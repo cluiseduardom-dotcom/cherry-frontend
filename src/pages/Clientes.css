@@ -1,0 +1,125 @@
+/* =====================================================
+   CLIENTES PAGE
+   ===================================================== */
+
+.clientes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.cliente-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cliente-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.cliente-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cliente-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(167, 6, 54, 0.2);
+}
+
+.cliente-vip-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-warning);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.cliente-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cliente-name {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.cliente-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cliente-contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.cliente-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.cliente-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.cliente-stat-value {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.cliente-stat-value--price {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
+
+.cliente-stat-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+.cliente-stat-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--color-border-light);
+}
+
+@media (max-width: 768px) {
+  .clientes-grid { grid-template-columns: 1fr; }
+}

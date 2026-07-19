@@ -1,0 +1,170 @@
+/* =====================================================
+   ESTOQUE PAGE
+   ===================================================== */
+
+.estoque-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.estoque-summary-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.estoque-summary-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.estoque-summary-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.estoque-summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.estoque-filters {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.estoque-filter-pills {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Table */
+.estoque-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.estoque-table th {
+  padding: var(--space-3) var(--space-5);
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg);
+}
+
+.estoque-table th:first-child { border-radius: var(--radius-md) 0 0 0; }
+.estoque-table th:last-child  { border-radius: 0 var(--radius-md) 0 0; }
+
+.estoque-row td {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast);
+}
+
+.estoque-row:last-child td {
+  border-bottom: none;
+}
+
+.estoque-row:hover td {
+  background: var(--color-bg);
+}
+
+.estoque-row--baixo td:first-child {
+  border-left: 3px solid var(--color-warning);
+}
+
+.estoque-row--esgotado td:first-child {
+  border-left: 3px solid var(--color-danger);
+}
+
+.estoque-product-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.estoque-product-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.estoque-product-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.estoque-sku {
+  font-family: monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: var(--color-border-light);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.estoque-price {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Stock bar */
+.stock-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 120px;
+}
+
+.stock-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--color-border-light);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.stock-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+
+.stock-bar-value {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  min-width: 24px;
+  text-align: right;
+}
+
+@media (max-width: 1100px) {
+  .estoque-summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .estoque-summary { grid-template-columns: repeat(2, 1fr); }
+  .estoque-table { font-size: var(--font-size-xs); }
+}

@@ -62,7 +62,7 @@
 }
 
 .product-card-stock-badge--out {
-  background: rgba(229, 57, 53, 0.12);
+  background: var(--color-danger-light);
   color: var(--color-danger);
 }
 

@@ -1,17 +1,26 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Cherry, Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { homeRouteForRole } from '../config/roles';
 import './Login.css';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isAuthenticated, user } = useAuth();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass]  = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
 
-  function handleSubmit(e) {
+  if (isAuthenticated) {
+    const from = location.state?.from?.pathname;
+    return <Navigate to={from || homeRouteForRole(user.role)} replace />;
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
 
@@ -21,15 +30,15 @@ export default function Login() {
     }
 
     setLoading(true);
-    // Simulate auth
-    setTimeout(() => {
+    try {
+      const loggedUser = await login(email, password);
+      const from = location.state?.from?.pathname;
+      navigate(from || homeRouteForRole(loggedUser.role), { replace: true });
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-      if (email === 'admin@cherry.com' && password === 'cherry123') {
-        navigate('/');
-      } else {
-        setError('E-mail ou senha incorretos. Tente: admin@cherry.com / cherry123');
-      }
-    }, 1200);
+    }
   }
 
   return (
@@ -132,9 +141,9 @@ export default function Login() {
           <button
             type="button"
             className="login-hint-fill"
-            onClick={() => { setEmail('admin@cherry.com'); setPassword('cherry123'); }}
+            onClick={() => { setEmail('ana@cherry.com'); setPassword('senha123'); }}
           >
-            admin@cherry.com / cherry123
+            ana@cherry.com / senha123
           </button>
         </div>
       </div>

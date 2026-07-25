@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -9,8 +9,27 @@ import {
   BarChart2,
   Settings,
   Cherry,
+  LogOut,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { canAccessRoute } from '../config/roles';
 import './Sidebar.css';
+
+const ROLE_LABEL = {
+  admin: 'Administrador(a)',
+  vendedor: 'Vendedor(a)',
+  estoquista: 'Estoquista',
+};
+
+function initials(name) {
+  if (!name) return '';
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0].toUpperCase())
+    .join('');
+}
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard',   path: '/' },
@@ -25,6 +44,13 @@ const menuItems = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
 
   return (
     <aside className="sidebar">
@@ -42,7 +68,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="sidebar-nav">
         <div className="sidebar-nav-label">Menu Principal</div>
-        {menuItems.slice(0, 5).map(({ icon: Icon, label, path }) => (
+        {menuItems.slice(0, 5).filter(({ path }) => canAccessRoute(path, user?.role)).map(({ icon: Icon, label, path }) => (
           <NavLink
             key={path}
             to={path}
@@ -62,7 +88,7 @@ export default function Sidebar() {
         ))}
 
         <div className="sidebar-nav-label" style={{ marginTop: 'var(--space-4)' }}>Gestão</div>
-        {menuItems.slice(5).map(({ icon: Icon, label, path }) => (
+        {menuItems.slice(5).filter(({ path }) => canAccessRoute(path, user?.role)).map(({ icon: Icon, label, path }) => (
           <NavLink
             key={path}
             to={path}
@@ -80,11 +106,20 @@ export default function Sidebar() {
 
       {/* User footer */}
       <div className="sidebar-footer">
-        <div className="sidebar-user-avatar">MS</div>
+        <div className="sidebar-user-avatar">{initials(user?.nome)}</div>
         <div className="sidebar-user-info">
-          <span className="sidebar-user-name">Maria Silva</span>
-          <span className="role-badge role-badge--admin">Administradora</span>
+          <span className="sidebar-user-name">{user?.nome}</span>
+          <span className={`role-badge role-badge--${user?.role}`}>{ROLE_LABEL[user?.role]}</span>
         </div>
+        <button
+          type="button"
+          className="sidebar-logout-btn"
+          onClick={handleLogout}
+          aria-label="Sair"
+          title="Sair"
+        >
+          <LogOut size={16} strokeWidth={2} />
+        </button>
       </div>
     </aside>
   );

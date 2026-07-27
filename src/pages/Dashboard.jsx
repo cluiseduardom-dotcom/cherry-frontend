@@ -1,107 +1,86 @@
-import { useState } from 'react';
-import { TrendingUp, TrendingDown, ShoppingBag, Package, Users, BarChart3, ArrowRight, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { TrendingUp, ShoppingBag, Package, Users, BarChart3, ArrowRight, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { dashboardStats, sparklineData, salesHistory, products } from '../data/mockData';
+import { buscarResumoDashboard } from '../services/dashboard';
 import './Dashboard.css';
 
-/* Mini Sparkline SVG */
-function Sparkline({ data, positive }) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const w = 80, h = 32;
-  const pts = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * w;
-    const y = h - ((v - min) / (max - min || 1)) * h;
-    return `${x},${y}`;
-  });
-  const color = positive ? 'var(--color-success)' : 'var(--color-danger)';
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} width={w} height={h} className="sparkline">
-      <polyline
-        points={pts.join(' ')}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <polyline
-        points={`0,${h} ${pts.join(' ')} ${w},${h}`}
-        fill={color}
-        opacity="0.1"
-        strokeWidth="0"
-      />
-    </svg>
-  );
+const CURVA_BADGE = { A: 'badge-success', B: 'badge-warning', C: 'badge-info' };
+
+function formatCurrency(v) {
+  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-const statCards = [
-  {
-    key: 'salesToday',
-    label: 'Vendas de hoje',
-    icon: ShoppingBag,
-    sparkKey: 'salesToday',
-  },
-  {
-    key: 'itemsSold',
-    label: 'Itens vendidos',
-    icon: Package,
-    sparkKey: 'itemsSold',
-  },
-  {
-    key: 'avgTicket',
-    label: 'Ticket médio',
-    icon: BarChart3,
-    sparkKey: 'avgTicket',
-  },
-  {
-    key: 'lowStock',
-    label: 'Estoque baixo',
-    icon: Package,
-    sparkKey: 'lowStock',
-    isAlert: true,
-  },
-];
+function initials(nome) {
+  return nome.split(' ').slice(0, 2).map(w => w[0]).join('');
+}
 
 export default function Dashboard() {
+  const [resumo, setResumo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await buscarResumoDashboard();
+        if (!cancelled) setResumo(data);
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const curvaAbc = resumo?.curva_abc ?? [];
+  const giro = resumo?.giro ?? [];
+  const cobertura = resumo?.cobertura ?? [];
+
+  const coberturaPorId = new Map(cobertura.map(c => [c.id, c.cobertura_dias]));
+  const giroCobertura = giro
+    .map(g => ({ ...g, cobertura_dias: coberturaPorId.get(g.id) ?? null }))
+    .sort((a, b) => (b.giro ?? -1) - (a.giro ?? -1));
+
+  const produtosCurvaA = curvaAbc.filter(p => p.curva === 'A').length;
+
+  const girosValidos = giro.map(g => g.giro).filter(v => v !== null && v !== undefined);
+  const giroMedio = girosValidos.length
+    ? (girosValidos.reduce((s, v) => s + Number(v), 0) / girosValidos.length).toFixed(2)
+    : null;
+
+  const coberturasValidas = cobertura.map(c => c.cobertura_dias).filter(v => v !== null && v !== undefined);
+  const coberturaMedia = coberturasValidas.length
+    ? Math.round(coberturasValidas.reduce((s, v) => s + Number(v), 0) / coberturasValidas.length)
+    : null;
+
+  const produtosEsgotados = giro.filter(g => g.estoque_atual === 0).length;
+
+  const statCards = [
+    { key: 'curvaA',    label: 'Produtos Curva A', icon: Star,        value: curvaAbc.length ? produtosCurvaA : '—' },
+    { key: 'giro',      label: 'Giro médio',        icon: TrendingUp,  value: giroMedio !== null ? `${giroMedio}x` : '—' },
+    { key: 'cobertura', label: 'Cobertura média',   icon: BarChart3,   value: coberturaMedia !== null ? `${coberturaMedia} dias` : '—' },
+    { key: 'esgotados', label: 'Produtos esgotados', icon: Package,    value: produtosEsgotados, isAlert: produtosEsgotados > 0 },
+  ];
+
   return (
     <div className="page-content">
       {/* Page header */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Terça-feira, 15 de julho de 2026</p>
+          <p className="page-subtitle">Visão geral do negócio</p>
         </div>
         <Link to="/venda" className="btn btn-primary btn-lg">
           <ShoppingBag size={18} />
           Nova Venda
         </Link>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="dashboard-stats">
-        {statCards.map(({ key, label, icon: Icon, sparkKey, isAlert }) => {
-          const stat = dashboardStats[key];
-          const isPositive = stat.positive;
-          return (
-            <div key={key} className={`stat-card card card-padding ${isAlert ? 'stat-card--alert' : ''}`}>
-              <div className="stat-card-header">
-                <div className={`stat-card-icon-wrap ${isAlert ? 'stat-card-icon-wrap--alert' : ''}`}>
-                  <Icon size={18} strokeWidth={2} />
-                </div>
-                <Sparkline data={sparklineData[sparkKey]} positive={!isAlert && isPositive} />
-              </div>
-              <div className="stat-card-value">{stat.value}</div>
-              <div className="stat-card-footer">
-                <span className="stat-card-label">{label}</span>
-                <span className={`stat-card-change ${isPositive && !isAlert ? 'stat-card-change--up' : 'stat-card-change--down'}`}>
-                  {isPositive && !isAlert ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                  {stat.change}
-                </span>
-              </div>
-            </div>
-          );
-        })}
       </div>
 
       {/* Quick Actions */}
@@ -140,63 +119,102 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Recent Sales + Best Products */}
-      <div className="dashboard-bottom">
-        {/* Recent Sales */}
-        <div className="card">
-          <div className="card-padding" style={{ borderBottom: '1px solid var(--color-border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 className="section-title">Vendas Recentes</h2>
-            <Link to="/historico" className="btn btn-ghost btn-sm">Ver todas</Link>
-          </div>
-          <div className="recent-sales-list">
-            {salesHistory.slice(0, 5).map((sale) => (
-              <div key={sale.id} className="recent-sale-item">
-                <div className="recent-sale-avatar">
-                  {sale.customer.split(' ').slice(0, 2).map(w => w[0]).join('')}
-                </div>
-                <div className="recent-sale-info">
-                  <div className="recent-sale-customer">{sale.customer}</div>
-                  <div className="recent-sale-meta">{sale.id} · {sale.items} {sale.items === 1 ? 'item' : 'itens'}</div>
-                </div>
-                <div className="recent-sale-right">
-                  <div className="recent-sale-value">
-                    {sale.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </div>
-                  <span className={`badge ${sale.status === 'concluída' ? 'badge-success' : 'badge-danger'}`}>
-                    {sale.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+      {loading && (
+        <div className="empty-state">
+          <p className="text-sm text-secondary">Carregando dashboard...</p>
         </div>
+      )}
 
-        {/* Top Products */}
-        <div className="card">
-          <div className="card-padding" style={{ borderBottom: '1px solid var(--color-border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 className="section-title">Mais Vendidos</h2>
-            <Link to="/produtos" className="btn btn-ghost btn-sm">Ver todos</Link>
-          </div>
-          <div className="top-products-list">
-            {products.slice(0, 5).map((p, i) => (
-              <div key={p.id} className="top-product-item">
-                <div className="top-product-rank">{i + 1}</div>
-                <div
-                  className="top-product-color"
-                  style={{ background: `linear-gradient(135deg, ${p.color}44, ${p.color}99)` }}
-                />
-                <div className="top-product-info">
-                  <div className="top-product-name">{p.name}</div>
-                  <div className="top-product-sku">{p.sku}</div>
+      {!loading && error && (
+        <div className="empty-state">
+          <div className="empty-state-title">Não foi possível carregar os dados do dashboard</div>
+          <p className="text-sm text-secondary">{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          {/* Stat Cards */}
+          <div className="dashboard-stats">
+            {statCards.map(({ key, label, icon: Icon, value, isAlert }) => (
+              <div key={key} className={`stat-card card card-padding ${isAlert ? 'stat-card--alert' : ''}`}>
+                <div className="stat-card-header">
+                  <div className={`stat-card-icon-wrap ${isAlert ? 'stat-card-icon-wrap--alert' : ''}`}>
+                    <Icon size={18} strokeWidth={2} />
+                  </div>
                 </div>
-                <div className="top-product-price">
-                  {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <div className="stat-card-value">{value}</div>
+                <div className="stat-card-footer">
+                  <span className="stat-card-label">{label}</span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
+
+          {/* Curva ABC + Giro/Cobertura */}
+          <div className="dashboard-bottom">
+            {/* Curva ABC */}
+            <div className="card">
+              <div className="card-padding" style={{ borderBottom: '1px solid var(--color-border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h2 className="section-title">Curva ABC</h2>
+                <Link to="/produtos" className="btn btn-ghost btn-sm">Ver produtos</Link>
+              </div>
+              <div className="top-products-list">
+                {curvaAbc.slice(0, 8).map((p, i) => (
+                  <div key={p.id} className="top-product-item">
+                    <div className="top-product-rank">{i + 1}</div>
+                    <div className="top-product-info">
+                      <div className="top-product-name">
+                        {p.nome}{' '}
+                        <span className={`badge ${CURVA_BADGE[p.curva] ?? 'badge-info'}`}>{p.curva}</span>
+                      </div>
+                      <div className="top-product-sku">{p.percentual_acumulado}% acumulado</div>
+                    </div>
+                    <div className="top-product-price">{formatCurrency(p.faturamento)}</div>
+                  </div>
+                ))}
+              </div>
+              {curvaAbc.length === 0 && (
+                <div className="empty-state">
+                  <div className="empty-state-title">Sem dados de faturamento</div>
+                </div>
+              )}
+            </div>
+
+            {/* Giro & Cobertura */}
+            <div className="card">
+              <div className="card-padding" style={{ borderBottom: '1px solid var(--color-border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h2 className="section-title">Giro &amp; Cobertura</h2>
+                <Link to="/estoque" className="btn btn-ghost btn-sm">Ver estoque</Link>
+              </div>
+              <div className="recent-sales-list">
+                {giroCobertura.slice(0, 8).map(p => (
+                  <div key={p.id} className="recent-sale-item">
+                    <div className="recent-sale-avatar">{initials(p.nome)}</div>
+                    <div className="recent-sale-info">
+                      <div className="recent-sale-customer">{p.nome}</div>
+                      <div className="recent-sale-meta">
+                        estoque: {p.estoque_atual} · vendido: {p.quantidade_vendida_periodo}
+                      </div>
+                    </div>
+                    <div className="recent-sale-right">
+                      <div className="recent-sale-value">{p.giro !== null ? `${p.giro}x` : '—'}</div>
+                      <span className="badge badge-primary">
+                        {p.cobertura_dias !== null ? `${p.cobertura_dias}d cobertura` : 'sem giro'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {giroCobertura.length === 0 && (
+                <div className="empty-state">
+                  <div className="empty-state-title">Sem dados de giro no período</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

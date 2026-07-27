@@ -12,6 +12,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/': ['admin'],
   '/relatorios': ['admin'],
   '/venda': ['admin', 'vendedor'],
+  '/historico': ['admin', 'vendedor'],
 };
 
 export function canAccessRoute(path, role) {

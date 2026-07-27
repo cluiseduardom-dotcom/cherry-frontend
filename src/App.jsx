@@ -31,7 +31,7 @@ function AppRoutes() {
         <Route path="/estoque"       element={<Estoque />} />
         <Route path="/produtos"      element={<Produtos />} />
         <Route path="/clientes"      element={<Clientes />} />
-        <Route path="/historico"     element={<Historico />} />
+        <Route path="/historico"     element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/historico']}><Historico /></ProtectedRoute>} />
         <Route path="/relatorios"    element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/relatorios']}><Relatorios /></ProtectedRoute>} />
         <Route path="/configuracoes" element={<Configuracoes />} />
       </Route>

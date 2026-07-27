@@ -14,3 +14,8 @@ export async function criarCliente(dados) {
   const body = await apiFetch('/clientes', { method: 'POST', body: JSON.stringify(dados) });
   return body.data;
 }
+
+export async function buscarHistoricoCliente(id) {
+  const body = await apiFetch(`/clientes/${id}/historico`);
+  return body.data;
+}

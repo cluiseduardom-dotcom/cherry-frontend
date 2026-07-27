@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Search, Plus, Phone, Mail, Star, TrendingUp } from 'lucide-react';
 import { listarClientes, listarRankingClientes } from '../services/clientes';
 import ClienteModal from '../components/ClienteModal';
+import ClienteHistoricoModal from '../components/ClienteHistoricoModal';
 import './Clientes.css';
 
 function mesclarComRanking(clientes, ranking) {
@@ -25,6 +26,7 @@ export default function Clientes() {
   const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [historicoCliente, setHistoricoCliente] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,7 +169,11 @@ export default function Clientes() {
                     </div>
                   </div>
 
-                  <button className="btn btn-secondary btn-full" style={{ marginTop: 'var(--space-3)' }}>
+                  <button
+                    className="btn btn-secondary btn-full"
+                    style={{ marginTop: 'var(--space-3)' }}
+                    onClick={() => setHistoricoCliente(c)}
+                  >
                     <TrendingUp size={14} />
                     Ver histórico
                   </button>
@@ -189,6 +195,12 @@ export default function Clientes() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}
+      />
+
+      <ClienteHistoricoModal
+        open={historicoCliente !== null}
+        cliente={historicoCliente}
+        onClose={() => setHistoricoCliente(null)}
       />
     </div>
   );

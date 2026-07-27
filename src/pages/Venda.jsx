@@ -1,36 +1,94 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Search, SlidersHorizontal, Barcode, ShoppingCart,
-  Trash2, Plus, Minus, X, CheckCircle, Pencil, Tag
+  Trash2, Plus, Minus, X, CheckCircle
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import { products as allProducts, categories } from '../data/mockData';
+import { listarProdutos } from '../services/produtos';
+import { criarVenda } from '../services/vendas';
+import { ApiError } from '../services/api';
 import './Venda.css';
 
+const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
+
+function colorForProduto(id) {
+  return CARD_COLORS[id % CARD_COLORS.length];
+}
+
+// O preço exibido/vendido é sempre o vigente para o canal (preco_canal),
+// nunca o preco_venda "cru" da tabela produtos — é o que o backend usa
+// para travar o preço da venda. Produto sem preço definido para o canal
+// não pode ser vendido (backend responde 409), então fica fora da vitrine.
+function toCartProduct(p) {
+  const precoCanal = p.preco_canal?.preco_venda;
+  if (precoCanal == null) return null;
+
+  return {
+    id: p.id,
+    sku: p.sku || '—',
+    name: p.nome,
+    category: p.categoria,
+    price: Number(precoCanal),
+    stock: p.estoque_atual,
+    color: colorForProduto(p.id),
+  };
+}
+
 export default function Venda() {
+  const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [loadError, setLoadError] = useState('');
+
   const [search, setSearch]         = useState('');
   const [activeCategory, setCategory] = useState('Todos');
   const [cart, setCart]             = useState([]);
-  const [discount, setDiscount]     = useState(0);
-  const [editingDiscount, setEditingDiscount] = useState(false);
-  const [discountInput, setDiscountInput] = useState('');
   const [saleSuccess, setSaleSuccess] = useState(false);
+  const [saleTotal, setSaleTotal]   = useState(0);
+  const [saving, setSaving]         = useState(false);
+  const [saveError, setSaveError]   = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setLoadError('');
+      try {
+        const data = await listarProdutos({ canal: 'loja_fisica' });
+        if (!cancelled) setProdutos(data.items.filter(p => p.ativo).map(toCartProduct).filter(Boolean));
+      } catch (err) {
+        if (!cancelled) setLoadError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const categories = useMemo(
+    () => ['Todos', ...new Set(produtos.map(p => p.category).filter(Boolean))],
+    [produtos]
+  );
 
   /* --- Filtered products --- */
   const filtered = useMemo(() => {
-    return allProducts.filter(p => {
+    return produtos.filter(p => {
       const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                           p.sku.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [search, activeCategory]);
+  }, [produtos, search, activeCategory]);
 
   /* --- Cart operations --- */
   function addToCart(product) {
+    setSaveError('');
     setCart(prev => {
       const existing = prev.find(i => i.id === product.id);
       if (existing) {
+        if (existing.qty >= product.stock) return prev;
         return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
       }
       return [...prev, { ...product, qty: 1 }];
@@ -43,35 +101,45 @@ export default function Venda() {
 
   function changeQty(id, delta) {
     setCart(prev => prev
-      .map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i)
+      .map(i => i.id === id ? { ...i, qty: Math.min(i.stock, Math.max(1, i.qty + delta)) } : i)
     );
   }
 
   function clearCart() {
     setCart([]);
-    setDiscount(0);
+    setSaveError('');
   }
 
-  /* --- Totals --- */
-  const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const total    = Math.max(0, subtotal - discount);
+  /* --- Totals (espelha o cálculo do backend: soma qty * preço vigente) --- */
+  const total     = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   const itemCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
   /* --- Finalize --- */
-  function finalizeSale() {
-    if (cart.length === 0) return;
-    setSaleSuccess(true);
-    setTimeout(() => {
-      setSaleSuccess(false);
-      clearCart();
-    }, 2500);
-  }
+  async function finalizeSale() {
+    if (cart.length === 0 || saving) return;
 
-  /* --- Discount --- */
-  function applyDiscount() {
-    const val = parseFloat(discountInput.replace(',', '.')) || 0;
-    setDiscount(val);
-    setEditingDiscount(false);
+    setSaving(true);
+    setSaveError('');
+    try {
+      const venda = await criarVenda({
+        canal: 'loja_fisica',
+        itens: cart.map(i => ({ produto_id: i.id, quantidade: i.qty })),
+      });
+
+      setProdutos(prev => prev.map(p => {
+        const item = venda.itens.find(i => i.produto_id === p.id);
+        return item ? { ...p, stock: p.stock - item.quantidade } : p;
+      }));
+
+      setSaleTotal(Number(venda.total));
+      setSaleSuccess(true);
+      clearCart();
+      setTimeout(() => setSaleSuccess(false), 2500);
+    } catch (err) {
+      setSaveError(err instanceof ApiError ? err.message : 'Não foi possível finalizar a venda. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -84,7 +152,7 @@ export default function Venda() {
               <CheckCircle size={48} strokeWidth={1.5} />
             </div>
             <h2>Venda Finalizada!</h2>
-            <p>Total: {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+            <p>Total: {saleTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
           </div>
         </div>
       )}
@@ -130,19 +198,34 @@ export default function Venda() {
             ))}
           </div>
 
-          {/* Product grid */}
-          {filtered.length > 0 ? (
-            <div className="venda-product-grid">
-              {filtered.map(p => (
-                <ProductCard key={p.id} product={p} onAddToCart={addToCart} />
-              ))}
-            </div>
-          ) : (
+          {loading && (
             <div className="empty-state">
-              <div className="empty-state-icon"><Search size={24} /></div>
-              <div className="empty-state-title">Nenhum produto encontrado</div>
-              <p className="text-sm text-secondary">Tente outro termo ou categoria</p>
+              <p className="text-sm text-secondary">Carregando produtos...</p>
             </div>
+          )}
+
+          {!loading && loadError && (
+            <div className="empty-state">
+              <div className="empty-state-title">Não foi possível carregar os produtos</div>
+              <p className="text-sm text-secondary">{loadError}</p>
+            </div>
+          )}
+
+          {/* Product grid */}
+          {!loading && !loadError && (
+            filtered.length > 0 ? (
+              <div className="venda-product-grid">
+                {filtered.map(p => (
+                  <ProductCard key={p.id} product={p} onAddToCart={addToCart} />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-state-icon"><Search size={24} /></div>
+                <div className="empty-state-title">Nenhum produto encontrado</div>
+                <p className="text-sm text-secondary">Tente outro termo ou categoria</p>
+              </div>
+            )
           )}
 
           {/* Barcode button */}
@@ -208,6 +291,7 @@ export default function Venda() {
                     <button
                       className="cart-qty-btn"
                       onClick={() => changeQty(item.id, 1)}
+                      disabled={item.qty >= item.stock}
                       aria-label="Aumentar quantidade"
                     >
                       <Plus size={11} strokeWidth={3} />
@@ -230,52 +314,9 @@ export default function Venda() {
 
           {/* Summary */}
           <div className="cart-summary">
-            <div className="cart-summary-row">
-              <span className="cart-summary-label">Subtotal</span>
-              <span className="cart-summary-value">
-                {subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </span>
-            </div>
-
-            <div className="cart-summary-row">
-              <span className="cart-summary-label">
-                <Tag size={13} />
-                Desconto
-                {!editingDiscount && (
-                  <button
-                    className="cart-discount-edit-btn"
-                    onClick={() => { setEditingDiscount(true); setDiscountInput(discount > 0 ? String(discount) : ''); }}
-                    aria-label="Editar desconto"
-                  >
-                    <Pencil size={12} />
-                  </button>
-                )}
-              </span>
-              {editingDiscount ? (
-                <div className="cart-discount-input-row">
-                  <span className="cart-discount-prefix">R$</span>
-                  <input
-                    type="number"
-                    className="cart-discount-input"
-                    value={discountInput}
-                    onChange={e => setDiscountInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && applyDiscount()}
-                    autoFocus
-                    min="0"
-                    placeholder="0,00"
-                  />
-                  <button className="btn btn-primary btn-sm" onClick={applyDiscount}>OK</button>
-                </div>
-              ) : (
-                <span className="cart-summary-value cart-discount-value">
-                  {discount > 0
-                    ? `- ${discount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
-                    : '—'}
-                </span>
-              )}
-            </div>
-
-            <div className="cart-divider" />
+            {saveError && (
+              <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{saveError}</p>
+            )}
 
             <div className="cart-total-row">
               <span className="cart-total-label">Total</span>
@@ -287,11 +328,11 @@ export default function Venda() {
             <button
               className="btn btn-primary btn-full btn-lg cart-finalize-btn"
               onClick={finalizeSale}
-              disabled={cart.length === 0}
+              disabled={cart.length === 0 || saving}
               id="btn-finalizar-venda"
             >
               <CheckCircle size={18} />
-              Finalizar Venda
+              {saving ? 'Finalizando...' : 'Finalizar Venda'}
             </button>
           </div>
         </div>

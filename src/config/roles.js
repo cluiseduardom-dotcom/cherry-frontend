@@ -11,6 +11,7 @@ export function homeRouteForRole(role) {
 export const ALLOWED_ROLES_BY_PATH = {
   '/': ['admin'],
   '/relatorios': ['admin'],
+  '/venda': ['admin', 'vendedor'],
 };
 
 export function canAccessRoute(path, role) {

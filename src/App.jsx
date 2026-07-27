@@ -27,7 +27,7 @@ function AppRoutes() {
       {/* Main app layout */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path="/"              element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/']}><Dashboard /></ProtectedRoute>} />
-        <Route path="/venda"         element={<Venda />} />
+        <Route path="/venda"         element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/venda']}><Venda /></ProtectedRoute>} />
         <Route path="/estoque"       element={<Estoque />} />
         <Route path="/produtos"      element={<Produtos />} />
         <Route path="/clientes"      element={<Clientes />} />

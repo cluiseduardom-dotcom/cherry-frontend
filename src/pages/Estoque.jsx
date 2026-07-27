@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Search, Plus, AlertTriangle, Package, Filter } from 'lucide-react';
 import { listarProdutos } from '../services/produtos';
 import { listarEstoqueBaixo } from '../services/estoque';
+import { useAuth } from '../context/AuthContext';
+import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
 import './Estoque.css';
 
 const ROW_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -24,12 +26,17 @@ function StockBar({ value, max = 20 }) {
 }
 
 export default function Estoque() {
+  const { user } = useAuth();
+  const podeMovimentar = user?.role === 'admin' || user?.role === 'estoquista';
+
   const [produtos, setProdutos] = useState([]);
   const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('todos');
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +79,37 @@ export default function Estoque() {
   const outCount      = alertas.filter(a => a.estoque_atual === 0).length;
   const totalItems    = produtos.reduce((s, p) => s + p.estoque_atual, 0);
 
+  function handleMovimentacaoSaved(movimentacao) {
+    const produtoAtualizado = produtos.find(p => p.id === movimentacao.produto_id);
+    if (!produtoAtualizado) {
+      setModalOpen(false);
+      return;
+    }
+
+    const atualizado = { ...produtoAtualizado, estoque_atual: movimentacao.estoque_resultante };
+
+    setProdutos(prev => prev.map(p => (p.id === atualizado.id ? atualizado : p)));
+
+    setAlertas(prev => {
+      const semEsteProduto = prev.filter(a => a.id !== atualizado.id);
+      if (atualizado.estoque_atual <= atualizado.estoque_minimo) {
+        return [...semEsteProduto, {
+          id: atualizado.id,
+          sku: atualizado.sku,
+          nome: atualizado.nome,
+          categoria: atualizado.categoria,
+          estoque_atual: atualizado.estoque_atual,
+          estoque_minimo: atualizado.estoque_minimo,
+        }];
+      }
+      return semEsteProduto;
+    });
+
+    setModalOpen(false);
+    setActionSuccess('Movimentação registrada com sucesso.');
+    setTimeout(() => setActionSuccess(''), 4000);
+  }
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -79,11 +117,19 @@ export default function Estoque() {
           <h1 className="page-title">Estoque</h1>
           <p className="page-subtitle">Controle de inventário e disponibilidade</p>
         </div>
-        <button className="btn btn-primary">
-          <Plus size={16} />
-          Entrada de Estoque
-        </button>
+        {podeMovimentar && (
+          <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
+            <Plus size={16} />
+            Entrada de Estoque
+          </button>
+        )}
       </div>
+
+      {actionSuccess && (
+        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
+          {actionSuccess}
+        </p>
+      )}
 
       {/* Summary cards */}
       <div className="estoque-summary">
@@ -223,6 +269,15 @@ export default function Estoque() {
             </div>
           )}
         </div>
+      )}
+
+      {podeMovimentar && (
+        <MovimentacaoEstoqueModal
+          open={modalOpen}
+          produtos={produtos}
+          onClose={() => setModalOpen(false)}
+          onSaved={handleMovimentacaoSaved}
+        />
       )}
     </div>
   );

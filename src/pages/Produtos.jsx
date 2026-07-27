@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Search, Plus, Tag, Edit, Trash2 } from 'lucide-react';
 import { listarProdutos, excluirProduto } from '../services/produtos';
+import { useAuth } from '../context/AuthContext';
+import ProductModal from '../components/ProductModal';
 import './Produtos.css';
 
 const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -10,12 +12,19 @@ function colorForProduto(id) {
 }
 
 export default function Produtos() {
+  const { user } = useAuth();
+  const podeGerenciar = user?.role === 'admin';
+
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState('create');
+  const [editingProduto, setEditingProduto] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +66,28 @@ export default function Produtos() {
     }
   }
 
+  function openCreateModal() {
+    setModalMode('create');
+    setEditingProduto(null);
+    setModalOpen(true);
+  }
+
+  function openEditModal(produto) {
+    setModalMode('edit');
+    setEditingProduto(produto);
+    setModalOpen(true);
+  }
+
+  function handleSaved(produtoSalvo) {
+    setProdutos(prev => {
+      if (modalMode === 'create') return [produtoSalvo, ...prev];
+      return prev.map(p => (p.id === produtoSalvo.id ? produtoSalvo : p));
+    });
+    setModalOpen(false);
+    setActionSuccess(modalMode === 'create' ? 'Produto criado com sucesso.' : 'Produto atualizado com sucesso.');
+    setTimeout(() => setActionSuccess(''), 4000);
+  }
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -64,15 +95,23 @@ export default function Produtos() {
           <h1 className="page-title">Produtos</h1>
           <p className="page-subtitle">{produtos.length} produtos cadastrados</p>
         </div>
-        <button className="btn btn-primary">
-          <Plus size={16} />
-          Novo Produto
-        </button>
+        {podeGerenciar && (
+          <button className="btn btn-primary" onClick={openCreateModal}>
+            <Plus size={16} />
+            Novo Produto
+          </button>
+        )}
       </div>
 
       {actionError && (
         <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
           {actionError}
+        </p>
+      )}
+
+      {actionSuccess && (
+        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
+          {actionSuccess}
         </p>
       )}
 
@@ -147,18 +186,20 @@ export default function Produtos() {
                     <span className="produto-price">
                       {Number(p.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </span>
-                    <div className="produto-actions">
-                      <button className="produto-action-btn" aria-label="Editar">
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        className="produto-action-btn produto-action-btn--danger"
-                        aria-label="Excluir"
-                        onClick={() => handleDelete(p.id)}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    {podeGerenciar && (
+                      <div className="produto-actions">
+                        <button className="produto-action-btn" aria-label="Editar" onClick={() => openEditModal(p)}>
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          className="produto-action-btn produto-action-btn--danger"
+                          aria-label="Excluir"
+                          onClick={() => handleDelete(p.id)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="produto-stock-info">
                     <Tag size={11} style={{ color: 'var(--color-text-muted)' }} />
@@ -178,6 +219,14 @@ export default function Produtos() {
           )}
         </>
       )}
+
+      <ProductModal
+        open={modalOpen}
+        mode={modalMode}
+        produto={editingProduto}
+        onClose={() => setModalOpen(false)}
+        onSaved={handleSaved}
+      />
     </div>
   );
 }

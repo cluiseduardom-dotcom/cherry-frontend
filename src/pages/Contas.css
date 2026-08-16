@@ -1,0 +1,131 @@
+/* =====================================================
+   CONTAS A PAGAR / CONTAS A RECEBER (Financeiro)
+   ===================================================== */
+
+.contas-filters {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.contas-filter-pills {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Table */
+.contas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.contas-table th {
+  padding: var(--space-3) var(--space-5);
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg);
+}
+
+.contas-table th:first-child { border-radius: var(--radius-md) 0 0 0; }
+.contas-table th:last-child  { border-radius: 0 var(--radius-md) 0 0; }
+
+.contas-row td {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast);
+}
+
+.contas-row:last-child td {
+  border-bottom: none;
+}
+
+.contas-row:hover td {
+  background: var(--color-bg);
+}
+
+.contas-row--atrasado td:first-child {
+  border-left: 3px solid var(--color-danger);
+}
+
+.contas-descricao {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.contas-date { color: var(--color-text-secondary); }
+
+.contas-valor {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.contas-venda-id {
+  font-family: monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: var(--color-border-light);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.contas-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.contas-action-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  transition: all var(--transition-fast);
+}
+
+.contas-action-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.contas-action-btn--success:hover {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.contas-action-btn--danger:hover {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.contas-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contas-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.contas-pagination-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+@media (max-width: 768px) {
+  .contas-table { font-size: var(--font-size-xs); }
+}

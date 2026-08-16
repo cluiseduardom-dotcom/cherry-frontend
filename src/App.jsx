@@ -12,6 +12,8 @@ import Clientes from './pages/Clientes';
 import Historico from './pages/Historico';
 import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
+import ContasPagar from './pages/ContasPagar';
+import ContasReceber from './pages/ContasReceber';
 
 function Fallback() {
   const { isAuthenticated, user } = useAuth();
@@ -33,6 +35,8 @@ function AppRoutes() {
         <Route path="/clientes"      element={<Clientes />} />
         <Route path="/historico"     element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/historico']}><Historico /></ProtectedRoute>} />
         <Route path="/relatorios"    element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/relatorios']}><Relatorios /></ProtectedRoute>} />
+        <Route path="/contas-pagar"   element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/contas-pagar']}><ContasPagar /></ProtectedRoute>} />
+        <Route path="/contas-receber" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/contas-receber']}><ContasReceber /></ProtectedRoute>} />
         <Route path="/configuracoes" element={<Configuracoes />} />
       </Route>
 

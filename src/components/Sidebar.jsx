@@ -10,6 +10,8 @@ import {
   Settings,
   Cherry,
   LogOut,
+  Wallet,
+  HandCoins,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/roles';
@@ -39,6 +41,8 @@ const menuItems = [
   { icon: Users,           label: 'Clientes',     path: '/clientes' },
   { icon: History,         label: 'Histórico',    path: '/historico' },
   { icon: BarChart2,       label: 'Relatórios',   path: '/relatorios' },
+  { icon: Wallet,          label: 'Contas a Pagar',    path: '/contas-pagar' },
+  { icon: HandCoins,       label: 'Contas a Receber',  path: '/contas-receber' },
   { icon: Settings,        label: 'Configurações',path: '/configuracoes' },
 ];
 

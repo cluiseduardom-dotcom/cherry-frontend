@@ -12,6 +12,8 @@ const pageTitles = {
   '/clientes':       'Clientes',
   '/historico':      'Histórico',
   '/relatorios':     'Relatórios',
+  '/contas-pagar':   'Contas a Pagar',
+  '/contas-receber': 'Contas a Receber',
   '/configuracoes':  'Configurações',
 };
 

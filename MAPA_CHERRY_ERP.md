@@ -144,14 +144,11 @@ Criar um `CLAUDE.md` na raiz de cada repositório, documentando:
 
 ## 8. Pendências detalhadas (para retomar)
 
-1. **Tela de contas a pagar (frontend)** — backend pronto, é o próximo passo mais rápido.
-2. **Contas a receber (backend + frontend)** — decidir antes de começar:
-   - Nasce automaticamente de toda venda, ou só de vendas específicas (a prazo)?
-   - Suporta parcelamento?
-3. **Relatórios (frontend)** — decidir escopo antes de prototipar:
+1. **Seletor de forma de pagamento na tela de Venda (à vista/prazo)** — hoje só é possível gerar venda a prazo via API direta, não pela interface; sem isso, contas a receber não populam organicamente pelo uso normal do sistema.
+2. **Relatórios (frontend)** — decidir escopo antes de prototipar:
    - Quais relatórios são realmente necessários (vendas por período? por vendedor? por produto?)
    - Precisa de exportação (PDF, Excel)?
-4. **Produção / Fornecedores** — módulo inteiro em aberto, do zero (schema, regras, backend, frontend).
+3. **Produção / Fornecedores** — módulo inteiro em aberto, do zero (schema, regras, backend, frontend).
 
 ---
 
@@ -181,19 +178,19 @@ Criar um `CLAUDE.md` na raiz de cada repositório, documentando:
    (7 telas: auth, produtos, estoque, dashboard, venda, clientes, histórico)
         │
         ▼
-4. Financeiro ───────────► Em andamento
-   (contas a pagar pronto; contas a receber pendente; tela de contas a pagar pendente)
+4. Financeiro ───────────► Concluída
+   (contas a pagar e contas a receber completos, backend + frontend)
         │
         ▼
 5. Relatórios e fornecedores ► Pendente
-   (escopo de relatórios a definir; módulo de produção/fornecedores do zero)
+   (seletor de forma de pagamento na tela de Venda; escopo de relatórios a definir; módulo de produção/fornecedores do zero)
 ```
 
 ### 10.2. Linha do tempo real (até aqui)
 
 - Início do projeto: meados de julho de 2025 (protótipo no Lovable + ChatGPT)
 - Migração para arquitetura definitiva com Claude Code: fim de 2025
-- Hoje (jul/2026): ~75-80% do núcleo operacional completo
+- Hoje (ago/2026): ~85-90% do núcleo operacional completo
 
 Levou cerca de **1 ano em ritmo part-time e irregular** para chegar até aqui — boa parte desse tempo foi exploração e troca de ferramentas (Lovable → ChatGPT → Claude), não só desenvolvimento em si.
 
@@ -202,7 +199,7 @@ Levou cerca de **1 ano em ritmo part-time e irregular** para chegar até aqui �
 | Fase | Estimativa (ritmo de sessões curtas e esporádicas) |
 |---|---|
 | Roteiro de profissionalização (itens 2, 4-7 da seção 12) | 5-8 sessões |
-| Telas de contas a pagar e a receber (frontend) | 1-2 sessões |
+| Seletor de forma de pagamento na tela de Venda | 1 sessão |
 | Relatórios (definir escopo + implementar) | 2-4 sessões — a definição de escopo pode levar tanto quanto a implementação |
 | Produção/Fornecedores (módulo inteiro) | 4-8 sessões — maior bloco restante, comparável em tamanho ao módulo de PDV |
 

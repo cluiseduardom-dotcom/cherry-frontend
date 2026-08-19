@@ -14,6 +14,8 @@ import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
 import ContasPagar from './pages/ContasPagar';
 import ContasReceber from './pages/ContasReceber';
+import PontoEquilibrio from './pages/PontoEquilibrio';
+import DespesasFixas from './pages/DespesasFixas';
 
 function Fallback() {
   const { isAuthenticated, user } = useAuth();
@@ -37,6 +39,8 @@ function AppRoutes() {
         <Route path="/relatorios"    element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/relatorios']}><Relatorios /></ProtectedRoute>} />
         <Route path="/contas-pagar"   element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/contas-pagar']}><ContasPagar /></ProtectedRoute>} />
         <Route path="/contas-receber" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/contas-receber']}><ContasReceber /></ProtectedRoute>} />
+        <Route path="/ponto-equilibrio" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/ponto-equilibrio']}><PontoEquilibrio /></ProtectedRoute>} />
+        <Route path="/despesas-fixas" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/despesas-fixas']}><DespesasFixas /></ProtectedRoute>} />
         <Route path="/configuracoes" element={<Configuracoes />} />
       </Route>
 

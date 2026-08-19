@@ -14,6 +14,8 @@ const pageTitles = {
   '/relatorios':     'Relatórios',
   '/contas-pagar':   'Contas a Pagar',
   '/contas-receber': 'Contas a Receber',
+  '/ponto-equilibrio': 'Ponto de Equilíbrio',
+  '/despesas-fixas': 'Despesas Fixas',
   '/configuracoes':  'Configurações',
 };
 

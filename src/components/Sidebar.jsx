@@ -12,6 +12,8 @@ import {
   LogOut,
   Wallet,
   HandCoins,
+  Target,
+  Receipt,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/roles';
@@ -43,6 +45,8 @@ const menuItems = [
   { icon: BarChart2,       label: 'Relatórios',   path: '/relatorios' },
   { icon: Wallet,          label: 'Contas a Pagar',    path: '/contas-pagar' },
   { icon: HandCoins,       label: 'Contas a Receber',  path: '/contas-receber' },
+  { icon: Target,          label: 'Ponto de Equilíbrio', path: '/ponto-equilibrio' },
+  { icon: Receipt,         label: 'Despesas Fixas',    path: '/despesas-fixas' },
   { icon: Settings,        label: 'Configurações',path: '/configuracoes' },
 ];
 

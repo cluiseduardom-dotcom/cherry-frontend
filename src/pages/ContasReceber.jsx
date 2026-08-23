@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
-import { CheckCircle, AlertTriangle, ChevronLeft, ChevronRight, HandCoins } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { CheckCircle, AlertTriangle, ChevronLeft, ChevronRight, HandCoins, Search } from 'lucide-react';
 import { listarContasReceber, marcarContaReceberComoRecebida } from '../services/contasReceber';
+import { listarVendas } from '../services/vendas';
+import { listarClientes } from '../services/clientes';
 import './Contas.css';
 
 const STATUS_FILTERS = [
@@ -23,6 +25,24 @@ function formatDate(value) {
   return `${dia}/${mes}/${ano}`;
 }
 
+// Cards de resumo precisam do total real (todos os status, todas as páginas),
+// não só da página atual — GET /contas-receber pagina em até 100 itens, então
+// percorremos todas as páginas para somar os valores corretamente.
+async function carregarTodasContasReceber() {
+  let pagina = 1;
+  let totalPaginas = 1;
+  let itens = [];
+
+  do {
+    const data = await listarContasReceber({ page: pagina, pageSize: 100 });
+    itens = itens.concat(data.items);
+    totalPaginas = data.totalPages;
+    pagina += 1;
+  } while (pagina <= totalPaginas);
+
+  return itens;
+}
+
 export default function ContasReceber() {
   const [contas, setContas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,9 +52,13 @@ export default function ContasReceber() {
   const [workingId, setWorkingId] = useState(null);
 
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const [resumoContas, setResumoContas] = useState([]);
+  const [nomeClientePorVendaId, setNomeClientePorVendaId] = useState(new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +84,68 @@ export default function ContasReceber() {
     return () => { cancelled = true; };
   }, [page, statusFilter]);
 
+  // Contas a receber só guardam venda_id — resolve o nome do cliente
+  // localmente juntando vendas + clientes, mesmo padrão de Historico.jsx.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadClientes() {
+      try {
+        const [vendasData, clientesData] = await Promise.all([listarVendas(), listarClientes()]);
+        if (cancelled) return;
+        const nomePorClienteId = new Map(clientesData.map(c => [c.id, c.nome]));
+        setNomeClientePorVendaId(
+          new Map(vendasData.items.map(v => [v.id, nomePorClienteId.get(v.cliente_id) ?? '']))
+        );
+      } catch {
+        // Busca por cliente é um extra sobre a listagem principal — se essa
+        // busca falhar, a tabela de contas a receber continua funcionando
+        // normalmente (só sem nome de cliente e sem busca por nome).
+      }
+    }
+
+    loadClientes();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function atualizarResumo() {
+    try {
+      setResumoContas(await carregarTodasContasReceber());
+    } catch {
+      // Idem: cards de resumo não bloqueiam a listagem principal se falharem.
+    }
+  }
+
+  useEffect(() => {
+    atualizarResumo();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return contas;
+    return contas.filter(c => {
+      const nomeCliente = (nomeClientePorVendaId.get(c.venda_id) ?? '').toLowerCase();
+      return nomeCliente.includes(term) || String(c.id).includes(term) || String(c.venda_id).includes(term);
+    });
+  }, [contas, search, nomeClientePorVendaId]);
+
+  const totalPendente = useMemo(
+    () => resumoContas.filter(c => c.status === 'pendente').reduce((soma, c) => soma + Number(c.valor), 0),
+    [resumoContas]
+  );
+  const totalRecebido = useMemo(
+    () => resumoContas.filter(c => c.status === 'recebido').reduce((soma, c) => soma + Number(c.valor), 0),
+    [resumoContas]
+  );
+  const totalCancelado = useMemo(
+    () => resumoContas.filter(c => c.status === 'cancelado').reduce((soma, c) => soma + Number(c.valor), 0),
+    [resumoContas]
+  );
+  const taxaRecebimento = useMemo(() => {
+    const totalGeral = resumoContas.reduce((soma, c) => soma + Number(c.valor), 0);
+    return totalGeral > 0 ? (totalRecebido / totalGeral) * 100 : 0;
+  }, [resumoContas, totalRecebido]);
+
   function handleStatusFilterChange(key) {
     setStatusFilter(key);
     setPage(1);
@@ -80,6 +166,7 @@ export default function ContasReceber() {
       }
       setActionSuccess('Conta marcada como recebida.');
       setTimeout(() => setActionSuccess(''), 4000);
+      atualizarResumo();
     } catch (err) {
       setActionError(err.message);
     } finally {
@@ -108,18 +195,45 @@ export default function ContasReceber() {
         </p>
       )}
 
-      <div className="contas-filters">
-        <div className="contas-filter-pills">
-          {STATUS_FILTERS.map(f => (
-            <button
-              key={f.key}
-              className={`category-pill ${statusFilter === f.key ? 'category-pill--active' : ''}`}
-              onClick={() => handleStatusFilterChange(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
+      <div className="contas-summary">
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Total Pendente</div>
+          <div className="contas-stat-value">{formatCurrency(totalPendente)}</div>
         </div>
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Total Recebido</div>
+          <div className="contas-stat-value contas-stat-value--success">{formatCurrency(totalRecebido)}</div>
+        </div>
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Total Cancelado</div>
+          <div className="contas-stat-value contas-stat-value--danger">{formatCurrency(totalCancelado)}</div>
+        </div>
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Taxa de Recebimento</div>
+          <div className="contas-stat-value">{taxaRecebimento.toFixed(1)}%</div>
+        </div>
+      </div>
+
+      <div className="contas-toolbar">
+        <div className="input-icon-wrapper contas-search">
+          <Search size={16} className="input-icon" />
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Buscar conta ou cliente..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <select
+          className="input-field contas-status-select"
+          value={statusFilter}
+          onChange={e => handleStatusFilterChange(e.target.value)}
+        >
+          {STATUS_FILTERS.map(f => (
+            <option key={f.key} value={f.key}>{f.label}</option>
+          ))}
+        </select>
       </div>
 
       {loading && (
@@ -141,6 +255,7 @@ export default function ContasReceber() {
             <thead>
               <tr>
                 <th>Descrição</th>
+                <th>Cliente</th>
                 <th>Venda</th>
                 <th>Vencimento</th>
                 <th>Valor</th>
@@ -149,9 +264,10 @@ export default function ContasReceber() {
               </tr>
             </thead>
             <tbody>
-              {contas.map(conta => (
+              {filtered.map(conta => (
                 <tr key={conta.id} className={`contas-row ${conta.atrasado ? 'contas-row--atrasado' : ''}`}>
                   <td className="contas-descricao">{conta.descricao}</td>
+                  <td>{nomeClientePorVendaId.get(conta.venda_id) || '—'}</td>
                   <td><span className="contas-venda-id">#{conta.venda_id}</span></td>
                   <td className="contas-date">{formatDate(conta.data_vencimento)}</td>
                   <td className="contas-valor">{formatCurrency(conta.valor)}</td>
@@ -183,10 +299,14 @@ export default function ContasReceber() {
               ))}
             </tbody>
           </table>
-          {contas.length === 0 && (
+          {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><HandCoins size={24} /></div>
-              <div className="empty-state-title">Nenhuma conta a receber encontrada</div>
+              {contas.length === 0 ? (
+                <div className="empty-state-title">Nenhuma conta a receber</div>
+              ) : (
+                <div className="empty-state-title">Nenhuma conta encontrada para essa busca</div>
+              )}
             </div>
           )}
 

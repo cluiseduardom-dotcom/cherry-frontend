@@ -2,17 +2,53 @@
    CONTAS A PAGAR / CONTAS A RECEBER (Financeiro)
    ===================================================== */
 
-.contas-filters {
+/* Summary cards */
+.contas-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.contas-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.contas-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.contas-stat-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.contas-stat-value--success { color: var(--color-success); }
+.contas-stat-value--danger  { color: var(--color-danger); }
+
+/* Toolbar (search + status filter) */
+.contas-toolbar {
   display: flex;
   gap: var(--space-3);
   align-items: center;
-  flex-wrap: wrap;
   margin-bottom: var(--space-4);
 }
 
-.contas-filter-pills {
-  display: flex;
-  gap: var(--space-2);
+.contas-search {
+  flex: 1;
+  max-width: 380px;
+}
+
+.contas-status-select {
+  width: auto;
+  min-width: 160px;
 }
 
 /* Table */
@@ -126,6 +162,11 @@
   gap: var(--space-2);
 }
 
+@media (max-width: 1100px) { .contas-summary { grid-template-columns: repeat(2, 1fr); } }
+
 @media (max-width: 768px) {
+  .contas-summary { grid-template-columns: repeat(2, 1fr); }
+  .contas-toolbar { flex-wrap: wrap; }
+  .contas-search { max-width: none; }
   .contas-table { font-size: var(--font-size-xs); }
 }

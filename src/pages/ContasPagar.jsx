@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Edit, CheckCircle, Ban, AlertTriangle, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, Edit, CheckCircle, Ban, AlertTriangle, ChevronLeft, ChevronRight, Wallet, Search } from 'lucide-react';
 import { listarContasPagar, marcarContaPagarComoPaga, cancelarContaPagar } from '../services/contasPagar';
 import ContaPagarModal from '../components/ContaPagarModal';
 import './Contas.css';
@@ -24,6 +24,24 @@ function formatDate(value) {
   return `${dia}/${mes}/${ano}`;
 }
 
+// Cards de resumo precisam do total real (todos os status, todas as páginas),
+// não só da página atual — GET /contas-pagar pagina em até 100 itens, então
+// percorremos todas as páginas para somar os valores corretamente.
+async function carregarTodasContasPagar() {
+  let pagina = 1;
+  let totalPaginas = 1;
+  let itens = [];
+
+  do {
+    const data = await listarContasPagar({ page: pagina, pageSize: 100 });
+    itens = itens.concat(data.items);
+    totalPaginas = data.totalPages;
+    pagina += 1;
+  } while (pagina <= totalPaginas);
+
+  return itens;
+}
+
 export default function ContasPagar() {
   const [contas, setContas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,9 +51,12 @@ export default function ContasPagar() {
   const [workingId, setWorkingId] = useState(null);
 
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const [resumoContas, setResumoContas] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -65,6 +86,49 @@ export default function ContasPagar() {
     return () => { cancelled = true; };
   }, [page, statusFilter]);
 
+  async function atualizarResumo() {
+    try {
+      setResumoContas(await carregarTodasContasPagar());
+    } catch {
+      // Cards de resumo são um extra sobre a listagem principal — se essa
+      // busca falhar, a tabela de contas continua funcionando normalmente.
+    }
+  }
+
+  useEffect(() => {
+    atualizarResumo();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return contas;
+    return contas.filter(c =>
+      (c.fornecedor ?? '').toLowerCase().includes(term) || String(c.id).includes(term)
+    );
+  }, [contas, search]);
+
+  const totalPendente = useMemo(
+    () => resumoContas.filter(c => c.status === 'pendente').reduce((soma, c) => soma + Number(c.valor), 0),
+    [resumoContas]
+  );
+  const totalPago = useMemo(
+    () => resumoContas.filter(c => c.status === 'pago').reduce((soma, c) => soma + Number(c.valor), 0),
+    [resumoContas]
+  );
+  const totalCancelado = useMemo(
+    () => resumoContas.filter(c => c.status === 'cancelado').reduce((soma, c) => soma + Number(c.valor), 0),
+    [resumoContas]
+  );
+  const mediaPrazoDias = useMemo(() => {
+    const pendentes = resumoContas.filter(c => c.status === 'pendente');
+    if (pendentes.length === 0) return 0;
+    const somaDias = pendentes.reduce((soma, c) => {
+      const dias = (new Date(c.data_vencimento) - new Date(c.criado_em)) / 86400000;
+      return soma + dias;
+    }, 0);
+    return Math.round(somaDias / pendentes.length);
+  }, [resumoContas]);
+
   function handleStatusFilterChange(key) {
     setStatusFilter(key);
     setPage(1);
@@ -91,6 +155,7 @@ export default function ContasPagar() {
     setModalOpen(false);
     setActionSuccess(modalMode === 'create' ? 'Conta a pagar criada com sucesso.' : 'Conta a pagar atualizada com sucesso.');
     setTimeout(() => setActionSuccess(''), 4000);
+    atualizarResumo();
   }
 
   function aplicarAtualizacaoStatus(contaAtualizada) {
@@ -112,6 +177,7 @@ export default function ContasPagar() {
       aplicarAtualizacaoStatus(contaAtualizada);
       setActionSuccess('Conta marcada como paga.');
       setTimeout(() => setActionSuccess(''), 4000);
+      atualizarResumo();
     } catch (err) {
       setActionError(err.message);
     } finally {
@@ -129,6 +195,7 @@ export default function ContasPagar() {
       aplicarAtualizacaoStatus(contaAtualizada);
       setActionSuccess('Conta cancelada com sucesso.');
       setTimeout(() => setActionSuccess(''), 4000);
+      atualizarResumo();
     } catch (err) {
       setActionError(err.message);
     } finally {
@@ -161,18 +228,45 @@ export default function ContasPagar() {
         </p>
       )}
 
-      <div className="contas-filters">
-        <div className="contas-filter-pills">
-          {STATUS_FILTERS.map(f => (
-            <button
-              key={f.key}
-              className={`category-pill ${statusFilter === f.key ? 'category-pill--active' : ''}`}
-              onClick={() => handleStatusFilterChange(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
+      <div className="contas-summary">
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Total Pendente</div>
+          <div className="contas-stat-value">{formatCurrency(totalPendente)}</div>
         </div>
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Total Pago</div>
+          <div className="contas-stat-value contas-stat-value--success">{formatCurrency(totalPago)}</div>
+        </div>
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Total Cancelado</div>
+          <div className="contas-stat-value contas-stat-value--danger">{formatCurrency(totalCancelado)}</div>
+        </div>
+        <div className="card card-padding contas-stat">
+          <div className="contas-stat-label">Média de Prazo</div>
+          <div className="contas-stat-value">{mediaPrazoDias} dias</div>
+        </div>
+      </div>
+
+      <div className="contas-toolbar">
+        <div className="input-icon-wrapper contas-search">
+          <Search size={16} className="input-icon" />
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Buscar conta ou fornecedor..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <select
+          className="input-field contas-status-select"
+          value={statusFilter}
+          onChange={e => handleStatusFilterChange(e.target.value)}
+        >
+          {STATUS_FILTERS.map(f => (
+            <option key={f.key} value={f.key}>{f.label}</option>
+          ))}
+        </select>
       </div>
 
       {loading && (
@@ -203,7 +297,7 @@ export default function ContasPagar() {
               </tr>
             </thead>
             <tbody>
-              {contas.map(conta => (
+              {filtered.map(conta => (
                 <tr key={conta.id} className={`contas-row ${conta.atrasado ? 'contas-row--atrasado' : ''}`}>
                   <td className="contas-descricao">{conta.descricao}</td>
                   <td>{conta.fornecedor || '—'}</td>
@@ -256,10 +350,17 @@ export default function ContasPagar() {
               ))}
             </tbody>
           </table>
-          {contas.length === 0 && (
+          {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><Wallet size={24} /></div>
-              <div className="empty-state-title">Nenhuma conta a pagar encontrada</div>
+              {contas.length === 0 ? (
+                <>
+                  <div className="empty-state-title">Nenhuma conta a pagar</div>
+                  <p className="text-sm text-secondary">Crie a primeira conta acima</p>
+                </>
+              ) : (
+                <div className="empty-state-title">Nenhuma conta encontrada para essa busca</div>
+              )}
             </div>
           )}
 

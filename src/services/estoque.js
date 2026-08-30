@@ -12,3 +12,9 @@ export async function registrarMovimentacaoEstoque(produtoId, dados) {
   });
   return body.data;
 }
+
+export async function listarMovimentacoesProduto(produtoId, { page = 1, pageSize = 100 } = {}) {
+  const params = new URLSearchParams({ page, pageSize });
+  const body = await apiFetch(`/produtos/${produtoId}/movimentacoes?${params.toString()}`);
+  return body.data;
+}

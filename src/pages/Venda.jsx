@@ -47,6 +47,9 @@ export default function Venda() {
   const [saving, setSaving]         = useState(false);
   const [saveError, setSaveError]   = useState('');
 
+  const [formaPagamento, setFormaPagamento] = useState('a_vista');
+  const [diasPrazo, setDiasPrazo]           = useState('30');
+
   useEffect(() => {
     let cancelled = false;
 
@@ -120,10 +123,21 @@ export default function Venda() {
 
     setSaving(true);
     setSaveError('');
+    // Front-end validation: se venda a prazo, diasPrazo deve ser > 0
+    if (formaPagamento === 'prazo') {
+      const dias = Number(diasPrazo);
+      if (!dias || dias < 1) {
+        setSaveError('Informe um número de dias de prazo válido (>= 1).');
+        setSaving(false);
+        return;
+      }
+    }
     try {
       const venda = await criarVenda({
         canal: 'loja_fisica',
         itens: cart.map(i => ({ produto_id: i.id, quantidade: i.qty })),
+        forma_pagamento: formaPagamento,
+        ...(formaPagamento === 'prazo' ? { dias_prazo: Number(diasPrazo) } : {}),
       });
 
       setProdutos(prev => prev.map(p => {
@@ -317,6 +331,35 @@ export default function Venda() {
             {saveError && (
               <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{saveError}</p>
             )}
+
+            {/* Forma de pagamento */}
+            <div className="payment-row">
+              <div className="payment-toggle-group">
+                <button
+                  type="button"
+                  className={`payment-toggle ${formaPagamento === 'a_vista' ? 'payment-toggle--active' : ''}`}
+                  onClick={() => { setFormaPagamento('a_vista'); setSaveError(''); }}
+                >À vista</button>
+                <button
+                  type="button"
+                  className={`payment-toggle ${formaPagamento === 'prazo' ? 'payment-toggle--active' : ''}`}
+                  onClick={() => { setFormaPagamento('prazo'); setSaveError(''); }}
+                >A prazo</button>
+              </div>
+              {formaPagamento === 'prazo' && (
+                <div className="payment-days">
+                  <label className="text-xs" htmlFor="dias-prazo">Dias de prazo</label>
+                  <input
+                    id="dias-prazo"
+                    type="number"
+                    min={1}
+                    value={diasPrazo}
+                    onChange={e => setDiasPrazo(e.target.value)}
+                    className="payment-days-input"
+                  />
+                </div>
+              )}
+            </div>
 
             <div className="cart-total-row">
               <span className="cart-total-label">Total</span>

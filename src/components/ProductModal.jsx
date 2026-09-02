@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { criarProduto, atualizarProduto } from '../services/produtos';
+import { useAuth } from '../context/AuthContext';
+import { FIELDS, podeVerCampo } from '../config/access';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -30,7 +32,7 @@ function formFromProduto(produto) {
   };
 }
 
-function validar(form, mode) {
+function validar(form, mode, podeVerCusto) {
   if (!form.sku.trim()) return 'SKU é obrigatório';
   if (!form.nome.trim()) return 'Nome é obrigatório';
 
@@ -39,9 +41,11 @@ function validar(form, mode) {
     return 'Preço de venda deve ser maior que zero';
   }
 
-  const custo = Number(form.custo);
-  if (form.custo === '' || Number.isNaN(custo) || custo <= 0) {
-    return 'Custo deve ser maior que zero';
+  if (podeVerCusto) {
+    const custo = Number(form.custo);
+    if (form.custo === '' || Number.isNaN(custo) || custo <= 0) {
+      return 'Custo deve ser maior que zero';
+    }
   }
 
   if (mode === 'create' && form.estoque_atual !== '') {
@@ -81,6 +85,9 @@ function montarPayload(form, mode) {
 }
 
 export default function ProductModal({ open, mode = 'create', produto, onClose, onSaved }) {
+  const { user } = useAuth();
+  const podeVerCusto = podeVerCampo(user?.role, FIELDS.CUSTO);
+
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -111,7 +118,7 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const validationError = validar(form, mode);
+    const validationError = validar(form, mode, podeVerCusto);
     if (validationError) {
       setError(validationError);
       return;
@@ -204,18 +211,20 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                 />
               </div>
 
-              <div className="input-wrapper">
-                <label className="input-label" htmlFor="pm-custo">Custo *</label>
-                <input
-                  id="pm-custo"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="input-field"
-                  value={form.custo}
-                  onChange={e => updateField('custo', e.target.value)}
-                />
-              </div>
+              {podeVerCusto && (
+                <div className="input-wrapper">
+                  <label className="input-label" htmlFor="pm-custo">Custo *</label>
+                  <input
+                    id="pm-custo"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="input-field"
+                    value={form.custo}
+                    onChange={e => updateField('custo', e.target.value)}
+                  />
+                </div>
+              )}
 
               {mode === 'create' ? (
                 <div className="input-wrapper">

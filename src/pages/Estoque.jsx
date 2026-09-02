@@ -3,6 +3,7 @@ import { Search, Plus, AlertTriangle, Package, Filter } from 'lucide-react';
 import { listarProdutos } from '../services/produtos';
 import { listarEstoqueBaixo } from '../services/estoque';
 import { useAuth } from '../context/AuthContext';
+import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
 import './Estoque.css';
 
@@ -27,7 +28,7 @@ function StockBar({ value, max = 20 }) {
 
 export default function Estoque() {
   const { user } = useAuth();
-  const podeMovimentar = user?.role === 'admin' || user?.role === 'estoquista';
+  const podeMovimentar = podeExecutarAcao(user?.role, ACTIONS.MOVIMENTAR_ESTOQUE);
 
   const [produtos, setProdutos] = useState([]);
   const [alertas, setAlertas] = useState([]);

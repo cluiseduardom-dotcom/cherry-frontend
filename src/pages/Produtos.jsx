@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Search, Plus, Tag, Edit, Trash2 } from 'lucide-react';
 import { listarProdutos, excluirProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
+import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
 import './Produtos.css';
 
@@ -13,7 +14,7 @@ function colorForProduto(id) {
 
 export default function Produtos() {
   const { user } = useAuth();
-  const podeGerenciar = user?.role === 'admin';
+  const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
 
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);

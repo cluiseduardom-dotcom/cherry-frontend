@@ -100,6 +100,7 @@ O que falta para "sistema completo":
 - Contas a pagar: fornecedor é campo texto livre (sem tabela própria ainda); edição bloqueada após conta paga/cancelada.
 - Desconto na venda: **não implementado de propósito** — não existe no backend, então a tela de Venda também não expõe o campo, para não criar UI enganosa (mostrar algo que não é realmente aplicado na cobrança).
 - `data_vencimento` (financeiro) usa validação de data ISO pura, evitando bug de fuso horário que aconteceria com coerção de data (o driver do Postgres poderia gravar um dia a menos em servidores UTC-3).
+- **Controle de acesso por rota (stage 1, concluído):** `/estoque`, `/produtos`, `/clientes` e `/configuracoes` eram alcançáveis por qualquer papel autenticado — sem `ProtectedRoute` e sem entrada em `ALLOWED_ROLES_BY_PATH`, então `canAccessRoute` tratava rota não registrada como liberada por omissão. Corrigido renomeando `src/config/roles.js` para `src/config/access.js`, estendendo a matriz para as 12 rotas, invertendo o default para fail-closed (rota sem entrada = negada, nunca liberada), e gerando as rotas de `App.jsx` a partir do registro (um path registrado sem componente mapeado, ou vice-versa, quebra o build em vez de silenciosamente deixar de proteger). `Sidebar.jsx` e `BottomNav.jsx` passaram a derivar seus itens visíveis do mesmo registro em vez de listas mantidas à mão. Gating de campo/ação (`custo` em `ProductModal.jsx`, `podeGerenciar`/`podeMovimentar`/`podeCancelar`) ainda não migrou — é a stage 2, pendente.
 
 ---
 

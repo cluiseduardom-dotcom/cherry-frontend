@@ -3,6 +3,7 @@ import { Search, Filter, Calendar } from 'lucide-react';
 import { listarVendas, cancelarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { useAuth } from '../context/AuthContext';
+import { ACTIONS, podeExecutarAcao } from '../config/access';
 import './Historico.css';
 
 const STATUS_LABEL = {
@@ -17,7 +18,7 @@ const CANAL_LABEL = {
 
 export default function Historico() {
   const { user } = useAuth();
-  const podeCancelar = user?.role === 'admin';
+  const podeCancelar = podeExecutarAcao(user?.role, ACTIONS.CANCELAR_VENDA);
 
   const [vendas, setVendas] = useState([]);
   const [clientesPorId, setClientesPorId] = useState(new Map());

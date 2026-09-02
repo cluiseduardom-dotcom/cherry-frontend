@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { ALLOWED_ROLES_BY_PATH, canAccessRoute, homeRouteForRole } from './access';
+import {
+  ALLOWED_ROLES_BY_PATH,
+  canAccessRoute,
+  homeRouteForRole,
+  FIELDS,
+  ACTIONS,
+  podeVerCampo,
+  podeExecutarAcao,
+} from './access';
 
 describe('canAccessRoute', () => {
   it('allows admin on every registered route', () => {
@@ -57,5 +65,52 @@ describe('homeRouteForRole', () => {
   it('falls back to /login for an unknown role', () => {
     expect(homeRouteForRole('desconhecido')).toBe('/login');
     expect(homeRouteForRole(undefined)).toBe('/login');
+  });
+});
+
+describe('podeVerCampo', () => {
+  it('allows admin to see custo', () => {
+    expect(podeVerCampo('admin', FIELDS.CUSTO)).toBe(true);
+  });
+
+  it('denies vendedor and estoquista from seeing custo', () => {
+    expect(podeVerCampo('vendedor', FIELDS.CUSTO)).toBe(false);
+    expect(podeVerCampo('estoquista', FIELDS.CUSTO)).toBe(false);
+  });
+
+  it('denies an unregistered field (fail-closed default)', () => {
+    expect(podeVerCampo('admin', 'campo-inexistente')).toBe(false);
+  });
+
+  it('denies access when role is undefined (unauthenticated)', () => {
+    expect(podeVerCampo(undefined, FIELDS.CUSTO)).toBe(false);
+  });
+});
+
+describe('podeExecutarAcao', () => {
+  it('restricts GERENCIAR_ESTOQUE to admin', () => {
+    expect(podeExecutarAcao('admin', ACTIONS.GERENCIAR_ESTOQUE)).toBe(true);
+    expect(podeExecutarAcao('vendedor', ACTIONS.GERENCIAR_ESTOQUE)).toBe(false);
+    expect(podeExecutarAcao('estoquista', ACTIONS.GERENCIAR_ESTOQUE)).toBe(false);
+  });
+
+  it('matches MOVIMENTAR_ESTOQUE to the /estoque route policy (admin or estoquista)', () => {
+    expect(podeExecutarAcao('admin', ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(true);
+    expect(podeExecutarAcao('estoquista', ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(true);
+    expect(podeExecutarAcao('vendedor', ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(false);
+  });
+
+  it('restricts CANCELAR_VENDA to admin', () => {
+    expect(podeExecutarAcao('admin', ACTIONS.CANCELAR_VENDA)).toBe(true);
+    expect(podeExecutarAcao('vendedor', ACTIONS.CANCELAR_VENDA)).toBe(false);
+    expect(podeExecutarAcao('estoquista', ACTIONS.CANCELAR_VENDA)).toBe(false);
+  });
+
+  it('denies an unregistered action (fail-closed default)', () => {
+    expect(podeExecutarAcao('admin', 'acao-inexistente')).toBe(false);
+  });
+
+  it('denies access when role is undefined (unauthenticated)', () => {
+    expect(podeExecutarAcao(undefined, ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(false);
   });
 });

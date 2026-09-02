@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Cherry, Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { homeRouteForRole } from '../config/roles';
+import { homeRouteForRole } from '../config/access';
 import './Login.css';
 
 export default function Login() {

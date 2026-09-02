@@ -16,7 +16,7 @@ import {
   Receipt,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { canAccessRoute } from '../config/roles';
+import { canAccessRoute } from '../config/access';
 import './Sidebar.css';
 
 const ROLE_LABEL = {

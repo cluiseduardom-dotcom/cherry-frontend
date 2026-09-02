@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import { homeRouteForRole, ALLOWED_ROLES_BY_PATH } from './config/roles';
+import { homeRouteForRole, ALLOWED_ROLES_BY_PATH } from './config/access';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';

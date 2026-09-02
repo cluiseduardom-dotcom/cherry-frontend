@@ -17,6 +17,36 @@ import ContasReceber from './pages/ContasReceber';
 import PontoEquilibrio from './pages/PontoEquilibrio';
 import DespesasFixas from './pages/DespesasFixas';
 
+const ROUTE_COMPONENTS = {
+  '/': Dashboard,
+  '/venda': Venda,
+  '/estoque': Estoque,
+  '/produtos': Produtos,
+  '/clientes': Clientes,
+  '/historico': Historico,
+  '/relatorios': Relatorios,
+  '/contas-pagar': ContasPagar,
+  '/contas-receber': ContasReceber,
+  '/ponto-equilibrio': PontoEquilibrio,
+  '/despesas-fixas': DespesasFixas,
+  '/configuracoes': Configuracoes,
+};
+
+// access.js e ROUTE_COMPONENTS precisam concordar exatamente. Uma rota
+// registrada sem componente mapeado (ou vice-versa) quebra o app no
+// carregamento, em vez de silenciosamente não renderizar.
+const registeredPaths = Object.keys(ALLOWED_ROLES_BY_PATH);
+for (const path of registeredPaths) {
+  if (!ROUTE_COMPONENTS[path]) {
+    throw new Error(`access.js registra "${path}" mas nenhum componente foi mapeado em App.jsx`);
+  }
+}
+for (const path of Object.keys(ROUTE_COMPONENTS)) {
+  if (!ALLOWED_ROLES_BY_PATH[path]) {
+    throw new Error(`App.jsx mapeia um componente para "${path}" mas access.js não registra essa rota`);
+  }
+}
+
 function Fallback() {
   const { isAuthenticated, user } = useAuth();
   return <Navigate to={isAuthenticated ? homeRouteForRole(user.role) : '/login'} replace />;
@@ -30,18 +60,20 @@ function AppRoutes() {
 
       {/* Main app layout */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route path="/"              element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/']}><Dashboard /></ProtectedRoute>} />
-        <Route path="/venda"         element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/venda']}><Venda /></ProtectedRoute>} />
-        <Route path="/estoque"       element={<Estoque />} />
-        <Route path="/produtos"      element={<Produtos />} />
-        <Route path="/clientes"      element={<Clientes />} />
-        <Route path="/historico"     element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/historico']}><Historico /></ProtectedRoute>} />
-        <Route path="/relatorios"    element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/relatorios']}><Relatorios /></ProtectedRoute>} />
-        <Route path="/contas-pagar"   element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/contas-pagar']}><ContasPagar /></ProtectedRoute>} />
-        <Route path="/contas-receber" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/contas-receber']}><ContasReceber /></ProtectedRoute>} />
-        <Route path="/ponto-equilibrio" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/ponto-equilibrio']}><PontoEquilibrio /></ProtectedRoute>} />
-        <Route path="/despesas-fixas" element={<ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH['/despesas-fixas']}><DespesasFixas /></ProtectedRoute>} />
-        <Route path="/configuracoes" element={<Configuracoes />} />
+        {registeredPaths.map(path => {
+          const Component = ROUTE_COMPONENTS[path];
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]}>
+                  <Component />
+                </ProtectedRoute>
+              }
+            />
+          );
+        })}
       </Route>
 
       {/* Fallback */}

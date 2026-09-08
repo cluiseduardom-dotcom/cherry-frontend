@@ -9,14 +9,29 @@ const CATEGORIAS = [
   { value: 'administrativa', label: 'Administrativa' },
 ];
 
-const EMPTY_FORM = { categoria: 'estrutural', descricao: '', valor: '' };
+// vigencia_inicio default pra hoje ao criar (não um valor congelado no
+// módulo — recalculado a cada abertura do modal, senão uma sessão longa
+// abriria sempre com a data do primeiro carregamento da página).
+function hojeISO() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+function formVazio() {
+  return { categoria: 'estrutural', descricao: '', valor: '', vigencia_inicio: hojeISO(), vigencia_fim: '' };
+}
 
 function formFromDespesa(despesa) {
-  if (!despesa) return EMPTY_FORM;
+  if (!despesa) return formVazio();
   return {
     categoria: despesa.categoria ?? 'estrutural',
     descricao: despesa.descricao ?? '',
     valor: despesa.valor ?? '',
+    vigencia_inicio: despesa.vigencia_inicio ?? hojeISO(),
+    vigencia_fim: despesa.vigencia_fim ?? '',
   };
 }
 
@@ -28,6 +43,12 @@ function validar(form) {
     return 'Valor não pode ser negativo';
   }
 
+  if (!form.vigencia_inicio) return 'Data de início de vigência é obrigatória';
+
+  if (form.vigencia_fim && form.vigencia_fim < form.vigencia_inicio) {
+    return 'Data de fim de vigência não pode ser antes do início';
+  }
+
   return '';
 }
 
@@ -36,11 +57,13 @@ function montarPayload(form) {
     categoria: form.categoria,
     descricao: form.descricao.trim(),
     valor: Number(form.valor),
+    vigencia_inicio: form.vigencia_inicio,
+    vigencia_fim: form.vigencia_fim || null,
   };
 }
 
 export default function DespesaFixaModal({ open, mode = 'create', despesa, onClose, onSaved }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(formVazio);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -141,6 +164,28 @@ export default function DespesaFixaModal({ open, mode = 'create', despesa, onClo
                   className="input-field"
                   value={form.valor}
                   onChange={e => updateField('valor', e.target.value)}
+                />
+              </div>
+
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="dfm-vigencia-inicio">Vigência desde *</label>
+                <input
+                  id="dfm-vigencia-inicio"
+                  type="date"
+                  className="input-field"
+                  value={form.vigencia_inicio}
+                  onChange={e => updateField('vigencia_inicio', e.target.value)}
+                />
+              </div>
+
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="dfm-vigencia-fim">Vigência até (vazio = em vigor)</label>
+                <input
+                  id="dfm-vigencia-fim"
+                  type="date"
+                  className="input-field"
+                  value={form.vigencia_fim}
+                  onChange={e => updateField('vigencia_fim', e.target.value)}
                 />
               </div>
             </div>

@@ -49,7 +49,7 @@ export default function PontoEquilibrio() {
     load({});
   }
 
-  const metaBatida = resultado && !resultado.inviavel && resultado.faltaParaAtingir === 0 && resultado.receita > 0;
+  const metaBatida = resultado && !resultado.semDespesasFixas && !resultado.inviavel && resultado.faltaParaAtingir === 0 && resultado.receita > 0;
 
   return (
     <div className="page-content">
@@ -124,23 +124,32 @@ export default function PontoEquilibrio() {
             </div>
           </div>
 
-          <div className={`card card-padding pe-highlight ${resultado.inviavel ? 'pe-highlight--inviavel' : ''}`}>
+          <div className={`card card-padding pe-highlight ${resultado.inviavel && !resultado.semDespesasFixas ? 'pe-highlight--inviavel' : ''}`}>
             <div className="pe-highlight-icon"><Target size={28} strokeWidth={2} /></div>
             <div className="pe-highlight-info">
               <div className="pe-highlight-label">Ponto de Equilíbrio</div>
-              <div className="pe-highlight-value">
-                {resultado.inviavel ? 'Inviável no período' : formatCurrency(resultado.pontoEquilibrio)}
-              </div>
-              {resultado.inviavel ? (
+              {resultado.semDespesasFixas ? (
                 <p className="text-sm text-secondary pe-highlight-sub">
-                  A margem de contribuição está zerada ou negativa: o custo variável (produtos + impostos) supera a receita do período.
+                  Nenhuma despesa fixa cadastrada para este período — o cálculo de Ponto de Equilíbrio não é confiável sem elas.{' '}
+                  <Link to="/despesas-fixas">Cadastrar despesas fixas</Link>
                 </p>
-              ) : metaBatida ? (
-                <p className="pe-highlight-sub pe-highlight-sub--success">Meta batida ✅</p>
               ) : (
-                <p className="text-sm text-secondary pe-highlight-sub">
-                  Falta {formatCurrency(resultado.faltaParaAtingir)} para bater o ponto de equilíbrio no período.
-                </p>
+                <>
+                  <div className="pe-highlight-value">
+                    {resultado.inviavel ? 'Inviável no período' : formatCurrency(resultado.pontoEquilibrio)}
+                  </div>
+                  {resultado.inviavel ? (
+                    <p className="text-sm text-secondary pe-highlight-sub">
+                      A margem de contribuição está zerada ou negativa: o custo variável (produtos + impostos) supera a receita do período.
+                    </p>
+                  ) : metaBatida ? (
+                    <p className="pe-highlight-sub pe-highlight-sub--success">Meta batida ✅</p>
+                  ) : (
+                    <p className="text-sm text-secondary pe-highlight-sub">
+                      Falta {formatCurrency(resultado.faltaParaAtingir)} para bater o ponto de equilíbrio no período.
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </div>

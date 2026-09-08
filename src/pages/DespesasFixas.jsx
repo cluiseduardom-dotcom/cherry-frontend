@@ -13,6 +13,16 @@ function formatCurrency(value) {
   return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+function formatDate(iso) {
+  if (!iso) return '';
+  const [ano, mes, dia] = iso.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function formatVigencia(despesa) {
+  return `${formatDate(despesa.vigencia_inicio)} – ${despesa.vigencia_fim ? formatDate(despesa.vigencia_fim) : 'em vigor'}`;
+}
+
 export default function DespesasFixas() {
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -224,6 +234,7 @@ export default function DespesasFixas() {
               <tr>
                 <th>Descrição</th>
                 <th>Valor</th>
+                <th>Vigência</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -233,6 +244,7 @@ export default function DespesasFixas() {
                 <tr key={despesa.id} className="contas-row">
                   <td className="contas-descricao">{despesa.descricao}</td>
                   <td className="contas-valor">{formatCurrency(despesa.valor)}</td>
+                  <td className="text-sm text-secondary">{formatVigencia(despesa)}</td>
                   <td>
                     <span className={`badge ${despesa.ativo ? 'badge-success' : 'badge-danger'}`}>
                       {despesa.ativo ? 'Ativa' : 'Inativa'}

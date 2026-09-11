@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Search, Plus, Tag, Edit, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus, Tag, DollarSign, Edit, Trash2 } from 'lucide-react';
 import { listarProdutos, excluirProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
@@ -14,7 +15,9 @@ function colorForProduto(id) {
 
 export default function Produtos() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
+  const podeGerenciarPrecos = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_PRECOS);
 
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -187,24 +190,38 @@ export default function Produtos() {
                     <span className="produto-price">
                       {Number(p.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </span>
-                    {podeGerenciar && (
+                    {(podeGerenciar || podeGerenciarPrecos) && (
                       <div className="produto-actions">
-                        <button className="produto-action-btn" aria-label="Editar" onClick={() => openEditModal(p)}>
-                          <Edit size={14} />
-                        </button>
-                        <button
-                          className="produto-action-btn produto-action-btn--danger"
-                          aria-label="Excluir"
-                          onClick={() => handleDelete(p.id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {podeGerenciarPrecos && (
+                          <button
+                            className="produto-action-btn"
+                            aria-label="Precificação por canal"
+                            title="Precificação por canal"
+                            onClick={() => navigate(`/produtos/${p.id}/precos`, { state: { nome: p.nome, sku: p.sku, custo: p.custo } })}
+                          >
+                            <DollarSign size={14} />
+                          </button>
+                        )}
+                        {podeGerenciar && (
+                          <>
+                            <button className="produto-action-btn" aria-label="Editar" onClick={() => openEditModal(p)}>
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              className="produto-action-btn produto-action-btn--danger"
+                              aria-label="Excluir"
+                              onClick={() => handleDelete(p.id)}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
                   <div className="produto-stock-info">
                     <Tag size={11} style={{ color: 'var(--color-text-muted)' }} />
-                    <span>{p.estoque_atual} em estoque</span>
+                    <span>{p.estoque_atual} {p.unidade ?? 'UN'} em estoque</span>
                   </div>
                 </div>
               </div>

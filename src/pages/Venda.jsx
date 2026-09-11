@@ -18,17 +18,17 @@ function colorForProduto(id) {
 // O preço exibido/vendido é sempre o vigente para o canal (preco_canal),
 // nunca o preco_venda "cru" da tabela produtos — é o que o backend usa
 // para travar o preço da venda. Produto sem preço definido para o canal
-// não pode ser vendido (backend responde 409), então fica fora da vitrine.
-function toCartProduct(p) {
+// fica visível na vitrine (price: null) mas não pode ser adicionado ao
+// carrinho — ProductCard desabilita o botão nesse caso.
+export function toCartProduct(p) {
   const precoCanal = p.preco_canal?.preco_venda;
-  if (precoCanal == null) return null;
 
   return {
     id: p.id,
     sku: p.sku || '—',
     name: p.nome,
     category: p.categoria,
-    price: Number(precoCanal),
+    price: precoCanal == null ? null : Number(precoCanal),
     stock: p.estoque_atual,
     color: colorForProduto(p.id),
   };
@@ -45,6 +45,7 @@ export function canConfirmKit(kitDraft) {
 }
 
 export function addToKitDraft(kitDraft, product) {
+  if (product.price == null) return kitDraft;
   const existing = kitDraft.find(i => i.id === product.id);
   if (existing) {
     if (existing.qty >= product.stock) return kitDraft;
@@ -132,7 +133,7 @@ export default function Venda() {
       setLoadError('');
       try {
         const data = await listarProdutos({ canal: 'loja_fisica' });
-        if (!cancelled) setProdutos(data.items.filter(p => p.ativo).map(toCartProduct).filter(Boolean));
+        if (!cancelled) setProdutos(data.items.filter(p => p.ativo).map(toCartProduct));
       } catch (err) {
         if (!cancelled) setLoadError(err.message);
       } finally {
@@ -161,6 +162,7 @@ export default function Venda() {
 
   /* --- Cart operations (itens avulsos) --- */
   function addToCart(product) {
+    if (product.price == null) return;
     setSaveError('');
     setCart(prev => {
       const existing = prev.find(i => i.type === 'avulso' && i.id === product.id);

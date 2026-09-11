@@ -52,7 +52,12 @@ const NAV_META_BY_PATH = {
   '/configuracoes':    { icon: Settings,        label: 'Configurações',       section: 'gestao' },
 };
 
-const menuItems = Object.keys(ALLOWED_ROLES_BY_PATH).map(path => ({ path, ...NAV_META_BY_PATH[path] }));
+// Rotas com segmento dinâmico (ex: /produtos/:id/precos) não têm entrada em
+// NAV_META_BY_PATH nem fazem sentido como item de menu fixo — são acessadas
+// a partir de outra tela (ex: um ícone na lista de Produtos), não pela sidebar.
+const menuItems = Object.keys(ALLOWED_ROLES_BY_PATH)
+  .filter(path => !path.includes(':'))
+  .map(path => ({ path, ...NAV_META_BY_PATH[path] }));
 
 export default function Sidebar() {
   const location = useLocation();

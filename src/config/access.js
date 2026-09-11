@@ -15,6 +15,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/venda': ['admin', 'vendedor'],
   '/estoque': ['admin', 'estoquista'],
   '/produtos': ['admin', 'vendedor', 'estoquista'],
+  '/produtos/:id/precos': ['admin'],
   '/clientes': ['admin', 'vendedor'],
   '/historico': ['admin', 'vendedor'],
   '/relatorios': ['admin'],
@@ -48,6 +49,7 @@ export const ACTIONS = {
   GERENCIAR_ESTOQUE: 'gerenciar_estoque',
   MOVIMENTAR_ESTOQUE: 'movimentar_estoque',
   CANCELAR_VENDA: 'cancelar_venda',
+  GERENCIAR_PRECOS: 'gerenciar_precos',
 };
 
 // Fail-closed: uma ação sem entrada aqui é negada, nunca permitida por omissão.
@@ -56,6 +58,7 @@ const ALLOWED_ROLES_BY_ACTION = {
   [ACTIONS.GERENCIAR_ESTOQUE]: ['admin'],
   [ACTIONS.MOVIMENTAR_ESTOQUE]: ['admin', 'estoquista'],
   [ACTIONS.CANCELAR_VENDA]: ['admin'],
+  [ACTIONS.GERENCIAR_PRECOS]: ['admin'],
 };
 
 export function podeExecutarAcao(role, action) {

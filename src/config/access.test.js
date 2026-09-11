@@ -44,6 +44,12 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/venda', 'estoquista')).toBe(false);
   });
 
+  it('restricts /produtos/:id/precos to admin only', () => {
+    expect(canAccessRoute('/produtos/:id/precos', 'admin')).toBe(true);
+    expect(canAccessRoute('/produtos/:id/precos', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/produtos/:id/precos', 'estoquista')).toBe(false);
+  });
+
   it('denies any role on an unregistered path (fail-closed default)', () => {
     expect(canAccessRoute('/rota-inexistente', 'admin')).toBe(false);
     expect(canAccessRoute('/rota-inexistente', 'vendedor')).toBe(false);
@@ -104,6 +110,12 @@ describe('podeExecutarAcao', () => {
     expect(podeExecutarAcao('admin', ACTIONS.CANCELAR_VENDA)).toBe(true);
     expect(podeExecutarAcao('vendedor', ACTIONS.CANCELAR_VENDA)).toBe(false);
     expect(podeExecutarAcao('estoquista', ACTIONS.CANCELAR_VENDA)).toBe(false);
+  });
+
+  it('restricts GERENCIAR_PRECOS to admin', () => {
+    expect(podeExecutarAcao('admin', ACTIONS.GERENCIAR_PRECOS)).toBe(true);
+    expect(podeExecutarAcao('vendedor', ACTIONS.GERENCIAR_PRECOS)).toBe(false);
+    expect(podeExecutarAcao('estoquista', ACTIONS.GERENCIAR_PRECOS)).toBe(false);
   });
 
   it('denies an unregistered action (fail-closed default)', () => {

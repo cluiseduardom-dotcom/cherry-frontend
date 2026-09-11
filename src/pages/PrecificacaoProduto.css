@@ -1,0 +1,106 @@
+/* =====================================================
+   PRECIFICAÇÃO POR CANAL
+   ===================================================== */
+
+.precos-voltar-btn {
+  margin-bottom: var(--space-4);
+}
+
+.precos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.preco-canal-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.preco-canal-nome {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.preco-canal-vazio {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.preco-canal-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.preco-canal-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preco-canal-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.preco-canal-valor {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.preco-canal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.preco-canal-toggle {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.preco-modo-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.preco-modo-btn--active {
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.preco-canal-erro {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+}
+
+.preco-canal-input-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.preco-canal-input-row .input-field {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .precos-grid {
+    grid-template-columns: 1fr;
+  }
+}

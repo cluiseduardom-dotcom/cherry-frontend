@@ -10,6 +10,7 @@ const EMPTY_FORM = {
   nome: '',
   descricao: '',
   categoria: '',
+  unidade: 'UN',
   preco_venda: '',
   custo: '',
   estoque_atual: '',
@@ -24,6 +25,7 @@ function formFromProduto(produto) {
     nome: produto.nome ?? '',
     descricao: produto.descricao ?? '',
     categoria: produto.categoria ?? '',
+    unidade: produto.unidade ?? 'UN',
     preco_venda: produto.preco_venda ?? '',
     custo: produto.custo ?? '',
     estoque_atual: produto.estoque_atual ?? '',
@@ -71,6 +73,7 @@ function montarPayload(form, mode) {
     nome: form.nome.trim(),
     descricao: form.descricao.trim(),
     categoria: form.categoria.trim(),
+    unidade: form.unidade,
     preco_venda: Number(form.preco_venda),
     custo: Number(form.custo),
     estoque_minimo: form.estoque_minimo === '' ? undefined : Number(form.estoque_minimo),
@@ -196,6 +199,21 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                   value={form.categoria}
                   onChange={e => updateField('categoria', e.target.value)}
                 />
+              </div>
+
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="pm-unidade">Unidade</label>
+                <select
+                  id="pm-unidade"
+                  className="input-field"
+                  value={form.unidade}
+                  onChange={e => updateField('unidade', e.target.value)}
+                >
+                  <option value="UN">UN</option>
+                  <option value="PAR">PAR</option>
+                  <option value="CX">CX</option>
+                  <option value="PCT">PCT</option>
+                </select>
               </div>
 
               <div className="input-wrapper">

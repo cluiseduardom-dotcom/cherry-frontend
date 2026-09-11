@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Venda from './pages/Venda';
 import Estoque from './pages/Estoque';
 import Produtos from './pages/Produtos';
+import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
 import Historico from './pages/Historico';
 import Relatorios from './pages/Relatorios';
@@ -22,6 +23,7 @@ const ROUTE_COMPONENTS = {
   '/venda': Venda,
   '/estoque': Estoque,
   '/produtos': Produtos,
+  '/produtos/:id/precos': PrecificacaoProduto,
   '/clientes': Clientes,
   '/historico': Historico,
   '/relatorios': Relatorios,

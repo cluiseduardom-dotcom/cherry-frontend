@@ -6,10 +6,32 @@ import {
   removeFromKitDraft,
   buildVendaItens,
   reduceEstoqueAposVenda,
+  toCartProduct,
 } from './Venda.jsx';
 
 const produtoA = { id: 1, sku: 'A', name: 'Produto A', category: 'Cat', price: 10, stock: 5, color: '#fff' };
 const produtoB = { id: 2, sku: 'B', name: 'Produto B', category: 'Cat', price: 20, stock: 2, color: '#000' };
+
+describe('toCartProduct', () => {
+  it('mantém o produto visível com price null quando o canal não tem preço definido', () => {
+    const p = { id: 1, sku: 'A', nome: 'Produto A', categoria: 'Cat', preco_canal: { preco_venda: null }, estoque_atual: 5 };
+    const result = toCartProduct(p);
+    expect(result).not.toBeNull();
+    expect(result.price).toBeNull();
+    expect(result.id).toBe(1);
+    expect(result.stock).toBe(5);
+  });
+
+  it('mantém price null quando o produto nunca teve preco_canal', () => {
+    const p = { id: 2, sku: 'B', nome: 'Produto B', categoria: 'Cat', estoque_atual: 3 };
+    expect(toCartProduct(p).price).toBeNull();
+  });
+
+  it('converte preco_venda do canal em number quando presente', () => {
+    const p = { id: 3, sku: 'C', nome: 'Produto C', categoria: 'Cat', preco_canal: { preco_venda: '89.90' }, estoque_atual: 2 };
+    expect(toCartProduct(p).price).toBe(89.9);
+  });
+});
 
 describe('canConfirmKit', () => {
   it('desabilita com rascunho vazio', () => {
@@ -41,6 +63,13 @@ describe('addToKitDraft', () => {
     const draft = [{ ...produtoB, qty: 2 }]; // produtoB.stock === 2
     const result = addToKitDraft(draft, produtoB);
     expect(result).toEqual([{ ...produtoB, qty: 2 }]); // não passa de 2
+  });
+
+  it('recusa produto sem preço definido (price null) — não entra no rascunho do kit', () => {
+    const produtoSemPreco = { ...produtoA, price: null };
+    expect(addToKitDraft([], produtoSemPreco)).toEqual([]);
+    const draftComB = [{ ...produtoB, qty: 1 }];
+    expect(addToKitDraft(draftComB, produtoSemPreco)).toEqual(draftComB);
   });
 });
 

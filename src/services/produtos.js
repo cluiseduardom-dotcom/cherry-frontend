@@ -6,6 +6,11 @@ export async function listarProdutos({ canal = 'loja_fisica', page = 1, pageSize
   return body.data;
 }
 
+export async function buscarProduto(id) {
+  const body = await apiFetch(`/produtos/${id}`);
+  return body.data;
+}
+
 export async function excluirProduto(id) {
   const body = await apiFetch(`/produtos/${id}`, { method: 'DELETE' });
   return body.data;

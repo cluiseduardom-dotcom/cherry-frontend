@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { TrendingUp, PiggyBank, Wallet, Target, Settings2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { calcularPontoEquilibrio } from '../services/pontoEquilibrio';
+import GraficoPontoEquilibrio from '../components/GraficoPontoEquilibrio';
 import './PontoEquilibrio.css';
 
 function formatCurrency(value) {
@@ -153,6 +154,8 @@ export default function PontoEquilibrio() {
               )}
             </div>
           </div>
+
+          <GraficoPontoEquilibrio resultado={resultado} />
         </>
       )}
     </div>

@@ -66,6 +66,15 @@
   margin-bottom: var(--space-4);
 }
 
+.modal-warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+}
+
 .modal-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

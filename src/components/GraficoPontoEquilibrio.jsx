@@ -15,6 +15,11 @@ import './GraficoPontoEquilibrio.css';
 
 const COR_OURO = '#C9A24B';
 const PONTOS_SERIE = 20;
+// Acima desse múltiplo da referência de escala (receita, ou custo fixo se
+// não houver receita), o PE calculado é tecnicamente válido mas inútil pra
+// plotar: ou estoura o domínio do eixo, ou vira um número ilegível. Nesses
+// casos tratamos como "impraticável" em vez de desenhar a linha.
+const LIMITE_MULTIPLO_IMPRATICAVEL = 50;
 
 function formatCurrency(value) {
   return Number(value ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -29,8 +34,16 @@ function formatCurrencyCompacta(value) {
   }).format(value ?? 0);
 }
 
-function gerarSerie({ custoFixoTotal, margemContribuicao, receita, pontoEquilibrio }) {
-  const maiorReferencia = Math.max(receita ?? 0, pontoEquilibrio ?? 0);
+function ehImpraticavel({ pontoEquilibrio, receita, custoFixoTotal }) {
+  if (pontoEquilibrio == null || !Number.isFinite(pontoEquilibrio)) return false;
+  const base = receita > 0 ? receita : custoFixoTotal;
+  if (!(base > 0)) return false;
+  return pontoEquilibrio > base * LIMITE_MULTIPLO_IMPRATICAVEL;
+}
+
+function gerarSerie({ custoFixoTotal, margemContribuicao, receita, pontoEquilibrio, impraticavel }) {
+  const referenciaPE = impraticavel ? 0 : (pontoEquilibrio ?? 0);
+  const maiorReferencia = Math.max(receita ?? 0, referenciaPE);
   const max = maiorReferencia > 0 ? maiorReferencia * 1.3 : 1000;
   const passo = max / PONTOS_SERIE;
 
@@ -60,7 +73,7 @@ function GraficoTooltip({ active, payload, label }) {
   );
 }
 
-export default function GraficoPontoEquilibrio({ resultado }) {
+export default function GraficoPontoEquilibrio({ resultado, simulado = false }) {
   if (!resultado || resultado.semDespesasFixas) {
     return (
       <div className="card card-padding grafico-pe grafico-pe--vazio">
@@ -75,17 +88,29 @@ export default function GraficoPontoEquilibrio({ resultado }) {
   }
 
   const { receita, custoFixoTotal, margemContribuicao, pontoEquilibrio, inviavel } = resultado;
-  const dados = gerarSerie({ custoFixoTotal, margemContribuicao, receita, pontoEquilibrio });
+  const impraticavel = !inviavel && ehImpraticavel({ pontoEquilibrio, receita, custoFixoTotal });
+  const dados = gerarSerie({ custoFixoTotal, margemContribuicao, receita, pontoEquilibrio, impraticavel });
+  const sufixoNome = simulado ? ' (simulado)' : '';
 
   return (
     <div className="card card-padding grafico-pe">
-      <div className="grafico-pe-titulo">Simulação: receita vs. custo total</div>
+      <div className="grafico-pe-titulo">
+        Simulação: receita vs. custo total
+        {simulado && <span className="badge badge-warning grafico-pe-badge-simulado">Cenário simulado</span>}
+      </div>
 
       {inviavel && (
         <p className="text-sm text-secondary grafico-pe-aviso">
           A margem de contribuição está zerada ou negativa neste período: o custo variável supera
           a receita em qualquer volume de vendas, então não existe ponto de equilíbrio real — a
           linha de custo total nunca fica abaixo da de receita.
+        </p>
+      )}
+
+      {impraticavel && (
+        <p className="text-sm text-secondary grafico-pe-aviso">
+          A margem de contribuição está muito baixa neste cenário: o ponto de equilíbrio calculado
+          ({formatCurrency(pontoEquilibrio)}) é impraticável perto do volume atual e não é exibido no gráfico.
         </p>
       )}
 
@@ -115,23 +140,25 @@ export default function GraficoPontoEquilibrio({ resultado }) {
           <Line
             type="monotone"
             dataKey="receita"
-            name="Receita"
+            name={`Receita${sufixoNome}`}
             stroke="var(--color-primary)"
             strokeWidth={2}
+            strokeDasharray={simulado ? '6 3' : undefined}
             dot={false}
             activeDot={{ r: 5 }}
           />
           <Line
             type="monotone"
             dataKey="custoTotal"
-            name="Custo total"
+            name={`Custo total${sufixoNome}`}
             stroke="var(--color-text-secondary)"
             strokeWidth={2}
+            strokeDasharray={simulado ? '6 3' : undefined}
             dot={false}
             activeDot={{ r: 5 }}
           />
 
-          {!inviavel && pontoEquilibrio != null && (
+          {!inviavel && !impraticavel && pontoEquilibrio != null && (
             <>
               <ReferenceLine
                 x={pontoEquilibrio}

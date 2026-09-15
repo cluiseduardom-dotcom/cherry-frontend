@@ -270,7 +270,7 @@ export default function PontoEquilibrio() {
       )}
 
       {!comparar && (
-        <PainelPontoEquilibrio resultado={resultadoA} loading={loadingA} error={errorA} />
+        <PainelPontoEquilibrio resultado={resultadoA} loading={loadingA} error={errorA} permitirSimulacao />
       )}
 
       {comparar && (

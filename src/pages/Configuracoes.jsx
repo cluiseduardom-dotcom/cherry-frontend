@@ -1,7 +1,15 @@
-import { Bell, Lock, User, Palette, Globe, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Lock, User, Palette, Globe, ChevronRight, FolderTree } from 'lucide-react';
 import './Configuracoes.css';
 
 const sections = [
+  {
+    title: 'Catálogo',
+    icon: FolderTree,
+    items: [
+      { label: 'Categorias de produto', sub: 'Níveis, códigos e SKU automático', path: '/configuracoes/categorias' },
+    ],
+  },
   {
     title: 'Conta',
     icon: User,
@@ -37,6 +45,8 @@ const sections = [
 ];
 
 export default function Configuracoes() {
+  const navigate = useNavigate();
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -58,7 +68,11 @@ export default function Configuracoes() {
               </div>
               <div className="config-items">
                 {items.map((item, i) => (
-                  <button key={i} className="config-item">
+                  <button
+                    key={i}
+                    className="config-item"
+                    onClick={item.path ? () => navigate(item.path) : undefined}
+                  >
                     <div className="config-item-info">
                       <div className="config-item-label">{item.label}</div>
                       <div className="config-item-sub">{item.sub}</div>

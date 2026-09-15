@@ -17,6 +17,7 @@ import ContasPagar from './pages/ContasPagar';
 import ContasReceber from './pages/ContasReceber';
 import PontoEquilibrio from './pages/PontoEquilibrio';
 import DespesasFixas from './pages/DespesasFixas';
+import CategoriasProduto from './pages/CategoriasProduto';
 
 const ROUTE_COMPONENTS = {
   '/': Dashboard,
@@ -32,6 +33,7 @@ const ROUTE_COMPONENTS = {
   '/ponto-equilibrio': PontoEquilibrio,
   '/despesas-fixas': DespesasFixas,
   '/configuracoes': Configuracoes,
+  '/configuracoes/categorias': CategoriasProduto,
 };
 
 // access.js e ROUTE_COMPONENTS precisam concordar exatamente. Uma rota

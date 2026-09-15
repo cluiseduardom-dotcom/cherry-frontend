@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Tag, DollarSign, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Tag, DollarSign, Edit, Trash2, Layers } from 'lucide-react';
 import { listarProdutos, excluirProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
+import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
 import './Produtos.css';
 
 const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -13,11 +14,16 @@ function colorForProduto(id) {
   return CARD_COLORS[id % CARD_COLORS.length];
 }
 
+export function temSku(produto) {
+  return produto?.sku != null;
+}
+
 export default function Produtos() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
   const podeGerenciarPrecos = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_PRECOS);
+  const podeCategorizar = podeExecutarAcao(user?.role, ACTIONS.CATEGORIZAR_PRODUTO);
 
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,10 +31,11 @@ export default function Produtos() {
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Todos');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [editingProduto, setEditingProduto] = useState(null);
+  const [categorizarModalOpen, setCategorizarModalOpen] = useState(false);
+  const [categorizandoProduto, setCategorizandoProduto] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,13 +57,9 @@ export default function Produtos() {
     return () => { cancelled = true; };
   }, []);
 
-  const categories = ['Todos', ...new Set(produtos.map(p => p.categoria).filter(Boolean))];
-
   const filtered = produtos.filter(p => {
-    const matchCat = activeCategory === 'Todos' || p.categoria === activeCategory;
     const term = search.toLowerCase();
-    const matchSearch = p.nome.toLowerCase().includes(term) || (p.sku ?? '').toLowerCase().includes(term);
-    return matchCat && matchSearch;
+    return p.nome.toLowerCase().includes(term) || (p.sku ?? '').toLowerCase().includes(term);
   });
 
   async function handleDelete(id) {
@@ -92,6 +95,18 @@ export default function Produtos() {
     setTimeout(() => setActionSuccess(''), 4000);
   }
 
+  function openCategorizarModal(produto) {
+    setCategorizandoProduto(produto);
+    setCategorizarModalOpen(true);
+  }
+
+  function handleCategorizado(produtoSalvo) {
+    setProdutos(prev => prev.map(p => (p.id === produtoSalvo.id ? produtoSalvo : p)));
+    setCategorizarModalOpen(false);
+    setActionSuccess('Categorias atualizadas com sucesso.');
+    setTimeout(() => setActionSuccess(''), 4000);
+  }
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -119,7 +134,6 @@ export default function Produtos() {
         </p>
       )}
 
-      {/* Search & filter */}
       <div className="produtos-toolbar">
         <div className="input-icon-wrapper produtos-search">
           <Search size={16} className="input-icon" />
@@ -130,17 +144,6 @@ export default function Produtos() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-        </div>
-        <div className="produtos-cats">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              className={`category-pill ${activeCategory === cat ? 'category-pill--active' : ''}`}
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -183,14 +186,14 @@ export default function Produtos() {
                 <div className="produto-card-body">
                   <div className="produto-card-top">
                     <span className="produto-sku">{p.sku || '—'}</span>
-                    {p.categoria && <span className="badge badge-primary">{p.categoria}</span>}
+                    {!temSku(p) && <span className="badge badge-warning">Sem SKU</span>}
                   </div>
                   <h3 className="produto-name">{p.nome}</h3>
                   <div className="produto-card-footer">
                     <span className="produto-price">
                       {Number(p.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </span>
-                    {(podeGerenciar || podeGerenciarPrecos) && (
+                    {(podeGerenciar || podeGerenciarPrecos || podeCategorizar) && (
                       <div className="produto-actions">
                         {podeGerenciarPrecos && (
                           <button
@@ -200,6 +203,16 @@ export default function Produtos() {
                             onClick={() => navigate(`/produtos/${p.id}/precos`, { state: { nome: p.nome, sku: p.sku, custo: p.custo } })}
                           >
                             <DollarSign size={14} />
+                          </button>
+                        )}
+                        {podeCategorizar && (
+                          <button
+                            className="produto-action-btn"
+                            aria-label="Categorizar produto"
+                            title="Categorizar produto"
+                            onClick={() => openCategorizarModal(p)}
+                          >
+                            <Layers size={14} />
                           </button>
                         )}
                         {podeGerenciar && (
@@ -244,6 +257,13 @@ export default function Produtos() {
         produto={editingProduto}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}
+      />
+
+      <CategorizarProdutoModal
+        open={categorizarModalOpen}
+        produto={categorizandoProduto}
+        onClose={() => setCategorizarModalOpen(false)}
+        onSaved={handleCategorizado}
       />
     </div>
   );

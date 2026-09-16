@@ -22,12 +22,15 @@ function colorForProduto(id) {
 // carrinho — ProductCard desabilita o botão nesse caso.
 export function toCartProduct(p) {
   const precoCanal = p.preco_canal?.preco_venda;
+  // Filtro de pills usa o nível 1 da categorização estruturada (família, na Cherry)
+  // como agrupamento — mesmo papel que o antigo campo texto-livre `categoria` cumpria.
+  const categoriaNivel1 = p.categorias?.find(c => c.nivel === 1)?.nome;
 
   return {
     id: p.id,
     sku: p.sku || '—',
     name: p.nome,
-    category: p.categoria,
+    category: categoriaNivel1,
     price: precoCanal == null ? null : Number(precoCanal),
     stock: p.estoque_atual,
     color: colorForProduto(p.id),

@@ -98,7 +98,6 @@ export default function Estoque() {
           id: atualizado.id,
           sku: atualizado.sku,
           nome: atualizado.nome,
-          categoria: atualizado.categoria,
           estoque_atual: atualizado.estoque_atual,
           estoque_minimo: atualizado.estoque_minimo,
         }];
@@ -222,7 +221,7 @@ export default function Estoque() {
               <tr>
                 <th>Produto</th>
                 <th>SKU</th>
-                <th>Categoria</th>
+                <th>Categorias</th>
                 <th>Preço</th>
                 <th>Estoque</th>
                 <th>Status</th>
@@ -248,7 +247,15 @@ export default function Estoque() {
                       </div>
                     </td>
                     <td><span className="estoque-sku">{p.sku || '—'}</span></td>
-                    <td>{p.categoria && <span className="badge badge-primary">{p.categoria}</span>}</td>
+                    <td>
+                      {p.categorias?.length > 0 ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {[...p.categorias].sort((a, b) => a.nivel - b.nivel).map(c => (
+                            <span key={c.id} className="badge badge-primary">{c.nome}</span>
+                          ))}
+                        </div>
+                      ) : '—'}
+                    </td>
                     <td className="estoque-price">
                       {Number(p.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </td>

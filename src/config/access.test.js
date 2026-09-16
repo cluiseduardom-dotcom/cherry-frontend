@@ -50,6 +50,12 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/produtos/:id/precos', 'estoquista')).toBe(false);
   });
 
+  it('restricts /configuracoes/categorias to admin only', () => {
+    expect(canAccessRoute('/configuracoes/categorias', 'admin')).toBe(true);
+    expect(canAccessRoute('/configuracoes/categorias', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/configuracoes/categorias', 'estoquista')).toBe(false);
+  });
+
   it('denies any role on an unregistered path (fail-closed default)', () => {
     expect(canAccessRoute('/rota-inexistente', 'admin')).toBe(false);
     expect(canAccessRoute('/rota-inexistente', 'vendedor')).toBe(false);
@@ -116,6 +122,12 @@ describe('podeExecutarAcao', () => {
     expect(podeExecutarAcao('admin', ACTIONS.GERENCIAR_PRECOS)).toBe(true);
     expect(podeExecutarAcao('vendedor', ACTIONS.GERENCIAR_PRECOS)).toBe(false);
     expect(podeExecutarAcao('estoquista', ACTIONS.GERENCIAR_PRECOS)).toBe(false);
+  });
+
+  it('restricts CATEGORIZAR_PRODUTO to admin and estoquista', () => {
+    expect(podeExecutarAcao('admin', ACTIONS.CATEGORIZAR_PRODUTO)).toBe(true);
+    expect(podeExecutarAcao('estoquista', ACTIONS.CATEGORIZAR_PRODUTO)).toBe(true);
+    expect(podeExecutarAcao('vendedor', ACTIONS.CATEGORIZAR_PRODUTO)).toBe(false);
   });
 
   it('denies an unregistered action (fail-closed default)', () => {

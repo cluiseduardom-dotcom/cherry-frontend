@@ -6,10 +6,8 @@ import { FIELDS, podeVerCampo } from '../config/access';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
-  sku: '',
   nome: '',
   descricao: '',
-  categoria: '',
   unidade: 'UN',
   preco_venda: '',
   custo: '',
@@ -21,10 +19,8 @@ const EMPTY_FORM = {
 function formFromProduto(produto) {
   if (!produto) return EMPTY_FORM;
   return {
-    sku: produto.sku ?? '',
     nome: produto.nome ?? '',
     descricao: produto.descricao ?? '',
-    categoria: produto.categoria ?? '',
     unidade: produto.unidade ?? 'UN',
     preco_venda: produto.preco_venda ?? '',
     custo: produto.custo ?? '',
@@ -34,8 +30,7 @@ function formFromProduto(produto) {
   };
 }
 
-function validar(form, mode, podeVerCusto) {
-  if (!form.sku.trim()) return 'SKU é obrigatório';
+export function validar(form, mode, podeVerCusto) {
   if (!form.nome.trim()) return 'Nome é obrigatório';
 
   const preco = Number(form.preco_venda);
@@ -67,12 +62,10 @@ function validar(form, mode, podeVerCusto) {
   return '';
 }
 
-function montarPayload(form, mode) {
+export function montarPayload(form, mode) {
   const payload = {
-    sku: form.sku.trim(),
     nome: form.nome.trim(),
     descricao: form.descricao.trim(),
-    categoria: form.categoria.trim(),
     unidade: form.unidade,
     preco_venda: Number(form.preco_venda),
     custo: Number(form.custo),
@@ -157,16 +150,19 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
             {error && <div className="modal-error">{error}</div>}
 
             <div className="modal-form-grid">
-              <div className="input-wrapper">
-                <label className="input-label" htmlFor="pm-sku">SKU *</label>
-                <input
-                  id="pm-sku"
-                  type="text"
-                  className="input-field"
-                  value={form.sku}
-                  onChange={e => updateField('sku', e.target.value)}
-                />
-              </div>
+              {mode === 'edit' && (
+                <div className="input-wrapper">
+                  <label className="input-label" htmlFor="pm-sku">SKU</label>
+                  <input
+                    id="pm-sku"
+                    type="text"
+                    className="input-field"
+                    value={produto?.sku ?? '—'}
+                    disabled
+                  />
+                  <span className="modal-field-hint">Gerado automaticamente ao categorizar o produto</span>
+                </div>
+              )}
 
               <div className="input-wrapper">
                 <label className="input-label" htmlFor="pm-nome">Nome *</label>
@@ -187,17 +183,6 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                   className="input-field"
                   value={form.descricao}
                   onChange={e => updateField('descricao', e.target.value)}
-                />
-              </div>
-
-              <div className="input-wrapper">
-                <label className="input-label" htmlFor="pm-categoria">Categoria</label>
-                <input
-                  id="pm-categoria"
-                  type="text"
-                  className="input-field"
-                  value={form.categoria}
-                  onChange={e => updateField('categoria', e.target.value)}
                 />
               </div>
 

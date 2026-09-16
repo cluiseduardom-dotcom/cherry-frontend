@@ -25,3 +25,11 @@ export async function atualizarProduto(id, dados) {
   const body = await apiFetch(`/produtos/${id}`, { method: 'PUT', body: JSON.stringify(dados) });
   return body.data;
 }
+
+export async function categorizarProduto(id, categoriaIds) {
+  const body = await apiFetch(`/produtos/${id}/categoria`, {
+    method: 'PATCH',
+    body: JSON.stringify({ categoria_ids: categoriaIds }),
+  });
+  return body.data;
+}

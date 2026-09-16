@@ -24,6 +24,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/ponto-equilibrio': ['admin'],
   '/despesas-fixas': ['admin'],
   '/configuracoes': ['admin'],
+  '/configuracoes/categorias': ['admin'],
 };
 
 export function canAccessRoute(path, role) {
@@ -50,6 +51,7 @@ export const ACTIONS = {
   MOVIMENTAR_ESTOQUE: 'movimentar_estoque',
   CANCELAR_VENDA: 'cancelar_venda',
   GERENCIAR_PRECOS: 'gerenciar_precos',
+  CATEGORIZAR_PRODUTO: 'categorizar_produto',
 };
 
 // Fail-closed: uma ação sem entrada aqui é negada, nunca permitida por omissão.
@@ -59,6 +61,7 @@ const ALLOWED_ROLES_BY_ACTION = {
   [ACTIONS.MOVIMENTAR_ESTOQUE]: ['admin', 'estoquista'],
   [ACTIONS.CANCELAR_VENDA]: ['admin'],
   [ACTIONS.GERENCIAR_PRECOS]: ['admin'],
+  [ACTIONS.CATEGORIZAR_PRODUTO]: ['admin', 'estoquista'],
 };
 
 export function podeExecutarAcao(role, action) {

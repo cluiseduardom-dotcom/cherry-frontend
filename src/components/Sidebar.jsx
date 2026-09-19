@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -56,13 +57,32 @@ const NAV_META_BY_PATH = {
 // NAV_META_BY_PATH nem fazem sentido como item de menu fixo — são acessadas
 // a partir de outra tela (ex: um ícone na lista de Produtos), não pela sidebar.
 const menuItems = Object.keys(ALLOWED_ROLES_BY_PATH)
-  .filter(path => !path.includes(':'))
+  .filter(path => !path.includes(':') && path !== '/mais')
   .map(path => ({ path, ...NAV_META_BY_PATH[path] }));
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [estoqueAlertas, setEstoqueAlertas] = useState([]);
+
+  useEffect(() => {
+    if (!canAccessRoute('/estoque', user?.role)) {
+      setEstoqueAlertas([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    listarEstoqueBaixo()
+      .then(alertas => {
+        if (!cancelled) setEstoqueAlertas(Array.isArray(alertas) ? alertas : []);
+      })
+      .catch(() => {
+        if (!cancelled) setEstoqueAlertas([]);
+      });
+
+    return () => { cancelled = true; };
+  }, [user?.role]);
 
   function handleLogout() {
     logout();
@@ -102,8 +122,10 @@ export default function Sidebar() {
               <Icon size={18} strokeWidth={2} />
             </span>
             <span className="sidebar-nav-label-text">{label}</span>
-            {path === '/estoque' && (
-              <span className="sidebar-nav-badge">3</span>
+            {path === '/estoque' && estoqueAlertas.length > 0 && (
+              <span className="sidebar-nav-badge" aria-label={`${estoqueAlertas.length} alertas de estoque`}>
+                {estoqueAlertas.length > 99 ? '99+' : estoqueAlertas.length}
+              </span>
             )}
           </NavLink>
         ))}

@@ -16,6 +16,31 @@ const CANAL_LABEL = {
   online: 'Online',
 };
 
+async function listarTodasAsVendas() {
+  const itens = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const data = await listarVendas({ page, pageSize: 100 });
+    itens.push(...data.items);
+    totalPages = data.totalPages;
+    page += 1;
+  } while (page <= totalPages);
+
+  return itens;
+}
+
+function hojeISO() {
+  const agora = new Date();
+  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+}
+
+function inicioMesISO() {
+  const agora = new Date();
+  return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-01`;
+}
+
 export default function Historico() {
   const { user } = useAuth();
   const podeCancelar = podeExecutarAcao(user?.role, ACTIONS.CANCELAR_VENDA);
@@ -28,6 +53,10 @@ export default function Historico() {
   const [actionSuccess, setActionSuccess] = useState('');
   const [cancelandoId, setCancelandoId] = useState(null);
   const [search, setSearch] = useState('');
+  const [periodoFiltro, setPeriodoFiltro] = useState('todos');
+  const [statusFiltro, setStatusFiltro] = useState('todos');
+  const [canalFiltro, setCanalFiltro] = useState('todos');
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,11 +66,11 @@ export default function Historico() {
       setError('');
       try {
         const [vendasData, clientesData] = await Promise.all([
-          listarVendas(),
+          listarTodasAsVendas(),
           listarClientes(),
         ]);
         if (!cancelled) {
-          setVendas(vendasData.items);
+          setVendas(vendasData);
           setClientesPorId(new Map(clientesData.map(c => [c.id, c.nome])));
         }
       } catch (err) {
@@ -56,15 +85,24 @@ export default function Historico() {
   }, []);
 
   const filtered = useMemo(() => {
-    const term = search.toLowerCase();
+    const term = search.trim().toLowerCase();
+    const inicioMes = inicioMesISO();
+    const hoje = hojeISO();
+
     return vendas.filter(v => {
       const nomeCliente = (clientesPorId.get(v.cliente_id) ?? '').toLowerCase();
-      return nomeCliente.includes(term) || String(v.id).includes(term);
-    });
-  }, [vendas, clientesPorId, search]);
+      const textoCompativel = nomeCliente.includes(term) || String(v.id).includes(term);
+      const dataVenda = String(v.data).slice(0, 10);
+      const periodoCompativel = periodoFiltro === 'todos' || (dataVenda >= inicioMes && dataVenda <= hoje);
+      const statusCompativel = statusFiltro === 'todos' || v.status === statusFiltro;
+      const canalCompativel = canalFiltro === 'todos' || v.canal === canalFiltro;
 
-  const concluidas = vendas.filter(v => v.status === 'finalizada');
-  const canceladas = vendas.filter(v => v.status === 'cancelada');
+      return textoCompativel && periodoCompativel && statusCompativel && canalCompativel;
+    });
+  }, [vendas, clientesPorId, search, periodoFiltro, statusFiltro, canalFiltro]);
+
+  const concluidas = filtered.filter(v => v.status === 'finalizada');
+  const canceladas = filtered.filter(v => v.status === 'cancelada');
   const totalRevenue = concluidas.reduce((sum, v) => sum + Number(v.total), 0);
   const ticketMedio = concluidas.length > 0 ? totalRevenue / concluidas.length : 0;
 
@@ -92,9 +130,13 @@ export default function Historico() {
           <h1 className="page-title">Histórico de Vendas</h1>
           <p className="page-subtitle">{vendas.length} vendas registradas</p>
         </div>
-        <button className="btn btn-ghost">
+        <button
+          type="button"
+          className={`btn ${periodoFiltro === 'mes_atual' ? 'btn-primary' : 'btn-ghost'}`}
+          onClick={() => setPeriodoFiltro(prev => prev === 'mes_atual' ? 'todos' : 'mes_atual')}
+        >
           <Calendar size={16} />
-          Este mês
+          {periodoFiltro === 'mes_atual' ? 'Mês atual' : 'Este mês'}
         </button>
       </div>
 
@@ -146,11 +188,45 @@ export default function Historico() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <button className="btn btn-ghost">
+        <button type="button" className={`btn ${mostrarFiltros ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMostrarFiltros(prev => !prev)}>
           <Filter size={16} />
           Filtros
         </button>
       </div>
+
+      {mostrarFiltros && (
+        <div className="historico-toolbar" style={{ marginTop: 'var(--space-3)', flexWrap: 'wrap' }}>
+          <div className="input-wrapper">
+            <label className="input-label" htmlFor="historico-status">Status</label>
+            <select id="historico-status" className="input-field" value={statusFiltro} onChange={e => setStatusFiltro(e.target.value)}>
+              <option value="todos">Todos</option>
+              <option value="finalizada">Concluídas</option>
+              <option value="cancelada">Canceladas</option>
+            </select>
+          </div>
+          <div className="input-wrapper">
+            <label className="input-label" htmlFor="historico-canal">Canal</label>
+            <select id="historico-canal" className="input-field" value={canalFiltro} onChange={e => setCanalFiltro(e.target.value)}>
+              <option value="todos">Todos</option>
+              <option value="loja_fisica">Loja física</option>
+              <option value="online">Online</option>
+            </select>
+          </div>
+          {(statusFiltro !== 'todos' || canalFiltro !== 'todos' || periodoFiltro !== 'todos') && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                setPeriodoFiltro('todos');
+                setStatusFiltro('todos');
+                setCanalFiltro('todos');
+              }}
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
+      )}
 
       {loading && (
         <div className="empty-state">

@@ -1,21 +1,32 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { setAuthBridge } from '../services/api';
 import { loginRequest } from '../services/auth';
+import { carregarSessao, limparSessao, salvarSessao } from '../services/authSession';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const tokenRef = useRef(null);
   tokenRef.current = token;
 
   const logout = useCallback(() => {
+    limparSessao();
     setUser(null);
     setToken(null);
+  }, []);
+
+  useEffect(() => {
+    const sessao = carregarSessao();
+    if (sessao) {
+      setToken(sessao.token);
+      setUser(sessao.user);
+    }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -32,6 +43,7 @@ export function AuthProvider({ children }) {
       const result = await loginRequest(email, senha);
       setToken(result.token);
       setUser(result.user);
+      salvarSessao({ token: result.token, user: result.user });
       return result.user;
     } catch (err) {
       setError(err.message);

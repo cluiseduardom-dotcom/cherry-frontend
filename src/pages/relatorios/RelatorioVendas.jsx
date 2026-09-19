@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, AlertTriangle, BarChart2 } from 'lucide-react';
-import { listarVendas, buscarVenda } from '../../services/vendas';
+import { listarVendas } from '../../services/vendas';
 import { listarClientes } from '../../services/clientes';
 import {
   formatCurrency,
@@ -47,34 +47,24 @@ export default function RelatorioVendas() {
       setLoading(true);
       setError('');
       try {
-        const [todasVendas, clientes] = await Promise.all([
-          buscarTodasAsPaginas(listarVendas),
+        const [vendasFiltradas, clientes] = await Promise.all([
+          buscarTodasAsPaginas(listarVendas, {
+            status: 'finalizada',
+            canal: filtroCanal || undefined,
+            data_de: filtroInicio,
+            data_ate: filtroFim,
+          }),
           listarClientes(),
         ]);
         if (cancelled) return;
 
         const clientesPorId = new Map(clientes.map(c => [c.id, c.nome]));
-
-        const filtradas = todasVendas.filter(v => {
-          const dataVenda = String(v.data).slice(0, 10);
-          const dentroDoPeriodo = dataVenda >= filtroInicio && dataVenda <= filtroFim;
-          const noCanal = !filtroCanal || v.canal === filtroCanal;
-          return v.status === 'finalizada' && dentroDoPeriodo && noCanal;
-        });
-
-        // Itens por venda não vêm na listagem — busca detalhe por venda pra
-        // contar SKUs. Aceitável nesta escala (loja pequena, período filtrado).
-        const enriquecidas = await Promise.all(filtradas.map(async v => {
-          const clienteNome = clientesPorId.get(v.cliente_id) ?? '—';
-          try {
-            const detalhe = await buscarVenda(v.id);
-            return { ...v, clienteNome, qtdItens: detalhe.itens?.length ?? 0 };
-          } catch {
-            return { ...v, clienteNome, qtdItens: null };
-          }
+        const enriquecidas = vendasFiltradas.map(v => ({
+          ...v,
+          clienteNome: clientesPorId.get(v.cliente_id) ?? '—',
+          qtdItens: Number(v.itens_count ?? 0),
         }));
 
-        if (cancelled) return;
         enriquecidas.sort((a, b) => new Date(b.data) - new Date(a.data));
         setVendas(enriquecidas);
       } catch (err) {

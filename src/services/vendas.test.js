@@ -6,7 +6,7 @@ vi.mock('./api', () => ({
   apiFetch: apiFetchMock,
 }));
 
-import { criarVenda } from './vendas';
+import { criarVenda, listarVendas } from './vendas';
 
 describe('criarVenda', () => {
   beforeEach(() => {

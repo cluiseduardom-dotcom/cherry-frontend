@@ -20,10 +20,7 @@ const navItems = [
 
 export default function BottomNav() {
   const { user } = useAuth();
-  // '/mais' não é uma rota registrada em access.js (não existe em nenhum
-  // lugar de App.jsx) — não é parte do modelo de acesso, então fica sempre
-  // visível em vez de ser filtrada pelo fail-closed default.
-  const visibleItems = navItems.filter(({ path }) => path === '/mais' || canAccessRoute(path, user?.role));
+  const visibleItems = navItems.filter(({ path }) => canAccessRoute(path, user?.role));
 
   return (
     <nav className="bottom-nav">

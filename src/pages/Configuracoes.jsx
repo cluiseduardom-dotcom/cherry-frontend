@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Bell, Lock, User, Palette, Globe, ChevronRight, FolderTree } from 'lucide-react';
 import './Configuracoes.css';
 
@@ -39,13 +40,20 @@ const sections = [
     icon: Globe,
     items: [
       { label: 'Dados da empresa',      sub: 'CNPJ, endereço e contato' },
-      { label: 'Plano e assinatura',    sub: 'Pro — vence em 15/01/2027' },
+      { label: 'Plano e assinatura',    sub: 'Informações de assinatura ainda não configuradas' },
     ],
   },
 ];
 
 export default function Configuracoes() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const nomeUsuario = user?.nome || 'Usuário';
+  const emailUsuario = user?.email || '—';
+  const roleLabels = { admin: 'Administrador(a)', vendedor: 'Vendedor(a)', estoquista: 'Estoquista' };
+  const roleLabel = roleLabels[user?.role] || 'Usuário';
+  const iniciais = nomeUsuario.split(' ').filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('');
 
   return (
     <div className="page-content">
@@ -88,10 +96,10 @@ export default function Configuracoes() {
         {/* Profile card */}
         <div className="configuracoes-profile">
           <div className="card card-padding profile-card">
-            <div className="profile-card-avatar">MS</div>
-            <div className="profile-card-name">Maria Silva</div>
-            <div className="profile-card-role"><span className="role-badge role-badge--admin">Administradora</span></div>
-            <div className="profile-card-email">maria.silva@cherry.com.br</div>
+            <div className="profile-card-avatar">{iniciais}</div>
+            <div className="profile-card-name">{nomeUsuario}</div>
+            <div className="profile-card-role"><span className={`role-badge role-badge--${user?.role || "admin"}`}>{roleLabel}</span></div>
+            <div className="profile-card-email">{emailUsuario}</div>
             <button className="btn btn-secondary btn-full" style={{ marginTop: 'var(--space-4)' }}>
               <User size={15} />
               Editar perfil
@@ -104,12 +112,12 @@ export default function Configuracoes() {
               <span className="plan-card-title">Plano ativo</span>
             </div>
             <div className="plan-card-desc">
-              Acesso completo a todos os módulos do sistema Cherry Semijoias
+              Informações de plano e assinatura ainda não estão disponíveis neste ambiente.
             </div>
             <div className="plan-card-expiry">
-              Renova em <strong>15/01/2027</strong>
+              <span className="text-secondary">Sem data de renovação configurada.</span>
             </div>
-            <button className="btn btn-ghost btn-full" style={{ marginTop: 'var(--space-3)' }}>
+            <button type="button" className="btn btn-ghost btn-full" style={{ marginTop: 'var(--space-3)' }} disabled>
               Gerenciar plano
             </button>
           </div>

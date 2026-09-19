@@ -56,7 +56,7 @@ const NAV_META_BY_PATH = {
 // NAV_META_BY_PATH nem fazem sentido como item de menu fixo — são acessadas
 // a partir de outra tela (ex: um ícone na lista de Produtos), não pela sidebar.
 const menuItems = Object.keys(ALLOWED_ROLES_BY_PATH)
-  .filter(path => !path.includes(':'))
+  .filter(path => !path.includes(':') && path !== '/mais')
   .map(path => ({ path, ...NAV_META_BY_PATH[path] }));
 
 export default function Sidebar() {
@@ -102,9 +102,7 @@ export default function Sidebar() {
               <Icon size={18} strokeWidth={2} />
             </span>
             <span className="sidebar-nav-label-text">{label}</span>
-            {path === '/estoque' && (
-              <span className="sidebar-nav-badge">3</span>
-            )}
+
           </NavLink>
         ))}
 

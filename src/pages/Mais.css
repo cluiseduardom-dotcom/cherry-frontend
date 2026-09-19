@@ -1,0 +1,60 @@
+.mais-page {
+  max-width: 980px;
+}
+
+.mais-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.mais-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.mais-card:hover {
+  transform: translateY(-1px);
+}
+
+.mais-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+}
+
+.mais-card-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mais-card-title {
+  font-weight: 700;
+}
+
+.mais-card-sub {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.mais-card-arrow {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 720px) {
+  .mais-grid {
+    grid-template-columns: 1fr;
+  }
+}

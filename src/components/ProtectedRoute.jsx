@@ -3,8 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { homeRouteForRole } from '../config/access';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return <div className="page-content"><div className="empty-state"><p className="text-sm text-secondary">Carregando sessão...</p></div></div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

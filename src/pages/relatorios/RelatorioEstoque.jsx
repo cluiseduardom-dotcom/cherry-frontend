@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, AlertTriangle, Search, X, BarChart2 } from 'lucide-react';
 import { listarProdutos } from '../../services/produtos';
-import { listarMovimentacoesProduto } from '../../services/estoque';
+import { listarMovimentacoesRelatorio } from '../../services/estoque';
 import {
   formatDateBR,
   todayISO,
@@ -66,25 +66,23 @@ export default function RelatorioEstoque() {
       setLoading(true);
       setError('');
       try {
-        const produtosAlvo = produtoSelecionado ? [produtoSelecionado] : produtos;
-        const listasPorProduto = await Promise.all(
-          produtosAlvo.map(p => buscarTodasAsPaginas(params => listarMovimentacoesProduto(p.id, params)))
-        );
+        const produtosPorId = new Map(produtos.map(p => [p.id, p]));
+        const filtradas = await buscarTodasAsPaginas(params => listarMovimentacoesRelatorio({
+          ...params,
+          pageSize: 100,
+          produto_id: produtoSelecionado?.id,
+          data_de: filtroInicio,
+          data_ate: filtroFim,
+        }));
         if (cancelled) return;
 
-        const produtosPorId = new Map(produtos.map(p => [p.id, p]));
-        const todas = listasPorProduto.flat().map(m => ({
+        const enriquecidas = filtradas.map(m => ({
           ...m,
-          produtoNome: produtosPorId.get(m.produto_id)?.nome ?? `#${m.produto_id}`,
+          produtoNome: m.produto_nome ?? produtosPorId.get(m.produto_id)?.nome ?? `#${m.produto_id}`,
         }));
 
-        const filtradas = todas.filter(m => {
-          const dia = String(m.criado_em).slice(0, 10);
-          return dia >= filtroInicio && dia <= filtroFim;
-        });
-
-        filtradas.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
-        setMovimentacoes(filtradas);
+        enriquecidas.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+        setMovimentacoes(enriquecidas);
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {

@@ -122,7 +122,7 @@ export default function Venda() {
   const [saveError, setSaveError]   = useState('');
 
   const [formaPagamento, setFormaPagamento] = useState('a_vista');
-  const [diasPrazo, setDiasPrazo]           = useState('30');
+  const [mesesPrazo, setMesesPrazo]         = useState('1');
 
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
@@ -245,11 +245,11 @@ export default function Venda() {
 
     setSaving(true);
     setSaveError('');
-    // Front-end validation: se venda a prazo, diasPrazo deve ser > 0
+    // Front-end validation: se venda a prazo, mesesPrazo deve ser > 0
     if (formaPagamento === 'prazo') {
-      const dias = Number(diasPrazo);
-      if (!dias || dias < 1) {
-        setSaveError('Informe um número de dias de prazo válido (>= 1).');
+      const meses = Number(mesesPrazo);
+      if (!Number.isInteger(meses) || meses < 1) {
+        setSaveError('Informe um número de meses de prazo válido (>= 1).');
         setSaving(false);
         return;
       }
@@ -259,7 +259,7 @@ export default function Venda() {
         canal: 'loja_fisica',
         itens: buildVendaItens(cart),
         forma_pagamento: formaPagamento,
-        ...(formaPagamento === 'prazo' ? { dias_prazo: Number(diasPrazo) } : {}),
+        ...(formaPagamento === 'prazo' ? { meses_prazo: Number(mesesPrazo) } : {}),
       });
 
       setProdutos(prev => reduceEstoqueAposVenda(prev, venda.itens));
@@ -607,13 +607,14 @@ export default function Venda() {
                   </div>
                   {formaPagamento === 'prazo' && (
                     <div className="payment-days">
-                      <label className="text-xs" htmlFor="dias-prazo">Dias de prazo</label>
+                      <label className="text-xs" htmlFor="meses-prazo">Meses de prazo</label>
                       <input
-                        id="dias-prazo"
+                        id="meses-prazo"
                         type="number"
                         min={1}
-                        value={diasPrazo}
-                        onChange={e => setDiasPrazo(e.target.value)}
+                        step={1}
+                        value={mesesPrazo}
+                        onChange={e => setMesesPrazo(e.target.value)}
                         className="payment-days-input"
                       />
                     </div>

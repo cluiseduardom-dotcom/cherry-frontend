@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -63,6 +64,25 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [estoqueAlertas, setEstoqueAlertas] = useState([]);
+
+  useEffect(() => {
+    if (!canAccessRoute('/estoque', user?.role)) {
+      setEstoqueAlertas([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    listarEstoqueBaixo()
+      .then(alertas => {
+        if (!cancelled) setEstoqueAlertas(Array.isArray(alertas) ? alertas : []);
+      })
+      .catch(() => {
+        if (!cancelled) setEstoqueAlertas([]);
+      });
+
+    return () => { cancelled = true; };
+  }, [user?.role]);
 
   function handleLogout() {
     logout();
@@ -102,7 +122,11 @@ export default function Sidebar() {
               <Icon size={18} strokeWidth={2} />
             </span>
             <span className="sidebar-nav-label-text">{label}</span>
-
+            {path === '/estoque' && estoqueAlertas.length > 0 && (
+              <span className="sidebar-nav-badge" aria-label={`${estoqueAlertas.length} alertas de estoque`}>
+                {estoqueAlertas.length > 99 ? '99+' : estoqueAlertas.length}
+              </span>
+            )}
           </NavLink>
         ))}
 

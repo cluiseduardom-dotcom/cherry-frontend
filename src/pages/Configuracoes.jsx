@@ -78,14 +78,20 @@ export default function Configuracoes() {
                 {items.map((item, i) => (
                   <button
                     key={i}
+                    type="button"
                     className="config-item"
                     onClick={item.path ? () => navigate(item.path) : undefined}
+                    disabled={!item.path}
+                    aria-disabled={!item.path}
                   >
                     <div className="config-item-info">
                       <div className="config-item-label">{item.label}</div>
-                      <div className="config-item-sub">{item.sub}</div>
+                      <div className="config-item-sub">
+                        {item.sub}
+                        {!item.path && <span className="config-item-soon">Em breve</span>}
+                      </div>
                     </div>
-                    <ChevronRight size={16} className="config-item-arrow" />
+                    {item.path && <ChevronRight size={16} className="config-item-arrow" />}
                   </button>
                 ))}
               </div>
@@ -100,7 +106,12 @@ export default function Configuracoes() {
             <div className="profile-card-name">{nomeUsuario}</div>
             <div className="profile-card-role"><span className={`role-badge role-badge--${user?.role || "admin"}`}>{roleLabel}</span></div>
             <div className="profile-card-email">{emailUsuario}</div>
-            <button className="btn btn-secondary btn-full" style={{ marginTop: 'var(--space-4)' }}>
+            <button
+              type="button"
+              className="btn btn-secondary btn-full"
+              style={{ marginTop: 'var(--space-4)' }}
+              disabled
+            >
               <User size={15} />
               Editar perfil
             </button>

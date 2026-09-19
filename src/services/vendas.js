@@ -10,8 +10,12 @@ export async function criarVenda({ canal = 'loja_fisica', cliente_id, itens, for
   return body.data;
 }
 
-export async function listarVendas({ page = 1, pageSize = 100 } = {}) {
+export async function listarVendas({ page = 1, pageSize = 100, status, canal, data_de, data_ate } = {}) {
   const params = new URLSearchParams({ page, pageSize });
+  if (status) params.set('status', status);
+  if (canal) params.set('canal', canal);
+  if (data_de) params.set('data_de', data_de);
+  if (data_ate) params.set('data_ate', data_ate);
   const body = await apiFetch(`/vendas?${params.toString()}`);
   return body.data;
 }

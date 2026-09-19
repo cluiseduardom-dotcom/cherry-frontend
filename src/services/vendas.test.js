@@ -51,3 +51,24 @@ describe('criarVenda', () => {
     });
   });
 });
+
+
+describe('listarVendas', () => {
+  it('envia filtros server-side quando informados', async () => {
+    apiFetchMock.mockReset();
+    apiFetchMock.mockResolvedValue({ data: { items: [], total: 0, totalPages: 1 } });
+
+    await listarVendas({
+      page: 2,
+      pageSize: 50,
+      status: 'finalizada',
+      canal: 'loja_fisica',
+      data_de: '2026-09-01',
+      data_ate: '2026-09-30',
+    });
+
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      '/vendas?page=2&pageSize=50&status=finalizada&canal=loja_fisica&data_de=2026-09-01&data_ate=2026-09-30'
+    );
+  });
+});

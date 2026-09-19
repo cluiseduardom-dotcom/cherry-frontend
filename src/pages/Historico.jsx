@@ -226,8 +226,7 @@ export default function Historico() {
             </button>
           )}
         </div>
-      )
-      </div>
+      )}
 
       {loading && (
         <div className="empty-state">

@@ -9,6 +9,7 @@ export async function criarVenda({
   juros = 0,
   forma_pagamento,
   meses_prazo,
+  idempotencyKey,
 }) {
   const payload = { canal, itens };
 
@@ -23,8 +24,10 @@ export async function criarVenda({
     if (forma_pagamento === 'prazo') payload.meses_prazo = meses_prazo;
   }
 
+  const headers = idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined;
   const body = await apiFetch('/vendas', {
     method: 'POST',
+    ...(headers ? { headers } : {}),
     body: JSON.stringify(payload),
   });
 

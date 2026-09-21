@@ -1,12 +1,36 @@
 import { apiFetch } from './api';
 
-export async function criarVenda({ canal = 'loja_fisica', cliente_id, itens, forma_pagamento, meses_prazo }) {
+export async function criarVenda({
+  canal = 'loja_fisica',
+  cliente_id,
+  itens,
+  pagamentos,
+  desconto = 0,
+  juros = 0,
+  forma_pagamento,
+  meses_prazo,
+  idempotencyKey,
+}) {
   const payload = { canal, itens };
-  if (cliente_id) payload.cliente_id = cliente_id;
-  if (forma_pagamento) payload.forma_pagamento = forma_pagamento;
-  if (forma_pagamento === 'prazo') payload.meses_prazo = meses_prazo;
 
-  const body = await apiFetch('/vendas', { method: 'POST', body: JSON.stringify(payload) });
+  if (cliente_id) payload.cliente_id = cliente_id;
+  if (pagamentos) payload.pagamentos = pagamentos;
+  if (desconto) payload.desconto = Number(desconto);
+  if (juros) payload.juros = Number(juros);
+
+  // Compatibilidade temporária para consumidores antigos.
+  if (!pagamentos && forma_pagamento) {
+    payload.forma_pagamento = forma_pagamento;
+    if (forma_pagamento === 'prazo') payload.meses_prazo = meses_prazo;
+  }
+
+  const headers = idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined;
+  const body = await apiFetch('/vendas', {
+    method: 'POST',
+    ...(headers ? { headers } : {}),
+    body: JSON.stringify(payload),
+  });
+
   return body.data;
 }
 

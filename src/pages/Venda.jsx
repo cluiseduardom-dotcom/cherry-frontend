@@ -6,6 +6,7 @@ import {
 import ProductCard from '../components/ProductCard';
 import { listarProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
+import { listarClientes } from '../services/clientes';
 import { ApiError } from '../services/api';
 import './Venda.css';
 
@@ -121,12 +122,21 @@ export default function Venda() {
   const [saving, setSaving]         = useState(false);
   const [saveError, setSaveError]   = useState('');
 
-  const [formaPagamento, setFormaPagamento] = useState('a_vista');
-  const [mesesPrazo, setMesesPrazo]         = useState('1');
+  const [clientes, setClientes] = useState([]);
+  const [clienteId, setClienteId] = useState('');
+  const [desconto, setDesconto] = useState('0');
+  const [juros, setJuros] = useState('0');
+  const [pagamentos, setPagamentos] = useState([]);
+  const [pagamentoForma, setPagamentoForma] = useState('pix');
+  const [pagamentoValor, setPagamentoValor] = useState('');
+  const [pagamentoRecebido, setPagamentoRecebido] = useState('');
+  const [pagamentoParcelas, setPagamentoParcelas] = useState('1');
+  const [pagamentoMesesPrazo, setPagamentoMesesPrazo] = useState('1');
 
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
   const kitKeyCounterRef = useRef(0);
+  const saleIdempotencyKeyRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,6 +155,9 @@ export default function Venda() {
     }
 
     load();
+    listarClientes().then(data => {
+      if (!cancelled) setClientes(Array.isArray(data) ? data : data.items ?? []);
+    }).catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
@@ -233,11 +246,82 @@ export default function Venda() {
   }
 
   /* --- Totals (espelha o cálculo do backend: soma qty * preço vigente) --- */
-  const total     = cart.reduce((sum, row) => sum + rowTotal(row), 0);
+  const subtotal = Number(cart.reduce((sum, row) => sum + rowTotal(row), 0).toFixed(2));
+  const total = Number(Math.max(0, subtotal - Number(desconto || 0) + Number(juros || 0)).toFixed(2));
   const itemCount = cart.reduce((sum, row) => sum + rowQtyCount(row), 0);
+  const totalPagamentos = Number(pagamentos.reduce((sum, p) => sum + Number(p.valor || 0), 0).toFixed(2));
+  const saldoPagamento = Number((total - totalPagamentos).toFixed(2));
 
   const kitDraftTotal    = kitDraft.reduce((sum, i) => sum + i.price * i.qty, 0);
   const kitDraftQtyCount = kitDraft.reduce((sum, i) => sum + i.qty, 0);
+
+  /* --- Pagamentos --- */
+  function adicionarPagamento() {
+    const valor = Number(Number(pagamentoValor).toFixed(2));
+    if (!Number.isFinite(valor) || valor <= 0) {
+      setSaveError('Informe um valor de pagamento maior que zero.');
+      return;
+    }
+
+    if (pagamentoForma === 'crediario' && !clienteId) {
+      setSaveError('Crediário exige um cliente identificado.');
+      return;
+    }
+
+    if (pagamentoForma === 'dinheiro') {
+      const recebido = Number(pagamentoRecebido || valor);
+      if (recebido < valor) {
+        setSaveError('O valor recebido em dinheiro não pode ser menor que o pagamento.');
+        return;
+      }
+    }
+
+    if (valor > saldoPagamento + 0.01) {
+      setSaveError('O pagamento excede o saldo da venda.');
+      return;
+    }
+
+    const parcelas = Number(pagamentoParcelas);
+    const meses = Number(pagamentoMesesPrazo);
+
+    if (!Number.isInteger(parcelas) || parcelas < 1) {
+      setSaveError('Informe um número de parcelas válido.');
+      return;
+    }
+
+    if (pagamentoForma === 'crediario' && parcelas > 1 && (!Number.isInteger(meses) || meses < 1)) {
+      setSaveError('Informe o prazo em meses para o crediário parcelado.');
+      return;
+    }
+
+    setPagamentos(prev => [...prev, {
+      forma_pagamento: pagamentoForma,
+      valor,
+      ...(pagamentoForma === 'dinheiro' ? { valor_recebido: Number(pagamentoRecebido || valor) } : {}),
+      numero_parcelas: pagamentoForma === 'credito' || pagamentoForma === 'crediario' ? parcelas : 1,
+      ...(pagamentoForma === 'crediario' ? { meses_prazo: meses } : {}),
+    }]);
+
+    setPagamentoValor('');
+    setPagamentoRecebido('');
+    setSaveError('');
+  }
+
+  function preencherSaldo() {
+    setPagamentoValor(String(Math.max(0, saldoPagamento).toFixed(2)));
+  }
+
+  function removerPagamento(index) {
+    setPagamentos(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function limparVenda() {
+    clearCart();
+    setPagamentos([]);
+    setClienteId('');
+    setDesconto('0');
+    setJuros('0');
+  }
 
   /* --- Finalize --- */
   async function finalizeSale() {
@@ -245,31 +329,35 @@ export default function Venda() {
 
     setSaving(true);
     setSaveError('');
-    // Front-end validation: se venda a prazo, mesesPrazo deve ser > 0
-    if (formaPagamento === 'prazo') {
-      const meses = Number(mesesPrazo);
-      if (!Number.isInteger(meses) || meses < 1) {
-        setSaveError('Informe um número de meses de prazo válido (>= 1).');
-        setSaving(false);
-        return;
-      }
-    }
+
     try {
+      if (total <= 0) throw new Error('O total da venda deve ser maior que zero.');
+      if (Math.abs(totalPagamentos - total) > 0.01) {
+        throw new Error(`Falta distribuir ${Math.abs(saldoPagamento).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} entre os pagamentos.`);
+      }
+
+      if (!saleIdempotencyKeyRef.current) {
+        saleIdempotencyKeyRef.current = crypto.randomUUID();
+      }
+
       const venda = await criarVenda({
         canal: 'loja_fisica',
+        cliente_id: clienteId ? Number(clienteId) : undefined,
         itens: buildVendaItens(cart),
-        forma_pagamento: formaPagamento,
-        ...(formaPagamento === 'prazo' ? { meses_prazo: Number(mesesPrazo) } : {}),
+        pagamentos,
+        desconto: Number(desconto || 0),
+        juros: Number(juros || 0),
+        idempotencyKey: saleIdempotencyKeyRef.current,
       });
 
+      saleIdempotencyKeyRef.current = null;
       setProdutos(prev => reduceEstoqueAposVenda(prev, venda.itens));
-
       setSaleTotal(Number(venda.total));
       setSaleSuccess(true);
-      clearCart();
+      limparVenda();
       setTimeout(() => setSaleSuccess(false), 2500);
     } catch (err) {
-      setSaveError(err instanceof ApiError ? err.message : 'Não foi possível finalizar a venda. Tente novamente.');
+      setSaveError(err instanceof ApiError ? err.message : err.message || 'Não foi possível finalizar a venda. Tente novamente.');
     } finally {
       setSaving(false);
     }
@@ -585,40 +673,95 @@ export default function Venda() {
                 )}
               </div>
 
-              {/* Summary */}
+              {/* Summary financeiro */}
               <div className="cart-summary">
                 {saveError && (
-                  <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{saveError}</p>
+                  <p className="text-sm venda-payment-error">{saveError}</p>
                 )}
 
-                {/* Forma de pagamento */}
-                <div className="payment-row">
-                  <div className="payment-toggle-group">
-                    <button
-                      type="button"
-                      className={`payment-toggle ${formaPagamento === 'a_vista' ? 'payment-toggle--active' : ''}`}
-                      onClick={() => { setFormaPagamento('a_vista'); setSaveError(''); }}
-                    >À vista</button>
-                    <button
-                      type="button"
-                      className={`payment-toggle ${formaPagamento === 'prazo' ? 'payment-toggle--active' : ''}`}
-                      onClick={() => { setFormaPagamento('prazo'); setSaveError(''); }}
-                    >A prazo</button>
+                <div className="venda-payment-fields">
+                  <div className="input-wrapper">
+                    <label className="input-label" htmlFor="venda-cliente">Cliente</label>
+                    <select id="venda-cliente" className="input-field" value={clienteId} onChange={e => setClienteId(e.target.value)}>
+                      <option value="">Cliente não identificado</option>
+                      {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                    </select>
                   </div>
-                  {formaPagamento === 'prazo' && (
-                    <div className="payment-days">
-                      <label className="text-xs" htmlFor="meses-prazo">Meses de prazo</label>
-                      <input
-                        id="meses-prazo"
-                        type="number"
-                        min={1}
-                        step={1}
-                        value={mesesPrazo}
-                        onChange={e => setMesesPrazo(e.target.value)}
-                        className="payment-days-input"
-                      />
+
+                  <div className="venda-payment-adjustments">
+                    <div className="input-wrapper">
+                      <label className="input-label" htmlFor="venda-desconto">Desconto</label>
+                      <input id="venda-desconto" className="input-field" type="number" min="0" step="0.01" value={desconto} onChange={e => setDesconto(e.target.value)} />
+                    </div>
+                    <div className="input-wrapper">
+                      <label className="input-label" htmlFor="venda-juros">Juros</label>
+                      <input id="venda-juros" className="input-field" type="number" min="0" step="0.01" value={juros} onChange={e => setJuros(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div className="venda-payment-add">
+                    <div className="input-wrapper">
+                      <label className="input-label" htmlFor="venda-forma-pagamento">Pagamento</label>
+                      <select id="venda-forma-pagamento" className="input-field" value={pagamentoForma} onChange={e => setPagamentoForma(e.target.value)}>
+                        <option value="pix">PIX</option>
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="debito">Débito</option>
+                        <option value="credito">Crédito</option>
+                        <option value="crediario">Crediário</option>
+                      </select>
+                    </div>
+                    <div className="input-wrapper">
+                      <label className="input-label" htmlFor="venda-valor-pagamento">Valor</label>
+                      <input id="venda-valor-pagamento" className="input-field" type="number" min="0.01" step="0.01" value={pagamentoValor} onChange={e => setPagamentoValor(e.target.value)} placeholder="0,00" />
+                    </div>
+                    <button type="button" className="btn btn-ghost btn-sm venda-fill-balance" onClick={preencherSaldo} disabled={saldoPagamento <= 0}>
+                      Usar saldo
+                    </button>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={adicionarPagamento}>
+                      Adicionar
+                    </button>
+                  </div>
+
+                  {pagamentoForma === 'dinheiro' && (
+                    <div className="input-wrapper">
+                      <label className="input-label" htmlFor="venda-valor-recebido">Valor recebido</label>
+                      <input id="venda-valor-recebido" className="input-field" type="number" min="0" step="0.01" value={pagamentoRecebido} onChange={e => setPagamentoRecebido(e.target.value)} placeholder="0,00" />
                     </div>
                   )}
+
+                  {(pagamentoForma === 'credito' || pagamentoForma === 'crediario') && (
+                    <div className="venda-payment-adjustments">
+                      <div className="input-wrapper">
+                        <label className="input-label">Parcelas</label>
+                        <input className="input-field" type="number" min="1" step="1" value={pagamentoParcelas} onChange={e => setPagamentoParcelas(e.target.value)} />
+                      </div>
+                      {pagamentoForma === 'crediario' && (
+                        <div className="input-wrapper">
+                          <label className="input-label">Prazo (meses)</label>
+                          <input className="input-field" type="number" min="1" step="1" value={pagamentoMesesPrazo} onChange={e => setPagamentoMesesPrazo(e.target.value)} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {pagamentos.length > 0 && (
+                    <div className="venda-payment-list">
+                      {pagamentos.map((p, index) => (
+                        <div className="venda-payment-item" key={index}>
+                          <span>{p.forma_pagamento}</span>
+                          <span>{Number(p.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                          {p.numero_parcelas > 1 && <small>{p.numero_parcelas}x</small>}
+                          <button type="button" className="btn btn-ghost btn-sm" onClick={() => removerPagamento(index)}>Remover</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="venda-payment-balance">
+                    <span>Total: <strong>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></span>
+                    <span>Pago: <strong>{totalPagamentos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></span>
+                    <span>Saldo: <strong>{saldoPagamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></span>
+                  </div>
                 </div>
 
                 <div className="cart-total-row">
@@ -631,7 +774,7 @@ export default function Venda() {
                 <button
                   className="btn btn-primary btn-full btn-lg cart-finalize-btn"
                   onClick={finalizeSale}
-                  disabled={cart.length === 0 || saving}
+                  disabled={cart.length === 0 || saving || pagamentos.length === 0 || Math.abs(saldoPagamento) > 0.01}
                   id="btn-finalizar-venda"
                 >
                   <CheckCircle size={18} />

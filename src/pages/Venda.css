@@ -495,3 +495,18 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* P0-06 — pagamentos */
+.venda-payment-fields { display: flex; flex-direction: column; gap: var(--space-3); }
+.venda-payment-adjustments { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.venda-payment-add { display: grid; grid-template-columns: 1.2fr 1fr auto auto; gap: var(--space-2); align-items: end; }
+.venda-fill-balance { white-space: nowrap; }
+.venda-payment-list { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2) 0; border-top: 1px solid var(--color-border); }
+.venda-payment-item { display: grid; grid-template-columns: 1fr auto auto auto; gap: var(--space-2); align-items: center; font-size: 0.85rem; }
+.venda-payment-item span:first-child { text-transform: capitalize; font-weight: 600; }
+.venda-payment-balance { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) 0; font-size: 0.8rem; }
+.venda-payment-error { color: var(--color-danger); margin: 0; }
+@media (max-width: 760px) {
+  .venda-payment-add { grid-template-columns: 1fr 1fr; }
+  .venda-payment-balance { flex-direction: column; }
+}

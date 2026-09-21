@@ -773,7 +773,7 @@ export default function Venda() {
                   <CheckCircle size={18} />
                   {saving ? 'Finalizando...' : 'Finalizar Venda'}
                 </button>
-              </div>div>
+              </div>
             </>
           )}
         </div>

@@ -136,6 +136,7 @@ export default function Venda() {
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
   const kitKeyCounterRef = useRef(0);
+  const saleIdempotencyKeyRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -335,6 +336,10 @@ export default function Venda() {
         throw new Error(`Falta distribuir ${Math.abs(saldoPagamento).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} entre os pagamentos.`);
       }
 
+      if (!saleIdempotencyKeyRef.current) {
+        saleIdempotencyKeyRef.current = crypto.randomUUID();
+      }
+
       const venda = await criarVenda({
         canal: 'loja_fisica',
         cliente_id: clienteId ? Number(clienteId) : undefined,
@@ -342,8 +347,10 @@ export default function Venda() {
         pagamentos,
         desconto: Number(desconto || 0),
         juros: Number(juros || 0),
+        idempotencyKey: saleIdempotencyKeyRef.current,
       });
 
+      saleIdempotencyKeyRef.current = null;
       setProdutos(prev => reduceEstoqueAposVenda(prev, venda.itens));
       setSaleTotal(Number(venda.total));
       setSaleSuccess(true);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Search, Plus, AlertTriangle, Package, Filter } from 'lucide-react';
 import { listarProdutos } from '../services/produtos';
-import * as estoqueService from '../services/estoque';
+import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
@@ -48,7 +48,7 @@ export default function Estoque() {
       try {
         const [produtosData, alertasData] = await Promise.all([
           listarProdutos({ canal: 'loja_fisica' }),
-          estoqueService.listarEstoqueBaixo(),
+          apiFetch('/produtos/estoque-baixo').then(body => body.data),
         ]);
         if (!cancelled) {
           setProdutos(produtosData.items.filter(p => p.ativo));

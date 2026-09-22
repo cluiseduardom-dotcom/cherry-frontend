@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BarChart2, History, Settings, Tag, Users, Wallet, HandCoins, Target, Receipt } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BarChart2, History, Settings, Tag, Users, Wallet, HandCoins, Target, Receipt, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/access';
@@ -7,6 +7,7 @@ import './Mais.css';
 const ITEMS = [
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },
+  { path: '/fornecedores', label: 'Fornecedores', sub: 'Cadastro e relacionamento de compras', icon: Building2 },
   { path: '/historico', label: 'Histórico', sub: 'Consultar vendas', icon: History },
   { path: '/relatorios', label: 'Relatórios', sub: 'Análise de dados', icon: BarChart2 },
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },
@@ -36,9 +37,7 @@ export default function Mais() {
       <div className="mais-grid">
         {items.map(({ path, label, sub, icon: Icon }) => (
           <Link key={path} to={path} className="mais-card card card-padding">
-            <span className="mais-card-icon">
-              <Icon size={20} />
-            </span>
+            <span className="mais-card-icon"><Icon size={20} /></span>
             <span className="mais-card-content">
               <span className="mais-card-title">{label}</span>
               <span className="mais-card-sub">{sub}</span>

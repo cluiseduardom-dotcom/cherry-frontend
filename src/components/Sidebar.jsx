@@ -47,6 +47,7 @@ const NAV_META_BY_PATH = {
   '/produtos':         { icon: Tag,             label: 'Produtos',            section: 'principal' },
   '/clientes':         { icon: Users,           label: 'Clientes',            section: 'principal' },
   '/fornecedores':     { icon: Building2,       label: 'Fornecedores',        section: 'principal' },
+  '/compras':          { icon: ShoppingCart,    label: 'Compras',             section: 'principal' },
   '/historico':        { icon: History,         label: 'Histórico',           section: 'gestao' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios',          section: 'gestao' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar',      section: 'gestao' },

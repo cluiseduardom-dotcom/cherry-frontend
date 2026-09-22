@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
+import { listarEstoqueBaixo } from '../services/estoque';
 import './Sidebar.css';
 
 const ROLE_LABEL = {

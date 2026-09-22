@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BarChart2, History, Settings, Tag, Users, Wallet, HandCoins, Target, Receipt, Building2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BarChart2, History, Settings, Tag, Users, Wallet, HandCoins, Target, Receipt, Building2, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/access';
@@ -8,6 +8,7 @@ const ITEMS = [
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },
   { path: '/fornecedores', label: 'Fornecedores', sub: 'Cadastro e relacionamento de compras', icon: Building2 },
+  { path: '/compras', label: 'Compras', sub: 'Entradas, custos e fornecedores', icon: ShoppingCart },
   { path: '/historico', label: 'Histórico', sub: 'Consultar vendas', icon: History },
   { path: '/relatorios', label: 'Relatórios', sub: 'Análise de dados', icon: BarChart2 },
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },

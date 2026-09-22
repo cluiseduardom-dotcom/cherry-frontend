@@ -16,6 +16,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/produtos/:id/precos': ['admin'],
   '/clientes': ['admin', 'vendedor'],
   '/fornecedores': ['admin', 'estoquista'],
+  '/compras': ['admin'],
   '/historico': ['admin', 'vendedor'],
   '/mais': ['admin', 'vendedor', 'estoquista'],
   '/relatorios': ['admin'],

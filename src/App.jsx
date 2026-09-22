@@ -11,6 +11,7 @@ import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
 import Fornecedores from './pages/Fornecedores';
+import Compras from './pages/Compras';
 import Historico from './pages/Historico';
 import Mais from './pages/Mais';
 import Relatorios from './pages/Relatorios';
@@ -29,6 +30,7 @@ const ROUTE_COMPONENTS = {
   '/produtos/:id/precos': PrecificacaoProduto,
   '/clientes': Clientes,
   '/fornecedores': Fornecedores,
+  '/compras': Compras,
   '/historico': Historico,
   '/mais': Mais,
   '/relatorios': Relatorios,

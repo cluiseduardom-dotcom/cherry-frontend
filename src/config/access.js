@@ -8,8 +8,6 @@ export function homeRouteForRole(role) {
   return HOME_ROUTE_BY_ROLE[role] ?? '/login';
 }
 
-// Fail-closed: um path sem entrada aqui é negado, nunca permitido por
-// omissão. Toda rota precisa de uma entrada explícita.
 export const ALLOWED_ROLES_BY_PATH = {
   '/': ['admin'],
   '/venda': ['admin', 'vendedor'],
@@ -17,6 +15,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/produtos': ['admin', 'vendedor', 'estoquista'],
   '/produtos/:id/precos': ['admin'],
   '/clientes': ['admin', 'vendedor'],
+  '/fornecedores': ['admin', 'estoquista'],
   '/historico': ['admin', 'vendedor'],
   '/mais': ['admin', 'vendedor', 'estoquista'],
   '/relatorios': ['admin'],
@@ -37,7 +36,6 @@ export const FIELDS = {
   CUSTO: 'custo',
 };
 
-// Fail-closed: um campo sem entrada aqui é negado, nunca permitido por omissão.
 const ALLOWED_ROLES_BY_FIELD = {
   [FIELDS.CUSTO]: ['admin'],
 };
@@ -55,8 +53,6 @@ export const ACTIONS = {
   CATEGORIZAR_PRODUTO: 'categorizar_produto',
 };
 
-// Fail-closed: uma ação sem entrada aqui é negada, nunca permitida por omissão.
-// MOVIMENTAR_ESTOQUE precisa bater com ALLOWED_ROLES_BY_PATH['/estoque'].
 const ALLOWED_ROLES_BY_ACTION = {
   [ACTIONS.GERENCIAR_ESTOQUE]: ['admin'],
   [ACTIONS.MOVIMENTAR_ESTOQUE]: ['admin', 'estoquista'],

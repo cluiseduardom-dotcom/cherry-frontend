@@ -5,18 +5,19 @@ import MobileHeader from './MobileHeader';
 import './Layout.css';
 
 const pageTitles = {
-  '/':               'Dashboard',
-  '/venda':          'Nova Venda',
-  '/estoque':        'Estoque',
-  '/produtos':       'Produtos',
-  '/clientes':       'Clientes',
-  '/historico':      'Histórico',
-  '/relatorios':     'Relatórios',
-  '/contas-pagar':   'Contas a Pagar',
+  '/': 'Dashboard',
+  '/venda': 'Nova Venda',
+  '/estoque': 'Estoque',
+  '/produtos': 'Produtos',
+  '/clientes': 'Clientes',
+  '/fornecedores': 'Fornecedores',
+  '/historico': 'Histórico',
+  '/relatorios': 'Relatórios',
+  '/contas-pagar': 'Contas a Pagar',
   '/contas-receber': 'Contas a Receber',
   '/ponto-equilibrio': 'Ponto de Equilíbrio',
   '/despesas-fixas': 'Despesas Fixas',
-  '/configuracoes':  'Configurações',
+  '/configuracoes': 'Configurações',
 };
 
 export default function Layout() {
@@ -26,12 +27,10 @@ export default function Layout() {
   return (
     <div className="app-layout">
       <Sidebar />
-
       <main className="app-main">
         <MobileHeader title={title} />
         <Outlet />
       </main>
-
       <BottomNav />
     </div>
   );

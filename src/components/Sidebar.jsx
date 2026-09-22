@@ -15,6 +15,7 @@ import {
   HandCoins,
   Target,
   Receipt,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
@@ -45,6 +46,7 @@ const NAV_META_BY_PATH = {
   '/estoque':          { icon: Package,         label: 'Estoque',             section: 'principal' },
   '/produtos':         { icon: Tag,             label: 'Produtos',            section: 'principal' },
   '/clientes':         { icon: Users,           label: 'Clientes',            section: 'principal' },
+  '/fornecedores':     { icon: Building2,       label: 'Fornecedores',        section: 'principal' },
   '/historico':        { icon: History,         label: 'Histórico',           section: 'gestao' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios',          section: 'gestao' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar',      section: 'gestao' },

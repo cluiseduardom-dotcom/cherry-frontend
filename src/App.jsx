@@ -10,6 +10,7 @@ import Estoque from './pages/Estoque';
 import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
+import Fornecedores from './pages/Fornecedores';
 import Historico from './pages/Historico';
 import Mais from './pages/Mais';
 import Relatorios from './pages/Relatorios';
@@ -27,6 +28,7 @@ const ROUTE_COMPONENTS = {
   '/produtos': Produtos,
   '/produtos/:id/precos': PrecificacaoProduto,
   '/clientes': Clientes,
+  '/fornecedores': Fornecedores,
   '/historico': Historico,
   '/mais': Mais,
   '/relatorios': Relatorios,
@@ -38,9 +40,6 @@ const ROUTE_COMPONENTS = {
   '/configuracoes/categorias': CategoriasProduto,
 };
 
-// access.js e ROUTE_COMPONENTS precisam concordar exatamente. Uma rota
-// registrada sem componente mapeado (ou vice-versa) quebra o app no
-// carregamento, em vez de silenciosamente não renderizar.
 const registeredPaths = Object.keys(ALLOWED_ROLES_BY_PATH);
 for (const path of registeredPaths) {
   if (!ROUTE_COMPONENTS[path]) {
@@ -61,10 +60,7 @@ function Fallback() {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Auth */}
       <Route path="/login" element={<Login />} />
-
-      {/* Main app layout */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         {registeredPaths.map(path => {
           const Component = ROUTE_COMPONENTS[path];
@@ -81,8 +77,6 @@ function AppRoutes() {
           );
         })}
       </Route>
-
-      {/* Fallback */}
       <Route path="*" element={<Fallback />} />
     </Routes>
   );

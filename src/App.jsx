@@ -21,6 +21,7 @@ import ContasReceber from './pages/ContasReceber';
 import PontoEquilibrio from './pages/PontoEquilibrio';
 import DespesasFixas from './pages/DespesasFixas';
 import CategoriasProduto from './pages/CategoriasProduto';
+import ConfiguracaoSku from './pages/ConfiguracaoSku';
 
 const ROUTE_COMPONENTS = {
   '/': Dashboard,
@@ -40,6 +41,7 @@ const ROUTE_COMPONENTS = {
   '/despesas-fixas': DespesasFixas,
   '/configuracoes': Configuracoes,
   '/configuracoes/categorias': CategoriasProduto,
+  '/configuracoes/sku': ConfiguracaoSku,
 };
 
 const registeredPaths = Object.keys(ALLOWED_ROLES_BY_PATH);

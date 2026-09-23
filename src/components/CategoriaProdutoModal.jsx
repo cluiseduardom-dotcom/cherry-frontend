@@ -3,37 +3,51 @@ import { X } from 'lucide-react';
 import { criarCategoria, atualizarCategoria } from '../services/categorias';
 import './ProductModal.css';
 
-function formVazio() {
-  return { nivel: '', codigo: '', nome: '' };
+export function formVazio() {
+  return { nivel: '', codigo: '', nome: '', configuracao_sku_id: '' };
 }
 
-function formFromCategoria(categoria) {
+export function formFromCategoria(categoria) {
   if (!categoria) return formVazio();
-  return { nivel: String(categoria.nivel), codigo: categoria.codigo ?? '', nome: categoria.nome ?? '' };
+  return {
+    nivel: String(categoria.nivel),
+    codigo: categoria.codigo ?? '',
+    nome: categoria.nome ?? '',
+    configuracao_sku_id: categoria.configuracao_sku_id != null ? String(categoria.configuracao_sku_id) : '',
+  };
 }
 
-function validar(form, mode) {
+export function validar(form, mode) {
   if (mode === 'create') {
     const nivel = Number(form.nivel);
     if (form.nivel === '' || !Number.isInteger(nivel) || nivel <= 0) {
       return 'Nível deve ser um número inteiro positivo';
     }
-    if (!/^[A-Za-z0-9]{1,3}$/.test(form.codigo.trim())) {
-      return 'Código deve ter de 1 a 3 letras e/ou números';
+    if (!/^[A-Za-z0-9]{1,50}$/.test(form.codigo.trim())) {
+      return 'Código deve ter de 1 a 50 letras e/ou números';
     }
   }
   if (!form.nome.trim()) return 'Nome é obrigatório';
   return '';
 }
 
-function montarPayload(form, mode) {
+export function montarPayload(form, mode) {
+  const configuracao_sku_id = form.configuracao_sku_id ? Number(form.configuracao_sku_id) : null;
   if (mode === 'create') {
-    return { nivel: Number(form.nivel), codigo: form.codigo.trim(), nome: form.nome.trim() };
+    return {
+      nivel: Number(form.nivel),
+      codigo: form.codigo.trim(),
+      nome: form.nome.trim(),
+      configuracao_sku_id,
+    };
   }
-  return { nome: form.nome.trim() };
+  return {
+    nome: form.nome.trim(),
+    configuracao_sku_id,
+  };
 }
 
-export default function CategoriaProdutoModal({ open, mode = 'create', categoria, onClose, onSaved }) {
+export default function CategoriaProdutoModal({ open, mode = 'create', categoria, padroesSku = [], onClose, onSaved }) {
   const [form, setForm] = useState(formVazio);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -89,7 +103,7 @@ export default function CategoriaProdutoModal({ open, mode = 'create', categoria
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">{mode === 'create' ? 'Nova categoria' : 'Renomear categoria'}</h2>
+          <h2 className="modal-title">{mode === 'create' ? 'Nova categoria' : 'Editar categoria'}</h2>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Fechar">
             <X size={18} />
           </button>
@@ -126,7 +140,7 @@ export default function CategoriaProdutoModal({ open, mode = 'create', categoria
                     <input
                       id="cpm-codigo"
                       type="text"
-                      maxLength={3}
+                      maxLength={50}
                       className="input-field"
                       placeholder="ex.: BR"
                       value={form.codigo}
@@ -150,6 +164,26 @@ export default function CategoriaProdutoModal({ open, mode = 'create', categoria
                   value={form.nome}
                   onChange={e => updateField('nome', e.target.value)}
                 />
+              </div>
+
+              <div className="input-wrapper modal-form-span-2">
+                <label className="input-label" htmlFor="cpm-padrao-sku">Padrão de SKU</label>
+                <select
+                  id="cpm-padrao-sku"
+                  className="input-field"
+                  value={form.configuracao_sku_id}
+                  onChange={e => updateField('configuracao_sku_id', e.target.value)}
+                >
+                  <option value="">Padrão da empresa (fallback automático)</option>
+                  {padroesSku.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}{p.padrao ? ' ★ (Padrão fallback)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-xs text-secondary" style={{ marginTop: 'var(--space-1)', display: 'block' }}>
+                  Define qual padrão de SKU será usado quando produtos desta categoria forem categorizados.
+                </span>
               </div>
             </div>
           </div>

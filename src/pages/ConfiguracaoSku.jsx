@@ -7,8 +7,8 @@ import './ConfiguracaoSku.css';
 
 const EMPTY_CONFIG = {
   nome: 'Padrão',
-  tipo_sku: 'alfanumerico',
-  separador: '',
+  tipo_sku: 'numerico',
+  separador: '-',
   prefixo: '',
   sufixo: '',
   tamanho_sequencia: 3,

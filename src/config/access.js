@@ -26,6 +26,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/despesas-fixas': ['admin'],
   '/configuracoes': ['admin'],
   '/configuracoes/categorias': ['admin'],
+  '/configuracoes/sku': ['admin'],
 };
 
 export function canAccessRoute(path, role) {

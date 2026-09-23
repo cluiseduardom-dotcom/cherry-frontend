@@ -1,5 +1,10 @@
 import { apiFetch } from './api';
 
+export async function listarPadroesSku() {
+  const body = await apiFetch('/configuracoes-sku/padroes');
+  return body.data;
+}
+
 export async function buscarConfiguracaoSku() {
   const body = await apiFetch('/configuracoes-sku');
   return body.data;

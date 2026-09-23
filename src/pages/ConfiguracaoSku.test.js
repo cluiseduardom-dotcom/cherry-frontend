@@ -199,5 +199,76 @@ describe('ConfiguracaoSku — Padrões de SKU v2', () => {
         'Início da sequência deve ser maior ou igual a zero'
       );
     });
+
+    it('impede desmarcar fallback (padrao=false) se não houver outro padrão fallback ativo', () => {
+      // Padrão único da empresa marcado como fallback sendo editado para padrao=false
+      const config = {
+        id: 1,
+        nome: 'Padrão Principal',
+        padrao: false,
+        separador: '-',
+        tamanho_sequencia: 3,
+        inicio_sequencia: 1,
+      };
+      const outrosPadroes = [
+        { id: 1, nome: 'Padrão Principal', padrao: true, ativo: true },
+      ];
+
+      expect(validarPadrao(config, outrosPadroes)).toBe(
+        'A empresa deve possuir sempre pelo menos um padrão ativo definido como padrão principal/fallback. Para desmarcar este padrão, defina outro padrão como principal primeiro.'
+      );
+    });
+
+    it('impede desmarcar fallback se existirem outros padrões mas nenhum deles for fallback', () => {
+      const config = {
+        id: 1,
+        nome: 'Padrão Principal',
+        padrao: false,
+        separador: '-',
+        tamanho_sequencia: 3,
+        inicio_sequencia: 1,
+      };
+      const outrosPadroes = [
+        { id: 1, nome: 'Padrão Principal', padrao: true, ativo: true },
+        { id: 2, nome: 'Padrão Alternativo', padrao: false, ativo: true },
+      ];
+
+      expect(validarPadrao(config, outrosPadroes)).toBe(
+        'A empresa deve possuir sempre pelo menos um padrão ativo definido como padrão principal/fallback. Para desmarcar este padrão, defina outro padrão como principal primeiro.'
+      );
+    });
+
+    it('permite salvar com padrao=false se existir outro padrão ativo marcado como fallback', () => {
+      const config = {
+        id: 2,
+        nome: 'Padrão Alternativo',
+        padrao: false,
+        separador: '-',
+        tamanho_sequencia: 3,
+        inicio_sequencia: 1,
+      };
+      const outrosPadroes = [
+        { id: 1, nome: 'Padrão Principal', padrao: true, ativo: true },
+        { id: 2, nome: 'Padrão Alternativo', padrao: false, ativo: true },
+      ];
+
+      expect(validarPadrao(config, outrosPadroes)).toBe('');
+    });
+
+    it('permite salvar com padrao=true mesmo quando for o único padrão', () => {
+      const config = {
+        id: 1,
+        nome: 'Padrão Principal',
+        padrao: true,
+        separador: '-',
+        tamanho_sequencia: 3,
+        inicio_sequencia: 1,
+      };
+      const outrosPadroes = [
+        { id: 1, nome: 'Padrão Principal', padrao: true, ativo: true },
+      ];
+
+      expect(validarPadrao(config, outrosPadroes)).toBe('');
+    });
   });
 });

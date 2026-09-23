@@ -200,6 +200,16 @@ export function validarPadrao(config, outrosPadroes = []) {
     return 'Já existe um padrão cadastrado com este nome';
   }
 
+  // Regra de Fallback: deve existir sempre pelo menos um padrão ativo como principal/fallback
+  const isPadrao = config.padrao !== false;
+  const outroFallbackExiste = outrosPadroes.some(
+    p => p.id !== config.id && p.padrao && p.ativo !== false
+  );
+
+  if (!isPadrao && !outroFallbackExiste) {
+    return 'A empresa deve possuir sempre pelo menos um padrão ativo definido como padrão principal/fallback. Para desmarcar este padrão, defina outro padrão como principal primeiro.';
+  }
+
   if (config.separador && !SEPARADORES_PERMITIDOS.includes(config.separador)) {
     return 'Separador de SKU não permitido. Use: -, _, /, x, *, + ou deixe vazio.';
   }
@@ -279,6 +289,12 @@ export default function ConfiguracaoSku() {
       .filter(n => !niveisEmUso.has(Number(n.nivel)))
       .sort((a, b) => Number(a.nivel) - Number(b.nivel));
   }, [config.segmentos, niveis]);
+
+  const outroFallbackExiste = useMemo(() => {
+    return padroes.some(p => p.id !== config.id && p.padrao && p.ativo !== false);
+  }, [padroes, config.id]);
+
+  const isUnicoFallback = Boolean(config.padrao) && !outroFallbackExiste;
 
   function handleSelectPadrao(padrao) {
     setIsCreatingNew(false);
@@ -614,13 +630,20 @@ export default function ConfiguracaoSku() {
                     <label className="configuracao-sku-checkbox-label">
                       <input
                         type="checkbox"
-                        checked={config.padrao}
+                        checked={Boolean(config.padrao)}
+                        disabled={isUnicoFallback}
                         onChange={e => setField('padrao', e.target.checked)}
                       />
                       <div>
                         <strong>Definir como padrão principal / fallback da empresa</strong>
                         <p>
-                          Quando nenhuma categoria vinculada ao produto possuir padrão específico, este padrão será utilizado automaticamente.
+                          {isUnicoFallback ? (
+                            <span className="configuracao-sku-fallback-warning">
+                              Este é atualmente o único padrão principal/fallback da empresa e não pode ser desmarcado diretamente. Para alterá-lo, defina outro padrão como principal primeiro.
+                            </span>
+                          ) : (
+                            'Quando nenhuma categoria vinculada ao produto possuir padrão específico, este padrão será utilizado automaticamente.'
+                          )}
                         </p>
                       </div>
                     </label>

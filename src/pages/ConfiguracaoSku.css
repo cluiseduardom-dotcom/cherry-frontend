@@ -250,6 +250,12 @@
   line-height: 1.4;
 }
 
+.configuracao-sku-fallback-warning {
+  color: #B45309;
+  font-weight: 600;
+  display: block;
+}
+
 /* Grupo de botões de separadores */
 .configuracao-sku-separadores-group {
   display: flex;

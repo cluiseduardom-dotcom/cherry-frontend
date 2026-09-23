@@ -8,7 +8,8 @@ const sections = [
     title: 'Catálogo',
     icon: FolderTree,
     items: [
-      { label: 'Categorias de produto', sub: 'Níveis, códigos e SKU automático', path: '/configuracoes/categorias' },
+      { label: 'Categorias de produto', sub: 'Níveis, códigos e categorias', path: '/configuracoes/categorias' },
+      { label: 'Configuração de SKU', sub: 'Formato, segmentos e sequência automática', path: '/configuracoes/sku' },
     ],
   },
   {

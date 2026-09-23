@@ -1,9 +1,26 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { carregarSessao, limparSessao, salvarSessao } from './authSession';
 
+const sessionStorageMock = {
+  store: {},
+  clear() {
+    this.store = {};
+  },
+  getItem(key) {
+    return this.store[key] ?? null;
+  },
+  setItem(key, value) {
+    this.store[key] = String(value);
+  },
+  removeItem(key) {
+    delete this.store[key];
+  },
+};
+
 describe('authSession', () => {
   beforeEach(() => {
-    window.sessionStorage.clear();
+    sessionStorageMock.clear();
+    globalThis.sessionStorage = sessionStorageMock;
   });
 
   it('salva e restaura a sessão', () => {
@@ -23,9 +40,9 @@ describe('authSession', () => {
   });
 
   it('descarta dados inválidos', () => {
-    window.sessionStorage.setItem('cherry.auth.session', JSON.stringify({ token: 'jwt' }));
+    sessionStorageMock.setItem('cherry.auth.session', JSON.stringify({ token: 'jwt' }));
 
     expect(carregarSessao()).toBeNull();
-    expect(window.sessionStorage.getItem('cherry.auth.session')).toBeNull();
+    expect(sessionStorageMock.getItem('cherry.auth.session')).toBeNull();
   });
 });

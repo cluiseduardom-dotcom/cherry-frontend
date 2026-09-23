@@ -7,11 +7,11 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  quality-gate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -26,5 +26,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Tests
+        run: npm test
+
       - name: Build
         run: npm run build
+
+      - name: Quality gate summary
+        run: |
+          echo "Frontend quality gate passed."
+          echo "Required checks: install, lint, tests and build."

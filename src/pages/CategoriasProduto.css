@@ -1,3 +1,15 @@
+.categorias-produto-header {
+  align-items: flex-end;
+}
+
+.categorias-produto-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
 .categorias-produto-secao {
   padding: var(--space-5) var(--space-6);
   margin-bottom: var(--space-5);

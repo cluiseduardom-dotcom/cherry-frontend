@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, FolderTree } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, FolderTree } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { listarNiveisCategoria, excluirNivelCategoria } from '../services/niveisCategoria';
 import { listarCategorias, excluirCategoria } from '../services/categorias';
 import { listarPadroesSku } from '../services/configuracoesSku';
@@ -8,7 +9,14 @@ import CategoriaProdutoModal from '../components/CategoriaProdutoModal';
 import './Contas.css';
 import './CategoriasProduto.css';
 
+export const ROTA_CONFIGURACOES = '/configuracoes';
+
+export function rotuloNivel(nivel, niveis = []) {
+  return niveis.find(n => n.nivel === nivel)?.nome || `Nível ${nivel}`;
+}
+
 export default function CategoriasProduto() {
+  const navigate = useNavigate();
   const [niveis, setNiveis] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [padroesSku, setPadroesSku] = useState([]);
@@ -49,8 +57,8 @@ export default function CategoriasProduto() {
     }
   }
 
-  function rotuloNivel(nivel) {
-    return niveis.find(n => n.nivel === nivel)?.nome || `Nível ${nivel}`;
+  function obterRotuloNivel(nivel) {
+    return rotuloNivel(nivel, niveis);
   }
 
   function openCreateNivel() {
@@ -139,8 +147,16 @@ export default function CategoriasProduto() {
 
   return (
     <div className="page-content">
-      <div className="page-header">
+      <div className="page-header categorias-produto-header">
         <div>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm categorias-produto-back"
+            onClick={() => navigate('/configuracoes')}
+          >
+            <ArrowLeft size={15} />
+            Configurações
+          </button>
           <h1 className="page-title">Categorias de produto</h1>
           <p className="page-subtitle">Níveis, códigos e nomes usados para gerar o SKU automaticamente</p>
         </div>
@@ -249,7 +265,7 @@ export default function CategoriasProduto() {
 
             {gruposCategorias.map(({ nivel, itens }) => (
               <div key={nivel} className="categorias-produto-grupo">
-                <h3 className="categorias-produto-grupo-title">{rotuloNivel(nivel)}</h3>
+                <h3 className="categorias-produto-grupo-title">{obterRotuloNivel(nivel)}</h3>
                 <table className="contas-table">
                   <thead>
                     <tr>

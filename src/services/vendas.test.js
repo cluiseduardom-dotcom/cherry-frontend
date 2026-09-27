@@ -52,7 +52,6 @@ describe('criarVenda', () => {
   });
 });
 
-
 describe('listarVendas', () => {
   it('envia filtros server-side quando informados', async () => {
     apiFetchMock.mockReset();

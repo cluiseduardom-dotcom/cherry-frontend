@@ -12,6 +12,9 @@ import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
 import Fornecedores from './pages/Fornecedores';
 import Compras from './pages/Compras';
+import CompraDetalhe from './pages/CompraDetalhe';
+import Recebimentos from './pages/Recebimentos';
+import RecebimentoDetalhe from './pages/RecebimentoDetalhe';
 import Historico from './pages/Historico';
 import Mais from './pages/Mais';
 import Relatorios from './pages/Relatorios';
@@ -32,6 +35,9 @@ const ROUTE_COMPONENTS = {
   '/clientes': Clientes,
   '/fornecedores': Fornecedores,
   '/compras': Compras,
+  '/compras/:id': CompraDetalhe,
+  '/compras/recebimentos': Recebimentos,
+  '/compras/recebimentos/:id': RecebimentoDetalhe,
   '/historico': Historico,
   '/mais': Mais,
   '/relatorios': Relatorios,

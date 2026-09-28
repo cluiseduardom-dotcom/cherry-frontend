@@ -1,22 +1,90 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Search, Eye, X, Trash2, ShoppingCart } from 'lucide-react';
-import { listarCompras, criarCompra, cancelarCompra, buscarCompra } from '../services/compras';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Search, Eye, X, Trash2, ShoppingCart, PackageCheck, Ban, ClipboardList, ScanLine } from 'lucide-react';
+import { listarCompras, criarCompra, cancelarCompra } from '../services/compras';
 import { listarFornecedores } from '../services/fornecedores';
 import { listarProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
+import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
 import './Compras.css';
 
 const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const today = () => new Date().toLocaleDateString('en-CA');
 
+const SUBVIEWS = [
+  { key: 'todas', label: 'Todas' },
+  { key: 'recebidas', label: 'Recebidas' },
+  { key: 'canceladas', label: 'Canceladas' },
+];
+
 function emptyItem() {
   return { produto_id: '', quantidade: 1, custo_unitario: '' };
 }
 
+function emptyFiltros() {
+  return { fornecedor_id: '', data_de: '', data_ate: '' };
+}
+
+function emptyForm() {
+  return {
+    fornecedor_id: '',
+    data_compra: today(),
+    nota_fiscal: '',
+    forma_pagamento: 'a_vista',
+    dias_prazo: '',
+    itens: [emptyItem()],
+  };
+}
+
+// KPIs derivados exclusivamente do status real das compras já carregadas —
+// não há estado de "em andamento"/"pendência" hoje (compras nascem
+// diretamente como 'recebido'), então não fabricamos essas métricas.
+export function calcularKpisCompras(compras) {
+  const lista = Array.isArray(compras) ? compras : [];
+  const recebidas = lista.filter(c => c.status === 'recebido');
+  const canceladas = lista.filter(c => c.status === 'cancelado');
+
+  return {
+    total: lista.length,
+    recebidas: recebidas.length,
+    canceladas: canceladas.length,
+    valorRecebido: recebidas.reduce((soma, c) => soma + Number(c.valor_total || 0), 0),
+  };
+}
+
+// Busca client-side sobre a página já carregada (o backend de /compras não
+// suporta busca por texto/NF/SKU — ver COMPRAS-UX-GPT-VALIDATION.md #5).
+export function filtrarComprasPorBusca(compras, termo) {
+  const lista = Array.isArray(compras) ? compras : [];
+  const query = (termo || '').trim().toLowerCase();
+  if (!query) return lista;
+
+  const semHash = query.replace(/^#/, '');
+
+  return lista.filter(c => {
+    const id = String(c.id);
+    const fornecedor = (c.fornecedor_nome || '').toLowerCase();
+    const nf = (c.nota_fiscal || '').toLowerCase();
+    return id.includes(semHash) || fornecedor.includes(query) || nf.includes(query);
+  });
+}
+
+export function filtrarComprasPorSubview(compras, subview) {
+  const lista = Array.isArray(compras) ? compras : [];
+  if (subview === 'recebidas') return lista.filter(c => c.status === 'recebido');
+  if (subview === 'canceladas') return lista.filter(c => c.status === 'cancelado');
+  return lista;
+}
+
 export default function Compras() {
   const { user } = useAuth();
-  const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
+  const navigate = useNavigate();
+  // Backend protege /compras inteiro (criar/cancelar/listar) com
+  // requireEstoquista (admin + estoquista) — ACTIONS.MOVIMENTAR_ESTOQUE já
+  // reflete essa mesma política, então reaproveitamos em vez de restringir
+  // além do que o backend permite.
+  const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.MOVIMENTAR_ESTOQUE);
 
   const [compras, setCompras] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
@@ -24,23 +92,27 @@ export default function Compras() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [details, setDetails] = useState(null);
-  const [form, setForm] = useState({
-    fornecedor_id: '',
-    data_compra: today(),
-    nota_fiscal: '',
-    forma_pagamento: 'a_vista',
-    dias_prazo: '',
-    itens: [emptyItem()],
-  });
 
-  async function load() {
+  const [busca, setBusca] = useState('');
+  const [subview, setSubview] = useState('todas');
+  const [filtros, setFiltros] = useState(emptyFiltros());
+  const [filtrosAplicados, setFiltrosAplicados] = useState(emptyFiltros());
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [createIntent, setCreateIntent] = useState('escolha');
+  const [form, setForm] = useState(emptyForm());
+  const [scannerParaItem, setScannerParaItem] = useState(null);
+
+  async function load(filtrosParaCarregar = filtrosAplicados) {
     setLoading(true);
     setError('');
     try {
       const [c, f, p] = await Promise.all([
-        listarCompras(),
+        listarCompras({
+          fornecedor_id: filtrosParaCarregar.fornecedor_id || undefined,
+          data_de: filtrosParaCarregar.data_de || undefined,
+          data_ate: filtrosParaCarregar.data_ate || undefined,
+        }),
         listarFornecedores({ pageSize: 100 }),
         listarProdutos({ canal: 'loja_fisica', pageSize: 100 }),
       ]);
@@ -54,7 +126,14 @@ export default function Compras() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(emptyFiltros()); }, []);
+
+  const kpis = useMemo(() => calcularKpisCompras(compras), [compras]);
+
+  const comprasVisiveis = useMemo(() => {
+    const porSubview = filtrarComprasPorSubview(compras, subview);
+    return filtrarComprasPorBusca(porSubview, busca);
+  }, [compras, subview, busca]);
 
   const total = useMemo(
     () => form.itens.reduce((sum, item) => sum + Number(item.quantidade || 0) * Number(item.custo_unitario || 0), 0),
@@ -69,16 +148,15 @@ export default function Compras() {
   }
 
   function openCreate() {
-    setForm({
-      fornecedor_id: '',
-      data_compra: today(),
-      nota_fiscal: '',
-      forma_pagamento: 'a_vista',
-      dias_prazo: '',
-      itens: [emptyItem()],
-    });
+    setForm(emptyForm());
+    setCreateIntent('escolha');
     setFeedback('');
     setModalOpen(true);
+  }
+
+  function closeCreate() {
+    setModalOpen(false);
+    setCreateIntent('escolha');
   }
 
   async function handleSubmit(e) {
@@ -107,19 +185,11 @@ export default function Compras() {
       };
 
       await criarCompra(payload);
-      setModalOpen(false);
+      closeCreate();
       setFeedback('Compra registrada com sucesso. O estoque foi atualizado.');
       await load();
     } catch (err) {
       setFeedback(err.message);
-    }
-  }
-
-  async function openDetails(id) {
-    try {
-      setDetails(await buscarCompra(id));
-    } catch (err) {
-      setError(err.message);
     }
   }
 
@@ -129,26 +199,121 @@ export default function Compras() {
       await cancelarCompra(id);
       setFeedback('Compra cancelada e estoque estornado.');
       await load();
-      if (details?.id === id) setDetails(null);
     } catch (err) {
       setError(err.message);
     }
   }
+
+  function aplicarFiltros(e) {
+    e.preventDefault();
+    setFiltrosAplicados(filtros);
+    load(filtros);
+  }
+
+  function limparFiltros() {
+    const vazio = emptyFiltros();
+    setFiltros(vazio);
+    setFiltrosAplicados(vazio);
+    load(vazio);
+  }
+
+  const filtrosAtivos = Boolean(filtrosAplicados.fornecedor_id || filtrosAplicados.data_de || filtrosAplicados.data_ate);
 
   return (
     <div className="page-content">
       <div className="page-header">
         <div>
           <h1 className="page-title">Compras</h1>
-          <p className="page-subtitle">Entrada de mercadorias, custos e integração financeira</p>
+          <p className="page-subtitle">Entradas de mercadorias, custos e integração financeira</p>
         </div>
         {podeGerenciar && (
-          <button className="btn btn-primary" onClick={openCreate}><Plus size={16} /> Nova Compra</button>
+          <button className="btn btn-primary" onClick={openCreate}><Plus size={16} /> Nova compra</button>
         )}
       </div>
 
       {feedback && <div className="compra-alert success">{feedback}</div>}
       {error && <div className="compra-alert error">{error}</div>}
+
+      <div className="compras-kpis">
+        <button
+          type="button"
+          className={`compras-kpi-card ${subview === 'todas' ? 'compras-kpi-card--active' : ''}`}
+          onClick={() => setSubview('todas')}
+        >
+          <div className="compras-kpi-icon compras-kpi-icon--neutro"><ClipboardList size={18} /></div>
+          <div className="compras-kpi-value">{kpis.total}</div>
+          <div className="compras-kpi-label">Total de compras</div>
+        </button>
+        <button
+          type="button"
+          className={`compras-kpi-card ${subview === 'recebidas' ? 'compras-kpi-card--active' : ''}`}
+          onClick={() => setSubview('recebidas')}
+        >
+          <div className="compras-kpi-icon compras-kpi-icon--sucesso"><PackageCheck size={18} /></div>
+          <div className="compras-kpi-value">{kpis.recebidas}</div>
+          <div className="compras-kpi-label">Recebidas &middot; {money(kpis.valorRecebido)}</div>
+        </button>
+        <button
+          type="button"
+          className={`compras-kpi-card ${subview === 'canceladas' ? 'compras-kpi-card--active' : ''}`}
+          onClick={() => setSubview('canceladas')}
+        >
+          <div className="compras-kpi-icon compras-kpi-icon--perigo"><Ban size={18} /></div>
+          <div className="compras-kpi-value">{kpis.canceladas}</div>
+          <div className="compras-kpi-label">Canceladas</div>
+        </button>
+      </div>
+
+      <div className="compras-toolbar">
+        <div className="input-icon-wrapper compras-search">
+          <Search size={16} className="input-icon" />
+          <input
+            className="input-field"
+            placeholder="Buscar por # da compra, fornecedor ou NF..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <form className="compras-filtros" onSubmit={aplicarFiltros}>
+        <div className="compra-field">
+          <label>Fornecedor</label>
+          <select className="input-field" value={filtros.fornecedor_id} onChange={e => setFiltros({ ...filtros, fornecedor_id: e.target.value })}>
+            <option value="">Todos</option>
+            {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
+          </select>
+        </div>
+        <div className="compra-field">
+          <label>De</label>
+          <input type="date" className="input-field" value={filtros.data_de} onChange={e => setFiltros({ ...filtros, data_de: e.target.value })} />
+        </div>
+        <div className="compra-field">
+          <label>Até</label>
+          <input type="date" className="input-field" value={filtros.data_ate} onChange={e => setFiltros({ ...filtros, data_ate: e.target.value })} />
+        </div>
+        <button type="submit" className="btn btn-secondary">Filtrar</button>
+        {filtrosAtivos && <button type="button" className="btn btn-ghost" onClick={limparFiltros}>Limpar filtros</button>}
+      </form>
+
+      <div className="compras-tabs">
+        {SUBVIEWS.map(tab => (
+          <button
+            key={tab.key}
+            type="button"
+            className={`compras-tab ${subview === tab.key ? 'compras-tab--active' : ''}`}
+            onClick={() => setSubview(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+        {/* Recebimentos não é um filtro sobre `compras` — é outro conjunto
+            de dados (pedidos de compra/recebimentos, sem relação com
+            Compra Direta), por isso navega em vez de filtrar a tabela. */}
+        <button type="button" className="compras-tab" onClick={() => navigate('/compras/recebimentos')}>
+          Recebimentos
+        </button>
+      </div>
 
       {loading ? (
         <div className="empty-state"><p className="text-sm text-secondary">Carregando compras...</p></div>
@@ -158,6 +323,12 @@ export default function Compras() {
           <div className="empty-state-title">Nenhuma compra registrada</div>
           <p className="text-sm text-secondary">Registre a primeira entrada de mercadorias.</p>
         </div>
+      ) : comprasVisiveis.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon"><Search size={24} /></div>
+          <div className="empty-state-title">Nenhuma compra encontrada</div>
+          <p className="text-sm text-secondary">Ajuste a busca, os filtros ou a aba selecionada.</p>
+        </div>
       ) : (
         <div className="card compras-table-wrap">
           <table className="compras-table">
@@ -166,7 +337,7 @@ export default function Compras() {
               <th className="numeric">Total</th><th>Status</th><th />
             </tr></thead>
             <tbody>
-              {compras.map(c => (
+              {comprasVisiveis.map(c => (
                 <tr key={c.id}>
                   <td>{c.id}</td>
                   <td>{new Date(c.data_compra + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
@@ -176,7 +347,7 @@ export default function Compras() {
                   <td className="numeric">{money(c.valor_total)}</td>
                   <td><span className={c.status === 'cancelado' ? 'badge badge-danger' : 'badge badge-success'}>{c.status}</span></td>
                   <td>
-                    <button className="produto-action-btn" title="Ver detalhes" onClick={() => openDetails(c.id)}><Eye size={14} /></button>
+                    <button className="produto-action-btn" title="Ver detalhes" onClick={() => navigate(`/compras/${c.id}`)}><Eye size={14} /></button>
                     {c.status === 'recebido' && podeGerenciar && (
                       <button className="produto-action-btn produto-action-btn--danger" title="Cancelar" onClick={() => handleCancel(c.id)}><X size={14} /></button>
                     )}
@@ -189,112 +360,128 @@ export default function Compras() {
       )}
 
       {modalOpen && (
-        <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && setModalOpen(false)}>
-          <form className="compra-modal" onSubmit={handleSubmit}>
-            <div className="compra-modal-header">
-              <h2>Nova Compra</h2>
-              <button type="button" className="produto-action-btn" onClick={() => setModalOpen(false)}><X size={16} /></button>
+        <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && closeCreate()}>
+          {createIntent === 'escolha' ? (
+            <div className="compra-modal compra-modal--intent">
+              <div className="compra-modal-header">
+                <h2>Nova compra</h2>
+                <button type="button" className="produto-action-btn" onClick={closeCreate}><X size={16} /></button>
+              </div>
+              <p className="text-sm text-secondary" style={{ marginTop: -8, marginBottom: 18 }}>Como você deseja comprar?</p>
+              <div className="compra-intent-grid">
+                <button type="button" className="compra-intent-card" onClick={() => setCreateIntent('direta')}>
+                  <ShoppingCart size={22} />
+                  <strong>Compra direta</strong>
+                  <span>Preciso comprar agora. Fornecedor, produtos e custos entram no estoque na hora.</span>
+                </button>
+                <button type="button" className="compra-intent-card compra-intent-card--disabled" disabled title="O recebimento já é suportado pelo backend, mas ainda não há como criar um pedido de compra pela interface">
+                  <ClipboardList size={22} />
+                  <strong>Compra planejada</strong>
+                  <span className="compra-intent-badge">Em breve</span>
+                  <span>Necessidade → Cotação → Pedido → Recebimento, com aprovação em etapas.</span>
+                </button>
+              </div>
+              <div className="compra-modal-actions">
+                <button type="button" className="btn btn-ghost" onClick={closeCreate}>Cancelar</button>
+              </div>
             </div>
+          ) : (
+            <form className="compra-modal" onSubmit={handleSubmit}>
+              <div className="compra-modal-header">
+                <h2>Nova compra direta</h2>
+                <button type="button" className="produto-action-btn" onClick={closeCreate}><X size={16} /></button>
+              </div>
 
-            {feedback && <div className="compra-alert error">{feedback}</div>}
+              {feedback && <div className="compra-alert error">{feedback}</div>}
 
-            <div className="compra-form-grid">
-              <div className="compra-field">
-                <label>Fornecedor *</label>
-                <select className="input-field" value={form.fornecedor_id} onChange={e => setForm({ ...form, fornecedor_id: e.target.value })}>
-                  <option value="">Selecione...</option>
-                  {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
-                </select>
-              </div>
-              <div className="compra-field">
-                <label>Data da compra *</label>
-                <input type="date" className="input-field" value={form.data_compra} onChange={e => setForm({ ...form, data_compra: e.target.value })} />
-              </div>
-              <div className="compra-field">
-                <label>Nota fiscal</label>
-                <input className="input-field" value={form.nota_fiscal} onChange={e => setForm({ ...form, nota_fiscal: e.target.value })} />
-              </div>
-              <div className="compra-field">
-                <label>Forma de pagamento *</label>
-                <select className="input-field" value={form.forma_pagamento} onChange={e => setForm({ ...form, forma_pagamento: e.target.value })}>
-                  <option value="a_vista">À vista</option>
-                  <option value="prazo">A prazo</option>
-                </select>
-              </div>
-              {form.forma_pagamento === 'prazo' && (
+              <div className="compra-form-grid">
                 <div className="compra-field">
-                  <label>Prazo (dias) *</label>
-                  <input type="number" min="1" className="input-field" value={form.dias_prazo} onChange={e => setForm({ ...form, dias_prazo: e.target.value })} />
+                  <label>Fornecedor *</label>
+                  <select className="input-field" value={form.fornecedor_id} onChange={e => setForm({ ...form, fornecedor_id: e.target.value })}>
+                    <option value="">Selecione...</option>
+                    {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
+                  </select>
                 </div>
-              )}
-            </div>
-
-            <div className="compra-items">
-              <div className="compra-items-header">
-                <strong>Itens da compra</strong>
-                <button type="button" className="btn btn-secondary" onClick={() => setForm(prev => ({ ...prev, itens: [...prev.itens, emptyItem()] }))}><Plus size={14} /> Item</button>
+                <div className="compra-field">
+                  <label>Data da compra *</label>
+                  <input type="date" className="input-field" value={form.data_compra} onChange={e => setForm({ ...form, data_compra: e.target.value })} />
+                </div>
+                <div className="compra-field">
+                  <label>Nota fiscal</label>
+                  <input className="input-field" value={form.nota_fiscal} onChange={e => setForm({ ...form, nota_fiscal: e.target.value })} />
+                </div>
+                <div className="compra-field">
+                  <label>Forma de pagamento *</label>
+                  <select className="input-field" value={form.forma_pagamento} onChange={e => setForm({ ...form, forma_pagamento: e.target.value })}>
+                    <option value="a_vista">À vista</option>
+                    <option value="prazo">A prazo</option>
+                  </select>
+                </div>
+                {form.forma_pagamento === 'prazo' && (
+                  <div className="compra-field">
+                    <label>Prazo (dias) *</label>
+                    <input type="number" min="1" className="input-field" value={form.dias_prazo} onChange={e => setForm({ ...form, dias_prazo: e.target.value })} />
+                  </div>
+                )}
               </div>
-              {form.itens.map((item, index) => (
-                <div className="compra-item-row" key={index}>
-                  <div className="compra-field compra-item-product">
-                    <label>Produto *</label>
-                    <select className="input-field" value={item.produto_id} onChange={e => updateItem(index, 'produto_id', e.target.value)}>
-                      <option value="">Selecione...</option>
-                      {produtos.map(p => <option key={p.id} value={p.id}>{p.sku ? p.sku + ' — ' : ''}{p.nome}</option>)}
-                    </select>
-                  </div>
-                  <div className="compra-field">
-                    <label>Qtd. *</label>
-                    <input type="number" min="1" step="1" className="input-field" value={item.quantidade} onChange={e => updateItem(index, 'quantidade', e.target.value)} />
-                  </div>
-                  <div className="compra-field">
-                    <label>Custo unit. *</label>
-                    <input type="number" min="0.01" step="0.01" className="input-field" value={item.custo_unitario} onChange={e => updateItem(index, 'custo_unitario', e.target.value)} />
-                  </div>
-                  <div className="compra-field">
-                    <label>Total</label>
-                    <div className="input-field">{money(Number(item.quantidade || 0) * Number(item.custo_unitario || 0))}</div>
-                  </div>
-                  <button type="button" className="produto-action-btn produto-action-btn--danger" disabled={form.itens.length === 1} onClick={() => setForm(prev => ({ ...prev, itens: prev.itens.filter((_, i) => i !== index) }))}><Trash2 size={14} /></button>
-                </div>
-              ))}
-              <div className="compra-total">Total: {money(total)}</div>
-            </div>
 
-            <div className="compra-modal-actions">
-              <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancelar</button>
-              <button type="submit" className="btn btn-primary">Registrar compra</button>
-            </div>
-          </form>
+              <div className="compra-items">
+                <div className="compra-items-header">
+                  <strong>Itens da compra</strong>
+                  <button type="button" className="btn btn-secondary" onClick={() => setForm(prev => ({ ...prev, itens: [...prev.itens, emptyItem()] }))}><Plus size={14} /> Item</button>
+                </div>
+                {form.itens.map((item, index) => (
+                  <div className="compra-item-row" key={index}>
+                    <div className="compra-field compra-item-product">
+                      <label>Produto *</label>
+                      <div className="compra-item-product-row">
+                        <select className="input-field" value={item.produto_id} onChange={e => updateItem(index, 'produto_id', e.target.value)}>
+                          <option value="">Selecione...</option>
+                          {produtos.map(p => <option key={p.id} value={p.id}>{p.sku ? p.sku + ' — ' : ''}{p.nome}</option>)}
+                        </select>
+                        <button type="button" className="produto-action-btn" title="Ler código do produto" onClick={() => setScannerParaItem(index)}><ScanLine size={14} /></button>
+                      </div>
+                    </div>
+                    <div className="compra-field">
+                      <label>Qtd. *</label>
+                      <input type="number" min="1" step="1" className="input-field" value={item.quantidade} onChange={e => updateItem(index, 'quantidade', e.target.value)} />
+                    </div>
+                    <div className="compra-field">
+                      <label>Custo unit. *</label>
+                      <input type="number" min="0.01" step="0.01" className="input-field" value={item.custo_unitario} onChange={e => updateItem(index, 'custo_unitario', e.target.value)} />
+                    </div>
+                    <div className="compra-field">
+                      <label>Total</label>
+                      <div className="input-field">{money(Number(item.quantidade || 0) * Number(item.custo_unitario || 0))}</div>
+                    </div>
+                    <button type="button" className="produto-action-btn produto-action-btn--danger" disabled={form.itens.length === 1} onClick={() => setForm(prev => ({ ...prev, itens: prev.itens.filter((_, i) => i !== index) }))}><Trash2 size={14} /></button>
+                  </div>
+                ))}
+                <div className="compra-total">Total: {money(total)}</div>
+              </div>
+
+              <div className="compra-modal-actions">
+                <button type="button" className="btn btn-ghost" onClick={() => setCreateIntent('escolha')}>&lsaquo; Voltar</button>
+                <button type="submit" className="btn btn-primary">Registrar compra</button>
+              </div>
+            </form>
+          )}
         </div>
       )}
 
-      {details && (
-        <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && setDetails(null)}>
-          <div className="compra-modal">
-            <div className="compra-modal-header">
-              <h2>Compra #{details.id}</h2>
-              <button className="produto-action-btn" onClick={() => setDetails(null)}><X size={16} /></button>
-            </div>
-            <p><strong>Fornecedor:</strong> {details.fornecedor_nome}</p>
-            <p><strong>Data:</strong> {new Date(details.data_compra + 'T12:00:00').toLocaleDateString('pt-BR')}</p>
-            <p><strong>Status:</strong> {details.status}</p>
-            <div className="card" style={{ marginTop: 16 }}>
-              <table className="compras-table">
-                <thead><tr><th>Produto</th><th>Qtd.</th><th>Custo unit.</th><th className="numeric">Total</th></tr></thead>
-                <tbody>{(details.itens || []).map(item => (
-                  <tr key={item.id}>
-                    <td>{produtos.find(p => p.id === item.produto_id)?.nome || 'Produto #' + item.produto_id}</td>
-                    <td>{item.quantidade}</td>
-                    <td>{money(item.custo_unitario)}</td>
-                    <td className="numeric">{money(Number(item.quantidade) * Number(item.custo_unitario))}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </div>
-            <div className="compra-total">Total: {money(details.valor_total)}</div>
-          </div>
-        </div>
+      {scannerParaItem !== null && (
+        <BarcodeScannerModal
+          onClose={() => setScannerParaItem(null)}
+          onDetect={produto => {
+            const disponivel = produtos.some(p => p.id === produto.produto_id);
+            if (!disponivel) {
+              setFeedback(`"${produto.nome}" foi encontrado, mas não está disponível no canal desta compra.`);
+              return;
+            }
+            updateItem(scannerParaItem, 'produto_id', String(produto.produto_id));
+            setScannerParaItem(null);
+          }}
+        />
       )}
     </div>
   );

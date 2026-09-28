@@ -33,9 +33,11 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/despesas-fixas', 'vendedor')).toBe(false);
   });
 
-  it('allows estoquista on estoque and produtos', () => {
+  it('allows estoquista on estoque, produtos, fornecedores and compras', () => {
     expect(canAccessRoute('/estoque', 'estoquista')).toBe(true);
     expect(canAccessRoute('/produtos', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/fornecedores', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/compras', 'estoquista')).toBe(true);
   });
 
   it('denies estoquista on clientes, configuracoes, and venda', () => {
@@ -44,10 +46,26 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/venda', 'estoquista')).toBe(false);
   });
 
+  it('denies vendedor on compras (matches backend requireEstoquista policy)', () => {
+    expect(canAccessRoute('/compras', 'vendedor')).toBe(false);
+  });
+
   it('restricts /produtos/:id/precos to admin only', () => {
     expect(canAccessRoute('/produtos/:id/precos', 'admin')).toBe(true);
     expect(canAccessRoute('/produtos/:id/precos', 'vendedor')).toBe(false);
     expect(canAccessRoute('/produtos/:id/precos', 'estoquista')).toBe(false);
+  });
+
+  it('allows admin and estoquista on /compras/:id, /compras/recebimentos and /compras/recebimentos/:id, matching /compras', () => {
+    expect(canAccessRoute('/compras/:id', 'admin')).toBe(true);
+    expect(canAccessRoute('/compras/:id', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/compras/:id', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/compras/recebimentos', 'admin')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/compras/recebimentos/:id', 'admin')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos/:id', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos/:id', 'vendedor')).toBe(false);
   });
 
   it('restricts /configuracoes/categorias to admin only', () => {

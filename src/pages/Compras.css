@@ -1,12 +1,75 @@
+.compras-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.compras-kpi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.compras-kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
+.compras-kpi-card--active { border-color: var(--color-primary); background: var(--cherry-50); }
+
+.compras-kpi-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+.compras-kpi-icon--neutro { background: var(--color-primary-ultra); color: var(--color-primary); }
+.compras-kpi-icon--sucesso { background: var(--color-success-light); color: var(--color-success); }
+.compras-kpi-icon--perigo { background: var(--color-danger-light); color: var(--color-danger); }
+
+.compras-kpi-value { font-size: var(--font-size-2xl); font-weight: 800; color: var(--color-text-primary); }
+.compras-kpi-label { font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: 600; }
+
 .compras-toolbar {
   display: flex;
   gap: var(--space-3);
   align-items: center;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
   flex-wrap: wrap;
 }
 
 .compras-search { flex: 1; min-width: 240px; }
+
+.compras-filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.compras-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.compras-tab {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+  margin-bottom: -1px;
+}
+
+.compras-tab:hover { color: var(--color-text-primary); }
+.compras-tab--active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 
 .compras-table-wrap { overflow-x: auto; }
 
@@ -39,8 +102,63 @@
 .compra-items { margin-top:20px; }
 .compra-items-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
 .compra-item-row { display:grid; grid-template-columns: minmax(180px,2fr) 90px 120px 120px 42px; gap:8px; align-items:end; margin-bottom:10px; }
+.compra-item-product-row { display:flex; gap:6px; }
+.compra-item-product-row .input-field { flex:1; }
 .compra-total { display:flex; justify-content:flex-end; font-size:18px; font-weight:800; margin-top:14px; }
 .compra-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+
+.compra-modal--intent { width: min(680px, 100%); }
+
+.compra-intent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.compra-intent-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  color: var(--color-primary);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.compra-intent-card strong { color: var(--color-text-primary); font-size: var(--font-size-md); }
+.compra-intent-card span { color: var(--color-text-secondary); font-size: var(--font-size-sm); font-weight: 400; }
+
+.compra-intent-card:not(:disabled):hover {
+  border-color: var(--color-primary-light);
+  background: var(--cherry-50);
+}
+
+.compra-intent-card--disabled,
+.compra-intent-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  color: var(--color-text-muted);
+}
+
+.compra-intent-badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+@media (max-width: 700px) {
+  .compra-intent-grid { grid-template-columns: 1fr; }
+}
 .compra-alert { margin-bottom:14px; padding:10px 12px; border-radius:8px; font-size:13px; }
 .compra-alert.error { color:var(--color-danger); background:rgba(180,30,60,.08); }
 .compra-alert.success { color:var(--color-success); background:rgba(30,150,90,.08); }

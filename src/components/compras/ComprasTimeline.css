@@ -1,0 +1,59 @@
+.compras-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.compras-timeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.compras-timeline-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.compras-timeline-step--atencao .compras-timeline-icon {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.compras-timeline-step--divergencia .compras-timeline-icon,
+.compras-timeline-step--cancelado .compras-timeline-icon {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.compras-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compras-timeline-title {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.compras-timeline-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.compras-timeline-detail {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}

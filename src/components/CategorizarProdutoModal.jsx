@@ -3,6 +3,9 @@ import { X } from 'lucide-react';
 import { listarCategorias } from '../services/categorias';
 import { listarNiveisCategoria } from '../services/niveisCategoria';
 import { categorizarProduto } from '../services/produtos';
+import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
+import { formularioAlterado } from '../utils/formularioAlterado';
+import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
 import './ProductModal.css';
 
 export function agruparCategoriasPorNivel(categorias) {
@@ -37,6 +40,7 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
   const [categorias, setCategorias] = useState([]);
   const [niveis, setNiveis] = useState([]);
   const [selecao, setSelecao] = useState({});
+  const [selecaoInicialCarregada, setSelecaoInicialCarregada] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -56,7 +60,9 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
         if (cancelled) return;
         setCategorias(categoriasResp.items);
         setNiveis(niveisResp);
-        setSelecao(selecaoInicial(produto?.categorias));
+        const inicial = selecaoInicial(produto?.categorias);
+        setSelecao(inicial);
+        setSelecaoInicialCarregada(inicial);
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {
@@ -68,16 +74,21 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
     return () => { cancelled = true; };
   }, [open, produto]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose]);
+  // Issue #42: nunca fechar silenciosamente (clique fora, ESC, X ou
+  // Cancelar) com seleção de categoria alterada e não salva. O snapshot só
+  // fica pronto depois do carregamento assíncrono acima — antes disso
+  // `selecao` e `selecaoInicialCarregada` são o mesmo `{}`, então isDirty
+  // é falso enquanto carrega.
+  const isDirty = formularioAlterado(selecao, selecaoInicialCarregada);
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open, isDirty, onClose });
 
   if (!open) return null;
+
+  function tentarFechar() {
+    if (saving) return;
+    solicitarFechamento();
+  }
 
   const grupos = agruparCategoriasPorNivel(categorias);
   const jaTemSku = produto?.sku != null;
@@ -102,11 +113,11 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={tentarFechar}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Categorizar produto</h2>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -152,7 +163,7 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>
+            <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={saving}>
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving || loading}>
@@ -160,6 +171,10 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
             </button>
           </div>
         </form>
+
+        {confirmando && (
+          <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
+        )}
       </div>
     </div>
   );

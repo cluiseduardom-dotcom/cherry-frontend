@@ -9,6 +9,9 @@ import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
 import { formatarData } from '../utils/formatarData';
 import CancelarCompraModal from '../components/compras/CancelarCompraModal';
+import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
+import { formularioAlterado } from '../utils/formularioAlterado';
+import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import './Compras.css';
 
 const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -103,8 +106,22 @@ export default function Compras() {
   const [modalOpen, setModalOpen] = useState(false);
   const [createIntent, setCreateIntent] = useState('escolha');
   const [form, setForm] = useState(emptyForm());
+  const [initialForm, setInitialForm] = useState(form);
   const [scannerParaItem, setScannerParaItem] = useState(null);
   const [cancelAlvo, setCancelAlvo] = useState(null);
+
+  function fecharModalDireto() {
+    setModalOpen(false);
+    setCreateIntent('escolha');
+  }
+
+  // Issue #42: nunca fechar o modal de "Nova compra" silenciosamente
+  // (clique fora, ESC, X ou Cancelar) com itens/dados preenchidos e não
+  // salvos — vale tanto na tela de formulário quanto se o usuário voltou
+  // para a tela de escolha (o form preenchido continua ali, em risco).
+  const isDirty = formularioAlterado(form, initialForm);
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open: modalOpen, isDirty, onClose: fecharModalDireto });
 
   async function load(filtrosParaCarregar = filtrosAplicados) {
     setLoading(true);
@@ -151,15 +168,16 @@ export default function Compras() {
   }
 
   function openCreate() {
-    setForm(emptyForm());
+    const formInicial = emptyForm();
+    setForm(formInicial);
+    setInitialForm(formInicial);
     setCreateIntent('escolha');
     setFeedback('');
     setModalOpen(true);
   }
 
   function closeCreate() {
-    setModalOpen(false);
-    setCreateIntent('escolha');
+    solicitarFechamento();
   }
 
   async function handleSubmit(e) {
@@ -188,7 +206,7 @@ export default function Compras() {
       };
 
       await criarCompra(payload);
-      closeCreate();
+      fecharModalDireto();
       setFeedback('Compra registrada com sucesso. O estoque foi atualizado.');
       await load();
     } catch (err) {
@@ -481,6 +499,10 @@ export default function Compras() {
             </form>
           )}
         </div>
+      )}
+
+      {confirmando && (
+        <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
       )}
 
       {scannerParaItem !== null && (

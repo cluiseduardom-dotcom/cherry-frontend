@@ -1,0 +1,60 @@
+.confirmar-descarte-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 12, 16, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1100;
+}
+
+.confirmar-descarte-dialog {
+  width: min(420px, 100%);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.confirmar-descarte-icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto var(--space-3);
+  border-radius: 50%;
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirmar-descarte-dialog h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+
+.confirmar-descarte-dialog p {
+  margin: 0 0 var(--space-5);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.confirmar-descarte-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-2);
+}
+
+.confirmar-descarte-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (min-width: 480px) {
+  .confirmar-descarte-actions {
+    flex-direction: row-reverse;
+  }
+}

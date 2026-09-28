@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { TriangleAlert, X } from 'lucide-react';
+import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import './CancelarCompraModal.css';
 
 const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -14,6 +15,16 @@ export default function CancelarCompraModal({ compra, onConfirm, onClose }) {
   const [cancelando, setCancelando] = useState(false);
   const [erro, setErro] = useState('');
 
+  // Modal de confirmação, não de cadastro — não há dados de formulário a
+  // proteger (isDirty sempre falso). Usa o hook compartilhado só para
+  // ganhar o ESC de forma padronizada (Issue #42); o componente só existe
+  // montado enquanto está "aberto", por isso open: true.
+  const { solicitarFechamento } = useConfirmarFechamentoModal({
+    open: true,
+    isDirty: false,
+    onClose: () => { if (!cancelando) onClose(); },
+  });
+
   async function handleConfirmar() {
     setCancelando(true);
     setErro('');
@@ -26,11 +37,11 @@ export default function CancelarCompraModal({ compra, onConfirm, onClose }) {
   }
 
   return (
-    <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && !cancelando && onClose()}>
+    <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && solicitarFechamento()}>
       <div className="compra-modal cancelar-compra-modal">
         <div className="compra-modal-header">
           <h2>Cancelar compra #{compra.id}</h2>
-          <button type="button" className="produto-action-btn" onClick={onClose} disabled={cancelando}><X size={16} /></button>
+          <button type="button" className="produto-action-btn" onClick={solicitarFechamento} disabled={cancelando}><X size={16} /></button>
         </div>
 
         {erro && <div className="compra-alert error">{erro}</div>}
@@ -50,7 +61,7 @@ export default function CancelarCompraModal({ compra, onConfirm, onClose }) {
         </div>
 
         <div className="compra-modal-actions">
-          <button type="button" className="btn btn-ghost" onClick={onClose} disabled={cancelando}>Voltar</button>
+          <button type="button" className="btn btn-ghost" onClick={solicitarFechamento} disabled={cancelando}>Voltar</button>
           <button type="button" className="btn btn-danger" onClick={handleConfirmar} disabled={cancelando}>
             {cancelando ? 'Cancelando...' : 'Confirmar cancelamento'}
           </button>

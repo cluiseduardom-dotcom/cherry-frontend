@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, Search } from 'lucide-react';
 import { buscarHistoricoCliente } from '../services/clientes';
 import { ApiError } from '../services/api';
+import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import './ProductModal.css';
 import '../pages/Historico.css';
 
@@ -38,23 +39,19 @@ export default function ClienteHistoricoModal({ open, cliente, onClose }) {
     return () => { cancelled = true; };
   }, [open, cliente]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose]);
+  // Modal só de leitura (histórico) — sem dados a proteger, então isDirty é
+  // sempre falso. Usa o hook compartilhado só para padronizar o ESC (Issue
+  // #42) em vez de reimplementar o mesmo listener aqui.
+  const { solicitarFechamento } = useConfirmarFechamentoModal({ open, isDirty: false, onClose });
 
   if (!open || !cliente) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={solicitarFechamento}>
       <div className="modal-panel card" style={{ maxWidth: 720 }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Histórico de {cliente.nome}</h2>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="modal-close" onClick={solicitarFechamento} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -112,7 +109,7 @@ export default function ClienteHistoricoModal({ open, cliente, onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button type="button" className="btn btn-ghost" onClick={onClose}>
+          <button type="button" className="btn btn-ghost" onClick={solicitarFechamento}>
             Fechar
           </button>
         </div>

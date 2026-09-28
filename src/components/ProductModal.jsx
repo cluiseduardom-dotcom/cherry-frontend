@@ -3,6 +3,9 @@ import { X } from 'lucide-react';
 import { criarProduto, atualizarProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { FIELDS, podeVerCampo } from '../config/access';
+import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
+import { formularioAlterado } from '../utils/formularioAlterado';
+import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -85,27 +88,32 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
   const podeVerCusto = podeVerCampo(user?.role, FIELDS.CUSTO);
 
   const [form, setForm] = useState(EMPTY_FORM);
+  const [initialForm, setInitialForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setForm(formFromProduto(produto));
+      const dados = formFromProduto(produto);
+      setForm(dados);
+      setInitialForm(dados);
       setError('');
       setSaving(false);
     }
   }, [open, produto]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose]);
+  // Issue #42: nunca fechar silenciosamente (clique fora, ESC, X ou
+  // Cancelar) com dados alterados e não salvos.
+  const isDirty = formularioAlterado(form, initialForm);
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open, isDirty, onClose });
 
   if (!open) return null;
+
+  function tentarFechar() {
+    if (saving) return;
+    solicitarFechamento();
+  }
 
   function updateField(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -136,11 +144,11 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={tentarFechar}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{mode === 'create' ? 'Novo Produto' : 'Editar Produto'}</h2>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -281,7 +289,7 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>
+            <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={saving}>
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
@@ -289,6 +297,10 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
             </button>
           </div>
         </form>
+
+        {confirmando && (
+          <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
+        )}
       </div>
     </div>
   );

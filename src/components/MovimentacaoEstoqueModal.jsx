@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { registrarMovimentacaoEstoque } from '../services/estoque';
+import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
+import { formularioAlterado } from '../utils/formularioAlterado';
+import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -50,16 +53,18 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose]);
+  // Issue #42: nunca fechar silenciosamente (clique fora, ESC, X ou
+  // Cancelar) com dados preenchidos e não salvos.
+  const isDirty = formularioAlterado(form, EMPTY_FORM);
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open, isDirty, onClose });
 
   if (!open) return null;
+
+  function tentarFechar() {
+    if (saving) return;
+    solicitarFechamento();
+  }
 
   const produtoSelecionado = produtos.find(p => String(p.id) === form.produtoId) ?? null;
 
@@ -100,11 +105,11 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={tentarFechar}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Registrar Movimentação de Estoque</h2>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Fechar">
+          <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
@@ -178,7 +183,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>
+            <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={saving}>
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
@@ -186,6 +191,10 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
             </button>
           </div>
         </form>
+
+        {confirmando && (
+          <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
+        )}
       </div>
     </div>
   );

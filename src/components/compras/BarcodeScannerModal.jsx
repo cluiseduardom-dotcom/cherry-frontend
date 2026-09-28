@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Keyboard, X } from 'lucide-react';
 import { buscarProdutoPorCodigo } from '../../services/produtosCodigos';
+import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import './BarcodeScannerModal.css';
 
 export function normalizarCodigoLido(codigo) {
@@ -26,6 +27,12 @@ export default function BarcodeScannerModal({ onDetect, onClose }) {
   const bufferRef = useRef('');
   const ultimoEventoRef = useRef(0);
   const buscandoRef = useRef(false);
+
+  // Leitor de código, não cadastro — o código digitado manualmente e ainda
+  // não enviado é transitório, então isDirty fica sempre falso. Usa o hook
+  // compartilhado só para padronizar o ESC (Issue #42); o componente só
+  // existe montado enquanto está "aberto", por isso open: true.
+  const { solicitarFechamento } = useConfirmarFechamentoModal({ open: true, isDirty: false, onClose });
 
   async function tentarCodigo(codigoBruto) {
     const codigo = normalizarCodigoLido(codigoBruto);
@@ -127,11 +134,11 @@ export default function BarcodeScannerModal({ onDetect, onClose }) {
   }
 
   return (
-    <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && onClose()}>
+    <div className="compra-modal-backdrop" onMouseDown={e => e.target === e.currentTarget && solicitarFechamento()}>
       <div className="compra-modal scanner-modal">
         <div className="compra-modal-header">
           <h2>Leitor de código</h2>
-          <button type="button" className="produto-action-btn" onClick={onClose}><X size={16} /></button>
+          <button type="button" className="produto-action-btn" onClick={solicitarFechamento}><X size={16} /></button>
         </div>
 
         {erro && <div className="compra-alert error">{erro}</div>}

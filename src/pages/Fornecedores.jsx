@@ -6,6 +6,9 @@ import {
   listarFornecedores,
   removerFornecedor,
 } from '../services/fornecedores';
+import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
+import { formularioAlterado } from '../utils/formularioAlterado';
+import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import './Fornecedores.css';
 
 const EMPTY_FORM = {
@@ -47,7 +50,14 @@ export default function Fornecedores() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [initialForm, setInitialForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+
+  // Issue #42: o modal não pode fechar silenciosamente (clique fora, ESC,
+  // X ou Cancelar) quando o formulário tem alterações não salvas.
+  const isDirty = formularioAlterado(form, initialForm);
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open: modalOpen, isDirty, onClose: () => setModalOpen(false) });
 
   async function load() {
     setLoading(true);
@@ -79,27 +89,30 @@ export default function Fornecedores() {
   function openCreate() {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setInitialForm(EMPTY_FORM);
     setActionError('');
     setModalOpen(true);
   }
 
   function openEdit(fornecedor) {
-    setEditing(fornecedor);
-    setForm({
+    const dados = {
       nome: fornecedor.nome ?? '',
       contato: fornecedor.contato ?? '',
       telefone: fornecedor.telefone ?? '',
       email: fornecedor.email ?? '',
       cnpj_cpf: fornecedor.cnpj_cpf ?? '',
       observacoes: fornecedor.observacoes ?? '',
-    });
+    };
+    setEditing(fornecedor);
+    setForm(dados);
+    setInitialForm(dados);
     setActionError('');
     setModalOpen(true);
   }
 
-  function closeModal() {
+  function tentarFecharModal() {
     if (saving) return;
-    setModalOpen(false);
+    solicitarFechamento();
   }
 
   function setField(field, value) {
@@ -261,14 +274,14 @@ export default function Fornecedores() {
       )}
 
       {modalOpen && (
-        <div className="fornecedor-modal-backdrop" role="presentation" onMouseDown={closeModal}>
+        <div className="fornecedor-modal-backdrop" role="presentation" onMouseDown={tentarFecharModal}>
           <div className="fornecedor-modal card" role="dialog" aria-modal="true" aria-labelledby="fornecedor-modal-title" onMouseDown={e => e.stopPropagation()}>
             <div className="fornecedor-modal-header">
               <div>
                 <h2 id="fornecedor-modal-title">{editing ? 'Editar fornecedor' : 'Novo fornecedor'}</h2>
                 <p>Os dados serão usados também no fluxo de compras.</p>
               </div>
-              <button className="fornecedor-modal-close" onClick={closeModal} aria-label="Fechar"><X size={18} /></button>
+              <button className="fornecedor-modal-close" onClick={tentarFecharModal} aria-label="Fechar"><X size={18} /></button>
             </div>
 
             <form onSubmit={handleSave}>
@@ -302,12 +315,16 @@ export default function Fornecedores() {
               {actionError && <div className="fornecedor-feedback fornecedor-feedback--error">{actionError}</div>}
 
               <div className="fornecedor-modal-actions">
-                <button type="button" className="btn btn-ghost" onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="button" className="btn btn-ghost" onClick={tentarFecharModal} disabled={saving}>Cancelar</button>
                 <button type="submit" className="btn btn-primary" disabled={saving || !form.nome.trim()}>
                   {saving ? 'Salvando...' : editing ? 'Salvar alterações' : 'Cadastrar fornecedor'}
                 </button>
               </div>
             </form>
+
+            {confirmando && (
+              <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
+            )}
           </div>
         </div>
       )}

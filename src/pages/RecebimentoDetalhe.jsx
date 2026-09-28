@@ -142,6 +142,11 @@ export default function RecebimentoDetalhe() {
 
   const podeAprovar = recebimento.status === 'CONFERIDO' && podeGerenciar;
   const podeAlterarStatus = podeGerenciar && !['APROVADO', 'CANCELADO'].includes(recebimento.status);
+  // Conferência (scanner) só faz sentido enquanto o recebimento ainda pode
+  // receber apontamentos — nos estados terminais (APROVADO/CANCELADO) ou já
+  // fechado para conferência (CONFERIDO) não há o que localizar/ajustar.
+  const podeConferir = podeGerenciar && ['RASCUNHO', 'EM_CONFERENCIA', 'DIVERGENCIA'].includes(recebimento.status);
+  const labelConferencia = recebimento.status === 'RASCUNHO' ? 'Iniciar conferência' : 'Continuar conferência';
 
   return (
     <div className="page-content">
@@ -193,7 +198,11 @@ export default function RecebimentoDetalhe() {
       </div>
 
       <div className="card card-padding compra-recebimento-acoes-card">
-        <button type="button" className="btn btn-secondary" onClick={() => setScannerAberto(true)}><ScanLine size={16} /> Localizar item por código</button>
+        {podeConferir && (
+          <button type="button" className="btn btn-primary" onClick={() => setScannerAberto(true)}>
+            <ScanLine size={16} /> {labelConferencia} (scanner)
+          </button>
+        )}
 
         {podeAlterarStatus && (
           <form className="compra-recebimento-status-form" onSubmit={handleAlterarStatus}>

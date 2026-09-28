@@ -7,6 +7,8 @@ import { listarProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
+import { formatarData } from '../utils/formatarData';
+import CancelarCompraModal from '../components/compras/CancelarCompraModal';
 import './Compras.css';
 
 const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -102,6 +104,7 @@ export default function Compras() {
   const [createIntent, setCreateIntent] = useState('escolha');
   const [form, setForm] = useState(emptyForm());
   const [scannerParaItem, setScannerParaItem] = useState(null);
+  const [cancelAlvo, setCancelAlvo] = useState(null);
 
   async function load(filtrosParaCarregar = filtrosAplicados) {
     setLoading(true);
@@ -193,15 +196,11 @@ export default function Compras() {
     }
   }
 
-  async function handleCancel(id) {
-    if (!window.confirm('Cancelar esta compra? O estoque será estornado e a conta a pagar vinculada será cancelada, se houver.')) return;
-    try {
-      await cancelarCompra(id);
-      setFeedback('Compra cancelada e estoque estornado.');
-      await load();
-    } catch (err) {
-      setError(err.message);
-    }
+  async function confirmarCancelamento() {
+    await cancelarCompra(cancelAlvo.id);
+    setFeedback('Compra cancelada e estoque estornado.');
+    setCancelAlvo(null);
+    await load();
   }
 
   function aplicarFiltros(e) {
@@ -340,7 +339,7 @@ export default function Compras() {
               {comprasVisiveis.map(c => (
                 <tr key={c.id}>
                   <td>{c.id}</td>
-                  <td>{new Date(c.data_compra + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
+                  <td>{formatarData(c.data_compra)}</td>
                   <td>{c.fornecedor_nome || '—'}</td>
                   <td>{c.nota_fiscal || '—'}</td>
                   <td>{c.forma_pagamento === 'prazo' ? 'A prazo' + (c.dias_prazo ? ' (' + c.dias_prazo + ' dias)' : '') : 'À vista'}</td>
@@ -349,7 +348,7 @@ export default function Compras() {
                   <td>
                     <button className="produto-action-btn" title="Ver detalhes" onClick={() => navigate(`/compras/${c.id}`)}><Eye size={14} /></button>
                     {c.status === 'recebido' && podeGerenciar && (
-                      <button className="produto-action-btn produto-action-btn--danger" title="Cancelar" onClick={() => handleCancel(c.id)}><X size={14} /></button>
+                      <button className="produto-action-btn produto-action-btn--danger" title="Cancelar" onClick={() => setCancelAlvo(c)}><X size={14} /></button>
                     )}
                   </td>
                 </tr>
@@ -394,40 +393,55 @@ export default function Compras() {
 
               {feedback && <div className="compra-alert error">{feedback}</div>}
 
-              <div className="compra-form-grid">
-                <div className="compra-field">
-                  <label>Fornecedor *</label>
-                  <select className="input-field" value={form.fornecedor_id} onChange={e => setForm({ ...form, fornecedor_id: e.target.value })}>
-                    <option value="">Selecione...</option>
-                    {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
-                  </select>
-                </div>
-                <div className="compra-field">
-                  <label>Data da compra *</label>
-                  <input type="date" className="input-field" value={form.data_compra} onChange={e => setForm({ ...form, data_compra: e.target.value })} />
-                </div>
-                <div className="compra-field">
-                  <label>Nota fiscal</label>
-                  <input className="input-field" value={form.nota_fiscal} onChange={e => setForm({ ...form, nota_fiscal: e.target.value })} />
-                </div>
-                <div className="compra-field">
-                  <label>Forma de pagamento *</label>
-                  <select className="input-field" value={form.forma_pagamento} onChange={e => setForm({ ...form, forma_pagamento: e.target.value })}>
-                    <option value="a_vista">À vista</option>
-                    <option value="prazo">A prazo</option>
-                  </select>
-                </div>
-                {form.forma_pagamento === 'prazo' && (
+              <div className="compra-form-section">
+                <h3 className="compra-form-section-title">Fornecedor e data</h3>
+                <div className="compra-form-grid">
                   <div className="compra-field">
-                    <label>Prazo (dias) *</label>
-                    <input type="number" min="1" className="input-field" value={form.dias_prazo} onChange={e => setForm({ ...form, dias_prazo: e.target.value })} />
+                    <label>Fornecedor *</label>
+                    <select className="input-field" value={form.fornecedor_id} onChange={e => setForm({ ...form, fornecedor_id: e.target.value })}>
+                      <option value="">Selecione...</option>
+                      {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
+                    </select>
                   </div>
-                )}
+                  <div className="compra-field">
+                    <label>Data da compra *</label>
+                    <input type="date" className="input-field" value={form.data_compra} onChange={e => setForm({ ...form, data_compra: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="compra-form-section">
+                <h3 className="compra-form-section-title">NF-e</h3>
+                <div className="compra-form-grid">
+                  <div className="compra-field full">
+                    <label>Número da NF-e <span className="compra-field-optional">(opcional)</span></label>
+                    <input className="input-field" placeholder="Deixe em branco se ainda não houver NF-e" value={form.nota_fiscal} onChange={e => setForm({ ...form, nota_fiscal: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="compra-form-section">
+                <h3 className="compra-form-section-title">Forma de pagamento</h3>
+                <div className="compra-form-grid">
+                  <div className="compra-field">
+                    <label>Forma de pagamento *</label>
+                    <select className="input-field" value={form.forma_pagamento} onChange={e => setForm({ ...form, forma_pagamento: e.target.value })}>
+                      <option value="a_vista">À vista</option>
+                      <option value="prazo">A prazo</option>
+                    </select>
+                  </div>
+                  {form.forma_pagamento === 'prazo' && (
+                    <div className="compra-field">
+                      <label>Prazo (dias) *</label>
+                      <input type="number" min="1" className="input-field" value={form.dias_prazo} onChange={e => setForm({ ...form, dias_prazo: e.target.value })} />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="compra-items">
                 <div className="compra-items-header">
-                  <strong>Itens da compra</strong>
+                  <h3 className="compra-form-section-title" style={{ margin: 0 }}>Itens</h3>
                   <button type="button" className="btn btn-secondary" onClick={() => setForm(prev => ({ ...prev, itens: [...prev.itens, emptyItem()] }))}><Plus size={14} /> Item</button>
                 </div>
                 {form.itens.map((item, index) => (
@@ -481,6 +495,14 @@ export default function Compras() {
             updateItem(scannerParaItem, 'produto_id', String(produto.produto_id));
             setScannerParaItem(null);
           }}
+        />
+      )}
+
+      {cancelAlvo && (
+        <CancelarCompraModal
+          compra={cancelAlvo}
+          onClose={() => setCancelAlvo(null)}
+          onConfirm={confirmarCancelamento}
         />
       )}
     </div>

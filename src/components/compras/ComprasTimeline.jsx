@@ -1,4 +1,5 @@
 import { Check, Clock, TriangleAlert, X } from 'lucide-react';
+import { formatarData } from '../../utils/formatarData';
 import './ComprasTimeline.css';
 
 // Cada etapa reflete o que o backend realmente registra para uma COMPRA
@@ -15,6 +16,7 @@ export function montarTimelineCompra(compra) {
 
   const cancelada = compra.status === 'cancelado';
   const aPrazo = compra.forma_pagamento === 'prazo';
+  const quantidadeTotal = (compra.itens || []).reduce((soma, item) => soma + Number(item.quantidade || 0), 0);
 
   const passos = [
     {
@@ -25,13 +27,18 @@ export function montarTimelineCompra(compra) {
     },
     {
       key: 'estoque',
-      titulo: cancelada ? 'Estoque estornado' : 'Estoque atualizado',
+      titulo: cancelada ? 'Estoque estornado' : 'Entrada no estoque registrada',
+      detalhe: quantidadeTotal > 0 ? `${quantidadeTotal} unidade(s)` : null,
       data: compra.atualizado_em || compra.criado_em,
       estado: 'concluido',
     },
     {
       key: 'financeiro',
-      titulo: aPrazo ? 'Conta a pagar gerada' : 'Pago à vista',
+      // Só descreve a forma de pagamento registrada na compra — não afirma
+      // que o valor foi efetivamente recebido/liquidado, já que o backend
+      // não retorna um status de liquidação para compras à vista (ver
+      // docs/ai/COMPRAS-UX-GPT-VALIDATION.md).
+      titulo: aPrazo ? 'Conta a pagar gerada' : 'Forma de pagamento: à vista',
       detalhe: aPrazo
         ? `Prazo de ${compra.dias_prazo || '—'} dia(s) — status detalhado em Contas a Pagar`
         : null,
@@ -58,13 +65,6 @@ const ICON_BY_ESTADO = {
   cancelado: X,
 };
 
-function formatarData(data) {
-  if (!data) return null;
-  const iso = String(data).slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
-  return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR');
-}
-
 export default function ComprasTimeline({ compra }) {
   const passos = montarTimelineCompra(compra);
 
@@ -74,13 +74,12 @@ export default function ComprasTimeline({ compra }) {
     <ol className="compras-timeline">
       {passos.map(passo => {
         const Icon = ICON_BY_ESTADO[passo.estado] || Check;
-        const dataFormatada = formatarData(passo.data);
         return (
           <li key={passo.key} className={`compras-timeline-step compras-timeline-step--${passo.estado}`}>
             <span className="compras-timeline-icon"><Icon size={14} /></span>
             <div className="compras-timeline-content">
               <span className="compras-timeline-title">{passo.titulo}</span>
-              {dataFormatada && <span className="compras-timeline-date">{dataFormatada}</span>}
+              {passo.data !== undefined && <span className="compras-timeline-date">{formatarData(passo.data)}</span>}
               {passo.detalhe && <span className="compras-timeline-detail">{passo.detalhe}</span>}
             </div>
           </li>

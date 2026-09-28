@@ -1,0 +1,23 @@
+.cancelar-compra-modal { width: min(480px, 100%); }
+
+.cancelar-compra-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4) 0;
+}
+.cancelar-compra-resumo > div { display: flex; justify-content: space-between; gap: var(--space-3); }
+.cancelar-compra-resumo dt { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.cancelar-compra-resumo dd { margin: 0; font-weight: 700; color: var(--color-text-primary); }
+
+.cancelar-compra-aviso {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  background: var(--color-danger-light);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.cancelar-compra-aviso svg { flex: none; color: var(--color-danger); margin-top: 2px; }
+.cancelar-compra-aviso p { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }

@@ -6,6 +6,8 @@ import { listarProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS, canAccessRoute } from '../config/access';
 import ComprasTimeline from '../components/compras/ComprasTimeline';
+import CancelarCompraModal from '../components/compras/CancelarCompraModal';
+import { formatarData } from '../utils/formatarData';
 import './CompraDetalhe.css';
 
 const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -22,6 +24,7 @@ export default function CompraDetalhe() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [cancelarAberto, setCancelarAberto] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -42,15 +45,11 @@ export default function CompraDetalhe() {
 
   useEffect(() => { load(); }, [id]);
 
-  async function handleCancel() {
-    if (!window.confirm('Cancelar esta compra? O estoque será estornado e a conta a pagar vinculada será cancelada, se houver.')) return;
-    try {
-      await cancelarCompra(id);
-      setFeedback('Compra cancelada e estoque estornado.');
-      await load();
-    } catch (err) {
-      setError(err.message);
-    }
+  async function confirmarCancelamento() {
+    await cancelarCompra(id);
+    setFeedback('Compra cancelada e estoque estornado.');
+    setCancelarAberto(false);
+    await load();
   }
 
   if (loading) {
@@ -87,7 +86,7 @@ export default function CompraDetalhe() {
         <div className="compra-detalhe-header-actions">
           <span className={compra.status === 'cancelado' ? 'badge badge-danger' : 'badge badge-success'}>{compra.status}</span>
           {compra.status === 'recebido' && podeGerenciar && (
-            <button className="btn btn-secondary" onClick={handleCancel}><X size={16} /> Cancelar compra</button>
+            <button className="btn btn-secondary" onClick={() => setCancelarAberto(true)}><X size={16} /> Cancelar compra</button>
           )}
         </div>
       </div>
@@ -101,8 +100,8 @@ export default function CompraDetalhe() {
         <div className="card card-padding">
           <h3 className="compra-detalhe-section-title">Resumo</h3>
           <dl className="compra-detalhe-summary">
-            <div><dt>Data da compra</dt><dd>{new Date(compra.data_compra + 'T12:00:00').toLocaleDateString('pt-BR')}</dd></div>
-            <div><dt>Nota fiscal</dt><dd>{compra.nota_fiscal || 'não informada'}</dd></div>
+            <div><dt>Data da compra</dt><dd>{formatarData(compra.data_compra)}</dd></div>
+            <div><dt>NF-e</dt><dd>{compra.nota_fiscal || 'Não informada'}</dd></div>
             <div><dt>Forma de pagamento</dt><dd>{compra.forma_pagamento === 'prazo' ? `A prazo (${compra.dias_prazo || '—'} dias)` : 'À vista'}</dd></div>
             <div><dt>Valor total</dt><dd>{money(compra.valor_total)}</dd></div>
           </dl>
@@ -135,6 +134,14 @@ export default function CompraDetalhe() {
         </table>
         <div className="compra-total">Total: {money(compra.valor_total)}</div>
       </div>
+
+      {cancelarAberto && (
+        <CancelarCompraModal
+          compra={compra}
+          onClose={() => setCancelarAberto(false)}
+          onConfirm={confirmarCancelamento}
+        />
+      )}
     </div>
   );
 }

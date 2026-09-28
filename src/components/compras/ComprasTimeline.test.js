@@ -13,13 +13,17 @@ describe('montarTimelineCompra', () => {
       forma_pagamento: 'a_vista',
       data_compra: '2026-09-25',
       criado_em: '2026-09-25T10:00:00.000Z',
+      itens: [{ quantidade: 3 }, { quantidade: 2 }],
     };
 
     const passos = montarTimelineCompra(compra);
 
     expect(passos.map(p => p.key)).toEqual(['registro', 'estoque', 'financeiro']);
-    expect(passos[1].titulo).toBe('Estoque atualizado');
-    expect(passos[2].titulo).toBe('Pago à vista');
+    expect(passos[1].titulo).toBe('Entrada no estoque registrada');
+    expect(passos[1].detalhe).toBe('5 unidade(s)');
+    // Nunca "Pago à vista": isso implicaria liquidação financeira que o
+    // backend não confirma — só a forma de pagamento registrada.
+    expect(passos[2].titulo).toBe('Forma de pagamento: à vista');
     expect(passos[2].estado).toBe('concluido');
   });
 
@@ -51,5 +55,11 @@ describe('montarTimelineCompra', () => {
     expect(passos.map(p => p.key)).toEqual(['registro', 'estoque', 'financeiro', 'cancelamento']);
     expect(passos[1].titulo).toBe('Estoque estornado');
     expect(passos[3].estado).toBe('divergencia');
+  });
+
+  it('não usa quantidade fabricada quando a compra não tem itens carregados', () => {
+    const compra = { status: 'recebido', forma_pagamento: 'a_vista', data_compra: '2026-09-25' };
+    const [, estoque] = montarTimelineCompra(compra);
+    expect(estoque.detalhe).toBeNull();
   });
 });

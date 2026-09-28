@@ -4,6 +4,7 @@ import { ArrowLeft, PackageSearch } from 'lucide-react';
 import { listarRecebimentos } from '../services/recebimentos';
 import { listarFornecedores } from '../services/fornecedores';
 import { badgeClassePorStatus } from './RecebimentoDetalhe';
+import { formatarData } from '../utils/formatarData';
 
 const STATUS_FILTROS = ['RASCUNHO', 'EM_CONFERENCIA', 'CONFERIDO', 'APROVADO', 'DIVERGENCIA', 'CANCELADO'];
 
@@ -87,7 +88,7 @@ export default function Recebimentos() {
                   <td>{r.numero}</td>
                   <td>#{r.pedido_compra_id}</td>
                   <td>{fornecedores.find(f => f.id === r.fornecedor_id)?.nome || `Fornecedor #${r.fornecedor_id}`}</td>
-                  <td>{r.data_recebimento ? new Date(r.data_recebimento.slice(0, 10) + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+                  <td>{formatarData(r.data_recebimento)}</td>
                   <td><span className={badgeClassePorStatus(r.status)}>{r.status}</span></td>
                   <td>
                     <button className="produto-action-btn" title="Ver detalhes" onClick={() => navigate(`/compras/recebimentos/${r.id}`)}>Ver</button>

@@ -307,6 +307,12 @@ export default function Compras() {
             {tab.label}
           </button>
         ))}
+        {/* Recebimentos não é um filtro sobre `compras` — é outro conjunto
+            de dados (pedidos de compra/recebimentos, sem relação com
+            Compra Direta), por isso navega em vez de filtrar a tabela. */}
+        <button type="button" className="compras-tab" onClick={() => navigate('/compras/recebimentos')}>
+          Recebimentos
+        </button>
       </div>
 
       {loading ? (
@@ -368,7 +374,7 @@ export default function Compras() {
                   <strong>Compra direta</strong>
                   <span>Preciso comprar agora. Fornecedor, produtos e custos entram no estoque na hora.</span>
                 </button>
-                <button type="button" className="compra-intent-card compra-intent-card--disabled" disabled title="Ainda não suportado pelo backend">
+                <button type="button" className="compra-intent-card compra-intent-card--disabled" disabled title="O recebimento já é suportado pelo backend, mas ainda não há como criar um pedido de compra pela interface">
                   <ClipboardList size={22} />
                   <strong>Compra planejada</strong>
                   <span className="compra-intent-badge">Em breve</span>
@@ -465,10 +471,14 @@ export default function Compras() {
 
       {scannerParaItem !== null && (
         <BarcodeScannerModal
-          produtos={produtos}
           onClose={() => setScannerParaItem(null)}
           onDetect={produto => {
-            updateItem(scannerParaItem, 'produto_id', String(produto.id));
+            const disponivel = produtos.some(p => p.id === produto.produto_id);
+            if (!disponivel) {
+              setFeedback(`"${produto.nome}" foi encontrado, mas não está disponível no canal desta compra.`);
+              return;
+            }
+            updateItem(scannerParaItem, 'produto_id', String(produto.produto_id));
             setScannerParaItem(null);
           }}
         />

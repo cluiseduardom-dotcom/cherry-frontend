@@ -1,0 +1,32 @@
+.compra-recebimento-aviso {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  background: var(--color-warning-light);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.compra-recebimento-aviso svg { flex: none; color: var(--color-warning); margin-top: 2px; }
+.compra-recebimento-aviso p { margin: 4px 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+.compra-recebimento-item--destacado { background: var(--cherry-50); }
+
+.compra-recebimento-acoes-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+}
+
+.compra-recebimento-status-form { display: flex; gap: var(--space-2); align-items: center; }
+.compra-recebimento-status-form .input-field { min-width: 200px; }
+
+@media (max-width: 700px) {
+  .compra-recebimento-acoes-card { flex-direction: column; align-items: stretch; }
+  .compra-recebimento-status-form { flex-direction: column; align-items: stretch; }
+}

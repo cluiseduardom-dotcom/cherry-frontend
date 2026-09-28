@@ -59,9 +59,15 @@ const NAV_META_BY_PATH = {
 
 // Rotas com segmento dinâmico (ex: /produtos/:id/precos) não têm entrada em
 // NAV_META_BY_PATH nem fazem sentido como item de menu fixo — são acessadas
-// a partir de outra tela (ex: um ícone na lista de Produtos), não pela sidebar.
+// a partir de outra tela (ex: um ícone na lista de Produtos), não pela
+// sidebar. /compras/recebimentos é acessada pela aba "Recebimentos" dentro
+// do Hub de Compras — não deve virar item próprio de menu (o brief pede
+// explicitamente para não criar menus principais separados para
+// Recebimentos).
+const ROTAS_SEM_ITEM_PROPRIO = ['/mais', '/compras/recebimentos'];
+
 const menuItems = Object.keys(ALLOWED_ROLES_BY_PATH)
-  .filter(path => !path.includes(':') && path !== '/mais')
+  .filter(path => !path.includes(':') && !ROTAS_SEM_ITEM_PROPRIO.includes(path))
   .map(path => ({ path, ...NAV_META_BY_PATH[path] }));
 
 export default function Sidebar() {

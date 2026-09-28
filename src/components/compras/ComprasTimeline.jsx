@@ -1,11 +1,15 @@
 import { Check, Clock, TriangleAlert, X } from 'lucide-react';
 import './ComprasTimeline.css';
 
-// Cada etapa reflete o que o backend realmente registra para uma compra —
-// não existe pipeline formal de Necessidade/Cotação/PC/NF-e hoje (uma
-// compra nasce direto como 'recebido' numa única transação, ver
-// COMPRAS-UX-GPT-VALIDATION.md #2). Etapas sem dado real não aparecem aqui:
-// preferimos uma timeline curta e honesta a uma longa e fabricada.
+// Cada etapa reflete o que o backend realmente registra para uma COMPRA
+// DIRETA (tabela `compras`): ela nasce direto como 'recebido' numa única
+// transação, sem OC/Cotação/PC/NF-e como etapas prévias. O módulo de
+// pedidos de compra + recebimentos (pedidos_compra/recebimentos, com
+// aprovação transacional real) existe no backend e é usado pela "Compra
+// planejada" — mas é um fluxo paralelo e sem relação de chave estrangeira
+// com `compras`, então não aparece nesta timeline. Etapas sem dado real
+// não aparecem aqui: preferimos uma timeline curta e honesta a uma longa
+// e fabricada.
 export function montarTimelineCompra(compra) {
   if (!compra) return [];
 

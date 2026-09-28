@@ -56,13 +56,16 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/produtos/:id/precos', 'estoquista')).toBe(false);
   });
 
-  it('allows admin and estoquista on /compras/:id and /compras/:id/recebimento, matching /compras', () => {
+  it('allows admin and estoquista on /compras/:id, /compras/recebimentos and /compras/recebimentos/:id, matching /compras', () => {
     expect(canAccessRoute('/compras/:id', 'admin')).toBe(true);
     expect(canAccessRoute('/compras/:id', 'estoquista')).toBe(true);
     expect(canAccessRoute('/compras/:id', 'vendedor')).toBe(false);
-    expect(canAccessRoute('/compras/:id/recebimento', 'admin')).toBe(true);
-    expect(canAccessRoute('/compras/:id/recebimento', 'estoquista')).toBe(true);
-    expect(canAccessRoute('/compras/:id/recebimento', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/compras/recebimentos', 'admin')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/compras/recebimentos/:id', 'admin')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos/:id', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/compras/recebimentos/:id', 'vendedor')).toBe(false);
   });
 
   it('restricts /configuracoes/categorias to admin only', () => {

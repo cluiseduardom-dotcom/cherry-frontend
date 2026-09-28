@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ScanLine, X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { buscarCompra, cancelarCompra } from '../services/compras';
 import { listarProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
@@ -86,9 +86,6 @@ export default function CompraDetalhe() {
         </div>
         <div className="compra-detalhe-header-actions">
           <span className={compra.status === 'cancelado' ? 'badge badge-danger' : 'badge badge-success'}>{compra.status}</span>
-          {compra.status === 'recebido' && (
-            <button className="btn btn-secondary" onClick={() => navigate(`/compras/${compra.id}/recebimento`)}><ScanLine size={16} /> Conferência de recebimento</button>
-          )}
           {compra.status === 'recebido' && podeGerenciar && (
             <button className="btn btn-secondary" onClick={handleCancel}><X size={16} /> Cancelar compra</button>
           )}

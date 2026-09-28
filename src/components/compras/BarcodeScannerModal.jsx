@@ -1,27 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Keyboard, X } from 'lucide-react';
+import { buscarProdutoPorCodigo } from '../../services/produtosCodigos';
 import './BarcodeScannerModal.css';
 
-// Casa o código lido (câmera, leitor USB/Bluetooth ou digitação manual)
-// contra o SKU dos produtos informados. Não existe campo de código de
-// barras no backend hoje (só `sku`, ver docs/ai/COMPRAS-UX-GPT-VALIDATION.md),
-// então o "scanner" é uma camada de entrada que localiza produto por SKU —
-// não cria nenhuma regra de estoque nova.
-export function encontrarProdutoPorCodigo(produtos, codigo) {
-  const alvo = String(codigo || '').trim().toLowerCase();
-  if (!alvo) return null;
-  const lista = Array.isArray(produtos) ? produtos : [];
-  return lista.find(p => String(p.sku || '').trim().toLowerCase() === alvo) || null;
+export function normalizarCodigoLido(codigo) {
+  return String(codigo || '').trim();
 }
 
-// Buffer de eventos de teclado: leitores USB/Bluetooth digitam o código
-// muito rápido e terminam com Enter. Entrada manual normal (uma tecla por
-// vez, mais devagar) não deve disparar leitura prematura.
+// Leitor USB/Bluetooth: chega como uma sequência de keydown muito rápida
+// seguida de Enter. Entrada manual normal (uma tecla por vez, mais devagar)
+// não deve disparar leitura prematura.
 const INTERVALO_MAX_LEITOR_MS = 50;
 
-export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
+export default function BarcodeScannerModal({ onDetect, onClose }) {
   const [manualCodigo, setManualCodigo] = useState('');
   const [erro, setErro] = useState('');
+  const [buscando, setBuscando] = useState(false);
   const [cameraDisponivel] = useState(() => typeof window !== 'undefined' && 'BarcodeDetector' in window);
   const [cameraAtiva, setCameraAtiva] = useState(false);
   const [cameraErro, setCameraErro] = useState('');
@@ -31,15 +25,24 @@ export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
   const rafRef = useRef(null);
   const bufferRef = useRef('');
   const ultimoEventoRef = useRef(0);
+  const buscandoRef = useRef(false);
 
-  function tentarCodigo(codigo) {
-    const produto = encontrarProdutoPorCodigo(produtos, codigo);
-    if (!produto) {
-      setErro(`Nenhum produto encontrado para o código "${codigo}".`);
-      return;
-    }
+  async function tentarCodigo(codigoBruto) {
+    const codigo = normalizarCodigoLido(codigoBruto);
+    if (!codigo || buscandoRef.current) return;
+
+    buscandoRef.current = true;
+    setBuscando(true);
     setErro('');
-    onDetect(produto);
+    try {
+      const produto = await buscarProdutoPorCodigo(codigo);
+      onDetect(produto);
+    } catch (err) {
+      setErro(err.status === 404 ? `Nenhum produto encontrado para o código "${codigo}".` : err.message);
+    } finally {
+      buscandoRef.current = false;
+      setBuscando(false);
+    }
   }
 
   function handleManualSubmit(e) {
@@ -48,9 +51,6 @@ export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
     setManualCodigo('');
   }
 
-  // Leitor USB/Bluetooth: chega como uma sequência de keydown muito rápida
-  // seguida de Enter. Ignoramos quando o campo manual está focado, para não
-  // duplicar a leitura.
   useEffect(() => {
     function handleKeydown(e) {
       if (document.activeElement?.tagName === 'INPUT') return;
@@ -77,7 +77,7 @@ export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [produtos]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -100,13 +100,15 @@ export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
       const detector = new window.BarcodeDetector();
       const loop = async () => {
         if (!videoRef.current) return;
-        try {
-          const codigos = await detector.detect(videoRef.current);
-          if (codigos.length > 0) {
-            tentarCodigo(codigos[0].rawValue);
+        if (!buscandoRef.current) {
+          try {
+            const codigos = await detector.detect(videoRef.current);
+            if (codigos.length > 0) {
+              await tentarCodigo(codigos[0].rawValue);
+            }
+          } catch {
+            // frame não decodificável — tenta de novo no próximo tick
           }
-        } catch {
-          // frame não decodificável — tenta de novo no próximo tick
         }
         rafRef.current = requestAnimationFrame(loop);
       };
@@ -133,6 +135,7 @@ export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
         </div>
 
         {erro && <div className="compra-alert error">{erro}</div>}
+        {buscando && <p className="text-sm text-secondary">Buscando produto...</p>}
 
         <div className="scanner-section">
           <div className="scanner-section-title"><Camera size={16} /> Câmera</div>
@@ -159,12 +162,12 @@ export default function BarcodeScannerModal({ produtos, onDetect, onClose }) {
             <input
               type="text"
               className="input-field"
-              placeholder="Digite ou bipe o SKU do produto"
+              placeholder="Digite ou bipe o código do produto"
               value={manualCodigo}
               onChange={e => setManualCodigo(e.target.value)}
               autoFocus
             />
-            <button type="submit" className="btn btn-primary">Buscar</button>
+            <button type="submit" className="btn btn-primary" disabled={buscando}>Buscar</button>
           </form>
           <p className="text-sm text-secondary">Um leitor USB/Bluetooth conectado funciona como teclado — basta bipar com este modal aberto.</p>
         </div>

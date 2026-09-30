@@ -20,6 +20,8 @@
   box-shadow: var(--shadow-card-hover);
 }
 
+.cliente-card--inactive { opacity: 0.72; }
+
 .cliente-card-header {
   display: flex;
   align-items: center;
@@ -122,4 +124,88 @@
 
 @media (max-width: 768px) {
   .clientes-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Hub: KPIs clicáveis (mesmo padrão de .compras-kpi-card em Compras.css) --- */
+.clientes-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.clientes-kpi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.clientes-kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
+.clientes-kpi-card--active { border-color: var(--color-primary); background: var(--cherry-50); }
+
+.clientes-kpi-value { font-size: var(--font-size-2xl); font-weight: 800; color: var(--color-text-primary); }
+.clientes-kpi-label { font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: 600; }
+
+/* --- Hub: filtros --- */
+.clientes-filtros {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+/* --- Visão detalhada do cliente (dentro de ClienteHistoricoModal) --- */
+.cliente-detalhe-cadastro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cliente-detalhe-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.cliente-detalhe-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.cliente-detalhe-kpi { text-align: center; background: var(--color-bg); border-radius: var(--radius-md); padding: var(--space-3); }
+.cliente-detalhe-kpi-value { font-size: var(--font-size-md); font-weight: 700; color: var(--color-text-primary); }
+.cliente-detalhe-kpi-label { font-size: 10px; color: var(--color-text-muted); margin-top: 2px; }
+
+.cliente-detalhe-venda-row { cursor: pointer; }
+.cliente-detalhe-venda-row:hover { background: var(--color-bg-hover); }
+
+.cliente-detalhe-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: var(--space-3) var(--space-6) 0;
+}
+
+.cliente-detalhe-voltar:hover { color: var(--color-primary); }
+
+@media (max-width: 640px) {
+  .cliente-detalhe-kpis { grid-template-columns: repeat(2, 1fr); }
 }

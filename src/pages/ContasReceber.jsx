@@ -3,6 +3,8 @@ import { CheckCircle, AlertTriangle, ChevronLeft, ChevronRight, HandCoins, Searc
 import { listarContasReceber, marcarContaReceberComoRecebida } from '../services/contasReceber';
 import { listarVendas } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
+import { formatarMoeda as formatCurrency } from '../utils/mascaras';
+import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
 
 const STATUS_FILTERS = [
@@ -14,16 +16,6 @@ const STATUS_FILTERS = [
 
 const STATUS_LABEL = { pendente: 'Pendente', recebido: 'Recebido', cancelado: 'Cancelado' };
 const STATUS_BADGE_CLASS = { pendente: 'badge-warning', recebido: 'badge-success', cancelado: 'badge-danger' };
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function formatDate(value) {
-  if (!value) return '—';
-  const [ano, mes, dia] = String(value).slice(0, 10).split('-');
-  return `${dia}/${mes}/${ano}`;
-}
 
 // Cards de resumo precisam do total real (todos os status, todas as páginas),
 // não só da página atual — GET /contas-receber pagina em até 100 itens, então

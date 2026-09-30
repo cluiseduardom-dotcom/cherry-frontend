@@ -3,6 +3,7 @@ import { Search, Plus, Phone, Mail, Star, TrendingUp } from 'lucide-react';
 import { listarClientes, listarRankingClientes } from '../services/clientes';
 import ClienteModal from '../components/ClienteModal';
 import ClienteHistoricoModal from '../components/ClienteHistoricoModal';
+import { aplicarMascaraTelefone, formatarMoeda } from '../utils/mascaras';
 import './Clientes.css';
 
 function mesclarComRanking(clientes, ranking) {
@@ -144,7 +145,7 @@ export default function Clientes() {
                     </div>
                     <div className="cliente-contact-item">
                       <Phone size={12} />
-                      <span>{c.telefone || '—'}</span>
+                      <span>{c.telefone ? aplicarMascaraTelefone(c.telefone) : '—'}</span>
                     </div>
                   </div>
 
@@ -156,14 +157,14 @@ export default function Clientes() {
                     <div className="cliente-stat-divider" />
                     <div className="cliente-stat">
                       <div className="cliente-stat-value cliente-stat-value--price">
-                        {c.total_gasto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {formatarMoeda(c.total_gasto)}
                       </div>
                       <div className="cliente-stat-label">Total gasto</div>
                     </div>
                     <div className="cliente-stat-divider" />
                     <div className="cliente-stat">
                       <div className="cliente-stat-value">
-                        {c.ticket_medio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {formatarMoeda(c.ticket_medio)}
                       </div>
                       <div className="cliente-stat-label">Ticket médio</div>
                     </div>

@@ -3,6 +3,7 @@ import { X, Search } from 'lucide-react';
 import { buscarHistoricoCliente } from '../services/clientes';
 import { ApiError } from '../services/api';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
+import { formatarMoeda } from '../utils/mascaras';
 import './ProductModal.css';
 import '../pages/Historico.css';
 
@@ -97,9 +98,9 @@ export default function ClienteHistoricoModal({ open, cliente, onClose }) {
                     <td className="historico-date">{new Date(r.data).toLocaleDateString('pt-BR')}</td>
                     <td>{r.produto}</td>
                     <td>{r.quantidade}</td>
-                    <td>{Number(r.preco_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                    <td>{formatarMoeda(r.preco_unitario)}</td>
                     <td className="historico-total">
-                      {Number(r.total_item).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {formatarMoeda(r.total_item)}
                     </td>
                   </tr>
                 ))}

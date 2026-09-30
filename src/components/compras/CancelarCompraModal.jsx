@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { TriangleAlert, X } from 'lucide-react';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
+import { formatarMoeda as money } from '../../utils/mascaras';
 import './CancelarCompraModal.css';
-
-const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 // Substitui window.confirm por um modal real: mostra # da compra,
 // fornecedor e valor antes de qualquer ação irreversível, e só chama

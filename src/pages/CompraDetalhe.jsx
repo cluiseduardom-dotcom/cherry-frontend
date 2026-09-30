@@ -8,9 +8,8 @@ import { podeExecutarAcao, ACTIONS, canAccessRoute } from '../config/access';
 import ComprasTimeline from '../components/compras/ComprasTimeline';
 import CancelarCompraModal from '../components/compras/CancelarCompraModal';
 import { formatarData } from '../utils/formatarData';
+import { formatarMoeda as money } from '../utils/mascaras';
 import './CompraDetalhe.css';
-
-const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export default function CompraDetalhe() {
   const { id } = useParams();

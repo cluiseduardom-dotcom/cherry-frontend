@@ -9,6 +9,8 @@ import {
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
+import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, cpfCnpjValido, somenteDigitos } from '../utils/mascaras';
+import CampoMascarado from '../components/CampoMascarado';
 import './Fornecedores.css';
 
 const EMPTY_FORM = {
@@ -19,17 +21,6 @@ const EMPTY_FORM = {
   cnpj_cpf: '',
   observacoes: '',
 };
-
-function formatDocument(value) {
-  const digits = String(value ?? '').replace(/\D/g, '');
-  if (digits.length === 11) {
-    return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  }
-  if (digits.length === 14) {
-    return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-  }
-  return value || '—';
-}
 
 function initials(nome) {
   return String(nome || '')
@@ -79,10 +70,15 @@ export default function Fornecedores() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return fornecedores;
+    // Compara também por dígitos: registros salvos antes desta mudança podem
+    // ter cnpj_cpf com pontuação, os novos são normalizados (só dígitos) —
+    // a busca funciona nos dois formatos independente de como o usuário digitar.
+    const termoDigitos = somenteDigitos(term);
     return fornecedores.filter(f =>
       String(f.nome ?? '').toLowerCase().includes(term) ||
       String(f.contato ?? '').toLowerCase().includes(term) ||
-      String(f.cnpj_cpf ?? '').toLowerCase().includes(term)
+      String(f.cnpj_cpf ?? '').toLowerCase().includes(term) ||
+      (termoDigitos && somenteDigitos(f.cnpj_cpf).includes(termoDigitos))
     );
   }, [fornecedores, search]);
 
@@ -121,15 +117,21 @@ export default function Fornecedores() {
 
   async function handleSave(event) {
     event.preventDefault();
+
+    if (form.cnpj_cpf.trim() && !cpfCnpjValido(form.cnpj_cpf)) {
+      setActionError('CNPJ/CPF inválido.');
+      return;
+    }
+
     setSaving(true);
     setActionError('');
     try {
       const payload = {
         nome: form.nome.trim(),
         contato: form.contato.trim() || undefined,
-        telefone: form.telefone.trim() || undefined,
+        telefone: form.telefone.trim() ? somenteDigitos(form.telefone) : undefined,
         email: form.email.trim() || undefined,
-        cnpj_cpf: form.cnpj_cpf.trim() || undefined,
+        cnpj_cpf: form.cnpj_cpf.trim() ? somenteDigitos(form.cnpj_cpf) : undefined,
         observacoes: form.observacoes.trim() || undefined,
       };
 
@@ -237,9 +239,9 @@ export default function Fornecedores() {
                 </div>
 
                 <div className="fornecedor-details">
-                  <div><Building2 size={13} /><span>{formatDocument(fornecedor.cnpj_cpf)}</span></div>
+                  <div><Building2 size={13} /><span>{fornecedor.cnpj_cpf ? aplicarMascaraCpfCnpj(fornecedor.cnpj_cpf) : 'Documento não informado'}</span></div>
                   <div><UserRound size={13} /><span>{fornecedor.contato || 'Contato não informado'}</span></div>
-                  <div><Phone size={13} /><span>{fornecedor.telefone || 'Telefone não informado'}</span></div>
+                  <div><Phone size={13} /><span>{fornecedor.telefone ? aplicarMascaraTelefone(fornecedor.telefone) : 'Telefone não informado'}</span></div>
                   <div><Mail size={13} /><span>{fornecedor.email || 'Email não informado'}</span></div>
                 </div>
 
@@ -292,7 +294,14 @@ export default function Fornecedores() {
                 </div>
                 <div className="input-wrapper">
                   <label className="input-label">CNPJ / CPF</label>
-                  <input className="input-field" value={form.cnpj_cpf} onChange={e => setField('cnpj_cpf', e.target.value)} inputMode="numeric" />
+                  <CampoMascarado
+                    mascara={aplicarMascaraCpfCnpj}
+                    value={form.cnpj_cpf}
+                    onChange={valor => setField('cnpj_cpf', valor)}
+                    inputMode="numeric"
+                    maxLength={18}
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  />
                 </div>
                 <div className="input-wrapper">
                   <label className="input-label">Contato</label>
@@ -300,7 +309,14 @@ export default function Fornecedores() {
                 </div>
                 <div className="input-wrapper">
                   <label className="input-label">Telefone</label>
-                  <input className="input-field" value={form.telefone} onChange={e => setField('telefone', e.target.value)} />
+                  <CampoMascarado
+                    mascara={aplicarMascaraTelefone}
+                    value={form.telefone}
+                    onChange={valor => setField('telefone', valor)}
+                    inputMode="numeric"
+                    maxLength={15}
+                    placeholder="(00) 00000-0000"
+                  />
                 </div>
                 <div className="input-wrapper">
                   <label className="input-label">Email</label>

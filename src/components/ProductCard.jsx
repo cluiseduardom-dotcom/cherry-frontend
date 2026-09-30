@@ -1,4 +1,5 @@
 import { ShoppingCart, AlertTriangle } from 'lucide-react';
+import { formatarMoeda } from '../utils/mascaras';
 import './ProductCard.css';
 
 function ProductImagePlaceholder({ color, name }) {
@@ -44,9 +45,7 @@ export default function ProductCard({ product, onAddToCart }) {
         <h3 className="product-card-name">{product.name}</h3>
         <div className="product-card-footer">
           <span className="product-card-price">
-            {isNoPrice
-              ? '—'
-              : product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            {isNoPrice ? '—' : formatarMoeda(product.price)}
           </span>
           <button
             className="product-card-btn"

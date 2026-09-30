@@ -1,26 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Building2, Edit, Mail, Phone, Plus, Search, UserRound, X } from 'lucide-react';
-import {
-  atualizarFornecedor,
-  criarFornecedor,
-  listarFornecedores,
-  removerFornecedor,
-} from '../services/fornecedores';
-import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
-import { formularioAlterado } from '../utils/formularioAlterado';
-import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
-import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, cpfCnpjValido, somenteDigitos } from '../utils/mascaras';
-import CampoMascarado from '../components/CampoMascarado';
+import { atualizarFornecedor, listarFornecedores, removerFornecedor } from '../services/fornecedores';
+import FornecedorModal from '../components/FornecedorModal';
+import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, somenteDigitos } from '../utils/mascaras';
 import './Fornecedores.css';
-
-const EMPTY_FORM = {
-  nome: '',
-  contato: '',
-  telefone: '',
-  email: '',
-  cnpj_cpf: '',
-  observacoes: '',
-};
 
 function initials(nome) {
   return String(nome || '')
@@ -40,15 +23,6 @@ export default function Fornecedores() {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [initialForm, setInitialForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-
-  // Issue #42: o modal não pode fechar silenciosamente (clique fora, ESC,
-  // X ou Cancelar) quando o formulário tem alterações não salvas.
-  const isDirty = formularioAlterado(form, initialForm);
-  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
-    useConfirmarFechamentoModal({ open: modalOpen, isDirty, onClose: () => setModalOpen(false) });
 
   async function load() {
     setLoading(true);
@@ -84,74 +58,24 @@ export default function Fornecedores() {
 
   function openCreate() {
     setEditing(null);
-    setForm(EMPTY_FORM);
-    setInitialForm(EMPTY_FORM);
     setActionError('');
     setModalOpen(true);
   }
 
   function openEdit(fornecedor) {
-    const dados = {
-      nome: fornecedor.nome ?? '',
-      contato: fornecedor.contato ?? '',
-      telefone: fornecedor.telefone ?? '',
-      email: fornecedor.email ?? '',
-      cnpj_cpf: fornecedor.cnpj_cpf ?? '',
-      observacoes: fornecedor.observacoes ?? '',
-    };
     setEditing(fornecedor);
-    setForm(dados);
-    setInitialForm(dados);
     setActionError('');
     setModalOpen(true);
   }
 
-  function tentarFecharModal() {
-    if (saving) return;
-    solicitarFechamento();
-  }
-
-  function setField(field, value) {
-    setForm(prev => ({ ...prev, [field]: value }));
-  }
-
-  async function handleSave(event) {
-    event.preventDefault();
-
-    if (form.cnpj_cpf.trim() && !cpfCnpjValido(form.cnpj_cpf)) {
-      setActionError('CNPJ/CPF inválido.');
-      return;
-    }
-
-    setSaving(true);
-    setActionError('');
-    try {
-      const payload = {
-        nome: form.nome.trim(),
-        contato: form.contato.trim() || undefined,
-        telefone: form.telefone.trim() ? somenteDigitos(form.telefone) : undefined,
-        email: form.email.trim() || undefined,
-        cnpj_cpf: form.cnpj_cpf.trim() ? somenteDigitos(form.cnpj_cpf) : undefined,
-        observacoes: form.observacoes.trim() || undefined,
-      };
-
-      const saved = editing
-        ? await atualizarFornecedor(editing.id, payload)
-        : await criarFornecedor(payload);
-
-      setFornecedores(prev => {
-        if (!editing) return [saved, ...prev];
-        return prev.map(item => item.id === saved.id ? saved : item);
-      });
-
-      setModalOpen(false);
-      setActionSuccess(editing ? 'Fornecedor atualizado com sucesso.' : 'Fornecedor cadastrado com sucesso.');
-      window.setTimeout(() => setActionSuccess(''), 4000);
-    } catch (err) {
-      setActionError(err.message);
-    } finally {
-      setSaving(false);
-    }
+  function handleSaved(saved) {
+    setFornecedores(prev => {
+      if (!editing) return [saved, ...prev];
+      return prev.map(item => item.id === saved.id ? saved : item);
+    });
+    setModalOpen(false);
+    setActionSuccess(editing ? 'Fornecedor atualizado com sucesso.' : 'Fornecedor cadastrado com sucesso.');
+    window.setTimeout(() => setActionSuccess(''), 4000);
   }
 
   async function handleToggleStatus(fornecedor) {
@@ -275,75 +199,12 @@ export default function Fornecedores() {
         </div>
       )}
 
-      {modalOpen && (
-        <div className="fornecedor-modal-backdrop" role="presentation" onMouseDown={tentarFecharModal}>
-          <div className="fornecedor-modal card" role="dialog" aria-modal="true" aria-labelledby="fornecedor-modal-title" onMouseDown={e => e.stopPropagation()}>
-            <div className="fornecedor-modal-header">
-              <div>
-                <h2 id="fornecedor-modal-title">{editing ? 'Editar fornecedor' : 'Novo fornecedor'}</h2>
-                <p>Os dados serão usados também no fluxo de compras.</p>
-              </div>
-              <button className="fornecedor-modal-close" onClick={tentarFecharModal} aria-label="Fechar"><X size={18} /></button>
-            </div>
-
-            <form onSubmit={handleSave}>
-              <div className="fornecedor-form-grid">
-                <div className="input-wrapper fornecedor-form-full">
-                  <label className="input-label">Nome / Razão social *</label>
-                  <input className="input-field" value={form.nome} onChange={e => setField('nome', e.target.value)} required maxLength={200} />
-                </div>
-                <div className="input-wrapper">
-                  <label className="input-label">CNPJ / CPF</label>
-                  <CampoMascarado
-                    mascara={aplicarMascaraCpfCnpj}
-                    value={form.cnpj_cpf}
-                    onChange={valor => setField('cnpj_cpf', valor)}
-                    inputMode="numeric"
-                    maxLength={18}
-                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  />
-                </div>
-                <div className="input-wrapper">
-                  <label className="input-label">Contato</label>
-                  <input className="input-field" value={form.contato} onChange={e => setField('contato', e.target.value)} />
-                </div>
-                <div className="input-wrapper">
-                  <label className="input-label">Telefone</label>
-                  <CampoMascarado
-                    mascara={aplicarMascaraTelefone}
-                    value={form.telefone}
-                    onChange={valor => setField('telefone', valor)}
-                    inputMode="numeric"
-                    maxLength={15}
-                    placeholder="(00) 00000-0000"
-                  />
-                </div>
-                <div className="input-wrapper">
-                  <label className="input-label">Email</label>
-                  <input className="input-field" type="email" value={form.email} onChange={e => setField('email', e.target.value)} />
-                </div>
-                <div className="input-wrapper fornecedor-form-full">
-                  <label className="input-label">Observações</label>
-                  <textarea className="input-field fornecedor-textarea" value={form.observacoes} onChange={e => setField('observacoes', e.target.value)} rows={3} />
-                </div>
-              </div>
-
-              {actionError && <div className="fornecedor-feedback fornecedor-feedback--error">{actionError}</div>}
-
-              <div className="fornecedor-modal-actions">
-                <button type="button" className="btn btn-ghost" onClick={tentarFecharModal} disabled={saving}>Cancelar</button>
-                <button type="submit" className="btn btn-primary" disabled={saving || !form.nome.trim()}>
-                  {saving ? 'Salvando...' : editing ? 'Salvar alterações' : 'Cadastrar fornecedor'}
-                </button>
-              </div>
-            </form>
-
-            {confirmando && (
-              <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
-            )}
-          </div>
-        </div>
-      )}
+      <FornecedorModal
+        open={modalOpen}
+        fornecedor={editing}
+        onClose={() => setModalOpen(false)}
+        onSaved={handleSaved}
+      />
     </div>
   );
 }

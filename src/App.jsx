@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { homeRouteForRole, ALLOWED_ROLES_BY_PATH } from './config/access';
@@ -67,37 +67,36 @@ function Fallback() {
   return <Navigate to={isAuthenticated ? homeRouteForRole(user.role) : '/login'} replace />;
 }
 
-function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        {registeredPaths.map(path => {
-          const Component = ROUTE_COMPONENTS[path];
-          return (
-            <Route
-              key={path}
-              path={path}
-              element={
-                <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]}>
-                  <Component />
-                </ProtectedRoute>
-              }
-            />
-          );
-        })}
-      </Route>
-      <Route path="*" element={<Fallback />} />
-    </Routes>
-  );
-}
+// VERTUMNO-UX-FOUNDATION-P0 (UX-02/UX-03): migrado de <BrowserRouter>
+// declarativo para createBrowserRouter/RouterProvider — mesmas rotas,
+// mesmo RBAC, mesmo comportamento, só troca a API de configuração. É a
+// única forma de usar useBlocker (bloqueio de navegação nativo do React
+// Router): ele exige um data router, não funciona com <BrowserRouter>.
+// Sem isso não dá pra impedir que o usuário saia do PDV/Configurador de
+// SKU clicando em outro item do menu com dados não salvos.
+const router = createBrowserRouter([
+  { path: '/login', element: <Login /> },
+  {
+    element: <ProtectedRoute><Layout /></ProtectedRoute>,
+    children: registeredPaths.map(path => {
+      const Component = ROUTE_COMPONENTS[path];
+      return {
+        path,
+        element: (
+          <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]}>
+            <Component />
+          </ProtectedRoute>
+        ),
+      };
+    }),
+  },
+  { path: '*', element: <Fallback /> },
+]);
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 }

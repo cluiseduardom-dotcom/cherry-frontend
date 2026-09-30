@@ -11,7 +11,7 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useBlocker, useNavigate } from 'react-router-dom';
 import {
   buscarConfiguracaoSku,
   listarPadroesSku,
@@ -19,6 +19,8 @@ import {
 } from '../services/configuracoesSku';
 import { listarNiveisCategoria } from '../services/niveisCategoria';
 import { listarCategorias } from '../services/categorias';
+import { formularioAlterado } from '../utils/formularioAlterado';
+import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import './ConfiguracaoSku.css';
 
 export const SEPARADORES_PERMITIDOS = ['-', '_', '/', 'x', '*', '+'];
@@ -234,6 +236,12 @@ export default function ConfiguracaoSku() {
   const [selectedId, setSelectedId] = useState(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [config, setConfig] = useState(normalizarPadrao(null));
+  const [initialConfig, setInitialConfig] = useState(normalizarPadrao(null));
+  // UX-03 (VERTUMNO-UX-FOUNDATION-P0): guarda a troca de padrão pendente
+  // quando o padrão atual tem alterações não salvas — mesma UX de
+  // descarte dos modais (Issue #42), só que aqui a "ação a executar" é
+  // trocar/criar um padrão em vez de fechar um modal.
+  const [acaoPendente, setAcaoPendente] = useState(null);
 
   const [niveis, setNiveis] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -241,6 +249,37 @@ export default function ConfiguracaoSku() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Motor de SKU (normalizarPadrao, montarPreviaSku, validarPadrao etc.)
+  // não é tocado por nada abaixo — isDirty só compara o snapshot do
+  // padrão selecionado com o estado atual do formulário.
+  const isDirty = formularioAlterado(config, initialConfig);
+
+  // useBlocker exige um data router (createBrowserRouter/RouterProvider).
+  // Cobre a saída via Sidebar/BottomNav E o botão "‹ Configurações", que
+  // também navega pelo router — não precisa de guarda própria.
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    function handleBeforeUnload(e) {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = '';
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  function tentarAcao(executar) {
+    if (isDirty) {
+      setAcaoPendente(() => executar);
+    } else {
+      executar();
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -272,6 +311,7 @@ export default function ConfiguracaoSku() {
         const padraoPrincipal = listaNormalizada.find(p => p.padrao) || listaNormalizada[0];
         setSelectedId(padraoPrincipal.id);
         setConfig({ ...padraoPrincipal });
+        setInitialConfig({ ...padraoPrincipal });
       } catch (err) {
         if (!cancelled) setError(err.message || 'Erro ao carregar configurações de SKU');
       } finally {
@@ -297,40 +337,47 @@ export default function ConfiguracaoSku() {
   const isUnicoFallback = Boolean(config.padrao) && !outroFallbackExiste;
 
   function handleSelectPadrao(padrao) {
-    setIsCreatingNew(false);
-    setSelectedId(padrao.id);
-    setConfig({ ...padrao });
-    setError('');
-    setSuccess('');
+    tentarAcao(() => {
+      setIsCreatingNew(false);
+      setSelectedId(padrao.id);
+      setConfig({ ...padrao });
+      setInitialConfig({ ...padrao });
+      setError('');
+      setSuccess('');
+    });
   }
 
   function handleStartNewPadrao() {
-    setIsCreatingNew(true);
-    setSelectedId(null);
+    tentarAcao(() => {
+      setIsCreatingNew(true);
+      setSelectedId(null);
 
-    // Sugerir segmentos iniciais baseados nos níveis cadastrados
-    const segmentosIniciais = niveis.slice(0, 3).map((nivel, idx) => ({
-      nivel: Number(nivel.nivel),
-      ordem: idx + 1,
-      nome: nivel.nome || `Nível ${nivel.nivel}`,
-      obrigatorio: true,
-      participa_sku: true,
-    }));
+      // Sugerir segmentos iniciais baseados nos níveis cadastrados
+      const segmentosIniciais = niveis.slice(0, 3).map((nivel, idx) => ({
+        nivel: Number(nivel.nivel),
+        ordem: idx + 1,
+        nome: nivel.nome || `Nível ${nivel.nivel}`,
+        obrigatorio: true,
+        participa_sku: true,
+      }));
 
-    setConfig({
-      nome: '',
-      padrao: padroes.length === 0,
-      ativo: true,
-      tipo_sku: 'numerico',
-      separador: '-',
-      prefixo: '',
-      sufixo: '',
-      tamanho_sequencia: 3,
-      inicio_sequencia: 1,
-      segmentos: segmentosIniciais,
+      const novoConfig = {
+        nome: '',
+        padrao: padroes.length === 0,
+        ativo: true,
+        tipo_sku: 'numerico',
+        separador: '-',
+        prefixo: '',
+        sufixo: '',
+        tamanho_sequencia: 3,
+        inicio_sequencia: 1,
+        segmentos: segmentosIniciais,
+      };
+      setConfig(novoConfig);
+      setInitialConfig(novoConfig);
+      setError('');
+      setSuccess('');
     });
-    setError('');
-    setSuccess('');
   }
 
   function setField(field, value) {
@@ -453,6 +500,7 @@ export default function ConfiguracaoSku() {
       if (salvoMatch) {
         setSelectedId(salvoMatch.id);
         setConfig({ ...salvoMatch });
+        setInitialConfig({ ...salvoMatch });
         setIsCreatingNew(false);
       }
 
@@ -476,6 +524,27 @@ export default function ConfiguracaoSku() {
 
   return (
     <div className="page-content configuracao-sku-container">
+      {(acaoPendente || blocker.state === 'blocked') && (
+        <ConfirmarDescarteDialog
+          onContinuar={() => {
+            if (acaoPendente) {
+              setAcaoPendente(null);
+            } else {
+              blocker.reset();
+            }
+          }}
+          onDescartar={() => {
+            if (acaoPendente) {
+              const executar = acaoPendente;
+              setAcaoPendente(null);
+              executar();
+            } else {
+              blocker.proceed();
+            }
+          }}
+        />
+      )}
+
       {/* Top Header */}
       <div className="page-header configuracao-sku-header">
         <div>

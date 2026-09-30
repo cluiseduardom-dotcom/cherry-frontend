@@ -28,7 +28,7 @@ export default function ConfirmarDescarteDialog({ onContinuar, onDescartar }) {
         <div className="confirmar-descarte-icon"><TriangleAlert size={20} /></div>
         <h3 id="confirmar-descarte-titulo">Alterações não salvas</h3>
         <p id="confirmar-descarte-texto">
-          Há dados preenchidos neste formulário que ainda não foram salvos. Se você sair agora, essas informações serão perdidas.
+          Você possui informações preenchidas que ainda não foram salvas.
         </p>
         <div className="confirmar-descarte-actions">
           <button type="button" className="btn btn-danger" onClick={onDescartar}>

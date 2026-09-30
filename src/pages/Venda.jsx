@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 import {
   Search, SlidersHorizontal, Barcode, ShoppingCart,
   Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp
@@ -9,6 +10,7 @@ import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
+import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import './Venda.css';
 
 const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -161,6 +163,35 @@ export default function Venda() {
     }).catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  // UX-02 (VERTUMNO-UX-FOUNDATION-P0): "venda em andamento" cobre tudo que o
+  // usuário perderia silenciosamente se saísse do PDV agora — itens no
+  // carrinho, um kit sendo montado, desconto/juros já digitados ou
+  // pagamentos já lançados. Uma venda vazia (estado inicial ou logo após
+  // finalizar, já que limparVenda() zera tudo isso) segue liberando saída
+  // normal, sem bloqueio.
+  const vendaEmAndamento = cart.length > 0 || kitDraft.length > 0 || pagamentos.length > 0 ||
+    Number(desconto || 0) > 0 || Number(juros || 0) > 0;
+
+  // useBlocker exige um data router (createBrowserRouter/RouterProvider) —
+  // é o único jeito de impedir, de forma nativa, a saída do PDV pelo menu
+  // lateral/bottom nav com dados não salvos. Só bloqueia troca de rota
+  // (navegação dentro do app); fechar a aba/atualizar a página é coberto
+  // pelo beforeunload abaixo.
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      vendaEmAndamento && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    function handleBeforeUnload(e) {
+      if (!vendaEmAndamento) return;
+      e.preventDefault();
+      e.returnValue = '';
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [vendaEmAndamento]);
 
   const categories = useMemo(
     () => ['Todos', ...new Set(produtos.map(p => p.category).filter(Boolean))],
@@ -366,6 +397,13 @@ export default function Venda() {
 
   return (
     <div className="page-content venda-page">
+      {blocker.state === 'blocked' && (
+        <ConfirmarDescarteDialog
+          onContinuar={() => blocker.reset()}
+          onDescartar={() => blocker.proceed()}
+        />
+      )}
+
       {/* Success overlay */}
       {saleSuccess && (
         <div className="sale-success-overlay">

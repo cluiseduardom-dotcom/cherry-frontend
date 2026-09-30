@@ -105,7 +105,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
   }
 
   return (
-    <div className="modal-overlay" onClick={tentarFechar}>
+    <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Registrar Movimentação de Estoque</h2>

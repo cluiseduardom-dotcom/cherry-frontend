@@ -133,8 +133,12 @@ export default function Sidebar() {
             </span>
             <span className="sidebar-nav-label-text">{label}</span>
             {path === '/estoque' && estoqueAlertas.length > 0 && (
-              <span className="sidebar-nav-badge" aria-label={`${estoqueAlertas.length} alertas de estoque`}>
-                {estoqueAlertas.length > 99 ? '99+' : estoqueAlertas.length}
+              <span
+                className="sidebar-nav-badge"
+                aria-label={`${estoqueAlertas.length} ${estoqueAlertas.length === 1 ? 'alerta' : 'alertas'} de estoque`}
+                title={`${estoqueAlertas.length} ${estoqueAlertas.length === 1 ? 'alerta' : 'alertas'} de estoque`}
+              >
+                {estoqueAlertas.length > 99 ? '99+' : estoqueAlertas.length} {estoqueAlertas.length === 1 ? 'alerta' : 'alertas'}
               </span>
             )}
           </NavLink>

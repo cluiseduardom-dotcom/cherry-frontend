@@ -134,8 +134,11 @@
   color: white;
   font-size: 10px;
   font-weight: 700;
-  width: 18px;
+  line-height: 1;
+  white-space: nowrap;
+  min-width: 18px;
   height: 18px;
+  padding: 0 7px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;

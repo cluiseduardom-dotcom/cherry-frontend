@@ -81,6 +81,22 @@
   gap: var(--space-4);
 }
 
+/* Agrupamento de campos com título (ex.: "Endereço" em ClienteModal) —
+   genérico para qualquer modal que use este CSS, evita duplicar o mesmo
+   padrão por componente. */
+.modal-form-section {
+  margin-bottom: var(--space-5);
+}
+
+.modal-form-section-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+}
+
 .modal-form-span-2 {
   grid-column: span 2;
 }

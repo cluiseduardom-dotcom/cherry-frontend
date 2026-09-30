@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, AlertTriangle, Package, Filter } from 'lucide-react';
 import { listarProdutos } from '../services/produtos';
 import { apiFetch } from '../services/api';
@@ -11,6 +12,16 @@ const ROW_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A
 
 function colorForProduto(id) {
   return ROW_COLORS[id % ROW_COLORS.length];
+}
+
+const FILTROS_VALIDOS = ['todos', 'baixo', 'esgotado'];
+
+// UX-04 (Issue #48): normaliza o valor cru do query param ?filtro= — usado
+// tanto para o deeplink da Sidebar quanto para a troca manual dos pills.
+// Qualquer valor ausente/desconhecido cai em "todos" (comportamento atual
+// equivalente), sem quebrar a tela nem exigir um filtro "inválido" visível.
+export function normalizarFiltro(valor) {
+  return FILTROS_VALIDOS.includes(valor) ? valor : 'todos';
 }
 
 function StockBar({ value, max = 20 }) {
@@ -36,8 +47,29 @@ export default function Estoque() {
   const [error, setError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('todos');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = normalizarFiltro(searchParams.get('filtro'));
   const [modalOpen, setModalOpen] = useState(false);
+
+  // UX-04 (Issue #48): a URL é a fonte única de verdade do filtro — tanto o
+  // deeplink da Sidebar (/estoque?filtro=baixo) quanto o clique manual nos
+  // pills abaixo passam por aqui, então os dois casos sempre convergem para
+  // o mesmo estado e o botão voltar/avançar do navegador também funciona.
+  function selecionarFiltro(key) {
+    if (key === 'todos') {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        next.delete('filtro');
+        return next;
+      });
+    } else {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        next.set('filtro', key);
+        return next;
+      });
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -192,7 +224,7 @@ export default function Estoque() {
             <button
               key={f.key}
               className={`category-pill ${filter === f.key ? 'category-pill--active' : ''}`}
-              onClick={() => setFilter(f.key)}
+              onClick={() => selecionarFiltro(f.key)}
             >
               {f.label}
             </button>

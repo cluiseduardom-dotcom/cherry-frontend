@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, Edit, CheckCircle, Ban, AlertTriangle, ChevronLeft, ChevronRight, Wallet, Search } from 'lucide-react';
 import { listarContasPagar, marcarContaPagarComoPaga, cancelarContaPagar } from '../services/contasPagar';
 import ContaPagarModal from '../components/ContaPagarModal';
+import { formatarMoeda as formatCurrency } from '../utils/mascaras';
+import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
 
 const STATUS_FILTERS = [
@@ -13,16 +15,6 @@ const STATUS_FILTERS = [
 
 const STATUS_LABEL = { pendente: 'Pendente', pago: 'Pago', cancelado: 'Cancelado' };
 const STATUS_BADGE_CLASS = { pendente: 'badge-warning', pago: 'badge-success', cancelado: 'badge-danger' };
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function formatDate(value) {
-  if (!value) return '—';
-  const [ano, mes, dia] = String(value).slice(0, 10).split('-');
-  return `${dia}/${mes}/${ano}`;
-}
 
 // Cards de resumo precisam do total real (todos os status, todas as páginas),
 // não só da página atual — GET /contas-pagar pagina em até 100 itens, então

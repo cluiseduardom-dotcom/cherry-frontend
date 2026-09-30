@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
 import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
+import { formatarMoeda } from '../utils/mascaras';
 import './Produtos.css';
 
 const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -191,7 +192,7 @@ export default function Produtos() {
                   <h3 className="produto-name">{p.nome}</h3>
                   <div className="produto-card-footer">
                     <span className="produto-price">
-                      {Number(p.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {formatarMoeda(p.preco_venda)}
                     </span>
                     {(podeGerenciar || podeGerenciarPrecos || podeCategorizar) && (
                       <div className="produto-actions">

@@ -8,6 +8,7 @@ import { listarProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { ApiError } from '../services/api';
+import { formatarMoeda } from '../utils/mascaras';
 import './Venda.css';
 
 const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -333,7 +334,7 @@ export default function Venda() {
     try {
       if (total <= 0) throw new Error('O total da venda deve ser maior que zero.');
       if (Math.abs(totalPagamentos - total) > 0.01) {
-        throw new Error(`Falta distribuir ${Math.abs(saldoPagamento).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} entre os pagamentos.`);
+        throw new Error(`Falta distribuir ${formatarMoeda(Math.abs(saldoPagamento))} entre os pagamentos.`);
       }
 
       if (!saleIdempotencyKeyRef.current) {
@@ -373,7 +374,7 @@ export default function Venda() {
               <CheckCircle size={48} strokeWidth={1.5} />
             </div>
             <h2>Venda Finalizada!</h2>
-            <p>Total: {saleTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+            <p>Total: {formatarMoeda(saleTotal)}</p>
           </div>
         </div>
       )}
@@ -536,7 +537,7 @@ export default function Venda() {
                         </button>
                       </div>
                       <div className="cart-item-price">
-                        {(item.price * item.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {formatarMoeda(item.price * item.qty)}
                       </div>
                       <button
                         className="cart-item-remove"
@@ -555,7 +556,7 @@ export default function Venda() {
                 <div className="cart-total-row">
                   <span className="cart-total-label">Total do kit ({kitDraftQtyCount} itens)</span>
                   <span className="cart-total-value">
-                    {kitDraftTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {formatarMoeda(kitDraftTotal)}
                   </span>
                 </div>
                 <div className="kit-draft-actions">
@@ -602,7 +603,7 @@ export default function Venda() {
                           </button>
                         </div>
                         <div className="cart-item-price">
-                          {rowTotal(row).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          {formatarMoeda(rowTotal(row))}
                         </div>
                         <button
                           className="cart-item-remove"
@@ -619,7 +620,7 @@ export default function Venda() {
                               <span className="cart-kit-component-name">{c.name}</span>
                               <span className="cart-kit-component-qty">x{c.qty}</span>
                               <span className="cart-kit-component-price">
-                                {(c.price * c.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                {formatarMoeda(c.price * c.qty)}
                               </span>
                             </div>
                           ))}
@@ -659,7 +660,7 @@ export default function Venda() {
                         </button>
                       </div>
                       <div className="cart-item-price">
-                        {(row.price * row.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {formatarMoeda(row.price * row.qty)}
                       </div>
                       <button
                         className="cart-item-remove"
@@ -749,7 +750,7 @@ export default function Venda() {
                       {pagamentos.map((p, index) => (
                         <div className="venda-payment-item" key={index}>
                           <span>{p.forma_pagamento}</span>
-                          <span>{Number(p.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                          <span>{formatarMoeda(p.valor)}</span>
                           {p.numero_parcelas > 1 && <small>{p.numero_parcelas}x</small>}
                           <button type="button" className="btn btn-ghost btn-sm" onClick={() => removerPagamento(index)}>Remover</button>
                         </div>
@@ -758,16 +759,16 @@ export default function Venda() {
                   )}
 
                   <div className="venda-payment-balance">
-                    <span>Total: <strong>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></span>
-                    <span>Pago: <strong>{totalPagamentos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></span>
-                    <span>Saldo: <strong>{saldoPagamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></span>
+                    <span>Total: <strong>{formatarMoeda(total)}</strong></span>
+                    <span>Pago: <strong>{formatarMoeda(totalPagamentos)}</strong></span>
+                    <span>Saldo: <strong>{formatarMoeda(saldoPagamento)}</strong></span>
                   </div>
                 </div>
 
                 <div className="cart-total-row">
                   <span className="cart-total-label">Total</span>
                   <span className="cart-total-value">
-                    {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {formatarMoeda(total)}
                   </span>
                 </div>
 

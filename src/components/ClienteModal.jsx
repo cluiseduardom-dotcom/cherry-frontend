@@ -4,6 +4,8 @@ import { criarCliente } from '../services/clientes';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
+import { aplicarMascaraTelefone, somenteDigitos } from '../utils/mascaras';
+import CampoMascarado from './CampoMascarado';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -26,7 +28,7 @@ function validar(form) {
 function montarPayload(form) {
   return {
     nome: form.nome.trim(),
-    telefone: form.telefone.trim() || undefined,
+    telefone: form.telefone.trim() ? somenteDigitos(form.telefone) : undefined,
     email: form.email.trim() || undefined,
   };
 }
@@ -110,12 +112,14 @@ export default function ClienteModal({ open, onClose, onSaved }) {
 
               <div className="input-wrapper">
                 <label className="input-label" htmlFor="cm-telefone">Telefone</label>
-                <input
+                <CampoMascarado
                   id="cm-telefone"
-                  type="text"
-                  className="input-field"
+                  mascara={aplicarMascaraTelefone}
                   value={form.telefone}
-                  onChange={e => updateField('telefone', e.target.value)}
+                  onChange={valor => updateField('telefone', valor)}
+                  inputMode="numeric"
+                  maxLength={15}
+                  placeholder="(00) 00000-0000"
                 />
               </div>
 

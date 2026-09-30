@@ -12,9 +12,9 @@ import CancelarCompraModal from '../components/compras/CancelarCompraModal';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
+import { formatarMoeda as money } from '../utils/mascaras';
 import './Compras.css';
 
-const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const today = () => new Date().toLocaleDateString('en-CA');
 
 const SUBVIEWS = [

@@ -3,21 +3,13 @@ import { Plus, Edit, Trash2, Power, Receipt } from 'lucide-react';
 import { listarDespesasFixas, removerDespesaFixa, alternarAtivoDespesaFixa } from '../services/despesasFixas';
 import { obterConfiguracaoFinanceira, atualizarConfiguracaoFinanceira } from '../services/configuracoesFinanceiras';
 import DespesaFixaModal from '../components/DespesaFixaModal';
+import { formatarMoeda as formatCurrency } from '../utils/mascaras';
+import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
 import './DespesasFixas.css';
 
 const CATEGORIA_LABEL = { estrutural: 'Estrutural', pessoal: 'Pessoal', administrativa: 'Administrativa' };
 const CATEGORIA_ORDEM = ['estrutural', 'pessoal', 'administrativa'];
-
-function formatCurrency(value) {
-  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function formatDate(iso) {
-  if (!iso) return '';
-  const [ano, mes, dia] = iso.split('-');
-  return `${dia}/${mes}/${ano}`;
-}
 
 function formatVigencia(despesa) {
   return `${formatDate(despesa.vigencia_inicio)} – ${despesa.vigencia_fim ? formatDate(despesa.vigencia_fim) : 'em vigor'}`;

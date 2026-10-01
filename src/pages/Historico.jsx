@@ -4,6 +4,8 @@ import { listarVendas, cancelarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import './Historico.css';
 
 const STATUS_LABEL = {
@@ -58,6 +60,8 @@ export default function Historico() {
   const [canalFiltro, setCanalFiltro] = useState('todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+
   useEffect(() => {
     let cancelled = false;
 
@@ -106,9 +110,17 @@ export default function Historico() {
   const totalRevenue = concluidas.reduce((sum, v) => sum + Number(v.total), 0);
   const ticketMedio = concluidas.length > 0 ? totalRevenue / concluidas.length : 0;
 
-  async function handleCancelar(venda) {
-    if (!window.confirm(`Cancelar a venda #${venda.id}? O estoque dos itens será estornado automaticamente.`)) return;
+  function handleCancelar(venda) {
+    pedirConfirmacao({
+      title: 'Cancelar venda',
+      message: `Cancelar a venda #${venda.id}? O estoque dos itens será estornado automaticamente.`,
+      confirmLabel: 'Cancelar venda',
+      tone: 'danger',
+      execute: () => executarCancelar(venda),
+    });
+  }
 
+  async function executarCancelar(venda) {
     setActionError('');
     setCancelandoId(venda.id);
     try {
@@ -314,6 +326,16 @@ export default function Historico() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
+      />
     </div>
   );
 }

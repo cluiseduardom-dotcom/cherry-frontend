@@ -6,6 +6,8 @@ import { listarCategorias, excluirCategoria } from '../services/categorias';
 import { listarPadroesSku } from '../services/configuracoesSku';
 import NivelCategoriaModal from '../components/NivelCategoriaModal';
 import CategoriaProdutoModal from '../components/CategoriaProdutoModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import './Contas.css';
 import './CategoriasProduto.css';
 
@@ -33,6 +35,8 @@ export default function CategoriasProduto() {
   const [categoriaModalOpen, setCategoriaModalOpen] = useState(false);
   const [categoriaModalMode, setCategoriaModalMode] = useState('create');
   const [editingCategoria, setEditingCategoria] = useState(null);
+
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   useEffect(() => {
     load();
@@ -85,9 +89,17 @@ export default function CategoriasProduto() {
     setTimeout(() => setActionSuccess(''), 4000);
   }
 
-  async function handleExcluirNivel(nivel) {
-    if (!window.confirm(`Excluir o rótulo do nível ${nivel.nivel} (${nivel.nome})? Categorias existentes nesse nível não são afetadas.`)) return;
+  function handleExcluirNivel(nivel) {
+    pedirConfirmacao({
+      title: 'Excluir rótulo de nível',
+      message: `Excluir o rótulo do nível ${nivel.nivel} (${nivel.nome})? Categorias existentes nesse nível não são afetadas.`,
+      confirmLabel: 'Excluir',
+      tone: 'danger',
+      execute: () => executarExcluirNivel(nivel),
+    });
+  }
 
+  async function executarExcluirNivel(nivel) {
     setActionError('');
     setWorkingId(`nivel-${nivel.id}`);
     try {
@@ -124,9 +136,17 @@ export default function CategoriasProduto() {
     setTimeout(() => setActionSuccess(''), 4000);
   }
 
-  async function handleExcluirCategoria(categoria) {
-    if (!window.confirm(`Excluir a categoria "${categoria.nome}"? Produtos e SKUs já existentes não são afetados.`)) return;
+  function handleExcluirCategoria(categoria) {
+    pedirConfirmacao({
+      title: 'Excluir categoria',
+      message: `Excluir a categoria "${categoria.nome}"? Produtos e SKUs já existentes não são afetados.`,
+      confirmLabel: 'Excluir',
+      tone: 'danger',
+      execute: () => executarExcluirCategoria(categoria),
+    });
+  }
 
+  async function executarExcluirCategoria(categoria) {
     setActionError('');
     setWorkingId(`categoria-${categoria.id}`);
     try {
@@ -337,6 +357,16 @@ export default function CategoriasProduto() {
         padroesSku={padroesSku}
         onClose={() => setCategoriaModalOpen(false)}
         onSaved={handleCategoriaSaved}
+      />
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
       />
     </div>
   );

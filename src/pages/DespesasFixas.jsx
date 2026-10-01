@@ -3,6 +3,8 @@ import { Plus, Edit, Trash2, Power, Receipt } from 'lucide-react';
 import { listarDespesasFixas, removerDespesaFixa, alternarAtivoDespesaFixa } from '../services/despesasFixas';
 import { obterConfiguracaoFinanceira, atualizarConfiguracaoFinanceira } from '../services/configuracoesFinanceiras';
 import DespesaFixaModal from '../components/DespesaFixaModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
@@ -32,6 +34,8 @@ export default function DespesasFixas() {
   const [aliquotaSaving, setAliquotaSaving] = useState(false);
   const [aliquotaError, setAliquotaError] = useState('');
   const [aliquotaSuccess, setAliquotaSuccess] = useState('');
+
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   useEffect(() => {
     loadDespesas();
@@ -99,9 +103,17 @@ export default function DespesasFixas() {
     }
   }
 
-  async function handleRemover(despesa) {
-    if (!window.confirm(`Excluir a despesa "${despesa.descricao}"?`)) return;
+  function handleRemover(despesa) {
+    pedirConfirmacao({
+      title: 'Excluir despesa fixa',
+      message: `Excluir a despesa "${despesa.descricao}"?`,
+      confirmLabel: 'Excluir',
+      tone: 'danger',
+      execute: () => executarRemover(despesa),
+    });
+  }
 
+  async function executarRemover(despesa) {
     setActionError('');
     setWorkingId(despesa.id);
     try {
@@ -293,6 +305,16 @@ export default function DespesasFixas() {
         despesa={editingDespesa}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}
+      />
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
       />
     </div>
   );

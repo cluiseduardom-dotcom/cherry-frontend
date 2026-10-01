@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, Edit, CheckCircle, Ban, AlertTriangle, ChevronLeft, ChevronRight, Wallet, Search } from 'lucide-react';
 import { listarContasPagar, marcarContaPagarComoPaga, cancelarContaPagar } from '../services/contasPagar';
 import ContaPagarModal from '../components/ContaPagarModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
@@ -53,6 +55,8 @@ export default function ContasPagar() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [editingConta, setEditingConta] = useState(null);
+
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   useEffect(() => {
     let cancelled = false;
@@ -159,9 +163,17 @@ export default function ContasPagar() {
     setContas(prev => prev.map(c => (c.id === contaAtualizada.id ? contaAtualizada : c)));
   }
 
-  async function handlePagar(conta) {
-    if (!window.confirm(`Marcar a conta "${conta.descricao}" como paga?`)) return;
+  function handlePagar(conta) {
+    pedirConfirmacao({
+      title: 'Marcar conta como paga',
+      message: `Marcar a conta "${conta.descricao}" como paga?`,
+      confirmLabel: 'Marcar como paga',
+      tone: 'warning',
+      execute: () => executarPagar(conta),
+    });
+  }
 
+  async function executarPagar(conta) {
     setActionError('');
     setWorkingId(conta.id);
     try {
@@ -177,9 +189,17 @@ export default function ContasPagar() {
     }
   }
 
-  async function handleCancelar(conta) {
-    if (!window.confirm(`Cancelar a conta "${conta.descricao}"?`)) return;
+  function handleCancelar(conta) {
+    pedirConfirmacao({
+      title: 'Cancelar conta a pagar',
+      message: `Cancelar a conta "${conta.descricao}"?`,
+      confirmLabel: 'Cancelar conta',
+      tone: 'danger',
+      execute: () => executarCancelar(conta),
+    });
+  }
 
+  async function executarCancelar(conta) {
     setActionError('');
     setWorkingId(conta.id);
     try {
@@ -388,6 +408,16 @@ export default function ContasPagar() {
         conta={editingConta}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}
+      />
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
       />
     </div>
   );

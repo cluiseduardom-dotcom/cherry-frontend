@@ -21,6 +21,8 @@ import { listarNiveisCategoria } from '../services/niveisCategoria';
 import { listarCategorias } from '../services/categorias';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import './ConfiguracaoSku.css';
 
 export const SEPARADORES_PERMITIDOS = ['-', '_', '/', 'x', '*', '+'];
@@ -242,6 +244,10 @@ export default function ConfiguracaoSku() {
   // descarte dos modais (Issue #42), só que aqui a "ação a executar" é
   // trocar/criar um padrão em vez de fechar um modal.
   const [acaoPendente, setAcaoPendente] = useState(null);
+  // UX-05 (Issue #50): confirmação de remover segmento obrigatório — nome
+  // distinto de acaoPendente acima (que é da troca/criação de padrão com
+  // dados não salvos, UX-03) para não colidir; são dois diálogos diferentes.
+  const { acaoPendente: segmentoParaRemover, pedirConfirmacao: pedirConfirmacaoRemoverSegmento, confirmar: confirmarRemoverSegmento, cancelar: cancelarRemoverSegmento } = useConfirmAction();
 
   const [niveis, setNiveis] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -418,12 +424,20 @@ export default function ConfiguracaoSku() {
   function removeSegmento(index) {
     const segmentoRemovido = config.segmentos[index];
     if (segmentoRemovido?.obrigatorio) {
-      const confirma = window.confirm(
-        `O segmento "${segmentoRemovido.nome}" está marcado como obrigatório. Deseja realmente removê-lo da composição?`
-      );
-      if (!confirma) return;
+      pedirConfirmacaoRemoverSegmento({
+        title: 'Remover segmento obrigatório',
+        message: `O segmento "${segmentoRemovido.nome}" está marcado como obrigatório. Deseja realmente removê-lo da composição?`,
+        confirmLabel: 'Remover',
+        tone: 'danger',
+        execute: () => executarRemoverSegmento(index),
+      });
+      return;
     }
 
+    executarRemoverSegmento(index);
+  }
+
+  function executarRemoverSegmento(index) {
     setConfig(prev => ({
       ...prev,
       segmentos: prev.segmentos
@@ -544,6 +558,16 @@ export default function ConfiguracaoSku() {
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={segmentoParaRemover !== null}
+        title={segmentoParaRemover?.title}
+        message={segmentoParaRemover?.message}
+        confirmLabel={segmentoParaRemover?.confirmLabel}
+        tone={segmentoParaRemover?.tone}
+        onConfirm={confirmarRemoverSegmento}
+        onCancel={cancelarRemoverSegmento}
+      />
 
       {/* Top Header */}
       <div className="page-header configuracao-sku-header">

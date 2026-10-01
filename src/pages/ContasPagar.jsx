@@ -4,6 +4,7 @@ import { listarContasPagar, marcarContaPagarComoPaga, cancelarContaPagar } from 
 import ContaPagarModal from '../components/ContaPagarModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
@@ -40,9 +41,8 @@ export default function ContasPagar() {
   const [contas, setContas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [workingId, setWorkingId] = useState(null);
+  const toast = useToast();
 
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -149,8 +149,7 @@ export default function ContasPagar() {
     });
     if (modalMode === 'create') setTotal(prev => prev + 1);
     setModalOpen(false);
-    setActionSuccess(modalMode === 'create' ? 'Conta a pagar criada com sucesso.' : 'Conta a pagar atualizada com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(modalMode === 'create' ? 'Conta a pagar criada com sucesso.' : 'Conta a pagar atualizada com sucesso.');
     atualizarResumo();
   }
 
@@ -174,16 +173,14 @@ export default function ContasPagar() {
   }
 
   async function executarPagar(conta) {
-    setActionError('');
     setWorkingId(conta.id);
     try {
       const contaAtualizada = await marcarContaPagarComoPaga(conta.id);
       aplicarAtualizacaoStatus(contaAtualizada);
-      setActionSuccess('Conta marcada como paga.');
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Conta marcada como paga.');
       atualizarResumo();
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -200,16 +197,14 @@ export default function ContasPagar() {
   }
 
   async function executarCancelar(conta) {
-    setActionError('');
     setWorkingId(conta.id);
     try {
       const contaAtualizada = await cancelarContaPagar(conta.id);
       aplicarAtualizacaoStatus(contaAtualizada);
-      setActionSuccess('Conta cancelada com sucesso.');
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Conta cancelada com sucesso.');
       atualizarResumo();
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -227,18 +222,6 @@ export default function ContasPagar() {
           Nova Conta
         </button>
       </div>
-
-      {actionError && (
-        <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
-          {actionError}
-        </p>
-      )}
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       <div className="contas-summary">
         <div className="card card-padding contas-stat">

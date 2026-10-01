@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS, canAccessRoute } from '../config/access';
 import ComprasTimeline from '../components/compras/ComprasTimeline';
 import CancelarCompraModal from '../components/compras/CancelarCompraModal';
+import { useToast } from '../context/ToastContext';
 import { formatarData } from '../utils/formatarData';
 import { formatarMoeda as money } from '../utils/mascaras';
 import './CompraDetalhe.css';
@@ -22,8 +23,8 @@ export default function CompraDetalhe() {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [feedback, setFeedback] = useState('');
   const [cancelarAberto, setCancelarAberto] = useState(false);
+  const toast = useToast();
 
   async function load() {
     setLoading(true);
@@ -46,7 +47,7 @@ export default function CompraDetalhe() {
 
   async function confirmarCancelamento() {
     await cancelarCompra(id);
-    setFeedback('Compra cancelada e estoque estornado.');
+    toast.success('Compra cancelada e estoque estornado.');
     setCancelarAberto(false);
     await load();
   }
@@ -74,7 +75,6 @@ export default function CompraDetalhe() {
     <div className="page-content">
       <button className="compra-detalhe-voltar" onClick={() => navigate('/compras')}><ArrowLeft size={16} /> Voltar para Compras</button>
 
-      {feedback && <div className="compra-alert success">{feedback}</div>}
       {error && <div className="compra-alert error">{error}</div>}
 
       <div className="page-header">

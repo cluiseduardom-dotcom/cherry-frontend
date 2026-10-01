@@ -12,6 +12,7 @@ import CancelarCompraModal from '../components/compras/CancelarCompraModal';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
+import { useToast } from '../context/ToastContext';
 import { formatarMoeda as money } from '../utils/mascaras';
 import './Compras.css';
 
@@ -96,7 +97,13 @@ export default function Compras() {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [feedback, setFeedback] = useState('');
+  // UX-06 (Issue #52): só o que ainda precisa aparecer DENTRO do modal "Nova
+  // compra direta" (validação do formulário, scanner não disponível) fica
+  // aqui — o usuário está no meio do preenchimento e precisa ver o erro no
+  // mesmo lugar onde vai corrigi-lo. Sucesso/cancelamento, que só aparecem
+  // DEPOIS que o modal já fechou, vão para o toast (useToast abaixo).
+  const [formError, setFormError] = useState('');
+  const toast = useToast();
 
   const [busca, setBusca] = useState('');
   const [subview, setSubview] = useState('todas');
@@ -172,7 +179,7 @@ export default function Compras() {
     setForm(formInicial);
     setInitialForm(formInicial);
     setCreateIntent('escolha');
-    setFeedback('');
+    setFormError('');
     setModalOpen(true);
   }
 
@@ -182,7 +189,7 @@ export default function Compras() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setFeedback('');
+    setFormError('');
     try {
       if (!form.fornecedor_id) throw new Error('Selecione o fornecedor.');
       if (!form.itens.length || form.itens.some(i => !i.produto_id || Number(i.quantidade) <= 0 || Number(i.custo_unitario) <= 0)) {
@@ -207,16 +214,16 @@ export default function Compras() {
 
       await criarCompra(payload);
       fecharModalDireto();
-      setFeedback('Compra registrada com sucesso. O estoque foi atualizado.');
+      toast.success('Compra registrada com sucesso. O estoque foi atualizado.');
       await load();
     } catch (err) {
-      setFeedback(err.message);
+      setFormError(err.message);
     }
   }
 
   async function confirmarCancelamento() {
     await cancelarCompra(cancelAlvo.id);
-    setFeedback('Compra cancelada e estoque estornado.');
+    toast.success('Compra cancelada e estoque estornado.');
     setCancelAlvo(null);
     await load();
   }
@@ -248,7 +255,6 @@ export default function Compras() {
         )}
       </div>
 
-      {feedback && <div className="compra-alert success">{feedback}</div>}
       {error && <div className="compra-alert error">{error}</div>}
 
       <div className="compras-kpis">
@@ -409,7 +415,7 @@ export default function Compras() {
                 <button type="button" className="produto-action-btn" onClick={closeCreate}><X size={16} /></button>
               </div>
 
-              {feedback && <div className="compra-alert error">{feedback}</div>}
+              {formError && <div className="compra-alert error">{formError}</div>}
 
               <div className="compra-form-section">
                 <h3 className="compra-form-section-title">Fornecedor e data</h3>
@@ -511,7 +517,7 @@ export default function Compras() {
           onDetect={produto => {
             const disponivel = produtos.some(p => p.id === produto.produto_id);
             if (!disponivel) {
-              setFeedback(`"${produto.nome}" foi encontrado, mas não está disponível no canal desta compra.`);
+              setFormError(`"${produto.nome}" foi encontrado, mas não está disponível no canal desta compra.`);
               return;
             }
             updateItem(scannerParaItem, 'produto_id', String(produto.produto_id));

@@ -3,6 +3,7 @@ import { Search, Plus, Phone, Mail, Star, TrendingUp, Edit, Users, UserCheck, Sh
 import { listarClientes, listarRankingClientes } from '../services/clientes';
 import ClienteModal from '../components/ClienteModal';
 import ClienteHistoricoModal from '../components/ClienteHistoricoModal';
+import { useToast } from '../context/ToastContext';
 import { aplicarMascaraTelefone, formatarMoeda, somenteDigitos } from '../utils/mascaras';
 import './Clientes.css';
 
@@ -68,13 +69,13 @@ export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [statusFiltro, setStatusFiltro] = useState('ativos');
   const [comprasFiltro, setComprasFiltro] = useState('todos');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
   const [historicoCliente, setHistoricoCliente] = useState(null);
+  const toast = useToast();
 
   async function load() {
     setLoading(true);
@@ -120,8 +121,7 @@ export default function Clientes() {
       return prev.map(c => c.id === clienteSalvo.id ? { ...c, ...clienteSalvo } : c);
     });
     setModalOpen(false);
-    setActionSuccess(editingCliente ? 'Cliente atualizado com sucesso.' : 'Cliente criado com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(editingCliente ? 'Cliente atualizado com sucesso.' : 'Cliente criado com sucesso.');
   }
 
   return (
@@ -136,12 +136,6 @@ export default function Clientes() {
           Novo Cliente
         </button>
       </div>
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       {!loading && !error && (
         <div className="clientes-kpis">

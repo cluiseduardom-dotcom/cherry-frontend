@@ -8,6 +8,7 @@ import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import './RecebimentoDetalhe.css';
 
 // Vocabulário fixo de status.js (CHECK constraint de `recebimentos` no
@@ -49,13 +50,13 @@ export default function RecebimentoDetalhe() {
   const [fornecedores, setFornecedores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [feedback, setFeedback] = useState('');
   const [proximoStatus, setProximoStatus] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [scannerAberto, setScannerAberto] = useState(false);
   const [itemDestacadoId, setItemDestacadoId] = useState(null);
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+  const toast = useToast();
 
   async function load() {
     setLoading(true);
@@ -83,15 +84,13 @@ export default function RecebimentoDetalhe() {
     e.preventDefault();
     if (!proximoStatus) return;
     setSalvando(true);
-    setFeedback('');
-    setError('');
     try {
       await alterarStatusRecebimento(id, proximoStatus);
-      setFeedback(`Status alterado para ${proximoStatus}.`);
+      toast.success(`Status alterado para ${proximoStatus}.`);
       setProximoStatus('');
       await load();
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setSalvando(false);
     }
@@ -109,18 +108,16 @@ export default function RecebimentoDetalhe() {
 
   async function executarAprovar() {
     setSalvando(true);
-    setFeedback('');
-    setError('');
     try {
       const resultado = await aprovarRecebimento(id);
-      setFeedback(
+      toast.success(
         resultado?.conta_pagar
           ? `Recebimento aprovado. Conta a pagar #${resultado.conta_pagar.id} gerada.`
           : 'Recebimento aprovado.'
       );
       await load();
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setSalvando(false);
     }
@@ -130,10 +127,10 @@ export default function RecebimentoDetalhe() {
     const item = (recebimento?.itens || []).find(i => i.produto_id === produto.produto_id);
     setScannerAberto(false);
     if (!item) {
-      setFeedback(`"${produto.nome}" não faz parte deste recebimento.`);
+      toast.warning(`"${produto.nome}" não faz parte deste recebimento.`);
       return;
     }
-    setFeedback(`Localizado: ${item.descricao_snapshot}.`);
+    toast.info(`Localizado: ${item.descricao_snapshot}.`);
     setItemDestacadoId(item.id);
     setTimeout(() => setItemDestacadoId(null), 3000);
   }
@@ -164,9 +161,6 @@ export default function RecebimentoDetalhe() {
   return (
     <div className="page-content">
       <button className="compra-detalhe-voltar" onClick={() => navigate('/compras/recebimentos')}><ArrowLeft size={16} /> Voltar para Recebimentos</button>
-
-      {feedback && <div className="compra-alert success">{feedback}</div>}
-      {error && <div className="compra-alert error">{error}</div>}
 
       <div className="page-header">
         <div>

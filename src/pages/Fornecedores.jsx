@@ -4,6 +4,7 @@ import { atualizarFornecedor, listarFornecedores, removerFornecedor } from '../s
 import FornecedorModal from '../components/FornecedorModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, somenteDigitos } from '../utils/mascaras';
 import './Fornecedores.css';
 
@@ -20,13 +21,12 @@ export default function Fornecedores() {
   const [fornecedores, setFornecedores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+  const toast = useToast();
 
   async function load() {
     setLoading(true);
@@ -62,13 +62,11 @@ export default function Fornecedores() {
 
   function openCreate() {
     setEditing(null);
-    setActionError('');
     setModalOpen(true);
   }
 
   function openEdit(fornecedor) {
     setEditing(fornecedor);
-    setActionError('');
     setModalOpen(true);
   }
 
@@ -78,8 +76,7 @@ export default function Fornecedores() {
       return prev.map(item => item.id === saved.id ? saved : item);
     });
     setModalOpen(false);
-    setActionSuccess(editing ? 'Fornecedor atualizado com sucesso.' : 'Fornecedor cadastrado com sucesso.');
-    window.setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(editing ? 'Fornecedor atualizado com sucesso.' : 'Fornecedor cadastrado com sucesso.');
   }
 
   function handleToggleStatus(fornecedor) {
@@ -96,14 +93,12 @@ export default function Fornecedores() {
   }
 
   async function executarToggleStatus(fornecedor, ativo) {
-    setActionError('');
     try {
       const updated = await atualizarFornecedor(fornecedor.id, { ativo: !ativo });
       setFornecedores(prev => prev.map(item => item.id === updated.id ? updated : item));
-      setActionSuccess(ativo ? 'Fornecedor desativado.' : 'Fornecedor reativado.');
-      window.setTimeout(() => setActionSuccess(''), 4000);
+      toast.success(ativo ? 'Fornecedor desativado.' : 'Fornecedor reativado.');
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     }
   }
 
@@ -118,14 +113,12 @@ export default function Fornecedores() {
   }
 
   async function executarRemove(fornecedor) {
-    setActionError('');
     try {
       await removerFornecedor(fornecedor.id);
       setFornecedores(prev => prev.filter(item => item.id !== fornecedor.id));
-      setActionSuccess('Fornecedor removido.');
-      window.setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Fornecedor removido.');
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     }
   }
 
@@ -141,9 +134,6 @@ export default function Fornecedores() {
           Novo Fornecedor
         </button>
       </div>
-
-      {actionError && <div className="fornecedor-feedback fornecedor-feedback--error">{actionError}</div>}
-      {actionSuccess && <div className="fornecedor-feedback fornecedor-feedback--success">{actionSuccess}</div>}
 
       <div className="fornecedores-toolbar">
         <div className="input-icon-wrapper fornecedores-search">

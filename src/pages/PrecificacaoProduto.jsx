@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { listarPrecosProduto, atualizarPrecoCanal } from '../services/precos';
 import { buscarProduto } from '../services/produtos';
 import { formatCurrency, formatDateBR } from './relatorios/relatoriosUtils';
+import { useToast } from '../context/ToastContext';
 import './PrecificacaoProduto.css';
 
 const CANAL_LABEL = { loja_fisica: 'Loja física', online: 'Online' };
@@ -44,7 +45,7 @@ export default function PrecificacaoProduto() {
   const [formsPorCanal, setFormsPorCanal] = useState({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -108,8 +109,7 @@ export default function PrecificacaoProduto() {
       const atualizado = await atualizarPrecoCanal(id, canalId, payload);
       setCanais(prev => prev.map(c => (c.canal_id === canalId ? { ...c, ...atualizado } : c)));
       updateForm(canalId, { saving: false, valor: '' });
-      setSuccessMsg('Preço atualizado com sucesso.');
-      setTimeout(() => setSuccessMsg(''), 4000);
+      toast.success('Preço atualizado com sucesso.');
     } catch (err) {
       updateForm(canalId, { saving: false, error: err.message });
     }
@@ -130,12 +130,6 @@ export default function PrecificacaoProduto() {
           </p>
         </div>
       </div>
-
-      {successMsg && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {successMsg}
-        </p>
-      )}
 
       {loading && (
         <div className="empty-state">

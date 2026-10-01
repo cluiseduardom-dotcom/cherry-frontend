@@ -7,6 +7,7 @@ import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import './Contas.css';
 
 const STATUS_FILTERS = [
@@ -41,9 +42,8 @@ export default function ContasReceber() {
   const [contas, setContas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [workingId, setWorkingId] = useState(null);
+  const toast = useToast();
 
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -158,7 +158,6 @@ export default function ContasReceber() {
   }
 
   async function executarReceber(conta) {
-    setActionError('');
     setWorkingId(conta.id);
     try {
       const contaAtualizada = await marcarContaReceberComoRecebida(conta.id);
@@ -168,11 +167,10 @@ export default function ContasReceber() {
       } else {
         setContas(prev => prev.map(c => (c.id === contaAtualizada.id ? contaAtualizada : c)));
       }
-      setActionSuccess('Conta marcada como recebida.');
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Conta marcada como recebida.');
       atualizarResumo();
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -186,18 +184,6 @@ export default function ContasReceber() {
           <p className="page-subtitle">{total} contas cadastradas</p>
         </div>
       </div>
-
-      {actionError && (
-        <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
-          {actionError}
-        </p>
-      )}
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       <div className="contas-summary">
         <div className="card card-padding contas-stat">

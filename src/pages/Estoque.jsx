@@ -6,6 +6,7 @@ import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
+import { useToast } from '../context/ToastContext';
 import './Estoque.css';
 
 const ROW_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -45,11 +46,11 @@ export default function Estoque() {
   const [alertas, setAlertas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = normalizarFiltro(searchParams.get('filtro'));
   const [modalOpen, setModalOpen] = useState(false);
+  const toast = useToast();
 
   // UX-04 (Issue #48): a URL é a fonte única de verdade do filtro — tanto o
   // deeplink da Sidebar (/estoque?filtro=baixo) quanto o clique manual nos
@@ -138,8 +139,7 @@ export default function Estoque() {
     });
 
     setModalOpen(false);
-    setActionSuccess('Movimentação registrada com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success('Movimentação registrada com sucesso.');
   }
 
   return (
@@ -156,12 +156,6 @@ export default function Estoque() {
           </button>
         )}
       </div>
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       {/* Summary cards */}
       <div className="estoque-summary">

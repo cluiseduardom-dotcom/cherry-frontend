@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { homeRouteForRole, ALLOWED_ROLES_BY_PATH } from './config/access';
 import Layout from './components/Layout';
@@ -95,8 +96,13 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    // UX-06 (Issue #52): ToastProvider acima do RouterProvider para que os
+    // toasts sobrevivam à troca de rota — uma ação que navega logo em
+    // seguida (ex.: salvar e voltar para a lista) não deve perder o aviso.
+    <ToastProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ToastProvider>
   );
 }

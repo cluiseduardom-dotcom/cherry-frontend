@@ -14,6 +14,7 @@ import {
   buscarTodasAsPaginas,
   exportarRelatorioPDF,
 } from './relatoriosUtils';
+import { useToast } from '../../context/ToastContext';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos' },
@@ -45,7 +46,7 @@ export default function RelatorioFinanceiro() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exportando, setExportando] = useState(false);
-  const [exportError, setExportError] = useState('');
+  const toast = useToast();
 
   const dataInvalida = filtroInicio > filtroFim;
 
@@ -157,7 +158,6 @@ export default function RelatorioFinanceiro() {
   }
 
   async function handleExportar() {
-    setExportError('');
     setExportando(true);
     try {
       const statusLabel = STATUS_OPTIONS.find(o => o.value === filtroStatus)?.label ?? 'Todos';
@@ -169,7 +169,7 @@ export default function RelatorioFinanceiro() {
         periodoLabel,
       });
     } catch (err) {
-      setExportError(err.message);
+      toast.error(err.message);
     } finally {
       setExportando(false);
     }
@@ -204,8 +204,6 @@ export default function RelatorioFinanceiro() {
       {dataInvalida && (
         <p className="rel-inline-error"><AlertTriangle size={14} /> A data início não pode ser depois da data fim.</p>
       )}
-      {exportError && <p className="rel-inline-error"><AlertTriangle size={14} /> {exportError}</p>}
-
       {loading && !dataInvalida && (
         <div className="empty-state"><p className="text-sm text-secondary">Carregando relatório financeiro...</p></div>
       )}

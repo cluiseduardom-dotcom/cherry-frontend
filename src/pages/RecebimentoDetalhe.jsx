@@ -6,6 +6,8 @@ import { listarFornecedores } from '../services/fornecedores';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import './RecebimentoDetalhe.css';
 
 // Vocabulário fixo de status.js (CHECK constraint de `recebimentos` no
@@ -53,6 +55,8 @@ export default function RecebimentoDetalhe() {
   const [scannerAberto, setScannerAberto] = useState(false);
   const [itemDestacadoId, setItemDestacadoId] = useState(null);
 
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+
   async function load() {
     setLoading(true);
     setError('');
@@ -93,8 +97,17 @@ export default function RecebimentoDetalhe() {
     }
   }
 
-  async function handleAprovar() {
-    if (!window.confirm('Aprovar este recebimento? O backend vai lançar entrada de estoque, atualizar o pedido de compra e gerar a conta a pagar correspondente.')) return;
+  function handleAprovar() {
+    pedirConfirmacao({
+      title: 'Aprovar recebimento',
+      message: 'Aprovar este recebimento? O backend vai lançar entrada de estoque, atualizar o pedido de compra e gerar a conta a pagar correspondente.',
+      confirmLabel: 'Aprovar',
+      tone: 'warning',
+      execute: executarAprovar,
+    });
+  }
+
+  async function executarAprovar() {
     setSalvando(true);
     setFeedback('');
     setError('');
@@ -224,6 +237,16 @@ export default function RecebimentoDetalhe() {
       {scannerAberto && (
         <BarcodeScannerModal onClose={() => setScannerAberto(false)} onDetect={handleScanDetect} />
       )}
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
+      />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
 import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import { formatarMoeda } from '../utils/mascaras';
 import './Produtos.css';
 
@@ -38,6 +40,8 @@ export default function Produtos() {
   const [categorizarModalOpen, setCategorizarModalOpen] = useState(false);
   const [categorizandoProduto, setCategorizandoProduto] = useState(null);
 
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+
   useEffect(() => {
     let cancelled = false;
 
@@ -63,8 +67,17 @@ export default function Produtos() {
     return p.nome.toLowerCase().includes(term) || (p.sku ?? '').toLowerCase().includes(term);
   });
 
-  async function handleDelete(id) {
-    if (!window.confirm('Excluir este produto?')) return;
+  function handleDelete(id) {
+    pedirConfirmacao({
+      title: 'Excluir produto',
+      message: 'Excluir este produto?',
+      confirmLabel: 'Excluir',
+      tone: 'danger',
+      execute: () => executarDelete(id),
+    });
+  }
+
+  async function executarDelete(id) {
     setActionError('');
     try {
       await excluirProduto(id);
@@ -265,6 +278,16 @@ export default function Produtos() {
         produto={categorizandoProduto}
         onClose={() => setCategorizarModalOpen(false)}
         onSaved={handleCategorizado}
+      />
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
       />
     </div>
   );

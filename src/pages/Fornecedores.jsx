@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Building2, Edit, Mail, Phone, Plus, Search, UserRound, X } from 'lucide-react';
 import { atualizarFornecedor, listarFornecedores, removerFornecedor } from '../services/fornecedores';
 import FornecedorModal from '../components/FornecedorModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, somenteDigitos } from '../utils/mascaras';
 import './Fornecedores.css';
 
@@ -23,6 +25,8 @@ export default function Fornecedores() {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   async function load() {
     setLoading(true);
@@ -78,12 +82,20 @@ export default function Fornecedores() {
     window.setTimeout(() => setActionSuccess(''), 4000);
   }
 
-  async function handleToggleStatus(fornecedor) {
+  function handleToggleStatus(fornecedor) {
     const ativo = fornecedor.ativo !== false;
     const action = ativo ? 'desativar' : 'reativar';
 
-    if (!window.confirm(`Deseja ${action} o fornecedor "${fornecedor.nome}"?`)) return;
+    pedirConfirmacao({
+      title: ativo ? 'Desativar fornecedor' : 'Reativar fornecedor',
+      message: `Deseja ${action} o fornecedor "${fornecedor.nome}"?`,
+      confirmLabel: ativo ? 'Desativar' : 'Reativar',
+      tone: ativo ? 'danger' : 'warning',
+      execute: () => executarToggleStatus(fornecedor, ativo),
+    });
+  }
 
+  async function executarToggleStatus(fornecedor, ativo) {
     setActionError('');
     try {
       const updated = await atualizarFornecedor(fornecedor.id, { ativo: !ativo });
@@ -95,9 +107,17 @@ export default function Fornecedores() {
     }
   }
 
-  async function handleRemove(fornecedor) {
-    if (!window.confirm(`Remover o fornecedor "${fornecedor.nome}"? Essa ação depende das regras de integridade do backend.`)) return;
+  function handleRemove(fornecedor) {
+    pedirConfirmacao({
+      title: 'Remover fornecedor',
+      message: `Remover o fornecedor "${fornecedor.nome}"? Essa ação depende das regras de integridade do backend.`,
+      confirmLabel: 'Remover',
+      tone: 'danger',
+      execute: () => executarRemove(fornecedor),
+    });
+  }
 
+  async function executarRemove(fornecedor) {
     setActionError('');
     try {
       await removerFornecedor(fornecedor.id);
@@ -204,6 +224,16 @@ export default function Fornecedores() {
         fornecedor={editing}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}
+      />
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
       />
     </div>
   );

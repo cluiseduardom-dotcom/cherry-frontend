@@ -5,6 +5,8 @@ import { listarVendas } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import './Contas.css';
 
 const STATUS_FILTERS = [
@@ -51,6 +53,8 @@ export default function ContasReceber() {
 
   const [resumoContas, setResumoContas] = useState([]);
   const [nomeClientePorVendaId, setNomeClientePorVendaId] = useState(new Map());
+
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   useEffect(() => {
     let cancelled = false;
@@ -143,9 +147,17 @@ export default function ContasReceber() {
     setPage(1);
   }
 
-  async function handleReceber(conta) {
-    if (!window.confirm(`Marcar a conta "${conta.descricao}" (venda #${conta.venda_id}) como recebida?`)) return;
+  function handleReceber(conta) {
+    pedirConfirmacao({
+      title: 'Marcar conta como recebida',
+      message: `Marcar a conta "${conta.descricao}" (venda #${conta.venda_id}) como recebida?`,
+      confirmLabel: 'Marcar como recebida',
+      tone: 'warning',
+      execute: () => executarReceber(conta),
+    });
+  }
 
+  async function executarReceber(conta) {
     setActionError('');
     setWorkingId(conta.id);
     try {
@@ -327,6 +339,16 @@ export default function ContasReceber() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
+      />
     </div>
   );
 }

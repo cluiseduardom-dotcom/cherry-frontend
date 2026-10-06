@@ -928,7 +928,7 @@ Expected: build conclui sem erros
 
 Roteiro para o usuário (Luis) executar:
 
-1. Login como `bruno@cherry.com` / `senha123` (vendedor) e também como `ana@cherry.com` / `senha123` (admin) — confirmar que nenhum campo de custo/margem aparece em nenhum momento do fluxo de kit, para nenhum dos dois papéis.
+1. Login como `vendedor.exemplo@dominio.com` / `SENHA_DE_EXEMPLO` (vendedor) e também como `admin.exemplo@dominio.com` / `SENHA_DE_EXEMPLO` (admin) — confirmar que nenhum campo de custo/margem aparece em nenhum momento do fluxo de kit, para nenhum dos dois papéis.
 2. Montar um kit de 2 produtos distintos, confirmar, e verificar a linha agrupada "Kit (N itens)" no carrinho com o valor somado dos componentes.
 3. Expandir a linha do kit no carrinho e conferir que os componentes individuais aparecem corretamente (nome, quantidade, preço).
 4. Montar 2 kits + 1 item avulso na mesma venda, finalizar, e no histórico de vendas conferir que o `kit_id` está correto por grupo (1 para o primeiro kit, 2 para o segundo, ausente no avulso) e que o estoque foi baixado corretamente para cada produto.

@@ -135,17 +135,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
-        <div className="login-hint">
-          <span>Acesso demo:</span>
-          <button
-            type="button"
-            className="login-hint-fill"
-            onClick={() => { setEmail('ana@cherry.com'); setPassword('senha123'); }}
-          >
-            ana@cherry.com / senha123
-          </button>
-        </div>
       </div>
 
       {/* Side decoration (desktop) */}

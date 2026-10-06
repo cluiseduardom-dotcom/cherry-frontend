@@ -16,7 +16,7 @@
 - `access.js` never imports UI libraries (no `lucide-react`, no component references) — it exports data and pure functions only.
 - `canAccessRoute` stays a plain function taking `role` explicitly — no hook, no context reach-in — so it stays testable without a DOM.
 - Stage 1 only: no `canView`/`canPerform`, no `FIELDS`/`ACTIONS` constants, no changes to `podeGerenciar`/`podeMovimentar`/`podeCancelar`/`ProductModal.jsx`. That's stage 2, a separate plan.
-- Test accounts (local dev, per `MAPA_CHERRY_ERP.md`): admin `ana@cherry.com` / `senha123`, vendedor `bruno@cherry.com` / `senha123`, estoquista `carla@cherry.com` / `senha123`.
+- Test accounts (local dev, per `MAPA_CHERRY_ERP.md`): admin `admin.exemplo@dominio.com` / `SENHA_DE_EXEMPLO`, vendedor `vendedor.exemplo@dominio.com` / `SENHA_DE_EXEMPLO`, estoquista `estoquista.exemplo@dominio.com` / `SENHA_DE_EXEMPLO`.
 
 ---
 
@@ -368,11 +368,11 @@ Expected: still PASS (this task doesn't touch `access.js`).
 
 Run: `npm run dev`, open the app.
 
-Log in as admin (`ana@cherry.com` / `senha123`): confirm all 12 routes are reachable both by clicking every Sidebar link and by typing each path directly in the URL bar (`/`, `/venda`, `/estoque`, `/produtos`, `/clientes`, `/historico`, `/relatorios`, `/contas-pagar`, `/contas-receber`, `/ponto-equilibrio`, `/despesas-fixas`, `/configuracoes`).
+Log in as admin (`admin.exemplo@dominio.com` / `SENHA_DE_EXEMPLO`): confirm all 12 routes are reachable both by clicking every Sidebar link and by typing each path directly in the URL bar (`/`, `/venda`, `/estoque`, `/produtos`, `/clientes`, `/historico`, `/relatorios`, `/contas-pagar`, `/contas-receber`, `/ponto-equilibrio`, `/despesas-fixas`, `/configuracoes`).
 
-Log in as vendedor (`bruno@cherry.com` / `senha123`): confirm `/venda`, `/produtos`, `/clientes`, `/historico` are reachable; confirm typing `/estoque`, `/configuracoes`, `/relatorios`, `/contas-pagar`, `/contas-receber`, `/ponto-equilibrio`, `/despesas-fixas`, or `/` directly in the URL bar redirects to `/venda` (this is the actual bug fix — these routes were previously reachable).
+Log in as vendedor (`vendedor.exemplo@dominio.com` / `SENHA_DE_EXEMPLO`): confirm `/venda`, `/produtos`, `/clientes`, `/historico` are reachable; confirm typing `/estoque`, `/configuracoes`, `/relatorios`, `/contas-pagar`, `/contas-receber`, `/ponto-equilibrio`, `/despesas-fixas`, or `/` directly in the URL bar redirects to `/venda` (this is the actual bug fix — these routes were previously reachable).
 
-Log in as estoquista (`carla@cherry.com` / `senha123`): confirm `/estoque`, `/produtos` are reachable; confirm typing every other path redirects to `/estoque`.
+Log in as estoquista (`estoquista.exemplo@dominio.com` / `SENHA_DE_EXEMPLO`): confirm `/estoque`, `/produtos` are reachable; confirm typing every other path redirects to `/estoque`.
 
 - [ ] **Step 4: Lint and build check**
 
@@ -675,7 +675,7 @@ Expected: all three succeed.
 
 - [ ] **Step 2: Full manual pass across all 3 roles**
 
-For each of `ana@cherry.com`, `bruno@cherry.com`, `carla@cherry.com` (password `senha123`):
+For each of `admin.exemplo@dominio.com`, `vendedor.exemplo@dominio.com`, `estoquista.exemplo@dominio.com` (password `SENHA_DE_EXEMPLO`):
 - Log in, confirm redirect lands on that role's home route (`/`, `/venda`, `/estoque` respectively).
 - Walk every one of the 12 paths by typing it directly in the URL bar; confirm the result matches the access matrix in `docs/superpowers/specs/2026-09-01-access-control-seam.md` exactly (reachable vs. redirected home).
 - Confirm Sidebar and BottomNav only ever display links that role can actually reach.

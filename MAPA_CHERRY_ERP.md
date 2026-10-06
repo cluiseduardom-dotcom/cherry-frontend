@@ -40,9 +40,9 @@ Cherry ERP é um sistema de gestão (ERP) completo para uma empresa de semijoias
 **Contas de teste (ambiente local):**
 | Papel | E-mail | Senha |
 |---|---|---|
-| Admin | ana@cherry.com | senha123 |
-| Vendedor | bruno@cherry.com | senha123 |
-| Estoquista | carla@cherry.com | senha123 |
+| Admin | admin.exemplo@dominio.com | SENHA_DE_EXEMPLO |
+| Vendedor | vendedor.exemplo@dominio.com | SENHA_DE_EXEMPLO |
+| Estoquista | estoquista.exemplo@dominio.com | SENHA_DE_EXEMPLO |
 
 ---
 

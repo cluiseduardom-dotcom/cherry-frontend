@@ -211,30 +211,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Hint */
-.login-hint {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  text-align: center;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.login-hint-fill {
-  color: var(--color-primary);
-  font-weight: 500;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-size-xs);
-  transition: opacity var(--transition-fast);
-}
-
-.login-hint-fill:hover { opacity: 0.7; }
-
 /* Side panel */
 .login-side {
   display: none;

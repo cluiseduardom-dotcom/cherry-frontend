@@ -4,12 +4,15 @@ import {
   Search, SlidersHorizontal, Barcode, ShoppingCart,
   Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp
 } from 'lucide-react';
-import ProductCard from '../components/ProductCard';
+import ProductRow from '../components/ProductRow';
 import { listarProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
+import PagamentoPDV from '../components/PagamentoPDV';
+import { selecionarProdutosPdv } from '../utils/produtosPdv';
+import { calcularResumoPagamento, deCentavos, pagamentosAposMudancaDoCarrinho, pagamentosParaEnvio } from '../utils/pagamentoVenda';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import './Venda.css';
 
@@ -23,7 +26,7 @@ function colorForProduto(id) {
 // nunca o preco_venda "cru" da tabela produtos — é o que o backend usa
 // para travar o preço da venda. Produto sem preço definido para o canal
 // fica visível na vitrine (price: null) mas não pode ser adicionado ao
-// carrinho — ProductCard desabilita o botão nesse caso.
+// carrinho — ProductRow desabilita o botão nesse caso.
 export function toCartProduct(p) {
   const precoCanal = p.preco_canal?.preco_venda;
   // Filtro de pills usa o nível 1 da categorização estruturada (família, na Cherry)
@@ -37,7 +40,10 @@ export function toCartProduct(p) {
     category: categoriaNivel1,
     price: precoCanal == null ? null : Number(precoCanal),
     stock: p.estoque_atual,
+    unidade: p.unidade,
+    tipo: p.tipo,
     color: colorForProduto(p.id),
+    imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
   };
 }
 
@@ -130,11 +136,6 @@ export default function Venda() {
   const [desconto, setDesconto] = useState('0');
   const [juros, setJuros] = useState('0');
   const [pagamentos, setPagamentos] = useState([]);
-  const [pagamentoForma, setPagamentoForma] = useState('pix');
-  const [pagamentoValor, setPagamentoValor] = useState('');
-  const [pagamentoRecebido, setPagamentoRecebido] = useState('');
-  const [pagamentoParcelas, setPagamentoParcelas] = useState('1');
-  const [pagamentoMesesPrazo, setPagamentoMesesPrazo] = useState('1');
 
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
@@ -193,20 +194,24 @@ export default function Venda() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [vendaEmAndamento]);
 
+  // Vitrine do PDV: só o que dá para vender (esgotados ao final; sem preço e
+  // insumos ficam de fora) — ver utils/produtosPdv.js.
+  const produtosVitrine = useMemo(() => selecionarProdutosPdv(produtos), [produtos]);
+
   const categories = useMemo(
-    () => ['Todos', ...new Set(produtos.map(p => p.category).filter(Boolean))],
-    [produtos]
+    () => ['Todos', ...new Set(produtosVitrine.map(p => p.category).filter(Boolean))],
+    [produtosVitrine]
   );
 
   /* --- Filtered products --- */
   const filtered = useMemo(() => {
-    return produtos.filter(p => {
+    return produtosVitrine.filter(p => {
       const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                           p.sku.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [produtos, search, activeCategory]);
+  }, [produtosVitrine, search, activeCategory]);
 
   /* --- Cart operations (itens avulsos) --- */
   function addToCart(product) {
@@ -223,7 +228,9 @@ export default function Venda() {
   }
 
   function removeFromCart(id) {
-    setCart(prev => prev.filter(i => !(i.type === 'avulso' && i.id === id)));
+    const proximo = cart.filter(i => !(i.type === 'avulso' && i.id === id));
+    setCart(proximo);
+    setPagamentos(prev => pagamentosAposMudancaDoCarrinho(proximo, prev));
   }
 
   function changeQty(id, delta) {
@@ -270,7 +277,9 @@ export default function Venda() {
   }
 
   function removeKitFromCart(kitKey) {
-    setCart(prev => prev.filter(row => row.kitKey !== kitKey));
+    const proximo = cart.filter(row => row.kitKey !== kitKey);
+    setCart(proximo);
+    setPagamentos(prev => pagamentosAposMudancaDoCarrinho(proximo, prev));
   }
 
   function toggleKitExpanded(kitKey) {
@@ -281,66 +290,18 @@ export default function Venda() {
   const subtotal = Number(cart.reduce((sum, row) => sum + rowTotal(row), 0).toFixed(2));
   const total = Number(Math.max(0, subtotal - Number(desconto || 0) + Number(juros || 0)).toFixed(2));
   const itemCount = cart.reduce((sum, row) => sum + rowQtyCount(row), 0);
-  const totalPagamentos = Number(pagamentos.reduce((sum, p) => sum + Number(p.valor || 0), 0).toFixed(2));
-  const saldoPagamento = Number((total - totalPagamentos).toFixed(2));
+  // Pagamento calculado em centavos inteiros (ver utils/pagamentoVenda.js).
+  const resumoPagamento = calcularResumoPagamento(total, pagamentos);
+  const totalPagamentos = deCentavos(resumoPagamento.pagoCentavos);
+  const saldoPagamento = deCentavos(resumoPagamento.saldoCentavos);
 
   const kitDraftTotal    = kitDraft.reduce((sum, i) => sum + i.price * i.qty, 0);
   const kitDraftQtyCount = kitDraft.reduce((sum, i) => sum + i.qty, 0);
 
-  /* --- Pagamentos --- */
-  function adicionarPagamento() {
-    const valor = Number(Number(pagamentoValor).toFixed(2));
-    if (!Number.isFinite(valor) || valor <= 0) {
-      setSaveError('Informe um valor de pagamento maior que zero.');
-      return;
-    }
-
-    if (pagamentoForma === 'crediario' && !clienteId) {
-      setSaveError('Crediário exige um cliente identificado.');
-      return;
-    }
-
-    if (pagamentoForma === 'dinheiro') {
-      const recebido = Number(pagamentoRecebido || valor);
-      if (recebido < valor) {
-        setSaveError('O valor recebido em dinheiro não pode ser menor que o pagamento.');
-        return;
-      }
-    }
-
-    if (valor > saldoPagamento + 0.01) {
-      setSaveError('O pagamento excede o saldo da venda.');
-      return;
-    }
-
-    const parcelas = Number(pagamentoParcelas);
-    const meses = Number(pagamentoMesesPrazo);
-
-    if (!Number.isInteger(parcelas) || parcelas < 1) {
-      setSaveError('Informe um número de parcelas válido.');
-      return;
-    }
-
-    if (pagamentoForma === 'crediario' && parcelas > 1 && (!Number.isInteger(meses) || meses < 1)) {
-      setSaveError('Informe o prazo em meses para o crediário parcelado.');
-      return;
-    }
-
-    setPagamentos(prev => [...prev, {
-      forma_pagamento: pagamentoForma,
-      valor,
-      ...(pagamentoForma === 'dinheiro' ? { valor_recebido: Number(pagamentoRecebido || valor) } : {}),
-      numero_parcelas: pagamentoForma === 'credito' || pagamentoForma === 'crediario' ? parcelas : 1,
-      ...(pagamentoForma === 'crediario' ? { meses_prazo: meses } : {}),
-    }]);
-
-    setPagamentoValor('');
-    setPagamentoRecebido('');
+  /* --- Pagamentos (UI e regras de entrada em PagamentoPDV + utils/pagamentoVenda) --- */
+  function adicionarPagamento(pagamento) {
+    setPagamentos(prev => [...prev, pagamento]);
     setSaveError('');
-  }
-
-  function preencherSaldo() {
-    setPagamentoValor(String(Math.max(0, saldoPagamento).toFixed(2)));
   }
 
   function removerPagamento(index) {
@@ -364,8 +325,10 @@ export default function Venda() {
 
     try {
       if (total <= 0) throw new Error('O total da venda deve ser maior que zero.');
-      if (Math.abs(totalPagamentos - total) > 0.01) {
-        throw new Error(`Falta distribuir ${formatarMoeda(Math.abs(saldoPagamento))} entre os pagamentos.`);
+      if (!resumoPagamento.podeFinalizar) {
+        throw new Error(resumoPagamento.excedente
+          ? `Os pagamentos excedem o total em ${formatarMoeda(Math.abs(saldoPagamento))}. Remova ou ajuste um pagamento.`
+          : `Falta distribuir ${formatarMoeda(Math.abs(saldoPagamento))} entre os pagamentos.`);
       }
 
       if (!saleIdempotencyKeyRef.current) {
@@ -376,7 +339,7 @@ export default function Venda() {
         canal: 'loja_fisica',
         cliente_id: clienteId ? Number(clienteId) : undefined,
         itens: buildVendaItens(cart),
-        pagamentos,
+        pagamentos: pagamentosParaEnvio(pagamentos),
         desconto: Number(desconto || 0),
         juros: Number(juros || 0),
         idempotencyKey: saleIdempotencyKeyRef.current,
@@ -478,12 +441,12 @@ export default function Venda() {
             </div>
           )}
 
-          {/* Product grid */}
+          {/* Product list */}
           {!loading && !loadError && (
             filtered.length > 0 ? (
-              <div className="venda-product-grid">
+              <div className="venda-product-list" role="list">
                 {filtered.map(p => (
-                  <ProductCard key={p.id} product={p} onAddToCart={handleProductClick} />
+                  <ProductRow key={p.id} product={p} onAddToCart={handleProductClick} />
                 ))}
               </div>
             ) : (
@@ -520,7 +483,7 @@ export default function Venda() {
                   Montar kit
                 </button>
                 {cart.length > 0 && (
-                  <button className="btn btn-ghost btn-sm cart-clear-btn" onClick={clearCart}>
+                  <button className="btn btn-ghost btn-sm cart-clear-btn" onClick={limparVenda}>
                     <Trash2 size={14} />
                     Limpar
                   </button>
@@ -613,6 +576,7 @@ export default function Venda() {
             </>
           ) : (
             <>
+              <div className="cart-scroll">
               {/* Cart items */}
               <div className="cart-items">
                 {cart.length === 0 ? (
@@ -712,12 +676,8 @@ export default function Venda() {
                 )}
               </div>
 
-              {/* Summary financeiro */}
+              {/* Cliente, ajustes e pagamento */}
               <div className="cart-summary">
-                {saveError && (
-                  <p className="text-sm venda-payment-error">{saveError}</p>
-                )}
-
                 <div className="venda-payment-fields">
                   <div className="input-wrapper">
                     <label className="input-label" htmlFor="venda-cliente">Cliente</label>
@@ -738,82 +698,55 @@ export default function Venda() {
                     </div>
                   </div>
 
-                  <div className="venda-payment-add">
-                    <div className="input-wrapper">
-                      <label className="input-label" htmlFor="venda-forma-pagamento">Pagamento</label>
-                      <select id="venda-forma-pagamento" className="input-field" value={pagamentoForma} onChange={e => setPagamentoForma(e.target.value)}>
-                        <option value="pix">PIX</option>
-                        <option value="dinheiro">Dinheiro</option>
-                        <option value="debito">Débito</option>
-                        <option value="credito">Crédito</option>
-                        <option value="crediario">Crediário</option>
-                      </select>
-                    </div>
-                    <div className="input-wrapper">
-                      <label className="input-label" htmlFor="venda-valor-pagamento">Valor</label>
-                      <input id="venda-valor-pagamento" className="input-field" type="number" min="0.01" step="0.01" value={pagamentoValor} onChange={e => setPagamentoValor(e.target.value)} placeholder="0,00" />
-                    </div>
-                    <button type="button" className="btn btn-ghost btn-sm venda-fill-balance" onClick={preencherSaldo} disabled={saldoPagamento <= 0}>
-                      Usar saldo
-                    </button>
-                    <button type="button" className="btn btn-primary btn-sm" onClick={adicionarPagamento}>
-                      Adicionar
-                    </button>
-                  </div>
-
-                  {pagamentoForma === 'dinheiro' && (
-                    <div className="input-wrapper">
-                      <label className="input-label" htmlFor="venda-valor-recebido">Valor recebido</label>
-                      <input id="venda-valor-recebido" className="input-field" type="number" min="0" step="0.01" value={pagamentoRecebido} onChange={e => setPagamentoRecebido(e.target.value)} placeholder="0,00" />
-                    </div>
+                  {total > 0 && (
+                    <PagamentoPDV
+                      resumo={resumoPagamento}
+                      pagamentos={pagamentos}
+                      temCliente={Boolean(clienteId)}
+                      onConfirmar={adicionarPagamento}
+                      onRemover={removerPagamento}
+                    />
                   )}
-
-                  {(pagamentoForma === 'credito' || pagamentoForma === 'crediario') && (
-                    <div className="venda-payment-adjustments">
-                      <div className="input-wrapper">
-                        <label className="input-label">Parcelas</label>
-                        <input className="input-field" type="number" min="1" step="1" value={pagamentoParcelas} onChange={e => setPagamentoParcelas(e.target.value)} />
-                      </div>
-                      {pagamentoForma === 'crediario' && (
-                        <div className="input-wrapper">
-                          <label className="input-label">Prazo (meses)</label>
-                          <input className="input-field" type="number" min="1" step="1" value={pagamentoMesesPrazo} onChange={e => setPagamentoMesesPrazo(e.target.value)} />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {pagamentos.length > 0 && (
-                    <div className="venda-payment-list">
-                      {pagamentos.map((p, index) => (
-                        <div className="venda-payment-item" key={index}>
-                          <span>{p.forma_pagamento}</span>
-                          <span>{formatarMoeda(p.valor)}</span>
-                          {p.numero_parcelas > 1 && <small>{p.numero_parcelas}x</small>}
-                          <button type="button" className="btn btn-ghost btn-sm" onClick={() => removerPagamento(index)}>Remover</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="venda-payment-balance">
-                    <span>Total: <strong>{formatarMoeda(total)}</strong></span>
-                    <span>Pago: <strong>{formatarMoeda(totalPagamentos)}</strong></span>
-                    <span>Saldo: <strong>{formatarMoeda(saldoPagamento)}</strong></span>
-                  </div>
                 </div>
+              </div>
+              </div>
 
-                <div className="cart-total-row">
-                  <span className="cart-total-label">Total</span>
-                  <span className="cart-total-value">
-                    {formatarMoeda(total)}
-                  </span>
+              {/* Rodapé fixo do carrinho: o saldo e o Finalizar nunca saem da tela */}
+              <div className={`cart-footer ${total > 0 && resumoPagamento.saldoCentavos > 0 ? 'cart-footer--inline' : ''}`}>
+                {saveError && (
+                  <p className="text-sm venda-payment-error" role="alert">{saveError}</p>
+                )}
+
+                <div
+                  className={`venda-payment-balance ${resumoPagamento.completo ? 'venda-payment-balance--ok' : ''} ${total > 0 && resumoPagamento.saldoCentavos > 0 ? 'venda-payment-balance--falta' : ''} ${resumoPagamento.excedente ? 'venda-payment-balance--excess' : ''}`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <div className="venda-balance-line"><span>Total</span><strong>{formatarMoeda(total)}</strong></div>
+                  <div className="venda-balance-line"><span>Pago</span><strong>{formatarMoeda(totalPagamentos)}</strong></div>
+                  <div className="venda-balance-line venda-balance-line--saldo">
+                    <span>{resumoPagamento.excedente ? 'Excedente' : resumoPagamento.completo ? 'Restante' : 'Falta pagar'}</span>
+                    <strong>{formatarMoeda(Math.abs(saldoPagamento))}</strong>
+                  </div>
+                  {resumoPagamento.trocoCentavos > 0 && (
+                    <div className="venda-balance-line venda-balance-line--troco">
+                      <span>Troco a devolver</span>
+                      <strong>{formatarMoeda(deCentavos(resumoPagamento.trocoCentavos))}</strong>
+                    </div>
+                  )}
+                  <p className="venda-balance-status">
+                    {resumoPagamento.completo
+                      ? '✓ Pagamento completo'
+                      : resumoPagamento.excedente
+                        ? 'Pagamentos acima do total — remova ou ajuste um pagamento'
+                        : total > 0 ? 'Finalizar libera ao quitar o valor restante' : 'Adicione produtos ao carrinho'}
+                  </p>
                 </div>
 
                 <button
                   className="btn btn-primary btn-full btn-lg cart-finalize-btn"
                   onClick={finalizeSale}
-                  disabled={cart.length === 0 || saving || pagamentos.length === 0 || Math.abs(saldoPagamento) > 0.01}
+                  disabled={cart.length === 0 || saving || !resumoPagamento.podeFinalizar}
                   id="btn-finalizar-venda"
                 >
                   <CheckCircle size={18} />

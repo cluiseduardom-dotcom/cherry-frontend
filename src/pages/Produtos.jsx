@@ -9,6 +9,7 @@ import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { formatarMoeda } from '../utils/mascaras';
+import ProductRow from '../components/ProductRow';
 import './Produtos.css';
 
 const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
@@ -176,82 +177,77 @@ export default function Produtos() {
 
       {!loading && !error && (
         <>
-          {/* Product grid */}
-          <div className="produtos-grid">
+          {/* Product list */}
+          <div className="produtos-list" role="list">
             {filtered.map(p => (
-              <div key={p.id} className="produto-card card">
-                <div
-                  className="produto-card-image"
-                  style={{ background: `linear-gradient(135deg, ${colorForProduto(p.id)}22, ${colorForProduto(p.id)}55)` }}
-                >
-                  <span style={{ color: colorForProduto(p.id), fontSize: 32, fontWeight: 800 }}>
-                    {p.nome.split(' ').slice(0, 2).map(w => w[0]).join('')}
-                  </span>
-                  {p.estoque_atual <= 3 && (
-                    <div className="produto-card-badge">
-                      {p.estoque_atual === 0 ? (
-                        <span className="badge badge-danger">Esgotado</span>
-                      ) : (
-                        <span className="badge badge-warning">Baixo</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="produto-card-body">
-                  <div className="produto-card-top">
-                    <span className="produto-sku">{p.sku || '—'}</span>
-                    {!temSku(p) && <span className="badge badge-warning">Sem SKU</span>}
-                  </div>
-                  <h3 className="produto-name">{p.nome}</h3>
-                  <div className="produto-card-footer">
-                    <span className="produto-price">
-                      {formatarMoeda(p.preco_venda)}
-                    </span>
-                    {(podeGerenciar || podeGerenciarPrecos || podeCategorizar) && (
-                      <div className="produto-actions">
-                        {podeGerenciarPrecos && (
-                          <button
-                            className="produto-action-btn"
-                            aria-label="Precificação por canal"
-                            title="Precificação por canal"
-                            onClick={() => navigate(`/produtos/${p.id}/precos`, { state: { nome: p.nome, sku: p.sku, custo: p.custo } })}
-                          >
-                            <DollarSign size={14} />
-                          </button>
-                        )}
-                        {podeCategorizar && (
-                          <button
-                            className="produto-action-btn"
-                            aria-label="Categorizar produto"
-                            title="Categorizar produto"
-                            onClick={() => openCategorizarModal(p)}
-                          >
-                            <Layers size={14} />
-                          </button>
-                        )}
-                        {podeGerenciar && (
-                          <>
-                            <button className="produto-action-btn" aria-label="Editar" onClick={() => openEditModal(p)}>
-                              <Edit size={14} />
-                            </button>
-                            <button
-                              className="produto-action-btn produto-action-btn--danger"
-                              aria-label="Excluir"
-                              onClick={() => handleDelete(p.id)}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+              <ProductRow
+                key={p.id}
+                product={{
+                  id: p.id,
+                  name: p.nome,
+                  sku: p.sku,
+                  semSku: !temSku(p),
+                  price: p.preco_venda,
+                  stock: p.estoque_atual,
+                  unidade: p.unidade,
+                  imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
+                  categorias: p.categorias,
+                }}
+                actions={(podeGerenciar || podeGerenciarPrecos || podeCategorizar) ? (
+                  <div className="produto-actions">
+                    {podeGerenciarPrecos && (
+                      <button
+                        className="produto-action-btn"
+                        aria-label="Precificação por canal"
+                        title="Precificação por canal"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/produtos/${p.id}/precos`, { state: { nome: p.nome, sku: p.sku, custo: p.custo } });
+                        }}
+                      >
+                        <DollarSign size={14} />
+                      </button>
+                    )}
+                    {podeCategorizar && (
+                      <button
+                        className="produto-action-btn"
+                        aria-label="Categorizar produto"
+                        title="Categorizar produto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCategorizarModal(p);
+                        }}
+                      >
+                        <Layers size={14} />
+                      </button>
+                    )}
+                    {podeGerenciar && (
+                      <>
+                        <button
+                          className="produto-action-btn"
+                          aria-label="Editar"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(p);
+                          }}
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          className="produto-action-btn produto-action-btn--danger"
+                          aria-label="Excluir"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(p.id);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
                     )}
                   </div>
-                  <div className="produto-stock-info">
-                    <Tag size={11} style={{ color: 'var(--color-text-muted)' }} />
-                    <span>{p.estoque_atual} {p.unidade ?? 'UN'} em estoque</span>
-                  </div>
-                </div>
-              </div>
+                ) : null}
+              />
             ))}
           </div>
 

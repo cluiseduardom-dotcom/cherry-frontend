@@ -8,6 +8,7 @@ import ProductModal from '../components/ProductModal';
 import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import { formatarMoeda } from '../utils/mascaras';
 import ProductRow from '../components/ProductRow';
 import './Produtos.css';
@@ -32,8 +33,6 @@ export default function Produtos() {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -42,6 +41,7 @@ export default function Produtos() {
   const [categorizandoProduto, setCategorizandoProduto] = useState(null);
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+  const toast = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -79,12 +79,11 @@ export default function Produtos() {
   }
 
   async function executarDelete(id) {
-    setActionError('');
     try {
       await excluirProduto(id);
       setProdutos(prev => prev.filter(p => p.id !== id));
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     }
   }
 
@@ -106,8 +105,7 @@ export default function Produtos() {
       return prev.map(p => (p.id === produtoSalvo.id ? produtoSalvo : p));
     });
     setModalOpen(false);
-    setActionSuccess(modalMode === 'create' ? 'Produto criado com sucesso.' : 'Produto atualizado com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(modalMode === 'create' ? 'Produto criado com sucesso.' : 'Produto atualizado com sucesso.');
   }
 
   function openCategorizarModal(produto) {
@@ -118,8 +116,7 @@ export default function Produtos() {
   function handleCategorizado(produtoSalvo) {
     setProdutos(prev => prev.map(p => (p.id === produtoSalvo.id ? produtoSalvo : p)));
     setCategorizarModalOpen(false);
-    setActionSuccess('Categorias atualizadas com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success('Categorias atualizadas com sucesso.');
   }
 
   return (
@@ -136,18 +133,6 @@ export default function Produtos() {
           </button>
         )}
       </div>
-
-      {actionError && (
-        <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
-          {actionError}
-        </p>
-      )}
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       <div className="produtos-toolbar">
         <div className="input-icon-wrapper produtos-search">

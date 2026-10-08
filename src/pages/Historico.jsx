@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import './Historico.css';
 
 const STATUS_LABEL = {
@@ -51,8 +52,6 @@ export default function Historico() {
   const [clientesPorId, setClientesPorId] = useState(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [cancelandoId, setCancelandoId] = useState(null);
   const [search, setSearch] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState('todos');
@@ -61,6 +60,7 @@ export default function Historico() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+  const toast = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -121,15 +121,13 @@ export default function Historico() {
   }
 
   async function executarCancelar(venda) {
-    setActionError('');
     setCancelandoId(venda.id);
     try {
       const vendaAtualizada = await cancelarVenda(venda.id);
       setVendas(prev => prev.map(v => (v.id === venda.id ? { ...v, status: vendaAtualizada.status } : v)));
-      setActionSuccess(`Venda #${venda.id} cancelada com sucesso.`);
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success(`Venda #${venda.id} cancelada com sucesso.`);
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setCancelandoId(null);
     }
@@ -151,18 +149,6 @@ export default function Historico() {
           {periodoFiltro === 'mes_atual' ? 'Mês atual' : 'Este mês'}
         </button>
       </div>
-
-      {actionError && (
-        <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
-          {actionError}
-        </p>
-      )}
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       {/* Summary */}
       <div className="historico-summary">

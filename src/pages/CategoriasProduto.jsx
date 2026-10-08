@@ -8,6 +8,7 @@ import NivelCategoriaModal from '../components/NivelCategoriaModal';
 import CategoriaProdutoModal from '../components/CategoriaProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import './Contas.css';
 import './CategoriasProduto.css';
 
@@ -24,9 +25,8 @@ export default function CategoriasProduto() {
   const [padroesSku, setPadroesSku] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [workingId, setWorkingId] = useState(null);
+  const toast = useToast();
 
   const [nivelModalOpen, setNivelModalOpen] = useState(false);
   const [nivelModalMode, setNivelModalMode] = useState('create');
@@ -85,8 +85,7 @@ export default function CategoriasProduto() {
       return [...proximos].sort((a, b) => a.nivel - b.nivel);
     });
     setNivelModalOpen(false);
-    setActionSuccess(nivelModalMode === 'create' ? 'Nível criado com sucesso.' : 'Nível renomeado com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(nivelModalMode === 'create' ? 'Nível criado com sucesso.' : 'Nível renomeado com sucesso.');
   }
 
   function handleExcluirNivel(nivel) {
@@ -100,15 +99,13 @@ export default function CategoriasProduto() {
   }
 
   async function executarExcluirNivel(nivel) {
-    setActionError('');
     setWorkingId(`nivel-${nivel.id}`);
     try {
       await excluirNivelCategoria(nivel.id);
       setNiveis(prev => prev.filter(n => n.id !== nivel.id));
-      setActionSuccess('Rótulo de nível excluído.');
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Rótulo de nível excluído.');
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -132,8 +129,7 @@ export default function CategoriasProduto() {
       return prev.map(c => (c.id === categoriaSalva.id ? categoriaSalva : c));
     });
     setCategoriaModalOpen(false);
-    setActionSuccess(categoriaModalMode === 'create' ? 'Categoria criada com sucesso.' : 'Categoria renomeada com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(categoriaModalMode === 'create' ? 'Categoria criada com sucesso.' : 'Categoria renomeada com sucesso.');
   }
 
   function handleExcluirCategoria(categoria) {
@@ -147,15 +143,13 @@ export default function CategoriasProduto() {
   }
 
   async function executarExcluirCategoria(categoria) {
-    setActionError('');
     setWorkingId(`categoria-${categoria.id}`);
     try {
       await excluirCategoria(categoria.id);
       setCategorias(prev => prev.filter(c => c.id !== categoria.id));
-      setActionSuccess('Categoria excluída.');
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Categoria excluída.');
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -181,18 +175,6 @@ export default function CategoriasProduto() {
           <p className="page-subtitle">Níveis, códigos e nomes usados para gerar o SKU automaticamente</p>
         </div>
       </div>
-
-      {actionError && (
-        <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
-          {actionError}
-        </p>
-      )}
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       {loading && (
         <div className="empty-state">

@@ -5,6 +5,7 @@ import { obterConfiguracaoFinanceira, atualizarConfiguracaoFinanceira } from '..
 import DespesaFixaModal from '../components/DespesaFixaModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { useToast } from '../context/ToastContext';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
 import './Contas.css';
@@ -21,8 +22,6 @@ export default function DespesasFixas() {
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [actionSuccess, setActionSuccess] = useState('');
   const [workingId, setWorkingId] = useState(null);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -33,9 +32,9 @@ export default function DespesasFixas() {
   const [aliquotaLoading, setAliquotaLoading] = useState(true);
   const [aliquotaSaving, setAliquotaSaving] = useState(false);
   const [aliquotaError, setAliquotaError] = useState('');
-  const [aliquotaSuccess, setAliquotaSuccess] = useState('');
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+  const toast = useToast();
 
   useEffect(() => {
     loadDespesas();
@@ -86,18 +85,16 @@ export default function DespesasFixas() {
       return prev.map(d => (d.id === despesaSalva.id ? despesaSalva : d));
     });
     setModalOpen(false);
-    setActionSuccess(modalMode === 'create' ? 'Despesa fixa criada com sucesso.' : 'Despesa fixa atualizada com sucesso.');
-    setTimeout(() => setActionSuccess(''), 4000);
+    toast.success(modalMode === 'create' ? 'Despesa fixa criada com sucesso.' : 'Despesa fixa atualizada com sucesso.');
   }
 
   async function handleToggle(despesa) {
-    setActionError('');
     setWorkingId(despesa.id);
     try {
       const atualizada = await alternarAtivoDespesaFixa(despesa.id);
       setDespesas(prev => prev.map(d => (d.id === atualizada.id ? atualizada : d)));
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -114,15 +111,13 @@ export default function DespesasFixas() {
   }
 
   async function executarRemover(despesa) {
-    setActionError('');
     setWorkingId(despesa.id);
     try {
       await removerDespesaFixa(despesa.id);
       setDespesas(prev => prev.filter(d => d.id !== despesa.id));
-      setActionSuccess('Despesa fixa excluída.');
-      setTimeout(() => setActionSuccess(''), 4000);
+      toast.success('Despesa fixa excluída.');
     } catch (err) {
-      setActionError(err.message);
+      toast.error(err.message);
     } finally {
       setWorkingId(null);
     }
@@ -142,8 +137,7 @@ export default function DespesasFixas() {
     try {
       const configuracao = await atualizarConfiguracaoFinanceira(percentual / 100);
       setAliquota(String(Number(configuracao.aliquota_imposto) * 100));
-      setAliquotaSuccess('Alíquota de imposto atualizada.');
-      setTimeout(() => setAliquotaSuccess(''), 4000);
+      toast.success('Alíquota de imposto atualizada.');
     } catch (err) {
       setAliquotaError(err.message);
     } finally {
@@ -179,9 +173,6 @@ export default function DespesasFixas() {
           Usada no cálculo do Ponto de Equilíbrio para estimar os impostos sobre a receita do período.
         </p>
         {aliquotaError && <div className="modal-error">{aliquotaError}</div>}
-        {aliquotaSuccess && (
-          <p className="text-sm" style={{ color: 'var(--color-success)' }}>{aliquotaSuccess}</p>
-        )}
         <form className="despesas-fixas-aliquota-form" onSubmit={handleSalvarAliquota}>
           <div className="input-wrapper">
             <label className="input-label" htmlFor="aliquota-imposto">Alíquota (%)</label>
@@ -202,18 +193,6 @@ export default function DespesasFixas() {
           </button>
         </form>
       </div>
-
-      {actionError && (
-        <p className="text-sm" style={{ color: 'var(--color-danger)', marginBottom: 'var(--space-3)' }}>
-          {actionError}
-        </p>
-      )}
-
-      {actionSuccess && (
-        <p className="text-sm" style={{ color: 'var(--color-success)', marginBottom: 'var(--space-3)' }}>
-          {actionSuccess}
-        </p>
-      )}
 
       {loading && (
         <div className="empty-state">

@@ -10,6 +10,7 @@ import {
   buscarTodasAsPaginas,
   exportarRelatorioPDF,
 } from './relatoriosUtils';
+import { useToast } from '../../context/ToastContext';
 
 const TIPO_BADGE = {
   entrada: { className: 'badge-success', label: 'Entrada' },
@@ -30,7 +31,7 @@ export default function RelatorioEstoque() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exportando, setExportando] = useState(false);
-  const [exportError, setExportError] = useState('');
+  const toast = useToast();
 
   const dataInvalida = filtroInicio > filtroFim;
 
@@ -148,7 +149,6 @@ export default function RelatorioEstoque() {
   const skipLabel = Math.max(1, Math.ceil(dadosGrafico.length / 14));
 
   async function handleExportar() {
-    setExportError('');
     setExportando(true);
     try {
       const periodoLabel = `Período: ${formatDateBR(filtroInicio)} a ${formatDateBR(filtroFim)}${produtoSelecionado ? ` · Produto: ${produtoSelecionado.nome}` : ''}`;
@@ -159,7 +159,7 @@ export default function RelatorioEstoque() {
         periodoLabel,
       });
     } catch (err) {
-      setExportError(err.message);
+      toast.error(err.message);
     } finally {
       setExportando(false);
     }
@@ -215,7 +215,6 @@ export default function RelatorioEstoque() {
       {dataInvalida && (
         <p className="rel-inline-error"><AlertTriangle size={14} /> A data início não pode ser depois da data fim.</p>
       )}
-      {exportError && <p className="rel-inline-error"><AlertTriangle size={14} /> {exportError}</p>}
 
       {loading && !dataInvalida && (
         <div className="empty-state"><p className="text-sm text-secondary">Carregando relatório de estoque...</p></div>

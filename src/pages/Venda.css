@@ -9,7 +9,7 @@
 /* --- 2-column layout --- */
 .venda-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: var(--space-5);
   align-items: start;
 }
@@ -69,11 +69,17 @@
   box-shadow: 0 3px 10px rgba(167, 6, 54, 0.25);
 }
 
-/* Product grid */
+/* Product list */
+.venda-product-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
 .venda-product-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
 }
 
 /* Barcode button */
@@ -95,16 +101,74 @@
 
 /* ===== RIGHT COLUMN — Cart ===== */
 .venda-cart-col {
-  position: sticky;
-  top: var(--space-6);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 100px);
+  min-height: 0;
   overflow: hidden;
+}
+
+/* Desktop/tablet: a tela ocupa exatamente a viewport (dvh acompanha barras do
+   navegador; vh é o fallback). O cabeçalho da página tem altura própria, a
+   grade ocupa o resto (flex: 1) e o carrinho preenche essa altura — sem
+   número fixo e sem scroll da página para alcançar o Finalizar. */
+@media (min-width: 769px) {
+  .venda-page {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .venda-page > .page-header {
+    flex: 0 0 auto;
+  }
+
+  .venda-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .venda-products-col {
+    min-height: 0;
+  }
+
+  /* só a lista rola; busca, categorias e leitor de código ficam fixos */
+  .venda-product-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Miolo rolável (itens + cliente + ajustes + pagamento). Cabeçalho e rodapé
+   (saldo + Finalizar) ficam fora dele e nunca são cortados. */
+.cart-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cart-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-card, #fff);
+  box-shadow: 0 -6px 12px -10px rgba(0, 0, 0, 0.25);
 }
 
 .cart-header {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4) var(--space-5);
@@ -150,9 +214,15 @@
 
 /* Cart items */
 .cart-items {
-  flex: 1;
-  overflow-y: auto;
+  flex: none;
   padding: var(--space-2) 0;
+}
+
+/* modo kit: o cart-items é a única área rolável do cartão */
+.venda-cart-col > .cart-items {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .cart-item {
@@ -467,11 +537,12 @@
 /* === RESPONSIVE === */
 @media (max-width: 1100px) {
   .venda-layout {
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--space-4);
   }
 
-  .venda-product-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .cart-footer {
+    padding: var(--space-3);
   }
 }
 
@@ -480,33 +551,94 @@
     grid-template-columns: 1fr;
   }
 
+  /* Mobile: o carrinho vem depois da lista e rola com a página; o rodapé
+     (saldo + Finalizar) fica colado acima da barra inferior de navegação. */
   .venda-cart-col {
     position: static;
     max-height: none;
+    overflow: visible;
   }
 
-  .venda-product-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .cart-scroll {
+    overflow: visible;
+  }
+
+  .cart-footer {
+    position: sticky;
+    bottom: var(--bottom-nav-height, 64px);
+    z-index: 5;
+  }
+
+  /* Com saldo a pagar o formulário está aberto: o rodapé fica logo abaixo dele,
+     no fluxo normal, para nunca cobrir forma/valor/confirmar. Com o pagamento
+     completo (sem formulário) ele volta a ficar fixo acima da barra inferior. */
+  .cart-footer.cart-footer--inline {
+    position: static;
   }
 }
 
-@media (max-width: 420px) {
-  .venda-product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* P0-06 — pagamentos */
+/* Cliente / desconto / juros */
 .venda-payment-fields { display: flex; flex-direction: column; gap: var(--space-3); }
 .venda-payment-adjustments { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-.venda-payment-add { display: grid; grid-template-columns: 1.2fr 1fr auto auto; gap: var(--space-2); align-items: end; }
-.venda-fill-balance { white-space: nowrap; }
-.venda-payment-list { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2) 0; border-top: 1px solid var(--color-border); }
-.venda-payment-item { display: grid; grid-template-columns: 1fr auto auto auto; gap: var(--space-2); align-items: center; font-size: 0.85rem; }
-.venda-payment-item span:first-child { text-transform: capitalize; font-weight: 600; }
-.venda-payment-balance { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) 0; font-size: 0.8rem; }
-.venda-payment-error { color: var(--color-danger); margin: 0; }
-@media (max-width: 760px) {
-  .venda-payment-add { grid-template-columns: 1fr 1fr; }
-  .venda-payment-balance { flex-direction: column; }
+.venda-payment-error { color: var(--color-danger); margin: 0; font-weight: 600; }
+
+/* Resumo Total / Pago / Restante — saldo em destaque, sempre visível */
+.venda-payment-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-warning);
+  background: var(--color-warning-light);
+  font-size: var(--font-size-sm);
+}
+.venda-balance-line { display: flex; justify-content: space-between; align-items: baseline; font-variant-numeric: tabular-nums; }
+.venda-balance-line--saldo { font-size: var(--font-size-md); font-weight: 700; padding-top: 3px; margin-top: 2px; border-top: 1px dashed var(--color-border); }
+.venda-balance-line--saldo strong { font-size: var(--font-size-xl); }
+.venda-balance-line--troco { font-weight: 700; }
+.venda-balance-status { margin: 0; font-size: var(--font-size-xs); font-weight: 700; }
+/* Falta pagar: o saldo é o elemento dominante do painel */
+.venda-payment-balance--falta {
+  border-width: 2px;
+  background: var(--color-warning-light);
+}
+.venda-payment-balance--falta .venda-balance-line--saldo {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg, 17px);
+}
+.venda-payment-balance--falta .venda-balance-line--saldo strong {
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.venda-payment-balance--falta .venda-balance-status {
+  color: var(--color-text-secondary);
+}
+.venda-payment-balance--ok { border-color: var(--color-success); background: var(--color-success-light); color: var(--color-success); }
+.venda-payment-balance--excess { border-color: var(--color-danger); background: var(--color-danger-light); color: var(--color-danger); }
+
+.cart-finalize-btn { min-height: 48px; }
+
+/* === Densidade do carrinho (compactação moderada: só margens/paddings;
+   fontes e informações permanecem) === */
+.venda-cart-col .cart-header { padding: var(--space-3) var(--space-4); }
+.venda-cart-col .cart-items { padding: 0; }
+.venda-cart-col .cart-item { padding: var(--space-2) var(--space-4); }
+.venda-cart-col .cart-scroll .cart-summary { padding: var(--space-3) var(--space-4); }
+.venda-cart-col .venda-payment-fields { gap: var(--space-2); }
+.venda-cart-col .venda-payment-adjustments { gap: var(--space-2); }
+.venda-cart-col .input-wrapper { gap: 2px; }
+.venda-cart-col .input-label { font-size: var(--font-size-xs); font-weight: 600; }
+.venda-cart-col .input-field { padding: 8px 12px; }
+.venda-cart-col .cart-footer { gap: var(--space-2); padding: var(--space-3); }
+.venda-cart-col .venda-payment-balance { padding: var(--space-2) var(--space-3); gap: 0; }
+.venda-cart-col .venda-balance-line--saldo { margin-top: 2px; padding-top: 2px; }
+.venda-cart-col .cart-finalize-btn { min-height: 46px; }
+
+/* Desktop/tablet: o cabeçalho "Nova Venda" ocupa menos altura, devolvendo-a
+   ao carrinho e à lista (o título continua igual). */
+@media (min-width: 769px) {
+  .venda-page.page-content { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+  .venda-page > .page-header { margin-bottom: var(--space-3); }
 }

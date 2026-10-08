@@ -1,0 +1,119 @@
+/* Pagamento do PDV (dentro do carrinho da tela Venda) */
+.pdv-pay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+/* Pagamentos já confirmados */
+.pdv-pay-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pdv-pay-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-success-light);
+  font-size: var(--font-size-sm);
+}
+.pdv-pay-item-check { color: var(--color-success); display: inline-flex; }
+.pdv-pay-item-forma { font-weight: 600; min-width: 0; display: flex; flex-direction: column; }
+.pdv-pay-item-forma small { font-weight: 500; color: var(--color-text-secondary); }
+.pdv-pay-item-valor { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pdv-pay-item-remove { min-height: 28px; }
+
+/* Como o cliente vai pagar? — escolha de um clique */
+.pdv-pay-formas { border: 0; margin: 0; padding: 0; min-width: 0; }
+.pdv-pay-formas legend { padding: 0; margin-bottom: 4px; }
+.pdv-pay-formas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.pdv-pay-forma {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 8px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+.pdv-pay-forma input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+.pdv-pay-forma:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.pdv-pay-forma:focus-within { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pdv-pay-forma--ativa {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(167, 6, 54, 0.25);
+}
+.pdv-pay-forma--ativa:hover { color: #fff; }
+
+.pdv-pay-valor {
+  width: 100%;
+  min-height: 42px;
+  font-size: var(--font-size-lg, 17px);
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.pdv-pay .input-field[aria-invalid='true'] { border-color: var(--color-danger); }
+.pdv-pay .input-field:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pdv-pay .input-label { display: flex; align-items: center; gap: 4px; }
+
+.pdv-pay-error {
+  margin: 4px 0 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+.pdv-pay-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+
+/* Dinheiro: venda / recebido / troco */
+.pdv-pay-troco { margin: 6px 0 0; display: flex; flex-direction: column; gap: 2px; font-size: var(--font-size-sm); }
+.pdv-pay-troco > div { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.pdv-pay-troco dt { color: var(--color-text-secondary); }
+.pdv-pay-troco dd { margin: 0; font-weight: 700; }
+.pdv-pay-troco-total { padding-top: 3px; border-top: 1px dashed var(--color-border); font-size: var(--font-size-md); }
+.pdv-pay-troco-total dd { color: var(--color-primary); }
+
+.pdv-pay-confirmar { min-height: 42px; gap: var(--space-2); }
+.pdv-pay-confirmar:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+/* botão de confirmar sem forma escolhida: claramente inativo */
+.pdv-pay-confirmar:disabled {
+  background: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}

@@ -12,7 +12,15 @@ import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
 import PagamentoPDV from '../components/PagamentoPDV';
 import { selecionarProdutosPdv } from '../utils/produtosPdv';
-import { calcularResumoPagamento, deCentavos, pagamentosAposMudancaDoCarrinho, pagamentosParaEnvio } from '../utils/pagamentoVenda';
+import {
+  calcularResumoPagamento,
+  confirmarPagamentoPendente,
+  deCentavos,
+  pagamentosAposMudancaDoCarrinho,
+  pagamentosParaEnvio,
+  recusarPagamentoPendente,
+  removerPagamentoDaLista,
+} from '../utils/pagamentoVenda';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import './Venda.css';
 
@@ -292,7 +300,8 @@ export default function Venda() {
   const itemCount = cart.reduce((sum, row) => sum + rowQtyCount(row), 0);
   // Pagamento calculado em centavos inteiros (ver utils/pagamentoVenda.js).
   const resumoPagamento = calcularResumoPagamento(total, pagamentos);
-  const totalPagamentos = deCentavos(resumoPagamento.pagoCentavos);
+  // "Pago" é o que já entrou; crediário abate o saldo mas fica em "A receber".
+  const totalPagamentos = deCentavos(resumoPagamento.pagoCentavos - resumoPagamento.aReceberCentavos);
   const saldoPagamento = deCentavos(resumoPagamento.saldoCentavos);
 
   const kitDraftTotal    = kitDraft.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -304,8 +313,18 @@ export default function Venda() {
     setSaveError('');
   }
 
+  // PIX nasce "aguardando": só conta como pago quando o operador confirma o
+  // recebimento; se falhar, vira "recusado" e não mexe no saldo.
+  function confirmarPagamento(index) {
+    setPagamentos(prev => confirmarPagamentoPendente(prev, index));
+  }
+
+  function recusarPagamento(index) {
+    setPagamentos(prev => recusarPagamentoPendente(prev, index));
+  }
+
   function removerPagamento(index) {
-    setPagamentos(prev => prev.filter((_, i) => i !== index));
+    setPagamentos(prev => removerPagamentoDaLista(prev, index));
   }
 
   function limparVenda() {
@@ -328,7 +347,9 @@ export default function Venda() {
       if (!resumoPagamento.podeFinalizar) {
         throw new Error(resumoPagamento.excedente
           ? `Os pagamentos excedem o total em ${formatarMoeda(Math.abs(saldoPagamento))}. Remova ou ajuste um pagamento.`
-          : `Falta distribuir ${formatarMoeda(Math.abs(saldoPagamento))} entre os pagamentos.`);
+          : resumoPagamento.aguardando
+            ? 'Há pagamento aguardando confirmação. Confirme o recebimento ou remova o pagamento.'
+            : `Falta distribuir ${formatarMoeda(Math.abs(saldoPagamento))} entre os pagamentos.`);
       }
 
       if (!saleIdempotencyKeyRef.current) {
@@ -703,7 +724,9 @@ export default function Venda() {
                       resumo={resumoPagamento}
                       pagamentos={pagamentos}
                       temCliente={Boolean(clienteId)}
-                      onConfirmar={adicionarPagamento}
+                      onAdicionar={adicionarPagamento}
+                      onConfirmarPendente={confirmarPagamento}
+                      onRecusarPendente={recusarPagamento}
                       onRemover={removerPagamento}
                     />
                   )}
@@ -711,36 +734,56 @@ export default function Venda() {
               </div>
               </div>
 
-              {/* Rodapé fixo do carrinho: o saldo e o Finalizar nunca saem da tela */}
+              {/* Rodapé fixo do carrinho: Pago / Restante e o Finalizar nunca saem da tela.
+                  O destaque grande de Total/Restante fica no topo do PagamentoPDV. */}
               <div className={`cart-footer ${total > 0 && resumoPagamento.saldoCentavos > 0 ? 'cart-footer--inline' : ''}`}>
                 {saveError && (
                   <p className="text-sm venda-payment-error" role="alert">{saveError}</p>
                 )}
 
                 <div
-                  className={`venda-payment-balance ${resumoPagamento.completo ? 'venda-payment-balance--ok' : ''} ${total > 0 && resumoPagamento.saldoCentavos > 0 ? 'venda-payment-balance--falta' : ''} ${resumoPagamento.excedente ? 'venda-payment-balance--excess' : ''}`}
+                  className={`venda-payment-balance ${resumoPagamento.completo && !resumoPagamento.aguardando ? 'venda-payment-balance--ok' : ''} ${total > 0 && resumoPagamento.saldoCentavos > 0 ? 'venda-payment-balance--falta' : ''} ${resumoPagamento.excedente ? 'venda-payment-balance--excess' : ''}`}
                   role="status"
                   aria-live="polite"
                 >
-                  <div className="venda-balance-line"><span>Total</span><strong>{formatarMoeda(total)}</strong></div>
-                  <div className="venda-balance-line"><span>Pago</span><strong>{formatarMoeda(totalPagamentos)}</strong></div>
-                  <div className="venda-balance-line venda-balance-line--saldo">
-                    <span>{resumoPagamento.excedente ? 'Excedente' : resumoPagamento.completo ? 'Restante' : 'Falta pagar'}</span>
-                    <strong>{formatarMoeda(Math.abs(saldoPagamento))}</strong>
-                  </div>
+                  {total > 0 && (
+                    <>
+                      <div className="venda-balance-line"><span>Pago</span><strong>{formatarMoeda(totalPagamentos)}</strong></div>
+                      {resumoPagamento.aReceberCentavos > 0 && (
+                        <div className="venda-balance-line">
+                          <span>A receber (crediário)</span>
+                          <strong>{formatarMoeda(deCentavos(resumoPagamento.aReceberCentavos))}</strong>
+                        </div>
+                      )}
+                      <div className="venda-balance-line venda-balance-line--saldo">
+                        <span>{resumoPagamento.excedente ? 'Excedente' : 'Restante'}</span>
+                        <strong>{formatarMoeda(Math.abs(saldoPagamento))}</strong>
+                      </div>
+                      {resumoPagamento.aguardando && (
+                        <div className="venda-balance-line">
+                          <span>Aguardando confirmação</span>
+                          <strong>{formatarMoeda(deCentavos(resumoPagamento.pendenteCentavos))}</strong>
+                        </div>
+                      )}
+                    </>
+                  )}
                   {resumoPagamento.trocoCentavos > 0 && (
                     <div className="venda-balance-line venda-balance-line--troco">
                       <span>Troco a devolver</span>
                       <strong>{formatarMoeda(deCentavos(resumoPagamento.trocoCentavos))}</strong>
                     </div>
                   )}
-                  <p className="venda-balance-status">
-                    {resumoPagamento.completo
-                      ? '✓ Pagamento completo'
-                      : resumoPagamento.excedente
-                        ? 'Pagamentos acima do total — remova ou ajuste um pagamento'
-                        : total > 0 ? 'Finalizar libera ao quitar o valor restante' : 'Adicione produtos ao carrinho'}
-                  </p>
+                  {(total <= 0 || resumoPagamento.excedente || resumoPagamento.aguardando || resumoPagamento.completo) && (
+                    <p className="venda-balance-status">
+                      {total <= 0
+                        ? 'Adicione produtos ao carrinho'
+                        : resumoPagamento.excedente
+                          ? 'Pagamentos acima do total — remova ou ajuste um pagamento'
+                          : resumoPagamento.aguardando
+                            ? 'Aguardando confirmação do pagamento'
+                            : '✓ Pagamento completo'}
+                    </p>
+                  )}
                 </div>
 
                 <button

@@ -1,92 +1,128 @@
-/* Pagamento do PDV (dentro do carrinho da tela Venda) */
+/* Pagamento do PDV (dentro do carrinho da tela Venda) — layout orientado pelo
+   saldo restante: TOTAL/RESTANTE -> VALOR -> FORMAS -> PAGAMENTOS. */
 .pdv-pay {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
 }
 
-/* Pagamentos já confirmados */
-.pdv-pay-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.pdv-pay-item {
+/* 1. Total / Restante ------------------------------------------------- */
+.pdv-pay-hero {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--color-success-light);
-  font-size: var(--font-size-sm);
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: var(--space-3);
+  padding: 8px var(--space-3);
+  border: 2px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-light);
 }
-.pdv-pay-item-check { color: var(--color-success); display: inline-flex; }
-.pdv-pay-item-forma { font-weight: 600; min-width: 0; display: flex; flex-direction: column; }
-.pdv-pay-item-forma small { font-weight: 500; color: var(--color-text-secondary); }
-.pdv-pay-item-valor { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pdv-pay-item-remove { min-height: 28px; }
+.pdv-pay-hero span {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-text-secondary);
+}
+.pdv-pay-hero strong {
+  display: block;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.pdv-pay-hero-total strong { font-size: var(--font-size-lg, 17px); color: var(--color-text-primary); }
+.pdv-pay-hero-restante { text-align: right; }
+.pdv-pay-hero-restante strong { font-size: 28px; letter-spacing: -0.5px; color: var(--color-primary); }
+.pdv-pay-hero--ok { border-color: var(--color-success); background: var(--color-success-light); }
+.pdv-pay-hero--ok .pdv-pay-hero-restante span,
+.pdv-pay-hero--ok .pdv-pay-hero-restante strong { color: var(--color-success); }
+.pdv-pay-hero--excesso { border-color: var(--color-danger); background: var(--color-danger-light); }
+.pdv-pay-hero--excesso .pdv-pay-hero-restante span,
+.pdv-pay-hero--excesso .pdv-pay-hero-restante strong { color: var(--color-danger); }
 
-/* Como o cliente vai pagar? — escolha de um clique */
+/* 2. Valor do próximo pagamento + 3. Formas -------------------------- */
+.pdv-pay-entrada { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+
+.pdv-pay .input-label,
+.venda-cart-col .pdv-pay .input-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-text-secondary);
+}
+
+.pdv-pay-valor-wrap { position: relative; }
+.pdv-pay-valor-prefixo {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+.pdv-pay .input-field.pdv-pay-valor,
+.venda-cart-col .pdv-pay .input-field.pdv-pay-valor {
+  width: 100%;
+  min-height: 48px;
+  padding-left: 44px;
+  font-size: 26px;
+  font-weight: 800;
+  text-align: right;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.pdv-pay .input-field[aria-invalid='true'] { border-color: var(--color-danger); }
+.pdv-pay .input-field:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
 .pdv-pay-formas { border: 0; margin: 0; padding: 0; min-width: 0; }
-.pdv-pay-formas legend { padding: 0; margin-bottom: 4px; }
+.pdv-pay-formas legend { padding: 0; margin-bottom: 6px; }
 .pdv-pay-formas-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 .pdv-pay-forma {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 8px;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 12px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-card, #fff);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 700;
   cursor: pointer;
   user-select: none;
   transition: all var(--transition-fast);
 }
-.pdv-pay-forma input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  margin: 0;
-}
-.pdv-pay-forma:hover { border-color: var(--color-primary); color: var(--color-primary); }
-.pdv-pay-forma:focus-within { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pdv-pay-forma:hover { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-ultra); }
+.pdv-pay-forma:active { transform: scale(0.98); }
+.pdv-pay-forma:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 .pdv-pay-forma--ativa {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #fff;
   box-shadow: 0 3px 10px rgba(167, 6, 54, 0.25);
 }
-.pdv-pay-forma--ativa:hover { color: #fff; }
-
-.pdv-pay-valor {
-  width: 100%;
-  min-height: 42px;
-  font-size: var(--font-size-lg, 17px);
-  font-weight: 700;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+.pdv-pay-forma--ativa:hover { color: #fff; background: var(--color-primary); }
+/* Crediário é a forma menos usada: ocupa a linha toda, mais discreta */
+.pdv-pay-forma--crediario {
+  grid-column: 1 / -1;
+  min-height: 36px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
 }
-.pdv-pay .input-field[aria-invalid='true'] { border-color: var(--color-danger); }
-.pdv-pay .input-field:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-.pdv-pay .input-label { display: flex; align-items: center; gap: 4px; }
+.pdv-pay-forma--crediario:not(.pdv-pay-forma--ativa) { color: var(--color-text-secondary); }
 
 .pdv-pay-error {
   margin: 4px 0 0;
@@ -95,7 +131,58 @@
   color: var(--color-danger);
 }
 
-.pdv-pay-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+/* Passo curto (dinheiro / parcelas) */
+.pdv-pay-passo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-ultra);
+}
+.pdv-pay-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.pdv-pay-row .input-wrapper { min-width: 0; }
+.pdv-pay-row .input-field { width: 100%; min-width: 0; box-sizing: border-box; }
+.pdv-pay-passo-acoes { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2); min-width: 0; }
+.pdv-pay-confirmar { min-height: 46px; gap: var(--space-2); min-width: 0; white-space: normal; line-height: 1.2; text-align: center; }
+/* Telas estreitas: Confirmar ocupa a linha toda, Cancelar vai abaixo */
+@media (max-width: 480px) {
+  .pdv-pay-passo-acoes { grid-template-columns: minmax(0, 1fr); }
+  .pdv-pay-confirmar { order: -1; }
+}
+
+/* Mobile/tablet (a barra de navegação inferior fixa aparece até 768px): o passo
+   é levado à vista por scrollIntoView, que encostaria o fim dele (Cancelar /
+   Confirmar) embaixo da barra. A margem de rolagem reserva o espaço da barra. */
+@media (max-width: 768px) {
+  .pdv-pay-passo {
+    scroll-margin-bottom: calc(var(--bottom-nav-height, 64px) + var(--space-3));
+  }
+}
+
+/* Parcelamento: atalhos + valor da parcela */
+.pdv-pay-parcelamento { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.pdv-pay-parcelas-chips { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.pdv-pay-chip {
+  min-height: 40px;
+  padding: 0 4px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.pdv-pay-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.pdv-pay-chip:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pdv-pay-chip--ativo,
+.pdv-pay-chip--ativo:hover { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.pdv-pay-parcelas-resumo { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: var(--font-size-md); color: var(--color-text-primary); overflow-wrap: anywhere; }
+.pdv-pay-parcelas-resumo small { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); }
+.pdv-pay-confirmar:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
 /* Dinheiro: venda / recebido / troco */
 .pdv-pay-troco { margin: 6px 0 0; display: flex; flex-direction: column; gap: 2px; font-size: var(--font-size-sm); }
@@ -105,15 +192,54 @@
 .pdv-pay-troco-total { padding-top: 3px; border-top: 1px dashed var(--color-border); font-size: var(--font-size-md); }
 .pdv-pay-troco-total dd { color: var(--color-primary); }
 
-.pdv-pay-confirmar { min-height: 42px; gap: var(--space-2); }
-.pdv-pay-confirmar:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-
-/* botão de confirmar sem forma escolhida: claramente inativo */
-.pdv-pay-confirmar:disabled {
-  background: var(--color-border);
-  border-color: var(--color-border);
-  color: var(--color-text-muted);
-  box-shadow: none;
-  cursor: not-allowed;
-  transform: none;
+/* 4. Pagamentos realizados ------------------------------------------- */
+.pdv-pay-lista-bloco { display: flex; flex-direction: column; gap: 6px; }
+.pdv-pay-subtitulo {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-text-secondary);
 }
+.pdv-pay-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pdv-pay-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm);
+}
+.pdv-pay-item--confirmado { background: var(--color-success-light); }
+.pdv-pay-item--pendente { background: var(--color-warning-light); border-color: var(--color-warning); }
+.pdv-pay-item--recusado { background: var(--color-danger-light); }
+.pdv-pay-item--recusado .pdv-pay-item-valor { text-decoration: line-through; opacity: 0.7; }
+.pdv-pay-item-linha { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); }
+.pdv-pay-item-icone { display: inline-flex; }
+.pdv-pay-item--confirmado .pdv-pay-item-icone { color: var(--color-success); }
+.pdv-pay-item--pendente .pdv-pay-item-icone { color: var(--color-warning); }
+.pdv-pay-item--recusado .pdv-pay-item-icone { color: var(--color-danger); }
+.pdv-pay-item-forma { display: flex; flex-direction: column; min-width: 0; }
+.pdv-pay-item-nome { font-weight: 700; }
+.pdv-pay-item-nome small { font-weight: 500; color: var(--color-text-secondary); }
+.pdv-pay-item-status { font-weight: 600; color: var(--color-text-secondary); }
+.pdv-pay-item-valor { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: var(--font-size-md); }
+.pdv-pay-item-remove {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.pdv-pay-item-remove:hover { background: var(--color-danger-light); color: var(--color-danger); }
+.pdv-pay-item-remove:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pdv-pay-item-acoes { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2); }
+.pdv-pay-item-acoes .btn { min-height: 36px; }
+.pdv-pay-item-recusar { color: var(--color-danger); }

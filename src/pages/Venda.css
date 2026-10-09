@@ -595,22 +595,16 @@
 }
 .venda-balance-line { display: flex; justify-content: space-between; align-items: baseline; font-variant-numeric: tabular-nums; }
 .venda-balance-line--saldo { font-size: var(--font-size-md); font-weight: 700; padding-top: 3px; margin-top: 2px; border-top: 1px dashed var(--color-border); }
-.venda-balance-line--saldo strong { font-size: var(--font-size-xl); }
+.venda-balance-line--saldo strong { font-size: var(--font-size-lg, 17px); }
 .venda-balance-line--troco { font-weight: 700; }
 .venda-balance-status { margin: 0; font-size: var(--font-size-xs); font-weight: 700; }
-/* Falta pagar: o saldo é o elemento dominante do painel */
+/* Rodapé: resumo compacto (Pago / Restante). O destaque grande do Restante
+   fica no topo do PagamentoPDV, junto do valor do próximo pagamento. */
 .venda-payment-balance--falta {
-  border-width: 2px;
   background: var(--color-warning-light);
 }
 .venda-payment-balance--falta .venda-balance-line--saldo {
   color: var(--color-primary);
-  font-size: var(--font-size-lg, 17px);
-}
-.venda-payment-balance--falta .venda-balance-line--saldo strong {
-  font-size: 26px;
-  line-height: 1.1;
-  letter-spacing: -0.5px;
 }
 .venda-payment-balance--falta .venda-balance-status {
   color: var(--color-text-secondary);
@@ -642,3 +636,14 @@
   .venda-page.page-content { padding-top: var(--space-4); padding-bottom: var(--space-4); }
   .venda-page > .page-header { margin-bottom: var(--space-3); }
 }
+
+/* Compactação do bloco Cliente / Desconto / Juros e do rodapé para a área de
+   pagamento caber sem rolagem interna em ~900px de altura. */
+.venda-cart-col .cart-scroll .cart-summary { padding: var(--space-2) var(--space-4); }
+.venda-cart-col .venda-payment-fields { gap: 6px; }
+.venda-cart-col .venda-payment-adjustments { gap: 6px; }
+.venda-cart-col .input-field { padding: 6px 10px; }
+.venda-cart-col .cart-item { padding: 6px var(--space-4); }
+.venda-cart-col .cart-footer { gap: 6px; padding: var(--space-2) var(--space-3); }
+.venda-cart-col .venda-payment-balance { padding: 6px var(--space-3); }
+.venda-cart-col .cart-finalize-btn { min-height: 44px; }

@@ -12,15 +12,26 @@ import {
   montarPagamento,
   pagamentosParaEnvio,
   pagamentosAposMudancaDoCarrinho,
+  confirmarPagamentoPendente,
+  recusarPagamentoPendente,
+  removerPagamentoDaLista,
+  rotuloStatus,
+  FORMAS_PAGAMENTO,
 } from './pagamentoVenda.js';
 
-// Simula o operador: monta o pagamento com o campo Valor como a tela o mostra
-// (sugerido = saldo restante) e lança no estado, como o PagamentoPDV faz.
+// Simula o operador como o PagamentoPDV: o campo Valor mostra o que ainda pode
+// ser alocado (restante menos o reservado em PIX aguardando); tocar na forma
+// registra o pagamento. PIX nasce "aguardando": por padrão o operador confirma
+// o recebimento em seguida (passe { confirmar: false } para deixá-lo pendente).
 function lancar(total, pagamentos, forma, extra = {}) {
+  const { confirmar = true, ...resto } = extra;
   const resumo = calcularResumoPagamento(total, pagamentos);
-  const textoValor = extra.textoValor ?? textoValorExibido(null, resumo.saldoCentavos);
-  const r = montarPagamento({ forma, saldoCentavos: resumo.saldoCentavos, temCliente: true, ...extra, textoValor });
-  return r.pagamento ? { pagamentos: [...pagamentos, r.pagamento], erro: null } : { pagamentos, erro: r };
+  const textoValor = resto.textoValor ?? textoValorExibido(null, resumo.alocavelCentavos);
+  const r = montarPagamento({ forma, saldoCentavos: resumo.alocavelCentavos, temCliente: true, ...resto, textoValor });
+  if (!r.pagamento) return { pagamentos, erro: r };
+  let lista = [...pagamentos, r.pagamento];
+  if (confirmar && r.pagamento.status === 'pendente') lista = confirmarPagamentoPendente(lista, lista.length - 1);
+  return { pagamentos: lista, erro: null };
 }
 
 describe('paraCentavos', () => {
@@ -312,5 +323,152 @@ describe('pagamentos residuais ao limpar o carrinho', () => {
     const resumoNova = calcularResumoPagamento(30, aposLimpar);
     expect(resumoNova).toMatchObject({ pagoCentavos: 0, saldoCentavos: 3000 });
     expect(valorSugerido(resumoNova.saldoCentavos)).toBe('30,00');
+  });
+});
+
+describe('fluxo orientado pelo saldo restante (PDV)', () => {
+  it('PIX nasce aguardando confirmação; débito/crédito/dinheiro nascem confirmados', () => {
+    const status = f => montarPagamento({ forma: f, textoValor: '10,00', saldoCentavos: 5000, temCliente: true }).pagamento.status;
+    expect(status('pix')).toBe('pendente');
+    expect(status('debito')).toBe('confirmado');
+    expect(status('credito')).toBe('confirmado');
+    expect(status('dinheiro')).toBe('confirmado');
+  });
+
+  it('1. R$ 50: valor inicial = 50 -> PIX 25 confirmado -> restante 25 -> próximo valor 25 -> DÉBITO automático 25 -> completo', () => {
+    let resumo = calcularResumoPagamento(50, []);
+    expect(textoValorExibido(null, resumo.alocavelCentavos)).toBe('50,00');
+    expect(resumo).toMatchObject({ totalCentavos: 5000, pagoCentavos: 0, saldoCentavos: 5000 });
+
+    let s = lancar(50, [], 'pix', { textoValor: '25,00' });
+    resumo = calcularResumoPagamento(50, s.pagamentos);
+    expect(resumo).toMatchObject({ pagoCentavos: 2500, saldoCentavos: 2500, aguardando: false, podeFinalizar: false });
+    expect(textoValorExibido(null, resumo.alocavelCentavos)).toBe('25,00');
+
+    s = lancar(50, s.pagamentos, 'debito'); // sem redigitar
+    expect(s.pagamentos[1]).toMatchObject({ forma_pagamento: 'debito', valor: 25 });
+    resumo = calcularResumoPagamento(50, s.pagamentos);
+    expect(resumo).toMatchObject({ pagoCentavos: 5000, saldoCentavos: 0, completo: true, podeFinalizar: true });
+  });
+
+  it('2. R$ 50 -> PIX R$ 50 (valor automático) -> completo', () => {
+    const s = lancar(50, [], 'pix');
+    expect(s.pagamentos[0].valor).toBe(50);
+    expect(calcularResumoPagamento(50, s.pagamentos)).toMatchObject({ completo: true, podeFinalizar: true });
+  });
+
+  it('3. R$ 100 -> PIX 30 -> DÉBITO automático 70', () => {
+    let s = lancar(100, [], 'pix', { textoValor: '30,00' });
+    s = lancar(100, s.pagamentos, 'debito');
+    expect(s.pagamentos.map(p => p.valor)).toEqual([30, 70]);
+    expect(calcularResumoPagamento(100, s.pagamentos).podeFinalizar).toBe(true);
+  });
+
+  it('4. R$ 100 -> PIX 30 -> DÉBITO 40 -> CRÉDITO automático 30', () => {
+    let s = lancar(100, [], 'pix', { textoValor: '30,00' });
+    s = lancar(100, s.pagamentos, 'debito', { textoValor: '40,00' });
+    expect(calcularResumoPagamento(100, s.pagamentos)).toMatchObject({ saldoCentavos: 3000, alocavelCentavos: 3000 });
+    s = lancar(100, s.pagamentos, 'credito');
+    expect(s.pagamentos.map(p => p.valor)).toEqual([30, 40, 30]);
+    expect(calcularResumoPagamento(100, s.pagamentos).podeFinalizar).toBe(true);
+  });
+
+  it('5. pagamento acima do saldo é rejeitado (inclusive acima do que ainda está alocável)', () => {
+    const acima = lancar(50, [], 'debito', { textoValor: '50,01' });
+    expect(acima.erro).toMatchObject({ campo: 'valor' });
+    expect(acima.pagamentos).toEqual([]);
+    // PIX 30 aguardando reserva 30: só restam 20 para alocar
+    const pix = lancar(50, [], 'pix', { textoValor: '30,00', confirmar: false });
+    const tentativa = lancar(50, pix.pagamentos, 'debito', { textoValor: '25,00' });
+    expect(tentativa.erro).toMatchObject({ campo: 'valor' });
+    expect(tentativa.pagamentos).toHaveLength(1);
+  });
+
+  it('6. pagamento de R$ 0 é rejeitado', () => {
+    const zero = lancar(50, [], 'debito', { textoValor: '0,00' });
+    expect(zero.erro).toMatchObject({ campo: 'valor', erro: 'Informe um valor maior que R$ 0,00.' });
+    expect(zero.pagamentos).toEqual([]);
+  });
+
+  it('7. remover pagamento recalcula o saldo e o campo volta a sugerir o novo restante', () => {
+    let s = lancar(50, [], 'pix', { textoValor: '25,00' });
+    s = lancar(50, s.pagamentos, 'debito');
+    const sem = removerPagamentoDaLista(s.pagamentos, 1);
+    const resumo = calcularResumoPagamento(50, sem);
+    expect(resumo).toMatchObject({ pagoCentavos: 2500, saldoCentavos: 2500, podeFinalizar: false });
+    expect(textoValorExibido(null, resumo.alocavelCentavos)).toBe('25,00');
+  });
+
+  it('8. pagamento RECUSADO não reduz o saldo, não reserva valor e não bloqueia um novo pagamento', () => {
+    let s = lancar(50, [], 'pix', { textoValor: '25,00', confirmar: false });
+    s = { pagamentos: recusarPagamentoPendente(s.pagamentos, 0) };
+    const resumo = calcularResumoPagamento(50, s.pagamentos);
+    expect(resumo).toMatchObject({ pagoCentavos: 0, saldoCentavos: 5000, pendenteCentavos: 0, alocavelCentavos: 5000, podeFinalizar: false });
+    expect(rotuloStatus(s.pagamentos[0].status)).toBe('Recusado');
+    expect(pagamentosParaEnvio(s.pagamentos)).toEqual([]);
+  });
+
+  it('9. PIX PENDENTE não reduz o restante, reserva o valor e impede finalizar', () => {
+    const s = lancar(50, [], 'pix', { textoValor: '25,00', confirmar: false });
+    const resumo = calcularResumoPagamento(50, s.pagamentos);
+    expect(s.pagamentos[0].status).toBe('pendente');
+    expect(rotuloStatus('pendente')).toBe('Aguardando pagamento');
+    expect(resumo).toMatchObject({
+      pagoCentavos: 0, saldoCentavos: 5000, pendenteCentavos: 2500, alocavelCentavos: 2500, aguardando: true, podeFinalizar: false,
+    });
+    // o próximo pagamento sugere só o que ainda não está reservado
+    expect(textoValorExibido(null, resumo.alocavelCentavos)).toBe('25,00');
+    expect(pagamentosParaEnvio(s.pagamentos)).toEqual([]);
+  });
+
+  it('9b. venda totalmente alocada em PIX pendente: não finaliza até confirmar; confirmado, finaliza', () => {
+    const pendente = lancar(50, [], 'pix', { confirmar: false });
+    expect(calcularResumoPagamento(50, pendente.pagamentos)).toMatchObject({ saldoCentavos: 5000, alocavelCentavos: 0, podeFinalizar: false });
+    const confirmado = confirmarPagamentoPendente(pendente.pagamentos, 0);
+    expect(calcularResumoPagamento(50, confirmado)).toMatchObject({ saldoCentavos: 0, aguardando: false, podeFinalizar: true });
+  });
+
+  it('só um pagamento pendente muda de estado (confirmar/recusar ignoram os demais)', () => {
+    const base = [{ forma_pagamento: 'debito', valor: 10, status: 'confirmado' }, { forma_pagamento: 'pix', valor: 5, status: 'pendente' }];
+    expect(confirmarPagamentoPendente(base, 0)[0].status).toBe('confirmado');
+    expect(recusarPagamentoPendente(base, 0)[0].status).toBe('confirmado');
+    expect(recusarPagamentoPendente(base, 1)[1].status).toBe('recusado');
+    expect(base[1].status).toBe('pendente'); // imutável
+  });
+
+  it('10. dinheiro: venda R$ 50, cliente entrega R$ 100 -> troco R$ 50 e venda paga', () => {
+    const s = lancar(50, [], 'dinheiro', { textoRecebido: '100,00' });
+    expect(s.pagamentos[0]).toMatchObject({ forma_pagamento: 'dinheiro', valor: 50, valor_recebido: 100, status: 'confirmado' });
+    expect(calcularTroco(5000, paraCentavos('100,00'))).toBe(5000);
+    expect(calcularResumoPagamento(50, s.pagamentos)).toMatchObject({ pagoCentavos: 5000, trocoCentavos: 5000, completo: true, podeFinalizar: true });
+  });
+
+  it('11. desconto e juros refletem no total e o campo acompanha o novo restante', () => {
+    const s = lancar(100, [], 'pix', { textoValor: '30,00' });
+    // desconto de 10 -> total 90 -> restante 60
+    let resumo = calcularResumoPagamento(90, s.pagamentos);
+    expect(resumo).toMatchObject({ saldoCentavos: 6000 });
+    expect(textoValorExibido(null, resumo.alocavelCentavos)).toBe('60,00');
+    // juros de 5 sobre os 100 -> total 105 -> restante 75
+    resumo = calcularResumoPagamento(105, s.pagamentos);
+    expect(textoValorExibido(null, resumo.alocavelCentavos)).toBe('75,00');
+    // editado à mão contra um restante antigo volta ao novo restante
+    expect(textoValorExibido({ texto: '20,00', base: 7000 }, resumo.alocavelCentavos)).toBe('75,00');
+  });
+
+  it('12. só finaliza com o pagamento completo, confirmado e sem nada aguardando', () => {
+    expect(calcularResumoPagamento(50, []).podeFinalizar).toBe(false);
+    expect(calcularResumoPagamento(50, [{ valor: 25 }]).podeFinalizar).toBe(false);
+    expect(calcularResumoPagamento(50, [{ valor: 25 }, { valor: 25, status: 'pendente' }]).podeFinalizar).toBe(false);
+    expect(calcularResumoPagamento(50, [{ valor: 25 }, { valor: 25 }]).podeFinalizar).toBe(true);
+  });
+
+  it('formas: PIX aguarda confirmação; dinheiro/crédito/crediário pedem um detalhe; PIX/débito registram direto', () => {
+    const f = Object.fromEntries(FORMAS_PAGAMENTO.map(x => [x.valor, x]));
+    expect(f.pix).toMatchObject({ aguardaConfirmacao: true, detalhe: null });
+    expect(f.debito).toMatchObject({ aguardaConfirmacao: false, detalhe: null });
+    expect(f.dinheiro.detalhe).toBe('recebido');
+    expect(f.credito.detalhe).toBe('parcelas');
+    expect(f.crediario.detalhe).toBe('crediario');
   });
 });

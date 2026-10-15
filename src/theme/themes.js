@@ -18,6 +18,8 @@ export const TEMAS = {
     id: 'vertumno',
     marca: {
       nome: 'VERTUMNO',
+      // Nome completo para documentos (PDF etc.): no padrão é só a marca.
+      nomeCompleto: 'VERTUMNO',
       subtitulo: null,
       // Logo oficial recortado, sem alterações, da referência aprovada (Vertumno.jpeg):
       // símbolo, tipografia, proporções e cores preservados. Provisório até existir o
@@ -29,6 +31,9 @@ export const TEMAS = {
       sloganAutor: 'VERTUMNO',
       ornamento: null,
       mostrarIcone: false,
+      // Cores de avatar de produto (precisam ser hex: recebem sufixo de transparência).
+      // Tons médios/escuros da paleta do tema, para o texto das iniciais ter contraste.
+      paleta: ['#0B2545', '#1F5FBF', '#13315C', '#3F4D63', '#6B7A90', '#B8922E', '#2466C9', '#5B6B82', '#091D38'],
       loginTitulo: 'VERTUMNO',
       loginDescricao: 'Sistema completo de gestão. Vendas, estoque, clientes e relatórios em um só lugar.',
     },
@@ -37,6 +42,7 @@ export const TEMAS = {
     id: 'cherry',
     marca: {
       nome: 'Cherry',
+      nomeCompleto: 'Cherry Semijoias',
       subtitulo: 'SEMIJOIAS',
       // Logo da referência aprovada (Vertumno_cherry.jpeg): cereja dourada + lettering
       // "Cherry SEMIJOIAS", recortado sem alterações. É raster de baixa resolução (~221 px de
@@ -51,6 +57,7 @@ export const TEMAS = {
       // de marca-d'água no cabeçalho do dashboard.
       ornamento: cherryOrnamento,
       mostrarIcone: true,
+      paleta: ['#A70636', '#D33A63', '#760426', '#B8860B', '#C58B55', '#91052F', '#5D031E', '#6F5F66', '#E0527A'],
       loginTitulo: 'Cherry Semijoias',
       loginDescricao: 'Sistema completo de gestão para semijoias. Vendas, estoque, clientes e relatórios em um só lugar.',
     },
@@ -92,4 +99,31 @@ export function lerTemaDev({ search = '', storage = null, isDev = false } = {}) 
 
 export function aplicarTema(elemento, chave) {
   elemento.dataset.theme = resolverTema(chave);
+}
+
+const raizDoDocumento = () => (typeof document === 'undefined' ? null : document.documentElement);
+
+// Marca do tema que está aplicado no documento (para código que não é componente,
+// como a exportação de PDF). Sem documento ou sem data-theme, vale o tema padrão.
+export function marcaAtiva(elemento = raizDoDocumento()) {
+  return TEMAS[resolverTema(elemento?.dataset?.theme)].marca;
+}
+
+// Cor de avatar de um produto, sempre da paleta do tema ativo.
+export function corDoProduto(id, marca = marcaAtiva()) {
+  const indice = Math.abs(Math.trunc(Number(id))) || 0;
+  return marca.paleta[indice % marca.paleta.length];
+}
+
+// Cor primária do tema ativo como [r, g, b], lida do token --color-primary-rgb de
+// themes.css (única fonte das cores). Fora do navegador usa o padrão VERTUMNO.
+export function corPrimariaRgb(elemento = raizDoDocumento()) {
+  try {
+    const valor = elemento ? getComputedStyle(elemento).getPropertyValue('--color-primary-rgb') : '';
+    const partes = String(valor).split(',').map(n => Number(n.trim()));
+    if (partes.length === 3 && partes.every(n => Number.isInteger(n) && n >= 0 && n <= 255)) return partes;
+  } catch {
+    // sem estilo disponível: cai no padrão
+  }
+  return [11, 37, 69];
 }

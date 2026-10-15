@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { corPrimariaRgb, marcaAtiva } from '../../theme/themes';
 
 const WEEKDAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -89,42 +90,43 @@ export async function buscarTodasAsPaginas(fetchPage, params = {}) {
 const PDF_MARGIN = 20;
 const PDF_HEADER_HEIGHT = 78;
 const PDF_FOOTER_HEIGHT = 26;
-const PRIMARY_RGB = [167, 6, 54];
-const LOGO_URL = '/cherry-logo.jpg';
-const LOGO_SIZE = 22;
+const LOGO_ALTURA = 22;
 
-// Carrega o logo (cereja) uma única vez e cacheia como dataURL PNG, já que
-// jsPDF#addImage precisa de dados de imagem já carregados (não aceita URL).
-let logoDataUrlPromise = null;
-function carregarLogoDataUrl() {
-  if (!logoDataUrlPromise) {
-    logoDataUrlPromise = new Promise((resolve, reject) => {
+// Carrega o símbolo da marca do tema ativo e cacheia (por URL) como dataURL PNG com a
+// proporção original, já que jsPDF#addImage precisa de dados de imagem já carregados
+// (não aceita URL) e os símbolos das marcas não têm a mesma proporção.
+const logosCarregados = new Map();
+function carregarLogo(url) {
+  if (!url) return Promise.resolve(null);
+  if (!logosCarregados.has(url)) {
+    logosCarregados.set(url, new Promise(resolve => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
         canvas.getContext('2d').drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
+        resolve({ dataUrl: canvas.toDataURL('image/png'), proporcao: img.naturalWidth / img.naturalHeight });
       };
       img.onerror = () => resolve(null);
-      img.src = LOGO_URL;
-    });
+      img.src = url;
+    }));
   }
-  return logoDataUrlPromise;
+  return logosCarregados.get(url);
 }
 
-function desenharCabecalho(pdf, { titulo, periodoLabel, pageWidth, logoDataUrl }) {
-  const textoX = logoDataUrl ? PDF_MARGIN + LOGO_SIZE + 8 : PDF_MARGIN;
+function desenharCabecalho(pdf, { titulo, periodoLabel, pageWidth, logo, marca, corRgb }) {
+  const logoLargura = logo ? LOGO_ALTURA * logo.proporcao : 0;
+  const textoX = logo ? PDF_MARGIN + logoLargura + 8 : PDF_MARGIN;
 
-  if (logoDataUrl) {
-    pdf.addImage(logoDataUrl, 'PNG', PDF_MARGIN, 12, LOGO_SIZE, LOGO_SIZE);
+  if (logo) {
+    pdf.addImage(logo.dataUrl, 'PNG', PDF_MARGIN, 12, logoLargura, LOGO_ALTURA);
   }
 
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(14);
-  pdf.setTextColor(...PRIMARY_RGB);
-  pdf.text('Cherry Semijoias', textoX, 27);
+  pdf.setTextColor(...corRgb);
+  pdf.text(marca.nomeCompleto, textoX, 27);
 
   pdf.setFontSize(13);
   pdf.text(titulo, PDF_MARGIN, 46);
@@ -134,26 +136,27 @@ function desenharCabecalho(pdf, { titulo, periodoLabel, pageWidth, logoDataUrl }
   pdf.setTextColor(60, 60, 60);
   pdf.text(periodoLabel, PDF_MARGIN, 62);
 
-  pdf.setDrawColor(...PRIMARY_RGB);
+  pdf.setDrawColor(...corRgb);
   pdf.setLineWidth(1);
   pdf.line(PDF_MARGIN, PDF_HEADER_HEIGHT - 8, pageWidth - PDF_MARGIN, PDF_HEADER_HEIGHT - 8);
 }
 
-function desenharRodape(pdf, { pageWidth, pageHeight, pagina, totalPaginas, logoDataUrl }) {
+function desenharRodape(pdf, { pageWidth, pageHeight, pagina, totalPaginas, logo }) {
   const dataExportacao = new Date().toLocaleDateString('pt-BR');
+  const altura = 12;
+  const largura = logo ? altura * logo.proporcao : 0;
 
-  if (logoDataUrl) {
-    const tamanho = 12;
+  if (logo) {
     pdf.saveGraphicsState();
     pdf.setGState(new pdf.GState({ opacity: 0.25 }));
-    pdf.addImage(logoDataUrl, 'PNG', PDF_MARGIN, pageHeight - 10 - tamanho + 2, tamanho, tamanho);
+    pdf.addImage(logo.dataUrl, 'PNG', PDF_MARGIN, pageHeight - 10 - altura + 2, largura, altura);
     pdf.restoreGraphicsState();
   }
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
   pdf.setTextColor(130, 130, 130);
-  const textoX = logoDataUrl ? PDF_MARGIN + 16 : PDF_MARGIN;
+  const textoX = logo ? PDF_MARGIN + largura + 4 : PDF_MARGIN;
   pdf.text(`© GiroOne 2026 · Exportado em ${dataExportacao}`, textoX, pageHeight - 10);
   pdf.text(`Página ${pagina} de ${totalPaginas}`, pageWidth - PDF_MARGIN, pageHeight - 10, { align: 'right' });
 }
@@ -167,13 +170,17 @@ export async function exportarRelatorioPDF({ elementId, filename, titulo, period
     throw new Error('Não foi possível localizar o conteúdo do relatório para exportar.');
   }
 
-  const [canvas, logoDataUrl] = await Promise.all([
+  // Marca e cor do tema ativo: o relatório sai com a identidade de quem o exporta.
+  const marca = marcaAtiva();
+  const corRgb = corPrimariaRgb();
+
+  const [canvas, logo] = await Promise.all([
     html2canvas(elemento, {
       scale: 2,
       backgroundColor: '#FFFFFF',
       useCORS: true,
     }),
-    carregarLogoDataUrl(),
+    carregarLogo(marca.simbolo),
   ]);
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
@@ -218,14 +225,14 @@ export async function exportarRelatorioPDF({ elementId, filename, titulo, period
 
     let y = PDF_MARGIN;
     if (primeira) {
-      desenharCabecalho(pdf, { titulo, periodoLabel, pageWidth, logoDataUrl });
+      desenharCabecalho(pdf, { titulo, periodoLabel, pageWidth, logo, marca, corRgb });
       y = PDF_HEADER_HEIGHT;
     }
 
     const fatiaAlturaPt = fatiaPx / pxPerPt;
     pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', PDF_MARGIN, y, contentWidth, fatiaAlturaPt);
 
-    desenharRodape(pdf, { pageWidth, pageHeight, pagina: pagina + 1, totalPaginas, logoDataUrl });
+    desenharRodape(pdf, { pageWidth, pageHeight, pagina: pagina + 1, totalPaginas, logo });
 
     renderizadoPx += fatiaPx;
     pagina += 1;

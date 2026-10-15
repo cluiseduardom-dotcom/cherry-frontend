@@ -13,7 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 import './GraficoPontoEquilibrio.css';
 
-const COR_OURO = '#C9A24B';
+const COR_DESTAQUE = 'var(--color-accent)';
 const PONTOS_SERIE = 20;
 // Acima desse múltiplo da referência de escala (receita, ou custo fixo se
 // não houver receita), o PE calculado é tecnicamente válido mas inútil pra
@@ -162,15 +162,15 @@ export default function GraficoPontoEquilibrio({ resultado, simulado = false }) 
             <>
               <ReferenceLine
                 x={pontoEquilibrio}
-                stroke={COR_OURO}
+                stroke={COR_DESTAQUE}
                 strokeDasharray="4 4"
-                label={{ value: 'Ponto de equilíbrio', position: 'top', fill: COR_OURO, fontSize: 11 }}
+                label={{ value: 'Ponto de equilíbrio', position: 'top', fill: COR_DESTAQUE, fontSize: 11 }}
               />
               <ReferenceDot
                 x={pontoEquilibrio}
                 y={pontoEquilibrio}
                 r={5}
-                fill={COR_OURO}
+                fill={COR_DESTAQUE}
                 stroke="var(--color-bg-card)"
                 strokeWidth={2}
               />

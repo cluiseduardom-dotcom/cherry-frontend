@@ -149,7 +149,7 @@
 }
 
 .clientes-kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
-.clientes-kpi-card--active { border-color: var(--color-primary); background: var(--cherry-50); }
+.clientes-kpi-card--active { border-color: var(--color-primary); background: var(--brand-50); }
 
 .clientes-kpi-value { font-size: var(--font-size-2xl); font-weight: 800; color: var(--color-text-primary); }
 .clientes-kpi-label { font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: 600; }

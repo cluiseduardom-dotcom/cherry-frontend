@@ -13,7 +13,7 @@
 .compra-recebimento-aviso svg { flex: none; color: var(--color-warning); margin-top: 2px; }
 .compra-recebimento-aviso p { margin: 4px 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary); }
 
-.compra-recebimento-item--destacado { background: var(--cherry-50); }
+.compra-recebimento-item--destacado { background: var(--brand-50); }
 
 .compra-recebimento-acoes-card {
   display: flex;

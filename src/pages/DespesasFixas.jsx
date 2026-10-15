@@ -212,62 +212,64 @@ export default function DespesasFixas() {
           <div className="despesas-fixas-grupo-header">
             <h2 className="despesas-fixas-grupo-title">{CATEGORIA_LABEL[categoria]}</h2>
           </div>
-          <table className="contas-table">
-            <thead>
-              <tr>
-                <th>Descrição</th>
-                <th>Valor</th>
-                <th>Vigência</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {itens.map(despesa => (
-                <tr key={despesa.id} className="contas-row">
-                  <td className="contas-descricao">{despesa.descricao}</td>
-                  <td className="contas-valor">{formatCurrency(despesa.valor)}</td>
-                  <td className="text-sm text-secondary">{formatVigencia(despesa)}</td>
-                  <td>
-                    <span className={`badge ${despesa.ativo ? 'badge-success' : 'badge-danger'}`}>
-                      {despesa.ativo ? 'Ativa' : 'Inativa'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="contas-actions">
-                      <button
-                        className="contas-action-btn"
-                        aria-label="Editar"
-                        title="Editar"
-                        disabled={workingId === despesa.id}
-                        onClick={() => openEditModal(despesa)}
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        className="contas-action-btn"
-                        aria-label={despesa.ativo ? 'Desativar' : 'Ativar'}
-                        title={despesa.ativo ? 'Desativar' : 'Ativar'}
-                        disabled={workingId === despesa.id}
-                        onClick={() => handleToggle(despesa)}
-                      >
-                        <Power size={14} />
-                      </button>
-                      <button
-                        className="contas-action-btn contas-action-btn--danger"
-                        aria-label="Excluir"
-                        title="Excluir"
-                        disabled={workingId === despesa.id}
-                        onClick={() => handleRemover(despesa)}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
+          <div className="table-scroll">
+            <table className="contas-table">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Vigência</th>
+                  <th>Status</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {itens.map(despesa => (
+                  <tr key={despesa.id} className="contas-row">
+                    <td className="contas-descricao">{despesa.descricao}</td>
+                    <td className="contas-valor">{formatCurrency(despesa.valor)}</td>
+                    <td className="text-sm text-secondary">{formatVigencia(despesa)}</td>
+                    <td>
+                      <span className={`badge ${despesa.ativo ? 'badge-success' : 'badge-danger'}`}>
+                        {despesa.ativo ? 'Ativa' : 'Inativa'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="contas-actions">
+                        <button
+                          className="contas-action-btn"
+                          aria-label="Editar"
+                          title="Editar"
+                          disabled={workingId === despesa.id}
+                          onClick={() => openEditModal(despesa)}
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          className="contas-action-btn"
+                          aria-label={despesa.ativo ? 'Desativar' : 'Ativar'}
+                          title={despesa.ativo ? 'Desativar' : 'Ativar'}
+                          disabled={workingId === despesa.id}
+                          onClick={() => handleToggle(despesa)}
+                        >
+                          <Power size={14} />
+                        </button>
+                        <button
+                          className="contas-action-btn contas-action-btn--danger"
+                          aria-label="Excluir"
+                          title="Excluir"
+                          disabled={workingId === despesa.id}
+                          onClick={() => handleRemover(despesa)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ))}
 

@@ -241,54 +241,56 @@ export default function ContasReceber() {
 
       {!loading && !error && (
         <div className="card">
-          <table className="contas-table">
-            <thead>
-              <tr>
-                <th>Descrição</th>
-                <th>Cliente</th>
-                <th>Venda</th>
-                <th>Vencimento</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(conta => (
-                <tr key={conta.id} className={`contas-row ${conta.atrasado ? 'contas-row--atrasado' : ''}`}>
-                  <td className="contas-descricao">{conta.descricao}</td>
-                  <td>{nomeClientePorVendaId.get(conta.venda_id) || '—'}</td>
-                  <td><span className="contas-venda-id">#{conta.venda_id}</span></td>
-                  <td className="contas-date">{formatDate(conta.data_vencimento)}</td>
-                  <td className="contas-valor">{formatCurrency(conta.valor)}</td>
-                  <td>
-                    <span className={`badge ${STATUS_BADGE_CLASS[conta.status]}`}>{STATUS_LABEL[conta.status]}</span>
-                    {conta.atrasado && (
-                      <span className="badge badge-danger" style={{ marginLeft: 6 }}>
-                        <AlertTriangle size={10} />
-                        Atrasado
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {conta.status === 'pendente' && (
-                      <div className="contas-actions">
-                        <button
-                          className="contas-action-btn contas-action-btn--success"
-                          aria-label="Marcar como recebida"
-                          title="Marcar como recebida"
-                          disabled={workingId === conta.id}
-                          onClick={() => handleReceber(conta)}
-                        >
-                          <CheckCircle size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </td>
+          <div className="table-scroll">
+            <table className="contas-table">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Cliente</th>
+                  <th>Venda</th>
+                  <th>Vencimento</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map(conta => (
+                  <tr key={conta.id} className={`contas-row ${conta.atrasado ? 'contas-row--atrasado' : ''}`}>
+                    <td className="contas-descricao">{conta.descricao}</td>
+                    <td>{nomeClientePorVendaId.get(conta.venda_id) || '—'}</td>
+                    <td><span className="contas-venda-id">#{conta.venda_id}</span></td>
+                    <td className="contas-date">{formatDate(conta.data_vencimento)}</td>
+                    <td className="contas-valor">{formatCurrency(conta.valor)}</td>
+                    <td>
+                      <span className={`badge ${STATUS_BADGE_CLASS[conta.status]}`}>{STATUS_LABEL[conta.status]}</span>
+                      {conta.atrasado && (
+                        <span className="badge badge-danger" style={{ marginLeft: 6 }}>
+                          <AlertTriangle size={10} />
+                          Atrasado
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {conta.status === 'pendente' && (
+                        <div className="contas-actions">
+                          <button
+                            className="contas-action-btn contas-action-btn--success"
+                            aria-label="Marcar como recebida"
+                            title="Marcar como recebida"
+                            disabled={workingId === conta.id}
+                            onClick={() => handleReceber(conta)}
+                          >
+                            <CheckCircle size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><HandCoins size={24} /></div>

@@ -365,7 +365,7 @@
 .configuracao-sku-pipeline-node--sequence {
   background: linear-gradient(135deg, #FFF0F4 0%, #FFFFFF 100%);
   border: 1.5px solid var(--color-primary);
-  box-shadow: 0 2px 8px rgba(167, 6, 54, 0.12);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.12);
 }
 
 .configuracao-sku-node-title {
@@ -528,7 +528,7 @@
 .configuracao-sku-preview-card {
   padding: var(--space-5);
   border: 1px solid var(--color-border);
-  box-shadow: 0 4px 20px rgba(167, 6, 54, 0.08);
+  box-shadow: 0 4px 20px rgba(var(--color-primary-rgb), 0.08);
 }
 
 .configuracao-sku-preview-header {

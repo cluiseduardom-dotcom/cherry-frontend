@@ -5,11 +5,15 @@
 .sidebar {
   position: fixed;
   top: 0;
+  bottom: 0;
   left: 0;
   width: var(--sidebar-width);
+  /* Acompanha a janela (não a página): o conteúdo principal rola, o menu fica parado.
+     100dvh evita o corte causado pelas barras dinâmicas do navegador. */
   height: 100vh;
-  background: var(--color-bg-sidebar);
-  border-right: 1px solid var(--color-border-light);
+  height: 100dvh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
   box-shadow: var(--shadow-sidebar);
   display: flex;
   flex-direction: column;
@@ -23,8 +27,32 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-5) var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--sidebar-divider);
   min-height: var(--header-height);
+}
+
+/* Logo oficial em imagem: ocupa a largura do menu; o fundo da imagem é o mesmo degradê
+   do topo do menu, e a base se dissolve para não deixar emenda. */
+.sidebar-logo--imagem {
+  padding: 0;
+  border-bottom: 0;
+  min-height: 0;
+  display: block;
+}
+
+.sidebar-logo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Bordas dissolvidas (base e laterais) para a imagem se fundir ao degradê do menu */
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 80%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, #000 80%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .sidebar-logo-icon {
@@ -37,7 +65,7 @@
   justify-content: center;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(167, 6, 54, 0.30);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.30);
 }
 
 .sidebar-logo-text {
@@ -49,30 +77,38 @@
 .sidebar-logo-brand {
   font-size: var(--font-size-lg);
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--sidebar-text-strong);
   letter-spacing: -0.3px;
 }
 
 .sidebar-logo-sub {
   font-size: 9px;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--sidebar-text-muted);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
 /* --- Navigation --- */
+/* Se os itens passarem da altura disponível, só o menu rola; logo e rodapé permanecem */
 .sidebar-nav {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   padding: var(--space-4) var(--space-3);
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.sidebar-logo,
+.sidebar-footer {
+  flex-shrink: 0;
 }
 
 .sidebar-nav-label {
   font-size: var(--font-size-xs);
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--sidebar-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   padding: 0 var(--space-2);
@@ -83,9 +119,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 9px var(--space-3);
+  padding: 8px var(--space-3);
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  color: var(--sidebar-text);
   font-size: var(--font-size-sm);
   font-weight: 500;
   transition: all var(--transition-fast);
@@ -95,22 +132,23 @@
 }
 
 .sidebar-nav-item:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-primary);
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-hover-text);
 }
 
 .sidebar-nav-item--active {
-  background: var(--color-primary) !important;
-  color: var(--color-text-white) !important;
-  box-shadow: 0 4px 14px rgba(167, 6, 54, 0.25);
+  background: var(--sidebar-active-bg) !important;
+  border-color: var(--sidebar-active-border);
+  color: var(--sidebar-active-text) !important;
+  box-shadow: var(--sidebar-active-shadow);
 }
 
 .sidebar-nav-item--active .sidebar-nav-icon {
-  color: white !important;
+  color: var(--sidebar-active-text) !important;
 }
 
 .sidebar-nav-item--active:hover {
-  background: var(--color-primary-dark) !important;
+  filter: brightness(1.08);
 }
 
 .sidebar-nav-icon {
@@ -174,9 +212,9 @@
 .sidebar-footer {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border-light);
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  border-top: 1px solid var(--sidebar-divider);
 }
 
 .sidebar-user-avatar {
@@ -184,6 +222,7 @@
   height: 36px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
+  border: 2px solid var(--color-accent);
   color: white;
   font-size: var(--font-size-xs);
   font-weight: 700;
@@ -210,20 +249,20 @@
   height: 30px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
-  color: var(--color-text-muted);
+  color: var(--sidebar-text-muted);
   background: transparent;
   transition: all var(--transition-fast);
 }
 
 .sidebar-logout-btn:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-primary);
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-hover-text);
 }
 
 .sidebar-user-name {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sidebar-text-strong);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -231,6 +270,23 @@
 
 .sidebar-user-info .role-badge {
   margin-top: 1px;
+  width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+/* Telas baixas (ex.: 1024x768): logo e itens mais compactos para o menu inteiro caber sem rolagem */
+@media (min-width: 769px) and (max-height: 820px) {
+  .sidebar-logo-img {
+    width: 72%;
+    margin: 0 auto;
+  }
+
+  .sidebar-nav { padding-top: var(--space-2); }
+
+  .sidebar-nav-item { padding-top: 5px; padding-bottom: 5px; }
+
+  .sidebar-nav-label { margin-bottom: var(--space-1); }
 }
 
 /* === MOBILE: hide sidebar, use bottom nav === */

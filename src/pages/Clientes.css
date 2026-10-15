@@ -41,7 +41,7 @@
   justify-content: center;
   flex-shrink: 0;
   position: relative;
-  box-shadow: 0 4px 12px rgba(167, 6, 54, 0.2);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .cliente-vip-badge {

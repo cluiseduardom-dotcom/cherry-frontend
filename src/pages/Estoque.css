@@ -161,10 +161,59 @@
 }
 
 @media (max-width: 1100px) {
-  .estoque-summary { grid-template-columns: repeat(2, 1fr); }
+  .estoque-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
-  .estoque-summary { grid-template-columns: repeat(2, 1fr); }
-  .estoque-table { font-size: var(--font-size-xs); }
+  .estoque-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .estoque-summary-card {
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  /* minmax(0, ...) e min-width: 0 deixam os cartões encolherem em vez de alargar a página.
+     A busca mantém uma largura mínima utilizável; os filtros descem para a linha de baixo. */
+  .estoque-filters .input-icon-wrapper { min-width: min(100%, 220px); }
+  .estoque-filter-pills { flex-wrap: wrap; }
+
+  /* A tabela rola na horizontal só dentro do próprio cartão; o documento não alarga.
+     width: 0 + min-width: 100% tira a largura mínima da tabela do cálculo do contêiner da
+     página (sem isso ela alargaria o main) e o cartão continua ocupando toda a linha.
+     O min-width da tabela evita espremer as colunas (o SKU não quebra em duas linhas). */
+  .card:has(> .estoque-table) {
+    width: 0;
+    min-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .estoque-table {
+    font-size: var(--font-size-xs);
+    min-width: 560px;
+  }
+
+  .estoque-table th,
+  .estoque-row td {
+    padding: var(--space-3);
+  }
+
+  .estoque-sku { white-space: nowrap; }
+}
+
+/* Fallback para navegadores sem :has() (ex.: Firefox 114-120): mesmo efeito da regra acima,
+   escolhendo o cartão da tabela pela posição (é o único .card depois dos filtros). Em
+   navegadores com :has() este bloco não é aplicado. */
+@supports not selector(:has(*)) {
+  @media (max-width: 768px) {
+    .estoque-filters ~ .card {
+      width: 0;
+      min-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }

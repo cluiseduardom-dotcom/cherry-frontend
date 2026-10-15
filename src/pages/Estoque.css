@@ -203,3 +203,17 @@
 
   .estoque-sku { white-space: nowrap; }
 }
+
+/* Fallback para navegadores sem :has() (ex.: Firefox 114-120): mesmo efeito da regra acima,
+   escolhendo o cartão da tabela pela posição (é o único .card depois dos filtros). Em
+   navegadores com :has() este bloco não é aplicado. */
+@supports not selector(:has(*)) {
+  @media (max-width: 768px) {
+    .estoque-filters ~ .card {
+      width: 0;
+      min-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}

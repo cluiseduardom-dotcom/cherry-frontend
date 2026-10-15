@@ -25,6 +25,15 @@ describe('Estoque: responsividade mobile (sem rolagem horizontal no documento)',
     expect(mobile).toMatch(/\.estoque-table \{[^}]*min-width: \d+px/);
   });
 
+  it('há fallback sem :has() (ex.: Firefox 114-120) com o mesmo efeito, escolhendo o cartão pela posição', () => {
+    const fallback = css.match(/@supports not selector\(:has\(\*\)\) \{\n\s*@media \(max-width: 768px\) \{\n([\s\S]*?)\n  \}\n\}/)?.[1] ?? '';
+    expect(fallback).toMatch(/\.estoque-filters ~ \.card \{/);
+    for (const declaracao of ['width: 0', 'min-width: 100%', 'overflow-x: auto']) {
+      expect(fallback).toContain(declaracao);
+      expect(mobile).toContain(declaracao);
+    }
+  });
+
   it('a busca mantém largura utilizável, os filtros podem quebrar de linha e o SKU não quebra', () => {
     expect(mobile).toMatch(/\.estoque-filters \.input-icon-wrapper \{ min-width: min\(100%, 220px\); \}/);
     expect(mobile).toMatch(/\.estoque-filter-pills \{ flex-wrap: wrap; \}/);

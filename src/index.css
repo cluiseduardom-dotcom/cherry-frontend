@@ -5,43 +5,23 @@
 
 /* --- Google Font fallback (loaded via index.html) --- */
 :root {
-  /* === BRAND COLORS === */
-  --color-primary:        #A70636;
-  --color-primary-dark:   #91052F;
-  --color-primary-light:  #D33A63;
-  --color-primary-ultra:  #F8DCE4;
-
-  /* Cherry scale — full brand ramp, for anything the semantic aliases don't cover */
-  --cherry-50:  #FCF2F4;
-  --cherry-100: #F8DCE4;
-  --cherry-200: #F1B9C8;
-  --cherry-300: #E78AA3;
-  --cherry-400: #D33A63;
-  --cherry-500: #A70636;
-  --cherry-600: #91052F;
-  --cherry-700: #760426;
-  --cherry-800: #5D031E;
-  --cherry-900: #430216;
-
-  /* === BACKGROUNDS === */
-  --color-bg:             #FCF2F4;
+  /* === TOKENS COMUNS A TODOS OS TEMAS ===
+     Cores de marca, fundos, texto e bordas ficam em src/theme/themes.css. */
   --color-bg-card:        #FFFFFF;
-  --color-bg-surface:     #FFF9FA;
-  --color-bg-sidebar:     #FDF5F6;
-  --color-bg-hover:       #F8DCE4;
   --color-bg-input:       #FFFFFF;
-
-  /* === TEXT === */
-  --color-text-primary:   #272729;
-  --color-text-secondary: #555557;
-  --color-text-muted:     #8A8A8A;
   --color-text-white:     #FFFFFF;
-  --color-text-price:     #A70636;
 
-  /* === BORDERS === */
-  --color-border:         #E5D7DB;
-  --color-border-light:   #F0E5E8;
-  --color-border-input:   #E5D7DB;
+  /* Legado: a rampa --cherry-N agora acompanha a rampa do tema ativo */
+  --cherry-50:  var(--brand-50);
+  --cherry-100: var(--brand-100);
+  --cherry-200: var(--brand-200);
+  --cherry-300: var(--brand-300);
+  --cherry-400: var(--brand-400);
+  --cherry-500: var(--brand-500);
+  --cherry-600: var(--brand-600);
+  --cherry-700: var(--brand-700);
+  --cherry-800: var(--brand-800);
+  --cherry-900: var(--brand-900);
 
   /* === STATUS / SEMANTIC === */
   --color-success:        #2E9F57;
@@ -53,19 +33,17 @@
   --color-info:           #3B82F6;
   --color-info-light:     #EFF6FF;
 
-  /* === ROLE ACCENTS (Admin / Vendedor / Estoquista) === */
-  --color-role-admin:      #A70636;
-  --color-role-admin-bg:   #F8DCE4;
+  /* === ROLE ACCENTS (Vendedor / Estoquista; Admin segue o tema) === */
   --color-role-vendedor:      #3B82F6;
   --color-role-vendedor-bg:   #EFF6FF;
   --color-role-estoquista:    #B8860B;
   --color-role-estoquista-bg: #FBF0D9;
 
-  /* === SHADOWS === */
-  --shadow-card:    0 2px 12px rgba(167, 6, 54, 0.06);
-  --shadow-card-hover: 0 6px 24px rgba(167, 6, 54, 0.12);
-  --shadow-sidebar: 2px 0 16px rgba(167, 6, 54, 0.06);
-  --shadow-btn:     0 4px 14px rgba(167, 6, 54, 0.30);
+  /* === SHADOWS (acompanham a cor primária do tema) === */
+  --shadow-card:    0 2px 12px rgba(var(--color-primary-rgb), 0.06);
+  --shadow-card-hover: 0 6px 24px rgba(var(--color-primary-rgb), 0.12);
+  --shadow-sidebar: 2px 0 16px rgba(var(--color-primary-rgb), 0.06);
+  --shadow-btn:     0 4px 14px rgba(var(--color-primary-rgb), 0.30);
   --shadow-modal:   0 20px 60px rgba(31, 31, 31, 0.18);
 
   /* === BORDER RADIUS === */
@@ -253,7 +231,7 @@ ul, ol {
 .btn-primary:hover {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(167, 6, 54, 0.40);
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.40);
 }
 
 .btn-primary:active {
@@ -386,7 +364,7 @@ ul, ol {
 
 .input-field:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(167, 6, 54, 0.10);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.10);
 }
 
 .input-field::placeholder {

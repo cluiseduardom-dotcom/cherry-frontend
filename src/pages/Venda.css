@@ -66,7 +66,7 @@
   background: var(--color-primary) !important;
   border-color: var(--color-primary) !important;
   color: white !important;
-  box-shadow: 0 3px 10px rgba(167, 6, 54, 0.25);
+  box-shadow: 0 3px 10px rgba(var(--color-primary-rgb), 0.25);
 }
 
 /* Product list */

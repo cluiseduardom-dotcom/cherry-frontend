@@ -115,7 +115,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-2);
-  box-shadow: 0 6px 20px rgba(167, 6, 54, 0.25);
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.25);
 }
 
 .profile-card-name {

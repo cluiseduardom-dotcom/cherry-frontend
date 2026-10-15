@@ -1,0 +1,168 @@
+/* =========================================================
+   VERTUMNO — TEMAS VISUAIS
+   Cada tema define exatamente o mesmo conjunto de tokens.
+   - vertumno (padrão): azul-marinho, azul, cinza, branco, dourado discreto.
+   - cherry:            vinho, bordô, rosa-claro, branco, dourado.
+   O tema padrão vale em :root; um tema personalizado só vale quando
+   <html data-theme="..."> estiver definido (ver src/theme/ThemeProvider.jsx).
+   Não misturar paletas: componentes devem usar apenas os tokens.
+   ========================================================= */
+
+:root,
+html[data-theme="vertumno"] {
+  /* Marca */
+  --color-primary:        #0B2545;
+  --color-primary-dark:   #091D38;
+  --color-primary-light:  #1F5FBF;
+  --color-primary-ultra:  #E8F0FB;
+  --color-primary-rgb:    11, 37, 69;
+
+  --color-secondary:       #1F5FBF;
+  --color-secondary-ultra: #E8F0FB;
+  --color-secondary-rgb:   31, 95, 191;
+
+  --color-accent:             #B8922E;
+  --color-accent-soft:        #F7EFD8;
+  --color-accent-soft-hover:  #F1E5C2;
+
+  /* Rampa da marca (legado: --cherry-N aponta para esta rampa) */
+  --brand-50:  #F1F5FA;
+  --brand-100: #E8F0FB;
+  --brand-200: #C9D9F0;
+  --brand-300: #8FB0E3;
+  --brand-400: #1F5FBF;
+  --brand-500: #0B2545;
+  --brand-600: #091D38;
+  --brand-700: #07162B;
+  --brand-800: #050F1F;
+  --brand-900: #030914;
+
+  /* Fundos */
+  --color-bg:         #F4F6F9;
+  --color-bg-surface: #FAFBFD;
+  --color-bg-sidebar: #F7F9FC;
+  --color-bg-hover:   #E8F0FB;
+
+  /* Texto */
+  --color-text-primary:   #14213A;
+  --color-text-secondary: #3F4D63;
+  --color-text-muted:     #6B7A90;
+  --color-text-subtle:    #5B6B82;
+  --color-text-price:     #0B2545;
+
+  /* Bordas */
+  --color-border:       #D9E0EA;
+  --color-border-light: #E3E8EF;
+  --color-border-input: #D9E0EA;
+
+  /* Papéis */
+  --color-role-admin:    #0B2545;
+  --color-role-admin-bg: #E8F0FB;
+
+  /* Dashboard: faixa de boas-vindas e gráficos */
+  --color-hero-from:  #0B2545;
+  --color-hero-to:    #13315C;
+  --color-hero-muted: #C7D3E6;
+  --chart-a: #0B2545;
+  --chart-b: #1F5FBF;
+  --chart-c: #9AA8BC;
+
+  /* Menu lateral: azul-marinho escuro, como na referência aprovada. O degradê do topo
+     casa com o fundo do logo oficial (recortado da própria referência). */
+  --sidebar-bg: linear-gradient(180deg, #0F2137 0, #051222 134px, #071425 210px, #08192B 100%);
+  --sidebar-border: #0A1A2F;
+  --sidebar-divider: #16263D;
+  --sidebar-text: #DCE6F4;
+  --sidebar-text-strong: #FFFFFF;
+  --sidebar-text-muted: #8FA3BD;
+  --sidebar-hover-bg: #12243C;
+  --sidebar-hover-text: #FFFFFF;
+  --sidebar-active-bg: linear-gradient(180deg, #2466C9, #1B52A8);
+  --sidebar-active-text: #FFFFFF;
+  --sidebar-active-border: #4F86DA;
+  --sidebar-active-shadow: 0 4px 14px rgba(31, 95, 191, 0.35);
+  --brand-symbol-bg: linear-gradient(180deg, #0F2137 0, #051222 100%);
+
+  /* Pequenos acentos de marca (o padrão não usa: ficam transparentes) */
+  --section-accent: transparent;
+  --nav-active-accent: transparent;
+}
+
+html[data-theme="cherry"] {
+  /* Marca */
+  --color-primary:        #A70636;
+  --color-primary-dark:   #91052F;
+  --color-primary-light:  #D33A63;
+  --color-primary-ultra:  #F8DCE4;
+  --color-primary-rgb:    167, 6, 54;
+
+  --color-secondary:       #D33A63;
+  --color-secondary-ultra: #F8DCE4;
+  --color-secondary-rgb:   211, 58, 99;
+
+  --color-accent:             #B8860B;
+  --color-accent-soft:        #FBF0D9;
+  --color-accent-soft-hover:  #F5E4BD;
+
+  /* Rampa da marca */
+  --brand-50:  #FCF2F4;
+  --brand-100: #F8DCE4;
+  --brand-200: #F1B9C8;
+  --brand-300: #E78AA3;
+  --brand-400: #D33A63;
+  --brand-500: #A70636;
+  --brand-600: #91052F;
+  --brand-700: #760426;
+  --brand-800: #5D031E;
+  --brand-900: #430216;
+
+  /* Fundos */
+  --color-bg:         #FCF2F4;
+  --color-bg-surface: #FFF9FA;
+  --color-bg-sidebar: #FDF5F6;
+  --color-bg-hover:   #F8DCE4;
+
+  /* Texto */
+  --color-text-primary:   #272729;
+  --color-text-secondary: #555557;
+  --color-text-muted:     #8A8A8A;
+  --color-text-subtle:    #6F5F66;
+  --color-text-price:     #A70636;
+
+  /* Bordas */
+  --color-border:       #E5D7DB;
+  --color-border-light: #F0E5E8;
+  --color-border-input: #E5D7DB;
+
+  /* Papéis */
+  --color-role-admin:    #A70636;
+  --color-role-admin-bg: #F8DCE4;
+
+  /* Dashboard: faixa de boas-vindas e gráficos */
+  --color-hero-from:  #5D031E;
+  --color-hero-to:    #A70636;
+  --color-hero-muted: #F1D3DC;
+  --chart-a: #760426;
+  --chart-b: #D33A63;
+  --chart-c: #D9B8C2;
+
+  /* Menu lateral: vinho escuro, como na referência aprovada. O degradê do topo casa com o
+     fundo do logo do Cherry (recortado da própria referência); o item ativo é dourado. */
+  --sidebar-bg: linear-gradient(180deg, #5B0F21 0, #430714 150px, #440613 420px, #33040C 100%);
+  --sidebar-border: #2B0309;
+  --sidebar-divider: #7A5238;
+  --sidebar-text: #F3DDE2;
+  --sidebar-text-strong: #FFFFFF;
+  --sidebar-text-muted: #D9B27C;
+  --sidebar-hover-bg: #5F1427;
+  --sidebar-hover-text: #FFFFFF;
+  --sidebar-active-bg: linear-gradient(180deg, #DDB07E, #C58B55);
+  --sidebar-active-text: #3D0715;
+  --sidebar-active-border: #EBC9A0;
+  --sidebar-active-shadow: 0 4px 14px rgba(197, 139, 85, 0.35);
+  --brand-symbol-bg: linear-gradient(180deg, #5B0F21 0, #430714 100%);
+
+  /* Pequenos acentos dourados: filete sob os títulos de seção e marca do item ativo no celular */
+  --section-accent: var(--color-accent);
+  --nav-active-accent: var(--color-accent);
+}

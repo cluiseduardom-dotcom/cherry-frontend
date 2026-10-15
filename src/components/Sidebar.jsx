@@ -20,15 +20,11 @@ import {
   PackageX,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../theme/themeContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
+import { ROLE_LABEL } from '../config/papeis';
 import { listarEstoqueBaixo } from '../services/estoque';
 import './Sidebar.css';
-
-const ROLE_LABEL = {
-  admin: 'Administrador(a)',
-  vendedor: 'Vendedor(a)',
-  estoquista: 'Estoquista',
-};
 
 function initials(name) {
   if (!name) return '';
@@ -89,6 +85,7 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { marca } = useTheme();
   const [estoqueAlertas, setEstoqueAlertas] = useState([]);
 
   useEffect(() => {
@@ -123,15 +120,23 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       {/* Logo */}
-      <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">
-          <Cherry size={22} strokeWidth={2.2} />
+      {marca.logo ? (
+        <div className="sidebar-logo sidebar-logo--imagem">
+          <img className="sidebar-logo-img" src={marca.logo} alt={marca.logoAlt || marca.nome} />
         </div>
-        <div className="sidebar-logo-text">
-          <span className="sidebar-logo-brand">Cherry</span>
-          <span className="sidebar-logo-sub">SEMIJOIAS</span>
+      ) : (
+        <div className="sidebar-logo">
+          {marca.mostrarIcone && (
+            <div className="sidebar-logo-icon">
+              <Cherry size={22} strokeWidth={2.2} />
+            </div>
+          )}
+          <div className="sidebar-logo-text">
+            <span className="sidebar-logo-brand">{marca.nome}</span>
+            {marca.subtitulo && <span className="sidebar-logo-sub">{marca.subtitulo}</span>}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Navigation */}
       <nav className="sidebar-nav">

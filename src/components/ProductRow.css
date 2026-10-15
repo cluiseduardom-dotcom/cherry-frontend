@@ -35,14 +35,14 @@
 }
 
 .product-row--clickable:focus-visible {
-  outline: 2px solid #007BFF;
+  outline: 2px solid var(--color-secondary);
   outline-offset: 2px;
 }
 
 /* Estado selecionado */
 .product-row--selected {
-  border-color: #007BFF;
-  background: #F0F7FF;
+  border-color: var(--color-secondary);
+  background: var(--color-primary-ultra);
 }
 
 /* Micro-feedback visual ao adicionar ao carrinho */
@@ -258,7 +258,7 @@
 .product-row-price {
   font-size: 15.5px;
   font-weight: 700;
-  color: #0A1F44; /* Azul-marinho oficial VERTUMNO */
+  color: var(--color-primary); /* cor primária do tema ativo */
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.25px;
   line-height: 1.25;
@@ -288,7 +288,7 @@
   height: 36px;
   min-width: 36px;
   border-radius: var(--radius-sm, 7px);
-  background: #0A1F44; /* Azul-marinho VERTUMNO */
+  background: var(--color-primary); /* cor primária do tema ativo */
   color: #FFFFFF;
   border: none;
   font-family: inherit;
@@ -296,12 +296,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast, 0.15s ease);
-  box-shadow: 0 1px 3px rgba(10, 31, 68, 0.15);
+  box-shadow: 0 1px 3px rgba(var(--color-primary-rgb), 0.15);
 }
 
 .product-row-add-btn:hover:not(:disabled) {
-  background: #007BFF; /* Azul de ação VERTUMNO */
-  box-shadow: 0 3px 8px rgba(0, 123, 255, 0.25);
+  background: var(--color-secondary); /* cor de ação do tema ativo */
+  box-shadow: 0 3px 8px rgba(var(--color-secondary-rgb), 0.25);
   transform: translateY(-1px);
 }
 

@@ -93,6 +93,34 @@
   box-shadow: 0 8px 24px rgba(var(--color-primary-rgb), 0.35);
 }
 
+/* Logo oficial em imagem (celular): o fundo da própria imagem é o degradê escuro da marca,
+   então ela vira um cartão de marca e as bordas se dissolvem como no menu lateral. */
+.login-logo--imagem {
+  justify-content: center;
+  margin: calc(-1 * var(--space-2)) 0;
+  border-radius: var(--radius-lg);
+  background: var(--sidebar-bg);
+  overflow: hidden;
+}
+
+.login-logo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 80%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, #000 80%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.login-logo--imagem .login-logo-img {
+  max-width: 220px;
+}
+
 .login-logo-text {
   display: flex;
   flex-direction: column;
@@ -215,7 +243,8 @@
 .login-side {
   display: none;
   flex: 1;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  /* Fundo escuro da marca: o mesmo do menu lateral, que casa com o fundo do logo oficial */
+  background: var(--sidebar-bg);
   position: relative;
   z-index: 5;
   align-items: center;
@@ -229,6 +258,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+}
+
+/* Painel de marca: o logo oficial vira um cartão de cantos arredondados, sem esmaecer as
+   bordas (o fundo da imagem é mais claro que o painel e formaria um halo). */
+.login-side-logo {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  align-self: flex-start;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
 .login-side-icon {
@@ -297,6 +338,11 @@
 
   .login-side {
     display: flex;
+  }
+
+  /* No desktop o logo oficial fica no painel de marca; o cartão não o repete */
+  .login-logo--imagem {
+    display: none;
   }
 
   .login-bg-blob--3 {

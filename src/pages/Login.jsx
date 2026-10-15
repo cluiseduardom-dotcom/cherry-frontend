@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Cherry, Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../theme/themeContext';
 import { homeRouteForRole } from '../config/access';
 import './Login.css';
 
 export default function Login() {
+  const { marca } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, user } = useAuth();
@@ -53,15 +55,23 @@ export default function Login() {
       {/* Login card */}
       <div className="login-card card">
         {/* Logo */}
-        <div className="login-logo">
-          <div className="login-logo-icon">
-            <Cherry size={28} strokeWidth={2} />
+        {marca.logo ? (
+          <div className="login-logo login-logo--imagem">
+            <img className="login-logo-img" src={marca.logo} alt={marca.logoAlt || marca.nome} />
           </div>
-          <div className="login-logo-text">
-            <span className="login-brand">Cherry</span>
-            <span className="login-sub">SEMIJOIAS</span>
+        ) : (
+          <div className="login-logo">
+            {marca.mostrarIcone && (
+              <div className="login-logo-icon">
+                <Cherry size={28} strokeWidth={2} />
+              </div>
+            )}
+            <div className="login-logo-text">
+              <span className="login-brand">{marca.nome}</span>
+              {marca.subtitulo && <span className="login-sub">{marca.subtitulo}</span>}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="login-header">
           <h1 className="login-title">Bem-vinda de volta</h1>
@@ -140,13 +150,19 @@ export default function Login() {
       {/* Side decoration (desktop) */}
       <div className="login-side">
         <div className="login-side-content">
-          <div className="login-side-icon">
-            <Cherry size={48} strokeWidth={1.5} />
-          </div>
-          <h2 className="login-side-title">Cherry Semijoias</h2>
-          <p className="login-side-desc">
-            Sistema completo de gestão para semijoias. Vendas, estoque, clientes e relatórios em um só lugar.
-          </p>
+          {marca.logo ? (
+            <img className="login-side-logo" src={marca.logo} alt={marca.logoAlt || marca.nome} />
+          ) : (
+            <>
+              {marca.mostrarIcone && (
+                <div className="login-side-icon">
+                  <Cherry size={48} strokeWidth={1.5} />
+                </div>
+              )}
+              <h2 className="login-side-title">{marca.loginTitulo}</h2>
+            </>
+          )}
+          <p className="login-side-desc">{marca.loginDescricao}</p>
           <div className="login-side-features">
             {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (
               <div key={f} className="login-side-feature">

@@ -13,12 +13,6 @@ import { formatarMoeda } from '../utils/mascaras';
 import ProductRow from '../components/ProductRow';
 import './Produtos.css';
 
-const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
-
-function colorForProduto(id) {
-  return CARD_COLORS[id % CARD_COLORS.length];
-}
-
 export function temSku(produto) {
   return produto?.sku != null;
 }

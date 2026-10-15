@@ -7,13 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
 import { useToast } from '../context/ToastContext';
+import { corDoProduto as colorForProduto } from '../theme/themes';
 import './Estoque.css';
-
-const ROW_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
-
-function colorForProduto(id) {
-  return ROW_COLORS[id % ROW_COLORS.length];
-}
 
 const FILTROS_VALIDOS = ['todos', 'baixo', 'esgotado'];
 

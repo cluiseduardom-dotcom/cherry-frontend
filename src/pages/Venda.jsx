@@ -22,13 +22,8 @@ import {
   removerPagamentoDaLista,
 } from '../utils/pagamentoVenda';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
+import { corDoProduto as colorForProduto } from '../theme/themes';
 import './Venda.css';
-
-const CARD_COLORS = ['#C9A96E', '#D4AF37', '#F5F0E8', '#C0C0C0', '#A70636', '#E8A0BF', '#FFD700', '#F4A7B9', '#B8860B'];
-
-function colorForProduto(id) {
-  return CARD_COLORS[id % CARD_COLORS.length];
-}
 
 // O preço exibido/vendido é sempre o vigente para o canal (preco_canal),
 // nunca o preco_venda "cru" da tabela produtos — é o que o backend usa

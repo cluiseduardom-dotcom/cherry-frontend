@@ -91,7 +91,7 @@
 
 .configuracao-sku-item-card--active {
   border-color: var(--color-primary);
-  background: #FFFDFD;
+  background: var(--color-bg-surface);
   box-shadow: 0 0 0 2px var(--color-primary-ultra), var(--shadow-card);
 }
 
@@ -149,7 +149,7 @@
   font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--color-primary);
-  background: #FFF5F7;
+  background: var(--color-primary-ultra);
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border-light);
@@ -296,7 +296,7 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  background: #FFF;
+  background: var(--color-bg-card);
   border-radius: var(--radius-sm);
   font-family: 'JetBrains Mono', Consolas, monospace;
   font-weight: 800;
@@ -350,7 +350,7 @@
   align-items: center;
   justify-content: center;
   padding: 8px 14px;
-  background: #FFFFFF;
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
@@ -358,12 +358,12 @@
 }
 
 .configuracao-sku-pipeline-node--extra {
-  background: #FFF9F9;
+  background: var(--color-bg-surface);
   border-style: dashed;
 }
 
 .configuracao-sku-pipeline-node--sequence {
-  background: linear-gradient(135deg, #FFF0F4 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, var(--color-primary-ultra) 0%, var(--color-bg-card) 100%);
   border: 1.5px solid var(--color-primary);
   box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.12);
 }
@@ -405,7 +405,7 @@
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
-  background: #FFFFFF;
+  background: var(--color-bg-card);
   transition: border-color 0.15s ease;
 }
 
@@ -551,7 +551,7 @@
 }
 
 .configuracao-sku-preview-hero {
-  background: linear-gradient(135deg, #FFF9FA 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-bg-card) 100%);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-4);

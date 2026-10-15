@@ -1,5 +1,5 @@
 /* =========================================================
-   CHERRY SEMIJOIAS — DESIGN SYSTEM
+   VERTUMNO — DESIGN SYSTEM
    Global CSS Variables & Base Styles
    ========================================================= */
 
@@ -11,7 +11,8 @@
   --color-bg-input:       #FFFFFF;
   --color-text-white:     #FFFFFF;
 
-  /* Legado: a rampa --cherry-N agora acompanha a rampa do tema ativo */
+  /* Legado: --cherry-N é apenas alias de --brand-N (rampa do tema ativo). O código atual usa --brand-N;
+     o alias fica por compatibilidade com branches ainda não integrados. */
   --cherry-50:  var(--brand-50);
   --cherry-100: var(--brand-100);
   --cherry-200: var(--brand-200);
@@ -244,7 +245,7 @@ ul, ol {
 }
 
 .btn-secondary:hover {
-  background: var(--cherry-200);
+  background: var(--brand-200);
 }
 
 .btn-ghost {

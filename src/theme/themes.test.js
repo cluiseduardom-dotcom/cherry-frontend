@@ -249,3 +249,18 @@ describe('marca por tema', () => {
     expect(fonte).not.toMatch(/empresa_id|empresaId/);
   });
 });
+
+describe('limpeza de nomes e cores legadas', () => {
+  it('o código usa --brand-N: o alias legado --cherry-N só existe em index.css e themes.css', () => {
+    for (const arquivo of arquivosCss(SRC)) {
+      if (/index\.css$|themes\.css$/.test(arquivo)) continue;
+      expect(readFileSync(arquivo, 'utf8'), arquivo).not.toMatch(/--cherry-/);
+    }
+  });
+
+  it('o gráfico de ponto de equilíbrio usa o dourado do tema, não um hex fixo', () => {
+    const grafico = readFileSync(join(SRC, 'components', 'GraficoPontoEquilibrio.jsx'), 'utf8');
+    expect(grafico).not.toMatch(/COR_OURO|#C9A24B/i);
+    expect(grafico).toContain("'var(--color-accent)'");
+  });
+});

@@ -329,4 +329,11 @@
   /* Cartões de ~170 px: com 17 px, valores como "R$ 11.075,95" ficam em uma linha a 390 e 360 px
      (a 20 px quebravam no meio do número). overflow-wrap fica só como rede de segurança. */
   .rel-kpi-value { font-size: var(--font-size-lg); }
+
+  /* Abas: com o respiro de desktop as três somavam ~348 px e alargavam a página a 360 px.
+     Respiro menor as faz caber (~316 px); em telas ainda mais estreitas a barra rola só dentro
+     de si (width: 0 + min-width: 100%, mesmo padrão das tabelas). margin-bottom: 0 evita que o
+     overflow recorte a linha da aba ativa. */
+  .rel-tabs { gap: var(--space-1); width: 0; min-width: 100%; overflow-x: auto; }
+  .rel-tab { padding-inline: var(--space-3); flex: 0 0 auto; white-space: nowrap; margin-bottom: 0; }
 }

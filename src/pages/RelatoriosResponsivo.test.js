@@ -49,6 +49,20 @@ describe('Relatórios: sem rolagem horizontal da página', () => {
     expect(lg).toBeLessThan(xl);
   });
 
+  it('em ≤480 px a barra de abas cabe a 360 px e, se faltar espaço, rola só dentro de si', () => {
+    expect(bloco(480)).toMatch(/\.rel-tabs \{ gap: var\(--space-1\); width: 0; min-width: 100%; overflow-x: auto; \}/);
+    expect(bloco(480)).toMatch(/\.rel-tab \{ padding-inline: var\(--space-3\); flex: 0 0 auto; white-space: nowrap; margin-bottom: 0; \}/);
+  });
+
+  it('a barra de abas no desktop não muda (sem contenção, respiro e sobreposição de 1 px originais)', () => {
+    expect(regra('.rel-tabs')).not.toMatch(/overflow|width/);
+    expect(regra('.rel-tabs')).toMatch(/gap:\s*var\(--space-2\)/);
+    expect(regra('.rel-tab')).toMatch(/padding:\s*var\(--space-3\) var\(--space-4\)/);
+    expect(regra('.rel-tab')).toMatch(/margin-bottom:\s*-1px/);
+    expect(bloco(768)).not.toMatch(/\.rel-tabs?\b/);
+    expect(bloco(1100)).not.toMatch(/\.rel-tabs?\b/);
+  });
+
   it('o tamanho do valor dos indicadores no desktop não muda (só ≤480 px)', () => {
     expect(regra('.rel-kpi-value')).toMatch(/font-size:\s*var\(--font-size-2xl\)/);
     expect(bloco(768)).not.toMatch(/rel-kpi-value/);

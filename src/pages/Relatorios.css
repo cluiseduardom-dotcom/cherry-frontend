@@ -326,5 +326,7 @@
 }
 
 @media (max-width: 480px) {
-  .rel-kpi-value { font-size: var(--font-size-xl); }
+  /* Cartões de ~170 px: com 17 px, valores como "R$ 11.075,95" ficam em uma linha a 390 e 360 px
+     (a 20 px quebravam no meio do número). overflow-wrap fica só como rede de segurança. */
+  .rel-kpi-value { font-size: var(--font-size-lg); }
 }

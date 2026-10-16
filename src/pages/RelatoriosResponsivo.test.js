@@ -36,8 +36,23 @@ describe('Relatórios: sem rolagem horizontal da página', () => {
     expect(bloco(1100)).toMatch(/\.rel-bar-chart \{ padding-inline: 8px; \}/);
     expect(bloco(768)).toMatch(/\.rel-bar-chart \{ gap: 3px; \}/);
     expect(bloco(768)).toMatch(/\.rel-bar-wrap \{ flex-basis: 10px; min-width: 6px; \}/);
-    expect(bloco(480)).toMatch(/\.rel-kpi-value \{ font-size: var\(--font-size-xl\); \}/);
     expect(regra('.rel-kpi-value')).toMatch(/overflow-wrap:\s*anywhere/);
+  });
+
+  it('em ≤480 px o valor dos indicadores usa 17 px, para valores de cinco dígitos caberem em uma linha (390 e 360 px)', () => {
+    const lg = Number(ler('index.css').match(/--font-size-lg:\s*(\d+)px/)?.[1]);
+    const xl = Number(ler('index.css').match(/--font-size-xl:\s*(\d+)px/)?.[1]);
+    expect(bloco(480)).toMatch(/\.rel-kpi-value \{ font-size: var\(--font-size-lg\); \}/);
+    expect(bloco(480)).not.toMatch(/--font-size-xl/);
+    // 20 px (xl) quebrava "R$ 11.075,95" no meio do número nos cartões de ~170 px
+    expect(lg).toBe(17);
+    expect(lg).toBeLessThan(xl);
+  });
+
+  it('o tamanho do valor dos indicadores no desktop não muda (só ≤480 px)', () => {
+    expect(regra('.rel-kpi-value')).toMatch(/font-size:\s*var\(--font-size-2xl\)/);
+    expect(bloco(768)).not.toMatch(/rel-kpi-value/);
+    expect(bloco(1100)).not.toMatch(/rel-kpi-value/);
   });
 
   it('o desktop não muda: grade de 4 indicadores e barras com 18 px de base', () => {

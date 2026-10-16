@@ -184,6 +184,11 @@ export async function exportarRelatorioPDF({ elementId, filename, titulo, period
           const colunas = clonedDoc.defaultView.getComputedStyle(el).gridTemplateColumns.split(' ').length;
           el.style.gridTemplateColumns = Array(colunas).fill('1fr').join(' ');
         });
+        // O html2canvas copia para o clone a largura que o SVG tinha na tela; sem isto o gráfico de
+        // linha do Financeiro ficaria mais estreito que o cartão depois dos ajustes acima.
+        clonedDoc.querySelectorAll('.rel-line-chart').forEach(el => {
+          el.style.width = '100%';
+        });
       },
     }),
     carregarLogoDataUrl(),

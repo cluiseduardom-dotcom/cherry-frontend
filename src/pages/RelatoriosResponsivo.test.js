@@ -70,4 +70,16 @@ describe('Exportação de PDF continua completa no celular', () => {
     expect(util).toMatch(/el\.style\.overflow = 'visible'/);
     expect(util).toMatch(/Array\(colunas\)\.fill\('1fr'\)/);
   });
+
+  it('o gráfico de linha do Financeiro ocupa 100% do cartão na captura (o html2canvas copia a largura da tela)', () => {
+    const onclone = util.slice(util.indexOf('onclone:'));
+    expect(onclone).toMatch(/querySelectorAll\('\.rel-line-chart'\)\.forEach\(el => \{\s*el\.style\.width = '100%';/);
+  });
+
+  it('a aparência do gráfico de linha na tela não muda (a regra vale só na cópia usada na captura)', () => {
+    expect(regra('.rel-line-chart')).toMatch(/width:\s*100%/);
+    expect(regra('.rel-line-chart')).toMatch(/height:\s*180px/);
+    expect(regra('.rel-line-chart')).toMatch(/display:\s*block/);
+    expect(css).not.toMatch(/\.rel-line-chart[^{]*\{[^}]*(min-width|overflow)/);
+  });
 });

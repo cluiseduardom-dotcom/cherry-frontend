@@ -241,69 +241,71 @@ export default function Historico() {
 
       {!loading && !error && (
         <div className="card">
-          <table className="historico-table">
-            <thead>
-              <tr>
-                <th>Nº Venda</th>
-                <th>Data</th>
-                <th>Cliente</th>
-                <th>Canal</th>
-                <th>Total</th>
-                <th>Status</th>
-                {podeCancelar && <th></th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(venda => {
-                const nomeCliente = clientesPorId.get(venda.cliente_id);
-                return (
-                  <tr key={venda.id} className="historico-row">
-                    <td>
-                      <span className="historico-id">#{venda.id}</span>
-                    </td>
-                    <td className="historico-date">
-                      {new Date(venda.data).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td>
-                      {nomeCliente ? (
-                        <div className="historico-customer">
-                          <div className="historico-avatar">
-                            {nomeCliente.split(' ').slice(0, 2).map(w => w[0]).join('')}
-                          </div>
-                          {nomeCliente}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-secondary">—</span>
-                      )}
-                    </td>
-                    <td className="historico-items">{CANAL_LABEL[venda.canal] ?? venda.canal}</td>
-                    <td className="historico-total">
-                      {Number(venda.total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </td>
-                    <td>
-                      <span className={`badge ${venda.status === 'finalizada' ? 'badge-success' : 'badge-danger'}`}>
-                        {STATUS_LABEL[venda.status] ?? venda.status}
-                      </span>
-                    </td>
-                    {podeCancelar && (
+          <div className="table-scroll">
+            <table className="historico-table">
+              <thead>
+                <tr>
+                  <th>Nº Venda</th>
+                  <th>Data</th>
+                  <th>Cliente</th>
+                  <th>Canal</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  {podeCancelar && <th></th>}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(venda => {
+                  const nomeCliente = clientesPorId.get(venda.cliente_id);
+                  return (
+                    <tr key={venda.id} className="historico-row">
                       <td>
-                        {venda.status === 'finalizada' && (
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            style={{ color: 'var(--color-danger)' }}
-                            disabled={cancelandoId === venda.id}
-                            onClick={() => handleCancelar(venda)}
-                          >
-                            {cancelandoId === venda.id ? 'Cancelando...' : 'Cancelar'}
-                          </button>
+                        <span className="historico-id">#{venda.id}</span>
+                      </td>
+                      <td className="historico-date">
+                        {new Date(venda.data).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td>
+                        {nomeCliente ? (
+                          <div className="historico-customer">
+                            <div className="historico-avatar">
+                              {nomeCliente.split(' ').slice(0, 2).map(w => w[0]).join('')}
+                            </div>
+                            {nomeCliente}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-secondary">—</span>
                         )}
                       </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      <td className="historico-items">{CANAL_LABEL[venda.canal] ?? venda.canal}</td>
+                      <td className="historico-total">
+                        {Number(venda.total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </td>
+                      <td>
+                        <span className={`badge ${venda.status === 'finalizada' ? 'badge-success' : 'badge-danger'}`}>
+                          {STATUS_LABEL[venda.status] ?? venda.status}
+                        </span>
+                      </td>
+                      {podeCancelar && (
+                        <td>
+                          {venda.status === 'finalizada' && (
+                            <button
+                              className="btn btn-ghost btn-sm"
+                              style={{ color: 'var(--color-danger)' }}
+                              disabled={cancelandoId === venda.id}
+                              onClick={() => handleCancelar(venda)}
+                            >
+                              {cancelandoId === venda.id ? 'Cancelando...' : 'Cancelar'}
+                            </button>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
           {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><Search size={24} /></div>

@@ -219,32 +219,34 @@ export default function RelatorioVendas() {
           </div>
 
           <div className="card rel-table-card">
-            <table className="rel-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Cliente</th>
-                  <th>Itens</th>
-                  <th>Subtotal</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vendas.map(v => (
-                  <tr key={v.id} className="rel-row">
-                    <td>{formatDateBR(String(v.data).slice(0, 10))}</td>
-                    <td>{v.clienteNome}</td>
-                    <td>{v.qtdItens ?? '—'}</td>
-                    <td className="rel-valor">{formatCurrency(v.total)}</td>
-                    <td>
-                      {v.forma_pagamento === 'a_vista'
-                        ? <span className="badge badge-success">Pago</span>
-                        : <span className="badge badge-warning">Pendente</span>}
-                    </td>
+            <div className="rel-table-scroll">
+              <table className="rel-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Itens</th>
+                    <th>Subtotal</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {vendas.map(v => (
+                    <tr key={v.id} className="rel-row">
+                      <td>{formatDateBR(String(v.data).slice(0, 10))}</td>
+                      <td>{v.clienteNome}</td>
+                      <td>{v.qtdItens ?? '—'}</td>
+                      <td className="rel-valor">{formatCurrency(v.total)}</td>
+                      <td>
+                        {v.forma_pagamento === 'a_vista'
+                          ? <span className="badge badge-success">Pago</span>
+                          : <span className="badge badge-warning">Pendente</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {vendas.length === 0 && (
               <div className="empty-state">
                 <div className="empty-state-title">Nenhum registro encontrado para os filtros selecionados</div>

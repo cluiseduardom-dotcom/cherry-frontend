@@ -277,37 +277,39 @@ export default function RelatorioEstoque() {
           </div>
 
           <div className="card rel-table-card">
-            <table className="rel-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Produto</th>
-                  <th>Tipo</th>
-                  <th>Quantidade</th>
-                  <th>Saldo após</th>
-                  <th>Motivo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {movimentacoes.map(m => {
-                  const baixo = Number(m.estoque_resultante) <= 5;
-                  const tipoInfo = TIPO_BADGE[m.tipo] ?? { className: 'badge-info', label: m.tipo };
-                  return (
-                    <tr key={m.id} className={`rel-row ${baixo ? 'rel-row--baixo-estoque' : ''}`}>
-                      <td>{formatDateBR(String(m.criado_em).slice(0, 10))}</td>
-                      <td>{m.produtoNome}</td>
-                      <td><span className={`badge ${tipoInfo.className}`}>{tipoInfo.label}</span></td>
-                      <td>{m.quantidade}</td>
-                      <td>
-                        {m.estoque_resultante}
-                        {baixo && <span className="badge badge-warning" style={{ marginLeft: 6 }}>Baixo estoque</span>}
-                      </td>
-                      <td>{m.motivo || '—'}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="rel-table-scroll">
+              <table className="rel-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Saldo após</th>
+                    <th>Motivo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movimentacoes.map(m => {
+                    const baixo = Number(m.estoque_resultante) <= 5;
+                    const tipoInfo = TIPO_BADGE[m.tipo] ?? { className: 'badge-info', label: m.tipo };
+                    return (
+                      <tr key={m.id} className={`rel-row ${baixo ? 'rel-row--baixo-estoque' : ''}`}>
+                        <td>{formatDateBR(String(m.criado_em).slice(0, 10))}</td>
+                        <td>{m.produtoNome}</td>
+                        <td><span className={`badge ${tipoInfo.className}`}>{tipoInfo.label}</span></td>
+                        <td>{m.quantidade}</td>
+                        <td>
+                          {m.estoque_resultante}
+                          {baixo && <span className="badge badge-warning" style={{ marginLeft: 6 }}>Baixo estoque</span>}
+                        </td>
+                        <td>{m.motivo || '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
             {movimentacoes.length === 0 && (
               <div className="empty-state">
                 <div className="empty-state-title">Nenhum registro encontrado para os filtros selecionados</div>

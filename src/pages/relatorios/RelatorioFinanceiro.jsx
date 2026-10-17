@@ -266,31 +266,33 @@ export default function RelatorioFinanceiro() {
           <div className="rel-financeiro-tables">
             <div className="card rel-table-card">
               <div className="rel-table-title">Contas a Receber</div>
-              <table className="rel-table">
-                <thead>
-                  <tr>
-                    <th>Vencimento</th>
-                    <th>Cliente</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Dias em aberto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contasReceber.map(c => (
-                    <tr key={c.id} className="rel-row">
-                      <td>{formatDateBR(c.data_vencimento)}</td>
-                      <td>{nomeClientePorVendaId.get(c.venda_id) || '—'}</td>
-                      <td className="rel-valor">{formatCurrency(c.valor)}</td>
-                      <td>
-                        <span className={`badge ${STATUS_BADGE_RECEBER[c.status]}`}>{STATUS_LABEL_RECEBER[c.status]}</span>
-                        {c.atrasado && <span className="badge badge-danger" style={{ marginLeft: 6 }}>Atrasado</span>}
-                      </td>
-                      <td>{diasEmAbertoLabel(c.data_vencimento)}</td>
+              <div className="rel-table-scroll">
+                <table className="rel-table">
+                  <thead>
+                    <tr>
+                      <th>Vencimento</th>
+                      <th>Cliente</th>
+                      <th>Valor</th>
+                      <th>Status</th>
+                      <th>Dias em aberto</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {contasReceber.map(c => (
+                      <tr key={c.id} className="rel-row">
+                        <td>{formatDateBR(c.data_vencimento)}</td>
+                        <td>{nomeClientePorVendaId.get(c.venda_id) || '—'}</td>
+                        <td className="rel-valor">{formatCurrency(c.valor)}</td>
+                        <td>
+                          <span className={`badge ${STATUS_BADGE_RECEBER[c.status]}`}>{STATUS_LABEL_RECEBER[c.status]}</span>
+                          {c.atrasado && <span className="badge badge-danger" style={{ marginLeft: 6 }}>Atrasado</span>}
+                        </td>
+                        <td>{diasEmAbertoLabel(c.data_vencimento)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {contasReceber.length === 0 && (
                 <div className="empty-state">
                   <div className="empty-state-title">Nenhum registro encontrado para os filtros selecionados</div>
@@ -300,31 +302,33 @@ export default function RelatorioFinanceiro() {
 
             <div className="card rel-table-card">
               <div className="rel-table-title">Contas a Pagar</div>
-              <table className="rel-table">
-                <thead>
-                  <tr>
-                    <th>Vencimento</th>
-                    <th>Fornecedor</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Dias em aberto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contasPagar.map(c => (
-                    <tr key={c.id} className="rel-row">
-                      <td>{formatDateBR(c.data_vencimento)}</td>
-                      <td>{c.fornecedor || '—'}</td>
-                      <td className="rel-valor">{formatCurrency(c.valor)}</td>
-                      <td>
-                        <span className={`badge ${STATUS_BADGE_PAGAR[c.status]}`}>{STATUS_LABEL_PAGAR[c.status]}</span>
-                        {c.atrasado && <span className="badge badge-danger" style={{ marginLeft: 6 }}>Atrasado</span>}
-                      </td>
-                      <td>{diasEmAbertoLabel(c.data_vencimento)}</td>
+              <div className="rel-table-scroll">
+                <table className="rel-table">
+                  <thead>
+                    <tr>
+                      <th>Vencimento</th>
+                      <th>Fornecedor</th>
+                      <th>Valor</th>
+                      <th>Status</th>
+                      <th>Dias em aberto</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {contasPagar.map(c => (
+                      <tr key={c.id} className="rel-row">
+                        <td>{formatDateBR(c.data_vencimento)}</td>
+                        <td>{c.fornecedor || '—'}</td>
+                        <td className="rel-valor">{formatCurrency(c.valor)}</td>
+                        <td>
+                          <span className={`badge ${STATUS_BADGE_PAGAR[c.status]}`}>{STATUS_LABEL_PAGAR[c.status]}</span>
+                          {c.atrasado && <span className="badge badge-danger" style={{ marginLeft: 6 }}>Atrasado</span>}
+                        </td>
+                        <td>{diasEmAbertoLabel(c.data_vencimento)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {contasPagar.length === 0 && (
                 <div className="empty-state">
                   <div className="empty-state-title">Nenhum registro encontrado para os filtros selecionados</div>

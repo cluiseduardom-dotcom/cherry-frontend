@@ -16,14 +16,13 @@ function CherrySymbol({ className = '' }) {
           <stop offset="100%" stopColor="#FFE8A8" />
         </linearGradient>
       </defs>
-      <g fill="none" stroke="url(#cherry-gold)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M59 49 C58 32 60 17 73 9 C81 4 86 12 78 17 C70 21 62 19 59 13" />
-        <path d="M60 48 C47 52 36 63 29 78" />
-        <path d="M61 47 C76 52 85 63 91 76" />
-        <path d="M29 78 C16 72 8 83 12 96 C17 110 34 112 43 101 C49 94 45 83 37 79 C34 78 31 78 29 78 Z" />
-        <path d="M77 78 C64 72 56 83 60 96 C65 110 82 112 91 101 C97 94 93 83 85 79 C82 78 79 78 77 78 Z" />
-        <path d="M64 24 C77 23 91 29 100 43 C89 45 76 41 68 32 Z" fill="url(#cherry-gold)" strokeWidth="2.2" />
-        <path d="M71 29 C78 34 85 38 94 41" stroke="#8C5B23" strokeWidth="1.2" />
+      <g fill="none" stroke="url(#cherry-gold)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M34 66 C34 48 39 28 52 15 C56 11 61 9 65 11 C68 13 65 18 60 19 C55 20 51 17 52 13" />
+        <path d="M65 65 C59 47 52 33 52 15" />
+        <path d="M52 18 C64 17 77 23 88 35 C77 36 65 31 58 23 Z" fill="url(#cherry-gold)" strokeWidth="1.8" />
+        <path d="M59 24 C67 28 76 32 84 34" stroke="#8C5B23" strokeWidth="1.1" />
+        <circle cx="30" cy="78" r="13.5" />
+        <circle cx="58" cy="78" r="13.5" />
       </g>
     </svg>
   );

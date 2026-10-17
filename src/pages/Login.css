@@ -311,3 +311,32 @@
     margin: var(--space-4);
   }
 }
+
+/* Logos oficiais por identidade visual, sem ícone genérico no login. */
+.login-brand-logo {
+  display: block;
+  width: auto;
+  max-width: 240px;
+  max-height: 64px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.login-side-brand-symbol {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 10px;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="cherry"] .login-side {
+  background: linear-gradient(135deg, var(--color-hero-from), var(--color-hero-to));
+}
+
+html[data-theme="vertumno"] .login-side {
+  background: linear-gradient(135deg, var(--color-hero-from), var(--color-hero-to));
+}

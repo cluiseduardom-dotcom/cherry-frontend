@@ -3,8 +3,13 @@ import { TEMAS, TEMA_PADRAO, aplicarTema, lerTemaDev, resolverTema } from './the
 import { ThemeContext } from './themeContext';
 import { useAuth } from '../context/AuthContext';
 
+// A identidade antes do login é definida pela implantação (Cherry ou VERTUMNO).
+// Para este frontend da Cherry, Cherry é o padrão; outra implantação pode definir
+// VITE_DEFAULT_THEME=vertumno. A sessão autenticada sempre prevalece.
+const TEMA_INICIAL = resolverTema(import.meta.env.VITE_DEFAULT_THEME || 'cherry');
+
 function temaInicial() {
-  if (typeof window === 'undefined') return TEMA_PADRAO;
+  if (typeof window === 'undefined') return TEMA_INICIAL;
 
   let storage = null;
   try {
@@ -13,18 +18,19 @@ function temaInicial() {
     storage = null;
   }
 
-  return resolverTema(
-    lerTemaDev({ search: window.location.search, storage, isDev: import.meta.env.DEV }),
-  );
+  const temaDev = lerTemaDev({
+    search: window.location.search,
+    storage,
+    isDev: import.meta.env.DEV,
+  });
+
+  return resolverTema(temaDev || TEMA_INICIAL);
 }
 
 export function ThemeProvider({ children }) {
   const { user } = useAuth();
-  const [temaDev] = useState(temaInicial);
-
-  // O tema da empresa autenticada tem precedência. Antes do login,
-  // mantém VERTUMNO; a pré-visualização continua disponível apenas em dev.
-  const tema = user ? resolverTema(user.tema) : resolverTema(temaDev);
+  const [temaBase] = useState(temaInicial);
+  const tema = user ? resolverTema(user.tema) : resolverTema(temaBase);
 
   useLayoutEffect(() => {
     aplicarTema(document.documentElement, tema);

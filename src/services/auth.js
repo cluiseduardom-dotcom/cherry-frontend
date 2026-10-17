@@ -1,4 +1,5 @@
 import { apiFetch } from './api';
+import { resolverTema } from '../theme/themes';
 
 export async function loginRequest(email, senha) {
   const body = await apiFetch('/auth/login', {
@@ -16,6 +17,9 @@ export async function loginRequest(email, senha) {
       nome: usuario.nome,
       email: usuario.email,
       role: usuario.papel,
+      // O backend fornece apenas um identificador fechado de tema.
+      // Valores ausentes ou desconhecidos usam a identidade VERTUMNO.
+      tema: resolverTema(usuario.empresa?.tema),
     },
   };
 }

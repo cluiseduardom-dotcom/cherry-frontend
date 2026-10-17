@@ -45,6 +45,21 @@ export default function Login() {
   }
 
   return (
+    <>
+      {isCherry && (
+        <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute' }}>
+          <defs>
+            <filter id="cherry-transparent-background" colorInterpolationFilters="sRGB">
+              <feColorMatrix type="matrix" values="
+                1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0.5 1.5 1.2 0 -0.32
+              " />
+            </filter>
+          </defs>
+        </svg>
+      )}
     <div className={`login-page ${isCherry ? 'login-page-cherry' : ''}`}>
       <div className="login-bg" aria-hidden="true">
         <div className="login-bg-blob login-bg-blob--1" />
@@ -148,5 +163,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </>
   );
 }

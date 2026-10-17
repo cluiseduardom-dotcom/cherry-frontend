@@ -605,3 +605,71 @@
     transform: translate(5vw, 25px);
   }
 }
+
+
+/* Final polish: vector artwork has a transparent background and safe internal margins. */
+.login-page-cherry .cherry-official-logo,
+.login-page-cherry .cherry-official-symbol {
+  filter: none !important;
+}
+.login-page-cherry .cherry-brand-lockup {
+  display: grid;
+  width: 240px;
+  grid-template-columns: 1fr;
+  justify-items: start;
+  align-items: center;
+  line-height: 1;
+}
+.login-page-cherry .cherry-wordmark-symbol {
+  display: block;
+  width: 135px;
+  height: 125px;
+  object-fit: contain;
+  margin: 0 0 -2px 25px;
+  overflow: visible;
+}
+.login-page-cherry .cherry-wordmark-name {
+  color: #760426;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 62px;
+  line-height: .96;
+  letter-spacing: -2px;
+}
+.login-page-cherry .cherry-wordmark-subtitle {
+  width: 100%;
+  margin-top: 8px;
+  color: #bd842f;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 6px;
+  text-align: center;
+}
+.login-page-cherry .login-side-brand-symbol {
+  width: 200px !important;
+  height: 180px !important;
+  padding: 12px 10px 14px !important;
+  margin: 0 auto 24px !important;
+  overflow: visible !important;
+  object-fit: contain;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  filter: none !important;
+}
+.login-page-cherry .login-side-content {
+  transform: translate(4vw, 8px);
+}
+@media (max-width: 899px) {
+  .login-page-cherry .cherry-brand-lockup { width: 200px; }
+  .login-page-cherry .cherry-wordmark-symbol {
+    width: 105px;
+    height: 98px;
+    margin-left: 22px;
+  }
+  .login-page-cherry .cherry-wordmark-name { font-size: 52px; }
+  .login-page-cherry .cherry-wordmark-subtitle { font-size: 11px; letter-spacing: 5px; }
+  .login-page-cherry .login-side-brand-symbol {
+    width: 150px !important;
+    height: 140px !important;
+  }
+}

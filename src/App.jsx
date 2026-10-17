@@ -69,31 +69,31 @@ function Fallback() {
   return <Navigate to={isAuthenticated ? homeRouteForRole(user.role) : '/login'} replace />;
 }
 
-// UX-06 mantém o ToastProvider acima do roteador. ThemeProvider fica dentro
-// do AuthProvider para reagir ao tema devolvido pelo backend após o login.
+const router = createBrowserRouter([
+  { path: '/login', element: <Login /> },
+  {
+    element: <ProtectedRoute><Layout /></ProtectedRoute>,
+    children: registeredPaths.map(path => {
+      const Component = ROUTE_COMPONENTS[path];
+      return {
+        path,
+        element: (
+          <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]}>
+            <Component />
+          </ProtectedRoute>
+        ),
+      };
+    }),
+  },
+  { path: '*', element: <Fallback /> },
+]);
+
 export default function App() {
   return (
     <ToastProvider>
       <AuthProvider>
         <ThemeProvider>
-          <RouterProvider router={createBrowserRouter([
-            { path: '/login', element: <Login /> },
-            {
-              element: <ProtectedRoute><Layout /></ProtectedRoute>,
-              children: registeredPaths.map(path => {
-                const Component = ROUTE_COMPONENTS[path];
-                return {
-                  path,
-                  element: (
-                    <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]}>
-                      <Component />
-                    </ProtectedRoute>
-                  ),
-                };
-              }),
-            },
-            { path: '*', element: <Fallback /> },
-          ])} />
+          <RouterProvider router={router} />
         </ThemeProvider>
       </AuthProvider>
     </ToastProvider>

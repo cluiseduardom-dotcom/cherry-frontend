@@ -528,3 +528,216 @@
     height: 76px;
   }
 }
+
+
+/* Composição final baseada na referência aprovada pelo cliente. */
+.login-page-cherry {
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  background: #ffffff;
+}
+.login-page-cherry .login-card {
+  box-sizing: border-box;
+  width: 34%;
+  min-width: 430px;
+  max-width: none;
+  flex: 0 0 34%;
+  height: 100%;
+  padding: clamp(38px, 4.8vw, 80px);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: clamp(28px, 3vw, 48px);
+  background: #ffffff;
+}
+.login-page-cherry .login-logo-cherry {
+  flex: 0 0 auto;
+}
+.login-page-cherry .cherry-wordmark {
+  width: 220px;
+}
+.login-page-cherry .cherry-wordmark-symbol {
+  width: 110px;
+  height: 105px;
+  margin: 0 0 -3px 32px;
+}
+.login-page-cherry .cherry-wordmark-name {
+  font-size: 58px;
+  letter-spacing: -2px;
+  line-height: .98;
+}
+.login-page-cherry .cherry-wordmark-subtitle {
+  font-size: 13px;
+  letter-spacing: 6px;
+  margin-top: 9px;
+  color: #bf842f;
+}
+.login-page-cherry .login-header {
+  gap: 8px;
+}
+.login-page-cherry .login-title {
+  font-size: clamp(24px, 1.85vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.6px;
+  color: #760426;
+}
+.login-page-cherry .login-subtitle {
+  font-size: clamp(14px, .98vw, 18px);
+  line-height: 1.5;
+  color: #666166;
+}
+.login-page-cherry .login-form {
+  gap: 22px;
+}
+.login-page-cherry .input-wrapper {
+  gap: 9px;
+}
+.login-page-cherry .input-label {
+  font-size: 16px;
+  font-weight: 650;
+  color: #4b0a1c;
+}
+.login-page-cherry .input-field {
+  height: 60px;
+  font-size: 17px;
+  border-radius: 15px;
+  background: #f7f1f3;
+  border-color: transparent;
+  box-shadow: none;
+}
+.login-page-cherry .input-icon-wrapper {
+  position: relative;
+}
+.login-page-cherry .input-icon {
+  left: 20px;
+}
+.login-page-cherry .input-icon-wrapper .input-field {
+  padding-left: 58px;
+}
+.login-page-cherry .login-pass-wrapper .input-field {
+  padding-right: 48px;
+}
+.login-page-cherry .login-pass-label {
+  align-items: center;
+}
+.login-page-cherry .login-forgot {
+  font-size: 14px;
+  color: #760426;
+}
+.login-page-cherry .login-submit {
+  height: 66px;
+  margin-top: 0;
+  border-radius: 15px;
+  font-size: 19px;
+  gap: 14px;
+  background: #760426;
+  border-color: #760426;
+}
+.login-page-cherry .login-side {
+  box-sizing: border-box;
+  flex: 1 1 66%;
+  min-width: 0;
+  height: 100%;
+  padding: clamp(56px, 6vw, 110px);
+  justify-content: center;
+  align-items: center;
+  background: #760426 !important;
+  background-image: none !important;
+}
+.login-page-cherry .login-side-content {
+  width: min(100%, 700px);
+  max-width: 700px;
+  gap: 28px;
+  align-items: flex-start;
+}
+.login-page-cherry .login-side-brand-symbol {
+  width: 180px;
+  height: 170px;
+  align-self: center;
+  margin-bottom: 2px;
+}
+.login-page-cherry .login-side-title {
+  width: 100%;
+  text-align: center;
+  font-size: clamp(34px, 3.1vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -1.3px;
+}
+.login-page-cherry .login-side-desc {
+  width: 100%;
+  max-width: 700px;
+  font-size: clamp(18px, 1.35vw, 26px);
+  line-height: 1.65;
+  color: #fff8fa;
+}
+.login-page-cherry .login-side-features {
+  width: 100%;
+  gap: 22px;
+  margin-top: 8px;
+}
+.login-page-cherry .login-side-feature {
+  font-size: clamp(17px, 1.25vw, 24px);
+  gap: 22px;
+}
+.login-page-cherry .login-side-feature-dot {
+  width: 15px;
+  height: 15px;
+  background: #e9bd55;
+}
+
+@media (min-width: 900px) {
+  .login-page-cherry .login-card {
+    width: 34%;
+    min-width: 430px;
+    max-width: none;
+    flex: 0 0 34%;
+  }
+  .login-page-cherry .login-side {
+    flex: 1 1 66%;
+  }
+}
+@media (max-width: 899px) {
+  .login-page-cherry {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+  .login-page-cherry .login-card {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    flex: 0 0 auto;
+    padding: 38px 28px 46px;
+    gap: 30px;
+  }
+  .login-page-cherry .cherry-wordmark {
+    width: 190px;
+  }
+  .login-page-cherry .cherry-wordmark-symbol {
+    width: 88px;
+    height: 84px;
+    margin-left: 26px;
+  }
+  .login-page-cherry .cherry-wordmark-name {
+    font-size: 50px;
+  }
+  .login-page-cherry .login-side {
+    height: auto;
+    min-height: 620px;
+    padding: 50px 30px;
+  }
+  .login-page-cherry .login-side-brand-symbol {
+    width: 125px;
+    height: 120px;
+  }
+  .login-page-cherry .login-side-title {
+    font-size: 32px;
+  }
+  .login-page-cherry .login-side-desc {
+    font-size: 18px;
+  }
+  .login-page-cherry .login-side-feature {
+    font-size: 16px;
+  }
+}

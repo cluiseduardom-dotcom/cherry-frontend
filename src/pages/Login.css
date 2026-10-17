@@ -581,3 +581,27 @@
   .login-page-cherry .login-side-feature { font-size: 16px; gap: 14px; }
   .login-page-cherry .login-side-feature-dot { flex-basis: 10px; width: 10px; height: 10px; }
 }
+
+
+/* Transparentize the dark raster backdrop in the official gold Cherry artwork. */
+.login-page-cherry .cherry-official-logo,
+.login-page-cherry .cherry-official-symbol {
+  filter: url(#cherry-transparent-background);
+  background: transparent !important;
+  mix-blend-mode: normal !important;
+}
+@media (min-width: 900px) {
+  .login-page-cherry > .login-card {
+    box-sizing: border-box;
+    width: 33.5% !important;
+    flex: 0 0 33.5% !important;
+  }
+  .login-page-cherry > .login-side {
+    box-sizing: border-box;
+    width: 66.5% !important;
+    flex: 0 0 66.5% !important;
+  }
+  .login-page-cherry .login-side-content {
+    transform: translate(5vw, 25px);
+  }
+}

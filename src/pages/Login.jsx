@@ -6,16 +6,40 @@ import { useTheme } from '../theme/themeContext';
 import { homeRouteForRole } from '../config/access';
 import './Login.css';
 
+function CherrySymbol({ className = '' }) {
+  return (
+    <svg className={className} viewBox="0 0 120 120" role="img" aria-label="Cereja dourada">
+      <defs>
+        <linearGradient id="cherry-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#F8D88A" />
+          <stop offset="48%" stopColor="#C58B35" />
+          <stop offset="100%" stopColor="#FFE8A8" />
+        </linearGradient>
+      </defs>
+      <g fill="none" stroke="url(#cherry-gold)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M59 49 C58 32 60 17 73 9 C81 4 86 12 78 17 C70 21 62 19 59 13" />
+        <path d="M60 48 C47 52 36 63 29 78" />
+        <path d="M61 47 C76 52 85 63 91 76" />
+        <path d="M29 78 C16 72 8 83 12 96 C17 110 34 112 43 101 C49 94 45 83 37 79 C34 78 31 78 29 78 Z" />
+        <path d="M77 78 C64 72 56 83 60 96 C65 110 82 112 91 101 C97 94 93 83 85 79 C82 78 79 78 77 78 Z" />
+        <path d="M64 24 C77 23 91 29 100 43 C89 45 76 41 68 32 Z" fill="url(#cherry-gold)" strokeWidth="2.2" />
+        <path d="M71 29 C78 34 85 38 94 41" stroke="#8C5B23" strokeWidth="1.2" />
+      </g>
+    </svg>
+  );
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, user } = useAuth();
   const { marca } = useTheme();
-  const [email, setEmail]       = useState('');
+  const isCherry = marca.nome === 'Cherry';
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPass, setShowPass]  = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   if (isAuthenticated) {
     const from = location.state?.from?.pathname;
@@ -25,12 +49,10 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-
     if (!email || !password) {
       setError('Preencha todos os campos.');
       return;
     }
-
     setLoading(true);
     try {
       const loggedUser = await login(email, password);
@@ -44,7 +66,7 @@ export default function Login() {
   }
 
   return (
-    <div className="login-page">
+    <div className={`login-page ${isCherry ? 'login-page-cherry' : ''}`}>
       <div className="login-bg" aria-hidden="true">
         <div className="login-bg-blob login-bg-blob--1" />
         <div className="login-bg-blob login-bg-blob--2" />
@@ -52,8 +74,16 @@ export default function Login() {
       </div>
 
       <div className="login-card card">
-        <div className="login-logo">
-          <img className="login-brand-logo" src={marca.logo} alt={marca.logoAlt} />
+        <div className={`login-logo ${isCherry ? 'login-logo-cherry' : ''}`}>
+          {isCherry ? (
+            <div className="cherry-wordmark" aria-label="Cherry Semijoias">
+              <CherrySymbol className="cherry-wordmark-symbol" />
+              <span className="cherry-wordmark-name">Cherry</span>
+              <span className="cherry-wordmark-subtitle">SEMIJOIAS</span>
+            </div>
+          ) : (
+            <img className="login-brand-logo" src={marca.logo} alt={marca.logoAlt} />
+          )}
         </div>
 
         <div className="login-header">
@@ -118,21 +148,16 @@ export default function Login() {
             className="btn btn-primary btn-full btn-lg login-submit"
             disabled={loading}
           >
-            {loading ? (
-              <span className="login-spinner" />
-            ) : (
-              <>
-                Entrar
-                <ArrowRight size={18} />
-              </>
-            )}
+            {loading ? <span className="login-spinner" /> : <>Entrar <ArrowRight size={18} /></>}
           </button>
         </form>
       </div>
 
       <div className="login-side">
         <div className="login-side-content">
-          {marca.simbolo ? (
+          {isCherry ? (
+            <CherrySymbol className="login-side-brand-symbol" />
+          ) : marca.simbolo ? (
             <img className="login-side-brand-symbol" src={marca.simbolo} alt="" aria-hidden="true" />
           ) : null}
           <h2 className="login-side-title">{marca.loginTitulo}</h2>

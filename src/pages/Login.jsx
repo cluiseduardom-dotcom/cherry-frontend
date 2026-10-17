@@ -6,33 +6,7 @@ import { useTheme } from '../theme/themeContext';
 import { homeRouteForRole } from '../config/access';
 import './Login.css';
 
-function CherrySymbol({ className = '' }) {
-  return (
-    <svg className={className} viewBox="0 0 160 150" role="img" aria-label="Cerejas douradas">
-      <defs>
-        <linearGradient id="cherry-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#F9D889" />
-          <stop offset="52%" stopColor="#D19A3E" />
-          <stop offset="100%" stopColor="#F3C765" />
-        </linearGradient>
-        <linearGradient id="cherry-leaf" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#FFE7A1" />
-          <stop offset="100%" stopColor="#C58A32" />
-        </linearGradient>
-      </defs>
-      <g stroke="url(#cherry-gold)" strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M72 69 C75 47 80 29 94 17 C100 12 107 15 103 21 C99 27 91 25 91 19" />
-        <path d="M72 69 C62 79 54 91 49 104" />
-        <path d="M74 68 C91 76 105 88 111 104" />
-        <path d="M72 69 C74 87 77 96 82 105" />
-        <path d="M50 104 C38 91 20 96 17 111 C14 125 26 138 41 134 C52 131 58 117 50 104 Z" />
-        <path d="M82 105 C69 94 52 101 52 117 C52 132 67 143 81 136 C93 130 94 115 82 105 Z" />
-        <path d="M96 30 C113 27 130 36 141 52 C123 52 108 45 96 30 Z" fill="url(#cherry-leaf)" strokeWidth="1.9" />
-        <path d="M101 33 C113 40 124 47 137 50" stroke="#A96F28" strokeWidth="1.2" />
-      </g>
-    </svg>
-  );
-}
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -81,11 +55,7 @@ export default function Login() {
       <div className="login-card card">
         <div className={`login-logo ${isCherry ? 'login-logo-cherry' : ''}`}>
           {isCherry ? (
-            <div className="cherry-wordmark" aria-label="Cherry Semijoias">
-              <CherrySymbol className="cherry-wordmark-symbol" />
-              <span className="cherry-wordmark-name">Cherry</span>
-              <span className="cherry-wordmark-subtitle">SEMIJOIAS</span>
-            </div>
+            <img className="login-brand-logo cherry-official-logo" src={marca.logo} alt={marca.logoAlt} />
           ) : (
             <img className="login-brand-logo" src={marca.logo} alt={marca.logoAlt} />
           )}
@@ -161,7 +131,7 @@ export default function Login() {
       <div className="login-side">
         <div className="login-side-content">
           {isCherry ? (
-            <CherrySymbol className="login-side-brand-symbol" />
+            <img className="login-side-brand-symbol cherry-official-symbol" src={marca.simbolo} alt="" aria-hidden="true" />
           ) : marca.simbolo ? (
             <img className="login-side-brand-symbol" src={marca.simbolo} alt="" aria-hidden="true" />
           ) : null}

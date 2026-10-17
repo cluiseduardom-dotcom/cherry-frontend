@@ -456,3 +456,75 @@
   .login-side-title { font-size: 28px; }
   .login-side-desc { font-size: 16px; }
 }
+
+
+/* Ajustes finais fiéis à referência: wordmark limpo e cereja vetorial sem fundo. */
+.login-logo-cherry {
+  display: block;
+  margin-bottom: 0;
+}
+.cherry-wordmark {
+  width: fit-content;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: start;
+  align-items: center;
+  line-height: 1;
+}
+.cherry-wordmark-symbol {
+  width: 82px;
+  height: 82px;
+  display: block;
+  margin: 0 0 -4px 25px;
+}
+.cherry-wordmark-name {
+  color: #760426;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 43px;
+  line-height: .98;
+  letter-spacing: -1.5px;
+}
+.cherry-wordmark-subtitle {
+  width: 100%;
+  margin-top: 7px;
+  color: #b8864b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 5px;
+  text-align: center;
+}
+.login-side-brand-symbol {
+  width: 112px;
+  height: 112px;
+  display: block;
+  padding: 0;
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  object-fit: contain;
+  mix-blend-mode: normal;
+}
+.login-page-cherry .login-side-brand-symbol {
+  overflow: visible;
+}
+.login-page-cherry .login-side-content {
+  max-width: 520px;
+}
+.login-page-cherry .login-side {
+  background: #760426 !important;
+  background-image: none !important;
+}
+@media (max-width: 899px) {
+  .cherry-wordmark-symbol {
+    width: 68px;
+    height: 68px;
+    margin-left: 20px;
+  }
+  .cherry-wordmark-name {
+    font-size: 38px;
+  }
+  .login-page-cherry .login-side-brand-symbol {
+    width: 76px;
+    height: 76px;
+  }
+}

@@ -1,5 +1,5 @@
 /* =====================================================
-   LOGIN PAGE
+   LOGIN PAGE — VERTUMNO & CHERRY SEMIJOIAS
    ===================================================== */
 
 .login-page {
@@ -11,7 +11,7 @@
   background: var(--color-bg);
 }
 
-/* Animated background blobs */
+/* Animated background blobs (Vertumno / Default) */
 .login-bg {
   position: absolute;
   inset: 0;
@@ -39,7 +39,7 @@
 .login-bg-blob--2 {
   width: 300px;
   height: 300px;
-  background: var(--cherry-200);
+  background: rgba(var(--color-primary-rgb), 0.15);
   bottom: 10%;
   left: 20%;
   animation-delay: 3s;
@@ -60,7 +60,7 @@
   66%       { transform: translate(-10px, 15px) scale(0.95); }
 }
 
-/* --- Card --- */
+/* --- Card Base --- */
 .login-card {
   position: relative;
   z-index: 10;
@@ -74,23 +74,19 @@
   border-radius: var(--radius-xl);
 }
 
-/* Logo */
+/* Logo Base */
 .login-logo {
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
-.login-logo-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 8px 24px rgba(var(--color-primary-rgb), 0.35);
+.login-brand-logo {
+  display: block;
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .login-logo-text {
@@ -114,7 +110,7 @@
   text-transform: uppercase;
 }
 
-/* Header */
+/* Header Base */
 .login-header {
   display: flex;
   flex-direction: column;
@@ -133,7 +129,7 @@
   color: var(--color-text-secondary);
 }
 
-/* Form */
+/* Form Base */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -170,6 +166,38 @@
 }
 
 .login-forgot:hover { opacity: 0.7; }
+
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  z-index: 1;
+  color: var(--color-text-muted);
+}
+
+.input-field {
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  padding: 0 16px 0 46px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+}
 
 .login-pass-wrapper .input-field {
   padding-right: 42px;
@@ -211,7 +239,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Side panel */
+/* Side Panel Base (Vertumno / Default) */
 .login-side {
   display: none;
   flex: 1;
@@ -224,22 +252,18 @@
 }
 
 .login-side-content {
-  max-width: 360px;
+  max-width: 420px;
   color: white;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
-.login-side-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-xl);
-  background: rgba(255,255,255,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
+.login-side-brand-symbol {
+  display: block;
+  max-width: 160px;
+  height: auto;
+  object-fit: contain;
 }
 
 .login-side-title {
@@ -276,15 +300,15 @@
   flex-shrink: 0;
 }
 
-/* Responsive */
+/* Vertumno Desktop Split */
 @media (min-width: 900px) {
-  .login-page {
+  .login-page-vertumno {
     flex-direction: row;
     align-items: stretch;
   }
 
-  .login-card {
-    width: 480px;
+  .login-page-vertumno .login-card {
+    width: 440px;
     flex-shrink: 0;
     border-radius: 0;
     padding: var(--space-12);
@@ -292,39 +316,40 @@
     border: none;
     justify-content: center;
     margin: 0;
-    max-width: 480px;
+    max-width: 440px;
   }
 
-  .login-side {
+  .login-page-vertumno .login-side {
     display: flex;
+    background: var(--sidebar-bg);
   }
 
-  .login-bg-blob--3 {
+  .login-page-vertumno .login-bg-blob--3 {
     display: none;
   }
 }
 
-@media (max-width: 480px) {
-  .login-card {
-    padding: var(--space-6) var(--space-5);
-    border-radius: var(--radius-xl);
-    margin: var(--space-4);
-  }
-}
+/* =====================================================
+   CHERRY THEME — REPRODUÇÃO FIEL DA REFERÊNCIA
+   ===================================================== */
 
-
-/* Cherry login — alinhado à referência visual aprovada. Usa os arquivos oficiais da marca. */
 .login-page-cherry {
   display: flex;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
-  min-height: 700px;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-  background: #fff;
+  background: #ffffff;
   color: #4b071b;
 }
-.login-page-cherry .login-bg { display: none !important; }
 
+.login-page-cherry .login-bg {
+  display: none !important;
+}
+
+/* Painel Esquerdo — Formulário (~34% largura em Desktop) */
 .login-page-cherry > .login-card {
   box-sizing: border-box;
   width: 34%;
@@ -333,216 +358,275 @@
   flex: 0 0 34%;
   height: 100%;
   margin: 0;
-  padding: 165px 64px 56px 79px;
+  padding: clamp(36px, 7vh, 85px) clamp(28px, 4vw, 64px);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0;
   border: 0;
   border-radius: 0;
-  background: #fff;
+  background: #ffffff;
   box-shadow: none;
 }
+
 .login-page-cherry .login-logo {
-  display: block;
-  width: 100%;
-  margin: 0 0 49px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 0 clamp(20px, 3.5vh, 38px);
   line-height: 0;
 }
-.login-page-cherry .cherry-official-logo {
+
+.login-page-cherry .login-brand-logo {
   display: block;
-  width: 225px;
-  max-width: 100%;
+  max-width: 215px;
+  width: 100%;
   height: auto;
   object-fit: contain;
-  object-position: left top;
+  object-position: left center;
 }
+
 .login-page-cherry .login-header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 0 0 39px;
+  gap: 6px;
+  margin: 0 0 clamp(20px, 3.5vh, 34px);
 }
+
 .login-page-cherry .login-title {
   margin: 0;
-  color: #760426;
-  font-size: 36px;
-  font-weight: 750;
-  line-height: 1.15;
-  letter-spacing: -0.7px;
+  color: #6a0523;
+  font-size: clamp(26px, 2.1vw, 35px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.6px;
 }
+
 .login-page-cherry .login-subtitle {
   margin: 0;
-  color: #68656a;
-  font-size: 18px;
+  color: #6c757d;
+  font-size: clamp(14px, 1.05vw, 16px);
   line-height: 1.45;
 }
+
 .login-page-cherry .login-form {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: clamp(15px, 2.3vh, 20px);
   margin: 0;
 }
+
 .login-page-cherry .input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
 }
+
 .login-page-cherry .login-pass-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 .login-page-cherry .input-label {
   color: #4b071b;
-  font-size: 16px;
-  font-weight: 650;
+  font-size: 15px;
+  font-weight: 600;
 }
+
 .login-page-cherry .login-forgot {
-  color: #760426;
+  color: #6a0523;
   font-size: 14px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
+
+.login-page-cherry .login-forgot:hover {
+  text-decoration: underline;
+}
+
 .login-page-cherry .input-icon-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
+
 .login-page-cherry .input-field {
   box-sizing: border-box;
   width: 100%;
-  height: 60px;
-  padding: 0 18px 0 66px;
+  height: 56px;
+  padding: 0 18px 0 58px;
   border: 1px solid transparent;
-  border-radius: 15px;
-  background: #f7f1f3;
+  border-radius: 12px;
+  background: #f6f0f1;
   box-shadow: none;
   color: #3f0718;
-  font-size: 17px;
+  font-size: 16px;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
+
+.login-page-cherry .input-field:focus {
+  outline: none;
+  border-color: rgba(106, 5, 35, 0.3);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(106, 5, 35, 0.08);
+}
+
 .login-page-cherry .input-icon {
   position: absolute;
-  left: 24px;
+  left: 20px;
   z-index: 1;
-  color: #70757a;
+  color: #8c8f94;
 }
+
 .login-page-cherry .login-pass-wrapper .input-field {
-  padding-right: 52px;
+  padding-right: 50px;
 }
+
 .login-page-cherry .login-pass-toggle {
+  position: absolute;
   right: 16px;
-  color: #70757a;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #8c8f94;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
 }
+
+.login-page-cherry .login-pass-toggle:hover {
+  color: #6a0523;
+}
+
 .login-page-cherry .login-submit {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  height: 68px;
-  margin: 0;
+  height: 58px;
+  margin-top: 6px;
   border: 0;
-  border-radius: 15px;
-  background: #760426;
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(118, 4, 38, .14);
-  font-size: 19px;
-  font-weight: 650;
+  border-radius: 12px;
+  background: #6c0221;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(108, 2, 33, 0.25);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
+
 .login-page-cherry .login-submit:hover:not(:disabled) {
-  background: #5d031e;
+  background: #56011a;
 }
+
+/* Painel Direito — Apresentação da Marca (~66% largura em Desktop) */
 .login-page-cherry > .login-side {
   box-sizing: border-box;
   display: flex;
   width: 66%;
   min-width: 0;
   height: 100%;
-  flex: 1 1 66%;
+  flex: 0 0 66%;
   align-items: center;
   justify-content: center;
-  padding: 0 70px;
-  background: #760426 !important;
-  background-image: none !important;
-  color: #fff;
+  padding: clamp(40px, 6vw, 90px);
+  background: #6b0121 !important;
+  color: #ffffff;
 }
+
 .login-page-cherry .login-side-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 620px;
+  width: 480px;
   max-width: 100%;
   gap: 0;
-  color: #fff;
-  transform: translate(8vw, 25px);
+  color: #ffffff;
 }
-.login-page-cherry .cherry-official-symbol {
+
+.login-page-cherry .login-side-brand-symbol {
   display: block;
   align-self: center;
-  width: 190px;
-  height: 180px;
-  margin: 0 0 30px;
+  width: clamp(140px, 11vw, 180px);
+  height: auto;
+  margin: 0 0 clamp(20px, 3vh, 30px);
   object-fit: contain;
-  object-position: center;
 }
+
 .login-page-cherry .login-side-title {
   width: 100%;
-  margin: 0 0 35px;
-  color: #fff;
-  font-size: 56px;
+  margin: 0 0 clamp(20px, 3vh, 30px);
+  color: #ffffff;
+  font-size: clamp(34px, 3.2vw, 52px);
   font-weight: 750;
   line-height: 1.1;
-  letter-spacing: -1.2px;
+  letter-spacing: -1px;
   text-align: center;
 }
+
 .login-page-cherry .login-side-desc {
   width: 100%;
-  max-width: 620px;
-  margin: 0 0 39px;
+  max-width: 480px;
+  margin: 0 0 clamp(24px, 3.5vh, 36px);
   color: #fff8fa;
-  font-size: 24px;
-  line-height: 1.62;
-  opacity: 1;
+  font-size: clamp(17px, 1.3vw, 21px);
+  line-height: 1.58;
 }
+
 .login-page-cherry .login-side-features {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: clamp(14px, 2vh, 20px);
   width: 100%;
   margin: 0;
 }
+
 .login-page-cherry .login-side-feature {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 18px;
   color: #fff8fa;
-  font-size: 22px;
+  font-size: clamp(16px, 1.15vw, 20px);
   line-height: 1.25;
-  opacity: 1;
-}
-.login-page-cherry .login-side-feature-dot {
-  flex: 0 0 15px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #e9bd55;
 }
 
-/* Mobile keeps the same brand and readable stacked panels. */
-@media (max-width: 1100px) and (min-width: 900px) {
-  .login-page-cherry > .login-card {
-    padding: 100px 36px 40px;
-  }
-  .login-page-cherry .login-title { font-size: 30px; }
-  .login-page-cherry .login-side-content { transform: translate(3vw, 15px); }
-  .login-page-cherry .login-side-title { font-size: 42px; }
-  .login-page-cherry .login-side-desc { font-size: 19px; }
-  .login-page-cherry .login-side-feature { font-size: 18px; }
+.login-page-cherry .login-side-feature-dot {
+  flex: 0 0 13px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e0ac5d;
 }
-@media (max-width: 899px) {
+
+/* Tablet & Intermediate Viewports */
+@media (max-width: 1100px) and (min-width: 800px) {
+  .login-page-cherry > .login-card {
+    width: 38%;
+    flex: 0 0 38%;
+    padding: 40px 32px;
+  }
+  .login-page-cherry > .login-side {
+    width: 62%;
+    flex: 0 0 62%;
+    padding: 40px 36px;
+  }
+}
+
+/* Mobile Viewport (Abaixo de 800px) */
+@media (max-width: 799px) {
   .login-page-cherry {
     height: auto;
     min-height: 100vh;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-direction: column;
   }
   .login-page-cherry > .login-card {
@@ -550,126 +634,44 @@
     min-width: 0;
     height: auto;
     flex: 0 0 auto;
-    padding: 48px 28px;
-    gap: 0;
+    padding: 48px 24px 36px;
+    justify-content: flex-start;
   }
-  .login-page-cherry .login-logo { margin-bottom: 34px; }
-  .login-page-cherry .cherry-official-logo { width: 180px; }
-  .login-page-cherry .login-header { margin-bottom: 28px; }
-  .login-page-cherry .login-title { font-size: 28px; }
-  .login-page-cherry .login-subtitle { font-size: 16px; }
-  .login-page-cherry .input-field { height: 54px; }
-  .login-page-cherry .login-submit { height: 58px; }
+  .login-page-cherry .login-logo {
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .login-page-cherry .login-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-page-cherry .input-field {
+    height: 52px;
+  }
+  .login-page-cherry .login-submit {
+    height: 54px;
+  }
   .login-page-cherry > .login-side {
     width: 100%;
     height: auto;
-    min-height: 580px;
+    min-height: auto;
     flex: 0 0 auto;
-    padding: 54px 28px;
+    padding: 48px 24px 60px;
   }
   .login-page-cherry .login-side-content {
-    width: min(100%, 520px);
-    transform: none;
+    width: 100%;
   }
-  .login-page-cherry .cherry-official-symbol {
-    width: 140px;
-    height: 132px;
+  .login-page-cherry .login-side-title {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
+  .login-page-cherry .login-side-desc {
+    font-size: 17px;
     margin-bottom: 24px;
+    text-align: center;
   }
-  .login-page-cherry .login-side-title { font-size: 32px; margin-bottom: 24px; }
-  .login-page-cherry .login-side-desc { font-size: 18px; margin-bottom: 28px; }
-  .login-page-cherry .login-side-feature { font-size: 16px; gap: 14px; }
-  .login-page-cherry .login-side-feature-dot { flex-basis: 10px; width: 10px; height: 10px; }
-}
-
-
-/* Transparentize the dark raster backdrop in the official gold Cherry artwork. */
-.login-page-cherry .cherry-official-logo,
-.login-page-cherry .cherry-official-symbol {
-  filter: url(#cherry-transparent-background);
-  background: transparent !important;
-  mix-blend-mode: normal !important;
-}
-@media (min-width: 900px) {
-  .login-page-cherry > .login-card {
-    box-sizing: border-box;
-    width: 33.5% !important;
-    flex: 0 0 33.5% !important;
-  }
-  .login-page-cherry > .login-side {
-    box-sizing: border-box;
-    width: 66.5% !important;
-    flex: 0 0 66.5% !important;
-  }
-  .login-page-cherry .login-side-content {
-    transform: translate(5vw, 25px);
-  }
-}
-
-
-/* Final polish: vector artwork has a transparent background and safe internal margins. */
-.login-page-cherry .cherry-official-logo,
-.login-page-cherry .cherry-official-symbol {
-  filter: none !important;
-}
-.login-page-cherry .cherry-brand-lockup {
-  display: grid;
-  width: 240px;
-  grid-template-columns: 1fr;
-  justify-items: start;
-  align-items: center;
-  line-height: 1;
-}
-.login-page-cherry .cherry-wordmark-symbol {
-  display: block;
-  width: 135px;
-  height: 125px;
-  object-fit: contain;
-  margin: 0 0 -2px 25px;
-  overflow: visible;
-}
-.login-page-cherry .cherry-wordmark-name {
-  color: #760426;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 62px;
-  line-height: .96;
-  letter-spacing: -2px;
-}
-.login-page-cherry .cherry-wordmark-subtitle {
-  width: 100%;
-  margin-top: 8px;
-  color: #bd842f;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 6px;
-  text-align: center;
-}
-.login-page-cherry .login-side-brand-symbol {
-  width: 200px !important;
-  height: 180px !important;
-  padding: 12px 10px 14px !important;
-  margin: 0 auto 24px !important;
-  overflow: visible !important;
-  object-fit: contain;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  filter: none !important;
-}
-.login-page-cherry .login-side-content {
-  transform: translate(4vw, 8px);
-}
-@media (max-width: 899px) {
-  .login-page-cherry .cherry-brand-lockup { width: 200px; }
-  .login-page-cherry .cherry-wordmark-symbol {
-    width: 105px;
-    height: 98px;
-    margin-left: 22px;
-  }
-  .login-page-cherry .cherry-wordmark-name { font-size: 52px; }
-  .login-page-cherry .cherry-wordmark-subtitle { font-size: 11px; letter-spacing: 5px; }
-  .login-page-cherry .login-side-brand-symbol {
-    width: 150px !important;
-    height: 140px !important;
+  .login-page-cherry .login-side-feature {
+    font-size: 16px;
+    gap: 14px;
   }
 }

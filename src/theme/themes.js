@@ -7,8 +7,8 @@
 
 import vertumnoLogo from '../assets/vertumno-logo.png';
 import vertumnoSimbolo from '../assets/vertumno-simbolo.png';
-import cherryLogo from '../assets/cherry-logo.png';
-import cherrySimbolo from '../assets/cherry-simbolo.png';
+import cherryLogo from '../assets/cherry-logo.svg';
+import cherrySimbolo from '../assets/cherry-simbolo.svg';
 import cherryOrnamento from '../assets/cherry-ornamento.png';
 
 export const TEMA_PADRAO = 'vertumno';

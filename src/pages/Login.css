@@ -514,7 +514,7 @@
   background: #56011a;
 }
 
-/* Painel Direito Cherry (~66% largura, Fundo Bordô Profundo, Símbolo Centrado) */
+/* Painel Direito Cherry (~66% largura, Fundo Bordô Profundo #6b0121) */
 .login-page-cherry > .login-side {
   box-sizing: border-box;
   display: flex;
@@ -524,7 +524,7 @@
   flex: 0 0 66%;
   align-items: center;
   justify-content: center;
-  padding: clamp(40px, 6vw, 90px);
+  padding: clamp(36px, 5vh, 80px) clamp(40px, 6vw, 90px);
   background: #6b0121 !important;
   color: #ffffff;
 }
@@ -532,20 +532,67 @@
 .login-page-cherry .login-side-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+  align-items: flex-start;
+  width: 480px;
   max-width: 100%;
-  margin: 0 auto;
+  gap: 0;
+  color: #ffffff;
 }
 
 .login-page-cherry .login-side-brand-symbol {
   display: block;
-  width: clamp(240px, 24vw, 360px);
+  align-self: center;
+  width: clamp(170px, 14vw, 215px);
   max-width: 90%;
   height: auto;
-  margin: 0 auto;
+  margin: 0 auto clamp(18px, 2.5vh, 28px);
   object-fit: contain;
+}
+
+.login-page-cherry .login-side-title {
+  width: 100%;
+  margin: 0 0 clamp(14px, 2vh, 22px);
+  color: #ffffff;
+  font-size: clamp(30px, 2.8vw, 44px);
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  text-align: center;
+}
+
+.login-page-cherry .login-side-desc {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 0 clamp(20px, 2.8vh, 28px);
+  color: #fff4f6;
+  font-size: clamp(16px, 1.15vw, 18px);
+  line-height: 1.55;
+  opacity: 0.95;
+}
+
+.login-page-cherry .login-side-features {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.6vh, 16px);
+  width: 100%;
+  margin: 0;
+}
+
+.login-page-cherry .login-side-feature {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #ffffff;
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.3;
+}
+
+.login-page-cherry .login-side-feature-dot {
+  flex: 0 0 11px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #e0ac5d;
 }
 
 /* Mobile Viewport (Abaixo de 800px) */

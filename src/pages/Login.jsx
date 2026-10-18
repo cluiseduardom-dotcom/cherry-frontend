@@ -135,28 +135,22 @@ export default function Login() {
 
       <div className="login-side">
         <div className="login-side-content">
-          {marca.simbolo && (
-            <img
-              className="login-side-brand-symbol"
-              src={marca.simbolo}
-              alt=""
-              aria-hidden="true"
-            />
-          )}
-          {!isCherry && (
-            <>
-              <h2 className="login-side-title">{marca.loginTitulo}</h2>
-              <p className="login-side-desc">{marca.loginDescricao}</p>
-              <div className="login-side-features">
-                {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (
-                  <div key={f} className="login-side-feature">
-                    <div className="login-side-feature-dot" />
-                    {f}
-                  </div>
-                ))}
+          <img
+            className="login-side-brand-symbol"
+            src={isCherry ? marca.logo : (marca.simbolo || marca.logo)}
+            alt=""
+            aria-hidden="true"
+          />
+          <h2 className="login-side-title">{marca.loginTitulo}</h2>
+          <p className="login-side-desc">{marca.loginDescricao}</p>
+          <div className="login-side-features">
+            {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (
+              <div key={f} className="login-side-feature">
+                <div className="login-side-feature-dot" />
+                {f}
               </div>
-            </>
-          )}
+            ))}
+          </div>
         </div>
       </div>
     </div>

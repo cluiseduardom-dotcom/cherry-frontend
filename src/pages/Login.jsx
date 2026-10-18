@@ -67,7 +67,7 @@ export default function Login() {
         </div>
 
         <div className="login-header">
-          <h1 className="login-title">Bem-vinda de volta</h1>
+          <h1 className="login-title">{isCherry ? 'Bem-vinda de volta' : 'Bem-vindo de volta'}</h1>
           <p className="login-subtitle">Entre na sua conta para continuar</p>
         </div>
 
@@ -143,16 +143,20 @@ export default function Login() {
               aria-hidden="true"
             />
           )}
-          <h2 className="login-side-title">{marca.loginTitulo}</h2>
-          <p className="login-side-desc">{marca.loginDescricao}</p>
-          <div className="login-side-features">
-            {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (
-              <div key={f} className="login-side-feature">
-                <div className="login-side-feature-dot" />
-                {f}
+          {!isCherry && (
+            <>
+              <h2 className="login-side-title">{marca.loginTitulo}</h2>
+              <p className="login-side-desc">{marca.loginDescricao}</p>
+              <div className="login-side-features">
+                {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (
+                  <div key={f} className="login-side-feature">
+                    <div className="login-side-feature-dot" />
+                    {f}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

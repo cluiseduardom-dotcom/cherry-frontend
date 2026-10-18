@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './theme/ThemeProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import { homeRouteForRole, ALLOWED_ROLES_BY_PATH } from './config/access';
 import Layout from './components/Layout';
@@ -68,13 +69,6 @@ function Fallback() {
   return <Navigate to={isAuthenticated ? homeRouteForRole(user.role) : '/login'} replace />;
 }
 
-// VERTUMNO-UX-FOUNDATION-P0 (UX-02/UX-03): migrado de <BrowserRouter>
-// declarativo para createBrowserRouter/RouterProvider — mesmas rotas,
-// mesmo RBAC, mesmo comportamento, só troca a API de configuração. É a
-// única forma de usar useBlocker (bloqueio de navegação nativo do React
-// Router): ele exige um data router, não funciona com <BrowserRouter>.
-// Sem isso não dá pra impedir que o usuário saia do PDV/Configurador de
-// SKU clicando em outro item do menu com dados não salvos.
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
   {
@@ -96,12 +90,11 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    // UX-06 (Issue #52): ToastProvider acima do RouterProvider para que os
-    // toasts sobrevivam à troca de rota — uma ação que navega logo em
-    // seguida (ex.: salvar e voltar para a lista) não deve perder o aviso.
     <ToastProvider>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ThemeProvider>
+          <RouterProvider router={router} />
+        </ThemeProvider>
       </AuthProvider>
     </ToastProvider>
   );

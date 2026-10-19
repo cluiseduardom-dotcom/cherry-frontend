@@ -1,8 +1,8 @@
 // Registro dos temas visuais. As cores ficam em src/theme/themes.css;
 // aqui ficam só a identificação do tema e os textos de marca.
 
-import vertumnoLogo from '../assets/vertumno-logo.svg';
-import vertumnoSimbolo from '../assets/vertumno-simbolo.svg';
+import vertumnoLogo from '../assets/vertumno-logo.png';
+import vertumnoSimbolo from '../assets/vertumno-simbolo.png';
 import cherryLogo from '../assets/cherry-logo.png';
 import cherrySimbolo from '../assets/cherry-simbolo.png';
 import cherryOrnamento from '../assets/cherry-ornamento.png';
@@ -15,7 +15,7 @@ export const TEMAS = {
     marca: {
       nome: 'VERTUMNO',
       subtitulo: null,
-      // Wordmark vetorial para evitar serrilhado em telas de alta densidade.
+      // Preserva o recorte original aprovado enquanto não houver o arquivo vetorial oficial.
       logo: vertumnoLogo,
       simbolo: vertumnoSimbolo,
       logoAlt: 'VERTUMNO — Gestão que impulsiona',

@@ -3,10 +3,10 @@ import { TEMAS, TEMA_PADRAO, aplicarTema, lerTemaDev, resolverTema } from './the
 import { ThemeContext } from './themeContext';
 import { useAuth } from '../context/AuthContext';
 
-// A identidade padrão antes do login é VERTUMNO (TEMA_PADRAO).
-// Uma implantação dedicada pode configurar VITE_DEFAULT_THEME (ex.: 'cherry').
-// A sessão autenticada sempre prevalece após o login.
-const TEMA_INICIAL = resolverTema(import.meta.env.VITE_DEFAULT_THEME || TEMA_PADRAO);
+// Esta implantação serve a Cherry; preserve esse padrão no deploy atual.
+// Instalações dedicadas ao VERTUMNO definem VITE_DEFAULT_THEME=vertumno.
+// A prévia ?tema=vertumno continua disponível nos ambientes autorizados abaixo.
+const TEMA_INICIAL = resolverTema(import.meta.env.VITE_DEFAULT_THEME || 'cherry');
 
 function temaInicial() {
   if (typeof window === 'undefined') return TEMA_INICIAL;

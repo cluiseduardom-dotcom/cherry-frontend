@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
 import { homeRouteForRole } from '../config/access';
@@ -152,7 +152,9 @@ export default function Login() {
           <div className="login-side-features">
             {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (
               <div key={f} className="login-side-feature">
-                <div className="login-side-feature-dot" />
+                <div className="login-side-feature-dot">
+                  {!isCherry && <Check size={11} strokeWidth={3.5} className="login-side-feature-check" />}
+                </div>
                 {f}
               </div>
             ))}

@@ -6,7 +6,7 @@
 // desenvolvimento (ver lerTemaDev). A ligação com a empresa virá do backend.
 
 import vertumnoLogo from '../assets/vertumno-logo.png';
-import vertumnoSimbolo from '../assets/vertumno-simbolo.svg';
+import vertumnoSimbolo from '../assets/vertumno-simbolo.png';
 import cherryLogo from '../assets/cherry-logo.png';
 import cherrySimbolo from '../assets/cherry-simbolo.png';
 import cherryOrnamento from '../assets/cherry-ornamento.png';
@@ -19,9 +19,8 @@ export const TEMAS = {
     marca: {
       nome: 'VERTUMNO',
       subtitulo: null,
-      // Logo oficial recortado, sem alterações, da referência aprovada (Vertumno.jpeg):
-      // símbolo, tipografia, proporções e cores preservados. Provisório até existir o
-      // arquivo vetorial original.
+      // Logo oficial metálico da marca aprovada, em alta resolução e fundo transparente:
+      // símbolo V 3D, tipografia metálica, proporções e cores preservados.
       logo: vertumnoLogo,
       simbolo: vertumnoSimbolo,
       logoAlt: 'VERTUMNO — Gestão que impulsiona',
@@ -38,17 +37,12 @@ export const TEMAS = {
     marca: {
       nome: 'Cherry',
       subtitulo: 'SEMIJOIAS',
-      // Logo da referência aprovada (Vertumno_cherry.jpeg): cereja dourada + lettering
-      // "Cherry SEMIJOIAS", recortado sem alterações. É raster de baixa resolução (~221 px de
-      // largura): provisório até existir o arquivo original. O public/cherry-logo.jpg
-      // (cereja com folha verde) é outro desenho e segue só nos PDFs e no favicon.
+      // Logo da referência aprovada: cereja dourada + lettering "Cherry SEMIJOIAS".
       logo: cherryLogo,
       simbolo: cherrySimbolo,
       logoAlt: 'Cherry Semijoias',
       slogan: 'Detalhes que brilham todos os dias.',
       sloganAutor: 'Cherry Semijoias',
-      // Silhueta da cereja dourada (derivada do mesmo recorte), usada como máscara dourada
-      // de marca-d'água no cabeçalho do dashboard.
       ornamento: cherryOrnamento,
       mostrarIcone: true,
       loginTitulo: 'Cherry Semijoias',

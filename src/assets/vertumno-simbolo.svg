@@ -1,28 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 365" role="img" aria-labelledby="title">
-  <title id="title">Símbolo metálico VERTUMNO</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 365" role="img" aria-labelledby="title desc">
+  <title id="title">Símbolo VERTUMNO</title>
+  <desc id="desc">Símbolo metálico dourado, azul e prata sobre fundo transparente.</desc>
   <defs>
-    <linearGradient id="goldFace" x1="0" y1="0" x2="1" y2="0.15">
-      <stop offset="0" stop-color="#fff0c7"/><stop offset=".16" stop-color="#d6ad68"/><stop offset=".42" stop-color="#f8e0a2"/><stop offset=".68" stop-color="#b88942"/><stop offset="1" stop-color="#6e4b25"/>
-    </linearGradient>
-    <linearGradient id="goldSide" x1="0" y1="0" x2="1" y2=".4">
-      <stop offset="0" stop-color="#8a622f"/><stop offset=".48" stop-color="#d2a75f"/><stop offset="1" stop-color="#3d2b1b"/>
-    </linearGradient>
-    <linearGradient id="blueFace" x1="0" y1="0" x2="1" y2=".2">
-      <stop offset="0" stop-color="#07192b"/><stop offset=".36" stop-color="#154b76"/><stop offset=".7" stop-color="#236b9d"/><stop offset="1" stop-color="#061426"/>
-    </linearGradient>
-    <linearGradient id="silverFace" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f7f8f7"/><stop offset=".3" stop-color="#aeb8c1"/><stop offset=".62" stop-color="#e0e4e7"/><stop offset="1" stop-color="#4e5b67"/>
-    </linearGradient>
-    <linearGradient id="darkEdge" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#050d15"/><stop offset="1" stop-color="#172534"/>
-    </linearGradient>
+    <linearGradient id="goldFront" x1="0" y1="0" x2="1" y2=".18"><stop offset="0" stop-color="#fff1ce"/><stop offset=".16" stop-color="#d5aa63"/><stop offset=".38" stop-color="#f7dfa0"/><stop offset=".62" stop-color="#c99b50"/><stop offset=".83" stop-color="#e8c77f"/><stop offset="1" stop-color="#9a6a32"/></linearGradient>
+    <linearGradient id="goldEdge" x1="0" y1="0" x2="1" y2=".2"><stop offset="0" stop-color="#f4d58c"/><stop offset=".32" stop-color="#8a5b2a"/><stop offset=".65" stop-color="#d4a45c"/><stop offset="1" stop-color="#3b291c"/></linearGradient>
+    <linearGradient id="blueFront" x1="0" y1="0" x2="1" y2=".1"><stop offset="0" stop-color="#06172a"/><stop offset=".23" stop-color="#123c61"/><stop offset=".52" stop-color="#185783"/><stop offset=".78" stop-color="#0b2a47"/><stop offset="1" stop-color="#020b15"/></linearGradient>
+    <linearGradient id="silverFront" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fafafa"/><stop offset=".2" stop-color="#aeb8c0"/><stop offset=".42" stop-color="#eef0ef"/><stop offset=".72" stop-color="#89949d"/><stop offset="1" stop-color="#35434e"/></linearGradient>
   </defs>
-  <path d="M18 18 L151 18 L299 300 L277 339 L198 339 L37 54 Z" fill="url(#goldFace)"/>
-  <path d="M151 18 L173 18 L321 299 L299 339 L277 339 L299 300 Z" fill="url(#goldSide)" opacity=".92"/>
-  <path d="M18 18 L151 18 L168 35 L51 35 L198 339 L177 339 L37 54 Z" fill="#fff2d3" opacity=".7"/>
-  <path d="M324 18 L468 18 L307 269 L284 307 L263 339 L299 300 Z" fill="url(#blueFace)"/>
-  <path d="M468 18 L307 269 L284 307 L263 339 L299 300 L441 42 Z" fill="url(#darkEdge)" opacity=".95"/>
-  <path d="M468 18 L390 18 L273 199 L307 269 Z" fill="url(#silverFace)"/>
-  <path d="M390 18 L324 18 L273 101 L298 147 Z" fill="#0c2b48" opacity=".7"/>
-  <path d="M273 199 L307 269 L284 307 L263 339 L245 307 Z" fill="#071421" opacity=".55"/>
+  <g stroke-linejoin="round">
+    <path d="M16 16 L156 16 L321 326 L299 361 L208 361 L36 55 Q22 31 16 16Z" fill="url(#goldFront)"/>
+    <path d="M156 16 L177 16 L343 326 L321 361 L299 361 L321 326Z" fill="url(#goldEdge)"/>
+    <path d="M16 16 L156 16 L171 34 L50 34 L208 361 L194 361 L36 55 Q22 31 16 16Z" fill="#fff0c6" opacity=".38"/>
+    <path d="M323 16 L469 16 L308 267 L284 307 L263 340 L245 307 L273 199Z" fill="url(#blueFront)"/>
+    <path d="M469 16 L449 16 L291 263 L273 199 L308 267 L284 307 L263 340 L284 307 L308 267Z" fill="#071321" opacity=".78"/>
+    <path d="M469 16 L390 16 L273 199 L307 267Z" fill="url(#silverFront)"/>
+    <path d="M390 16 L378 16 L263 196 L273 199Z" fill="#f7f7f5" opacity=".55"/>
+    <path d="M273 199 L307 267 L284 307 L263 340 L245 307Z" fill="#06121e" opacity=".65"/>
+  </g>
 </svg>

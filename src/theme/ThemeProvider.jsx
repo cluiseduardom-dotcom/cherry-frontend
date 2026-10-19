@@ -3,9 +3,9 @@ import { TEMAS, TEMA_PADRAO, aplicarTema, lerTemaDev, resolverTema } from './the
 import { ThemeContext } from './themeContext';
 import { useAuth } from '../context/AuthContext';
 
-// A identidade antes do login é definida pela implantação (Cherry ou VERTUMNO).
-// Para este frontend da Cherry, Cherry é o padrão; outra implantação pode definir
-// VITE_DEFAULT_THEME=vertumno. A sessão autenticada sempre prevalece.
+// Esta implantação serve a Cherry; preserve esse padrão no deploy atual.
+// Instalações dedicadas ao VERTUMNO definem VITE_DEFAULT_THEME=vertumno.
+// A prévia ?tema=vertumno continua disponível nos ambientes autorizados abaixo.
 const TEMA_INICIAL = resolverTema(import.meta.env.VITE_DEFAULT_THEME || 'cherry');
 
 function temaInicial() {
@@ -18,10 +18,22 @@ function temaInicial() {
     storage = null;
   }
 
+  // Em desenvolvimento local ou ambientes de validação/preview (ex.: PR preview no Render),
+  // permite alternar o tema explicitamente via ?tema=cherry | ?tema=vertumno
+  const podePrevisualizar = Boolean(
+    import.meta.env.DEV ||
+    import.meta.env.VITE_ENABLE_THEME_DEV === 'true' ||
+    (typeof window !== 'undefined' && (
+      window.location.hostname.includes('localhost') ||
+      window.location.hostname.includes('127.0.0.1') ||
+      window.location.hostname.includes('onrender.com')
+    ))
+  );
+
   const temaDev = lerTemaDev({
     search: window.location.search,
     storage,
-    isDev: import.meta.env.DEV,
+    isDev: podePrevisualizar,
   });
 
   return resolverTema(temaDev || TEMA_INICIAL);

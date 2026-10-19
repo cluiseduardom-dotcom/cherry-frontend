@@ -8,9 +8,9 @@
     <linearGradient id="silverFront" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fafafa"/><stop offset=".2" stop-color="#aeb8c0"/><stop offset=".42" stop-color="#eef0ef"/><stop offset=".72" stop-color="#89949d"/><stop offset="1" stop-color="#35434e"/></linearGradient>
   </defs>
   <g stroke-linejoin="round">
-    <path d="M16 16 L156 16 L321 326 L299 361 L208 361 L36 55 Q22 31 16 16Z" fill="url(#goldFront)"/>
-    <path d="M156 16 L177 16 L343 326 L321 361 L299 361 L321 326Z" fill="url(#goldEdge)"/>
-    <path d="M16 16 L156 16 L171 34 L50 34 L208 361 L194 361 L36 55 Q22 31 16 16Z" fill="#fff0c6" opacity=".38"/>
+    <path d="M16 16 L156 16 L299 326 L278 356 L208 356 L36 55 Q22 31 16 16Z" fill="url(#goldFront)"/>
+    <path d="M156 16 L177 16 L299 326 L278 356 L264 356 L285 326Z" fill="url(#goldEdge)"/>
+    <path d="M16 16 L156 16 L171 34 L50 34 L208 356 L194 356 L36 55 Q22 31 16 16Z" fill="#fff0c6" opacity=".38"/>
     <path d="M323 16 L469 16 L308 267 L284 307 L263 340 L245 307 L273 199Z" fill="url(#blueFront)"/>
     <path d="M469 16 L449 16 L291 263 L273 199 L308 267 L284 307 L263 340 L284 307 L308 267Z" fill="#071321" opacity=".78"/>
     <path d="M469 16 L390 16 L273 199 L307 267Z" fill="url(#silverFront)"/>

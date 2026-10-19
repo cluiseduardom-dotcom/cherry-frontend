@@ -6,7 +6,7 @@
 // desenvolvimento (ver lerTemaDev). A ligação com a empresa virá do backend.
 
 import vertumnoLogo from '../assets/vertumno-logo.png';
-import vertumnoSimbolo from '../assets/vertumno-simbolo.png';
+import vertumnoSimbolo from '../assets/vertumno-simbolo.svg';
 import cherryLogo from '../assets/cherry-logo.png';
 import cherrySimbolo from '../assets/cherry-simbolo.png';
 import cherryOrnamento from '../assets/cherry-ornamento.png';

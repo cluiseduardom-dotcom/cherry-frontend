@@ -14,9 +14,6 @@
     <linearGradient id="silverFront" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#fafafa"/><stop offset=".2" stop-color="#aeb8c0"/><stop offset=".42" stop-color="#eef0ef"/><stop offset=".72" stop-color="#89949d"/><stop offset="1" stop-color="#35434e"/>
     </linearGradient>
-    <linearGradient id="word" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#dce1e5"/><stop offset="1" stop-color="#87939d"/>
-    </linearGradient>
     <filter id="shadow" x="-15%" y="-15%" width="130%" height="140%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="blur"/>
       <feOffset dy="2" result="offset"/>
@@ -37,5 +34,5 @@
     <path d="M390 16 L378 16 L263 196 L273 199Z" fill="#f7f7f5" opacity=".55"/>
     <path d="M273 199 L307 267 L284 307 L263 340 L245 307Z" fill="#06121e" opacity=".65"/>
   </g>
-  <text x="260" y="425" text-anchor="middle" fill="url(#word)" font-family="Poppins, Montserrat, Arial, sans-serif" font-size="53" font-weight="700" letter-spacing="2.8">VERTUMNO</text>
+  <text x="260" y="425" text-anchor="middle" fill="#0b1f4d" stroke="#0b1f4d" stroke-width=".35" paint-order="stroke" font-family="Poppins, Montserrat, Arial, sans-serif" font-size="53" font-weight="800" letter-spacing="2.8">VERTUMNO</text>
 </svg>

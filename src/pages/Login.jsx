@@ -64,6 +64,9 @@ export default function Login() {
               {marca.subtitulo && <span className="login-sub">{marca.subtitulo}</span>}
             </div>
           )}
+          {!isCherry && (
+            <span className="login-brand-tagline">GESTÃO QUE IMPULSIONA</span>
+          )}
         </div>
 
         <div className="login-header">
@@ -142,6 +145,9 @@ export default function Login() {
             aria-hidden="true"
           />
           <h2 className="login-side-title">{marca.loginTitulo}</h2>
+          {!isCherry && (
+            <p className="login-side-tagline">GESTÃO QUE IMPULSIONA</p>
+          )}
           <p className="login-side-desc">{marca.loginDescricao}</p>
           <div className="login-side-features">
             {['Vendas em tempo real', 'Controle de estoque', 'Gestão de clientes', 'Relatórios detalhados'].map(f => (

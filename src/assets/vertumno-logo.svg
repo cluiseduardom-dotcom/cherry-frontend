@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 142" role="img" aria-labelledby="title desc">
+  <title id="title">VERTUMNO</title>
+  <desc id="desc">Símbolo V em azul e dourado com o nome VERTUMNO.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5d99a"/>
+      <stop offset=".42" stop-color="#b78336"/>
+      <stop offset=".72" stop-color="#f4d58d"/>
+      <stop offset="1" stop-color="#8e632b"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e5bff"/>
+      <stop offset=".58" stop-color="#087bd1"/>
+      <stop offset="1" stop-color="#0b1f4d"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#17365b"/>
+      <stop offset="1" stop-color="#071526"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(96 4)">
+    <path d="M0 0H35L69 54L54 79Z" fill="url(#gold)"/>
+    <path d="M67 0H103L56 79H29Z" fill="url(#blue)"/>
+    <path d="M0 0L29 0L54 48L43 64Z" fill="url(#shade)" opacity=".94"/>
+    <path d="M54 79L69 54L56 79Z" fill="#d4a853"/>
+  </g>
+  <text x="160" y="119" text-anchor="middle" fill="#0b1f4d" font-family="Poppins, Arial, sans-serif" font-size="31" font-weight="800" letter-spacing="-1">VERTUMNO</text>
+</svg>

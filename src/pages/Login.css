@@ -628,3 +628,204 @@
     padding: 48px 24px 60px;
   }
 }
+
+
+/* VERTUMNO — layout aprovado em 19/10/2026 */
+.login-page-vertumno {
+  background: #f8fafc;
+  color: #0b2545;
+}
+
+.login-page-vertumno > .login-card {
+  width: 40%;
+  flex-basis: 40%;
+  padding: clamp(34px, 5vh, 64px) clamp(34px, 5vw, 76px);
+  background:
+    linear-gradient(135deg, transparent 0 83%, rgba(219, 232, 250, .42) 83% 88%, transparent 88%),
+    linear-gradient(45deg, transparent 0 9%, rgba(233, 241, 252, .62) 9% 13%, transparent 13%),
+    #fff;
+}
+
+.login-page-vertumno > .login-side {
+  position: relative;
+  isolation: isolate;
+  width: 60%;
+  flex-basis: 60%;
+  overflow: hidden;
+  padding: clamp(40px, 5vw, 84px);
+  background:
+    radial-gradient(ellipse at 70% 8%, rgba(15, 83, 153, .22), transparent 42%),
+    linear-gradient(135deg, #061426 0%, #071b32 52%, #041020 100%) !important;
+}
+
+.login-page-vertumno > .login-side::before,
+.login-page-vertumno > .login-side::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  transform: skewX(-43deg);
+}
+
+.login-page-vertumno > .login-side::before {
+  width: 36%;
+  height: 150%;
+  right: -16%;
+  top: -22%;
+  border-left: 1px solid rgba(30, 124, 220, .35);
+  background: linear-gradient(90deg, transparent, rgba(17, 67, 117, .14), transparent);
+}
+
+.login-page-vertumno > .login-side::after {
+  width: 28%;
+  height: 95%;
+  right: -14%;
+  bottom: -42%;
+  border-top: 2px solid rgba(220, 173, 77, .85);
+  box-shadow: 0 -1px 12px rgba(220, 173, 77, .18);
+}
+
+.login-page-vertumno .login-logo {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: clamp(24px, 4vh, 42px);
+}
+
+.login-page-vertumno .login-brand-logo {
+  width: min(100%, 320px);
+  max-width: 320px;
+  object-position: left center;
+}
+
+.login-page-vertumno .login-brand-tagline {
+  display: block;
+  padding-left: 8px;
+  color: #23466d;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .34em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.login-page-vertumno .login-header {
+  margin-bottom: clamp(22px, 3vh, 30px);
+}
+
+.login-page-vertumno .login-title {
+  font-size: clamp(27px, 2.25vw, 36px);
+  font-weight: 760;
+  letter-spacing: -.8px;
+}
+
+.login-page-vertumno .login-subtitle {
+  font-size: clamp(14px, 1.05vw, 16px);
+  color: #61738c;
+}
+
+.login-page-vertumno .input-field {
+  background: #edf4ff;
+  border-color: #d2e0f4;
+  border-radius: 9px;
+}
+
+.login-page-vertumno .login-submit {
+  background: linear-gradient(110deg, #071a30, #0b2545);
+  box-shadow: 0 7px 18px rgba(4, 20, 39, .2);
+}
+
+.login-page-vertumno .login-side-content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+}
+
+.login-page-vertumno .login-side-brand-symbol {
+  width: clamp(150px, 15vw, 230px);
+  max-height: 180px;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .24));
+}
+
+.login-page-vertumno .login-side-title {
+  margin: 0 0 7px;
+  font-size: clamp(38px, 3.8vw, 58px);
+  font-weight: 850;
+  letter-spacing: -1.4px;
+  line-height: 1.08;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .16);
+}
+
+.login-page-vertumno .login-side-tagline {
+  width: 100%;
+  margin: 0 0 clamp(24px, 3vh, 34px);
+  color: #d7e4f4;
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 600;
+  letter-spacing: .38em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.login-page-vertumno .login-side-desc {
+  margin-bottom: clamp(24px, 3vh, 32px);
+  color: #d8e2ef;
+  font-size: clamp(15px, 1.1vw, 18px);
+  line-height: 1.65;
+}
+
+.login-page-vertumno .login-side-features {
+  gap: clamp(13px, 1.8vh, 18px);
+}
+
+.login-page-vertumno .login-side-feature {
+  gap: 13px;
+  font-size: clamp(15px, 1.1vw, 17px);
+}
+
+.login-page-vertumno .login-side-feature-dot {
+  flex-basis: 11px;
+  width: 11px;
+  height: 11px;
+  background: #f1b844;
+  box-shadow: 0 0 0 3px rgba(241, 184, 68, .1);
+}
+
+@media (max-width: 799px) {
+  .login-page-vertumno > .login-card {
+    width: 100%;
+    flex-basis: auto;
+    padding: 42px 24px 36px;
+  }
+
+  .login-page-vertumno .login-logo {
+    align-items: center;
+  }
+
+  .login-page-vertumno .login-brand-logo {
+    width: min(100%, 280px);
+    object-position: center;
+  }
+
+  .login-page-vertumno .login-brand-tagline {
+    padding-left: 0;
+    font-size: 10px;
+    letter-spacing: .28em;
+  }
+
+  .login-page-vertumno > .login-side {
+    width: 100%;
+    flex-basis: auto;
+    min-height: 540px;
+    padding: 48px 28px 56px;
+  }
+
+  .login-page-vertumno .login-side-brand-symbol {
+    width: 160px;
+  }
+
+  .login-page-vertumno .login-side-title {
+    font-size: clamp(36px, 9vw, 46px);
+  }
+}

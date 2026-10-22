@@ -197,6 +197,16 @@ ul, ol {
   transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
+/* Contêiner de tabela responsivo: a tabela rola na horizontal só dentro do cartão, sem alargar
+   a página. width: 0 + min-width: 100% tira a largura mínima da tabela do cálculo do contêiner
+   da página (sem isso ela alargaria o <main>) e o contêiner continua ocupando toda a linha. */
+.table-scroll {
+  width: 0;
+  min-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .card:hover {
   box-shadow: var(--shadow-card-hover);
 }

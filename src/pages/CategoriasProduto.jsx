@@ -206,45 +206,47 @@ export default function CategoriasProduto() {
             {niveis.length === 0 ? (
               <p className="text-sm text-secondary">Nenhum nível nomeado ainda — categorias aparecem como "Nível N" até serem nomeadas.</p>
             ) : (
-              <table className="contas-table">
-                <thead>
-                  <tr>
-                    <th>Nível</th>
-                    <th>Nome</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {niveis.map(nivel => (
-                    <tr key={nivel.id} className="contas-row">
-                      <td>{nivel.nivel}</td>
-                      <td>{nivel.nome}</td>
-                      <td>
-                        <div className="contas-actions">
-                          <button
-                            className="contas-action-btn"
-                            aria-label="Renomear"
-                            title="Renomear"
-                            disabled={workingId === `nivel-${nivel.id}`}
-                            onClick={() => openEditNivel(nivel)}
-                          >
-                            <Edit size={14} />
-                          </button>
-                          <button
-                            className="contas-action-btn contas-action-btn--danger"
-                            aria-label="Excluir"
-                            title="Excluir"
-                            disabled={workingId === `nivel-${nivel.id}`}
-                            onClick={() => handleExcluirNivel(nivel)}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
+              <div className="table-scroll">
+                <table className="contas-table">
+                  <thead>
+                    <tr>
+                      <th>Nível</th>
+                      <th>Nome</th>
+                      <th></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {niveis.map(nivel => (
+                      <tr key={nivel.id} className="contas-row">
+                        <td>{nivel.nivel}</td>
+                        <td>{nivel.nome}</td>
+                        <td>
+                          <div className="contas-actions">
+                            <button
+                              className="contas-action-btn"
+                              aria-label="Renomear"
+                              title="Renomear"
+                              disabled={workingId === `nivel-${nivel.id}`}
+                              onClick={() => openEditNivel(nivel)}
+                            >
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              className="contas-action-btn contas-action-btn--danger"
+                              aria-label="Excluir"
+                              title="Excluir"
+                              disabled={workingId === `nivel-${nivel.id}`}
+                              onClick={() => handleExcluirNivel(nivel)}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
@@ -268,56 +270,58 @@ export default function CategoriasProduto() {
             {gruposCategorias.map(({ nivel, itens }) => (
               <div key={nivel} className="categorias-produto-grupo">
                 <h3 className="categorias-produto-grupo-title">{obterRotuloNivel(nivel)}</h3>
-                <table className="contas-table">
-                  <thead>
-                    <tr>
-                      <th>Código</th>
-                      <th>Nome</th>
-                      <th>Padrão de SKU</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {itens.map(categoria => {
-                      const padraoAssociado = padroesSku.find(p => p.id === categoria.configuracao_sku_id);
-                      return (
-                        <tr key={categoria.id} className="contas-row">
-                          <td>{categoria.codigo}</td>
-                          <td>{categoria.nome}</td>
-                          <td>
-                            {padraoAssociado ? (
-                              <span className="badge badge-primary">{padraoAssociado.nome}</span>
-                            ) : (
-                              <span className="text-xs text-muted">Padrão da empresa</span>
-                            )}
-                          </td>
-                          <td>
-                            <div className="contas-actions">
-                              <button
-                                className="contas-action-btn"
-                                aria-label="Editar"
-                                title="Editar"
-                                disabled={workingId === `categoria-${categoria.id}`}
-                                onClick={() => openEditCategoria(categoria)}
-                              >
-                                <Edit size={14} />
-                              </button>
-                              <button
-                                className="contas-action-btn contas-action-btn--danger"
-                                aria-label="Excluir"
-                                title="Excluir"
-                                disabled={workingId === `categoria-${categoria.id}`}
-                                onClick={() => handleExcluirCategoria(categoria)}
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="table-scroll">
+                  <table className="contas-table">
+                    <thead>
+                      <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Padrão de SKU</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {itens.map(categoria => {
+                        const padraoAssociado = padroesSku.find(p => p.id === categoria.configuracao_sku_id);
+                        return (
+                          <tr key={categoria.id} className="contas-row">
+                            <td>{categoria.codigo}</td>
+                            <td>{categoria.nome}</td>
+                            <td>
+                              {padraoAssociado ? (
+                                <span className="badge badge-primary">{padraoAssociado.nome}</span>
+                              ) : (
+                                <span className="text-xs text-muted">Padrão da empresa</span>
+                              )}
+                            </td>
+                            <td>
+                              <div className="contas-actions">
+                                <button
+                                  className="contas-action-btn"
+                                  aria-label="Editar"
+                                  title="Editar"
+                                  disabled={workingId === `categoria-${categoria.id}`}
+                                  onClick={() => openEditCategoria(categoria)}
+                                >
+                                  <Edit size={14} />
+                                </button>
+                                <button
+                                  className="contas-action-btn contas-action-btn--danger"
+                                  aria-label="Excluir"
+                                  title="Excluir"
+                                  disabled={workingId === `categoria-${categoria.id}`}
+                                  onClick={() => handleExcluirCategoria(categoria)}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
           </div>

@@ -82,8 +82,9 @@ describe('canAccessRoute', () => {
   it('permits gerente (cargo gerente e perfil vendedor) on /historico', () => {
     const gerenteUser = { role: 'vendedor', perfil: 'vendedor', cargo: 'gerente' };
     expect(canAccessRoute('/historico', gerenteUser)).toBe(true);
-    expect(canAccessRoute('/historico', { role: 'gerente' })).toBe(true);
-    expect(canAccessRoute('/historico', 'gerente')).toBe(true);
+    // O acesso vem do perfil legado (vendedor), não do nome do cargo: o nome do cargo sozinho não abre nada.
+    expect(canAccessRoute('/historico', { role: 'gerente' })).toBe(false);
+    expect(canAccessRoute('/historico', 'gerente')).toBe(false);
   });
 
   it('denies gerente without admin permission on admin-only routes', () => {

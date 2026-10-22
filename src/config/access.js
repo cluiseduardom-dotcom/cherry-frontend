@@ -91,11 +91,6 @@ export function canAccessRoute(path, userOrRole) {
     return true;
   }
 
-  // Regra especial: usuário com cargo gerente consegue abrir /historico
-  if (path === '/historico' && (role === 'gerente' || user?.cargo === 'gerente')) {
-    return true;
-  }
-
   // Checagem tradicional por papel
   if (allowedRoles && role && allowedRoles.includes(role)) {
     return true;

@@ -2,19 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { setAuthBridge } from '../services/api';
 import { buscarMe, formatarUsuario, loginRequest } from '../services/auth';
 import { carregarSessao, limparSessao, salvarSessao } from '../services/authSession';
+import { podeComCapacidade } from '../config/access';
 
 const AuthContext = createContext(null);
-
-export function checarCapacidade(user, nome) {
-  if (!user || !nome) return false;
-  const capacidades = Array.isArray(user.capacidades) ? user.capacidades : [];
-  return (
-    capacidades.includes(nome) ||
-    capacidades.includes('administrador') ||
-    user.role === 'admin' ||
-    user.perfil === 'admin'
-  );
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -32,7 +22,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const temCapacidade = useCallback(
-    (nome) => checarCapacidade(user, nome),
+    (nome) => podeComCapacidade(user, nome),
     [user]
   );
 

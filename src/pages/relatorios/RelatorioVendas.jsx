@@ -8,6 +8,7 @@ import {
   todayISO,
   isoDaysFromToday,
   weekdayLabel,
+  dayOfMonthLabel,
   listarDiasNoPeriodo,
   buscarTodasAsPaginas,
   exportarRelatorioPDF,
@@ -211,7 +212,14 @@ export default function RelatorioVendas() {
                         title={formatCurrency(d.valor)}
                       />
                     </div>
-                    <div className="rel-bar-label">{i % skipLabel === 0 ? weekdayLabel(d.dia) : ''}</div>
+                    <div className="rel-bar-label">
+                      {i % skipLabel === 0 && (
+                        <>
+                          <span>{weekdayLabel(d.dia)}</span>
+                          <span className="rel-bar-label-dia">{dayOfMonthLabel(d.dia)}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

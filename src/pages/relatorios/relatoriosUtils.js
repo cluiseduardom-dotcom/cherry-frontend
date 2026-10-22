@@ -57,6 +57,11 @@ export function weekdayLabel(iso) {
   return WEEKDAY_LABELS[parseISOLocal(iso).getDay()];
 }
 
+// Número do dia do mês ("21"), para o usuário não se perder no eixo do gráfico.
+export function dayOfMonthLabel(iso) {
+  return String(parseISOLocal(iso).getDate());
+}
+
 // Lista todos os dias (ISO) entre inicio e fim, inclusive.
 export function listarDiasNoPeriodo(isoInicio, isoFim) {
   const dias = [];

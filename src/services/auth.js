@@ -1,5 +1,32 @@
-import { apiFetch } from './api';
+import { apiFetch, ApiError } from './api';
 import { resolverTema } from '../theme/themes';
+
+export async function buscarMe(token) {
+  const body = await apiFetch('/auth/me', {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return body?.data ?? body;
+}
+
+export function formatarUsuario(me, usuarioBase = {}) {
+  // Mantém compatibilidade com o modelo de role legado:
+  // usa me.perfil (admin/vendedor/estoquista/faturista) como role principal para access.js
+  const perfil = me?.perfil || usuarioBase?.perfil || usuarioBase?.role;
+
+  return {
+    ...usuarioBase,
+    id: me?.id ?? usuarioBase?.id,
+    nome: usuarioBase?.nome ?? me?.nome,
+    email: usuarioBase?.email ?? me?.email,
+    empresa_id: me?.empresa_id ?? usuarioBase?.empresa_id,
+    perfil,
+    cargo: me?.cargo ?? usuarioBase?.cargo ?? usuarioBase?.role,
+    nivel: me?.nivel !== undefined ? me.nivel : (usuarioBase?.nivel ?? null),
+    capacidades: Array.isArray(me?.capacidades) ? me.capacidades : (usuarioBase?.capacidades || []),
+    role: perfil,
+    tema: usuarioBase?.tema,
+  };
+}
 
 export async function loginRequest(email, senha) {
   const body = await apiFetch('/auth/login', {
@@ -10,16 +37,32 @@ export async function loginRequest(email, senha) {
 
   const { token, usuario } = body.data;
 
+  const baseUser = {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    role: usuario.papel,
+    perfil: usuario.papel,
+    cargo: usuario.papel,
+    nivel: null,
+    capacidades: [],
+    tema: resolverTema(usuario.empresa?.tema),
+  };
+
+  let me;
+  try {
+    me = await buscarMe(token);
+  } catch (err) {
+    throw new ApiError(
+      err?.message || 'Falha ao consultar permissões do usuário.',
+      err?.status || 500
+    );
+  }
+
+  const user = formatarUsuario(me, baseUser);
+
   return {
     token,
-    user: {
-      id: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email,
-      role: usuario.papel,
-      // O backend fornece apenas um identificador fechado de tema.
-      // Valores ausentes ou desconhecidos usam a identidade VERTUMNO.
-      tema: resolverTema(usuario.empresa?.tema),
-    },
+    user,
   };
 }

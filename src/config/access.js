@@ -2,6 +2,7 @@ export const HOME_ROUTE_BY_ROLE = {
   admin: '/',
   vendedor: '/venda',
   estoquista: '/estoque',
+  faturista: '/mais',
 };
 
 export function homeRouteForRole(role) {
@@ -21,7 +22,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/compras/recebimentos': ['admin', 'estoquista'],
   '/compras/recebimentos/:id': ['admin', 'estoquista'],
   '/historico': ['admin', 'vendedor'],
-  '/mais': ['admin', 'vendedor', 'estoquista'],
+  '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
   '/contas-pagar': ['admin'],
   '/contas-receber': ['admin'],
@@ -32,9 +33,80 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/configuracoes/sku': ['admin'],
 };
 
-export function canAccessRoute(path, role) {
+export const REQUIRED_CAPABILITIES_BY_PATH = {
+  '/cancelamentos': ['ver_cancelamentos'],
+  '/configuracoes/cargos': ['gerir_cargos', 'conceder_admin'],
+};
+
+export function podeComCapacidade(userOrCapacidades, capacidadeOuCapacidades) {
+  if (!userOrCapacidades || !capacidadeOuCapacidades) return false;
+
+  let caps = [];
+  let role = null;
+
+  if (Array.isArray(userOrCapacidades)) {
+    caps = userOrCapacidades;
+  } else if (typeof userOrCapacidades === 'object') {
+    caps = Array.isArray(userOrCapacidades.capacidades) ? userOrCapacidades.capacidades : [];
+    role = userOrCapacidades.role || userOrCapacidades.perfil;
+  } else if (typeof userOrCapacidades === 'string') {
+    role = userOrCapacidades;
+  }
+
+  // Admin ou portador da capacidade 'administrador' tem todas as capacidades
+  if (role === 'admin' || caps.includes('administrador')) {
+    return true;
+  }
+
+  const requeridas = Array.isArray(capacidadeOuCapacidades)
+    ? capacidadeOuCapacidades
+    : [capacidadeOuCapacidades];
+
+  return requeridas.some(cap => caps.includes(cap));
+}
+
+export function canAccessRoute(path, userOrRole) {
+  if (!path || !userOrRole) return false;
+
+  let role = null;
+  let user = null;
+
+  if (typeof userOrRole === 'object') {
+    user = userOrRole;
+    role = user.role || user.perfil;
+  } else if (typeof userOrRole === 'string') {
+    role = userOrRole;
+  }
+
   const allowedRoles = ALLOWED_ROLES_BY_PATH[path];
-  return Boolean(allowedRoles) && allowedRoles.includes(role);
+  const requiredCaps = REQUIRED_CAPABILITIES_BY_PATH[path];
+
+  // Rota não registrada em nenhuma das tabelas -> fail-closed
+  if (!allowedRoles && !requiredCaps) {
+    return false;
+  }
+
+  // Admin efetivo tem acesso a todas as rotas conhecidas
+  if (role === 'admin' || (user && podeComCapacidade(user, 'administrador'))) {
+    return true;
+  }
+
+  // Regra especial: usuário com cargo gerente consegue abrir /historico
+  if (path === '/historico' && (role === 'gerente' || user?.cargo === 'gerente')) {
+    return true;
+  }
+
+  // Checagem tradicional por papel
+  if (allowedRoles && role && allowedRoles.includes(role)) {
+    return true;
+  }
+
+  // Checagem por capacidade da rota
+  if (user && requiredCaps) {
+    return podeComCapacidade(user, requiredCaps);
+  }
+
+  return false;
 }
 
 export const FIELDS = {
@@ -45,9 +117,43 @@ const ALLOWED_ROLES_BY_FIELD = {
   [FIELDS.CUSTO]: ['admin'],
 };
 
-export function podeVerCampo(role, field) {
+export const REQUIRED_CAPABILITIES_BY_FIELD = {
+  [FIELDS.CUSTO]: ['ver_custos'],
+};
+
+export function podeVerCampo(userOrRole, field) {
+  if (!userOrRole || !field) return false;
+
   const allowedRoles = ALLOWED_ROLES_BY_FIELD[field];
-  return Boolean(allowedRoles) && allowedRoles.includes(role);
+  const requiredCaps = REQUIRED_CAPABILITIES_BY_FIELD[field];
+
+  if (!allowedRoles && !requiredCaps) {
+    return false;
+  }
+
+  let role = null;
+  let user = null;
+
+  if (typeof userOrRole === 'object') {
+    user = userOrRole;
+    role = user.role || user.perfil;
+  } else if (typeof userOrRole === 'string') {
+    role = userOrRole;
+  }
+
+  if (role === 'admin' || (user && podeComCapacidade(user, 'administrador'))) {
+    return true;
+  }
+
+  if (allowedRoles && role && allowedRoles.includes(role)) {
+    return true;
+  }
+
+  if (user && requiredCaps && podeComCapacidade(user, requiredCaps)) {
+    return true;
+  }
+
+  return false;
 }
 
 export const ACTIONS = {
@@ -66,7 +172,41 @@ const ALLOWED_ROLES_BY_ACTION = {
   [ACTIONS.CATEGORIZAR_PRODUTO]: ['admin', 'estoquista'],
 };
 
-export function podeExecutarAcao(role, action) {
+export const REQUIRED_CAPABILITIES_BY_ACTION = {
+  [ACTIONS.CANCELAR_VENDA]: ['cancelar_venda'],
+};
+
+export function podeExecutarAcao(userOrRole, action) {
+  if (!userOrRole || !action) return false;
+
   const allowedRoles = ALLOWED_ROLES_BY_ACTION[action];
-  return Boolean(allowedRoles) && allowedRoles.includes(role);
+  const requiredCaps = REQUIRED_CAPABILITIES_BY_ACTION[action];
+
+  if (!allowedRoles && !requiredCaps) {
+    return false;
+  }
+
+  let role = null;
+  let user = null;
+
+  if (typeof userOrRole === 'object') {
+    user = userOrRole;
+    role = user.role || user.perfil;
+  } else if (typeof userOrRole === 'string') {
+    role = userOrRole;
+  }
+
+  if (role === 'admin' || (user && podeComCapacidade(user, 'administrador'))) {
+    return true;
+  }
+
+  if (allowedRoles && role && allowedRoles.includes(role)) {
+    return true;
+  }
+
+  if (user && requiredCaps && podeComCapacidade(user, requiredCaps)) {
+    return true;
+  }
+
+  return false;
 }

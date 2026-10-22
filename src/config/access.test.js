@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   ALLOWED_ROLES_BY_PATH,
+  REQUIRED_CAPABILITIES_BY_PATH,
   canAccessRoute,
   homeRouteForRole,
+  podeComCapacidade,
   FIELDS,
   ACTIONS,
   podeVerCampo,
@@ -13,6 +15,9 @@ describe('canAccessRoute', () => {
   it('allows admin on every registered route', () => {
     for (const path of Object.keys(ALLOWED_ROLES_BY_PATH)) {
       expect(canAccessRoute(path, 'admin')).toBe(true);
+      expect(canAccessRoute(path, { role: 'admin' })).toBe(true);
+      expect(canAccessRoute(path, { perfil: 'admin' })).toBe(true);
+      expect(canAccessRoute(path, { role: 'vendedor', capacidades: ['administrador'] })).toBe(true);
     }
   });
 
@@ -74,6 +79,48 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/configuracoes/categorias', 'estoquista')).toBe(false);
   });
 
+  it('permits gerente (cargo gerente e perfil vendedor) on /historico', () => {
+    const gerenteUser = { role: 'vendedor', perfil: 'vendedor', cargo: 'gerente' };
+    expect(canAccessRoute('/historico', gerenteUser)).toBe(true);
+    expect(canAccessRoute('/historico', { role: 'gerente' })).toBe(true);
+    expect(canAccessRoute('/historico', 'gerente')).toBe(true);
+  });
+
+  it('denies gerente without admin permission on admin-only routes', () => {
+    const gerenteUser = { role: 'vendedor', perfil: 'vendedor', cargo: 'gerente' };
+    expect(canAccessRoute('/relatorios', gerenteUser)).toBe(false);
+    expect(canAccessRoute('/configuracoes', gerenteUser)).toBe(false);
+  });
+
+  it('allows faturista on safe route /mais and denies on unpermitted routes', () => {
+    expect(canAccessRoute('/mais', 'faturista')).toBe(true);
+    expect(canAccessRoute('/mais', { role: 'faturista', perfil: 'faturista' })).toBe(true);
+    expect(canAccessRoute('/venda', 'faturista')).toBe(false);
+    expect(canAccessRoute('/estoque', 'faturista')).toBe(false);
+    expect(canAccessRoute('/relatorios', 'faturista')).toBe(false);
+  });
+
+  it('evaluates capability-based routes (/cancelamentos and /configuracoes/cargos)', () => {
+    expect(REQUIRED_CAPABILITIES_BY_PATH['/cancelamentos']).toEqual(['ver_cancelamentos']);
+    expect(REQUIRED_CAPABILITIES_BY_PATH['/configuracoes/cargos']).toEqual(['gerir_cargos', 'conceder_admin']);
+
+    const userComCancelamento = { role: 'vendedor', capacidades: ['ver_cancelamentos'] };
+    const userSemCancelamento = { role: 'vendedor', capacidades: [] };
+
+    expect(canAccessRoute('/cancelamentos', userComCancelamento)).toBe(true);
+    expect(canAccessRoute('/cancelamentos', userSemCancelamento)).toBe(false);
+    expect(canAccessRoute('/cancelamentos', 'admin')).toBe(true);
+
+    const userComGerirCargos = { role: 'vendedor', capacidades: ['gerir_cargos'] };
+    const userComConcederAdmin = { role: 'vendedor', capacidades: ['conceder_admin'] };
+    const userComOutraCapacidade = { role: 'vendedor', capacidades: ['ver_custos'] };
+
+    expect(canAccessRoute('/configuracoes/cargos', userComGerirCargos)).toBe(true);
+    expect(canAccessRoute('/configuracoes/cargos', userComConcederAdmin)).toBe(true);
+    expect(canAccessRoute('/configuracoes/cargos', userComOutraCapacidade)).toBe(false);
+    expect(canAccessRoute('/configuracoes/cargos', 'admin')).toBe(true);
+  });
+
   it('denies any role on an unregistered path (fail-closed default)', () => {
     expect(canAccessRoute('/rota-inexistente', 'admin')).toBe(false);
     expect(canAccessRoute('/rota-inexistente', 'vendedor')).toBe(false);
@@ -90,6 +137,7 @@ describe('homeRouteForRole', () => {
     expect(homeRouteForRole('admin')).toBe('/');
     expect(homeRouteForRole('vendedor')).toBe('/venda');
     expect(homeRouteForRole('estoquista')).toBe('/estoque');
+    expect(homeRouteForRole('faturista')).toBe('/mais');
   });
 
   it('falls back to /login for an unknown role', () => {
@@ -98,14 +146,50 @@ describe('homeRouteForRole', () => {
   });
 });
 
+describe('podeComCapacidade', () => {
+  it('returns true when user has specific capacity', () => {
+    expect(podeComCapacidade({ capacidades: ['ver_custos'] }, 'ver_custos')).toBe(true);
+    expect(podeComCapacidade(['ver_custos'], 'ver_custos')).toBe(true);
+  });
+
+  it('returns true when user has any of multiple required capacities', () => {
+    const user = { capacidades: ['gerir_cargos'] };
+    expect(podeComCapacidade(user, ['gerir_cargos', 'conceder_admin'])).toBe(true);
+  });
+
+  it('returns true when user has administrador capacity or admin role', () => {
+    expect(podeComCapacidade({ capacidades: ['administrador'] }, 'qualquer_capacidade')).toBe(true);
+    expect(podeComCapacidade({ role: 'admin' }, 'qualquer_capacidade')).toBe(true);
+    expect(podeComCapacidade('admin', 'qualquer_capacidade')).toBe(true);
+  });
+
+  it('returns false when user lacks required capacity', () => {
+    expect(podeComCapacidade({ capacidades: ['ver_custos'] }, 'cancelar_venda')).toBe(false);
+    expect(podeComCapacidade([], 'cancelar_venda')).toBe(false);
+  });
+
+  it('returns false on missing inputs', () => {
+    expect(podeComCapacidade(null, 'ver_custos')).toBe(false);
+    expect(podeComCapacidade({ capacidades: ['ver_custos'] }, null)).toBe(false);
+    expect(podeComCapacidade(undefined, undefined)).toBe(false);
+  });
+});
+
 describe('podeVerCampo', () => {
   it('allows admin to see custo', () => {
     expect(podeVerCampo('admin', FIELDS.CUSTO)).toBe(true);
+    expect(podeVerCampo({ role: 'admin' }, FIELDS.CUSTO)).toBe(true);
   });
 
-  it('denies vendedor and estoquista from seeing custo', () => {
+  it('allows user with ver_custos or administrador to see custo', () => {
+    expect(podeVerCampo({ role: 'vendedor', capacidades: ['ver_custos'] }, FIELDS.CUSTO)).toBe(true);
+    expect(podeVerCampo({ role: 'vendedor', capacidades: ['administrador'] }, FIELDS.CUSTO)).toBe(true);
+  });
+
+  it('denies vendedor and estoquista without ver_custos from seeing custo', () => {
     expect(podeVerCampo('vendedor', FIELDS.CUSTO)).toBe(false);
     expect(podeVerCampo('estoquista', FIELDS.CUSTO)).toBe(false);
+    expect(podeVerCampo({ role: 'vendedor', capacidades: [] }, FIELDS.CUSTO)).toBe(false);
   });
 
   it('denies an unregistered field (fail-closed default)', () => {
@@ -130,10 +214,22 @@ describe('podeExecutarAcao', () => {
     expect(podeExecutarAcao('vendedor', ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(false);
   });
 
-  it('restricts CANCELAR_VENDA to admin', () => {
+  it('allows CANCELAR_VENDA to admin and users with cancelar_venda capability', () => {
     expect(podeExecutarAcao('admin', ACTIONS.CANCELAR_VENDA)).toBe(true);
+    expect(podeExecutarAcao({ role: 'admin' }, ACTIONS.CANCELAR_VENDA)).toBe(true);
+    expect(podeExecutarAcao({ role: 'vendedor', capacidades: ['cancelar_venda'] }, ACTIONS.CANCELAR_VENDA)).toBe(true);
+    expect(podeExecutarAcao({ role: 'vendedor', capacidades: ['administrador'] }, ACTIONS.CANCELAR_VENDA)).toBe(true);
     expect(podeExecutarAcao('vendedor', ACTIONS.CANCELAR_VENDA)).toBe(false);
     expect(podeExecutarAcao('estoquista', ACTIONS.CANCELAR_VENDA)).toBe(false);
+    expect(podeExecutarAcao({ role: 'vendedor', capacidades: [] }, ACTIONS.CANCELAR_VENDA)).toBe(false);
+  });
+
+  it('allows user with administrador capability to execute any valid action', () => {
+    const adminCapUser = { role: 'vendedor', capacidades: ['administrador'] };
+    expect(podeExecutarAcao(adminCapUser, ACTIONS.GERENCIAR_ESTOQUE)).toBe(true);
+    expect(podeExecutarAcao(adminCapUser, ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(true);
+    expect(podeExecutarAcao(adminCapUser, ACTIONS.GERENCIAR_PRECOS)).toBe(true);
+    expect(podeExecutarAcao(adminCapUser, ACTIONS.CATEGORIZAR_PRODUTO)).toBe(true);
   });
 
   it('restricts GERENCIAR_PRECOS to admin', () => {

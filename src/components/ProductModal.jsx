@@ -85,7 +85,7 @@ export function montarPayload(form, mode) {
 
 export default function ProductModal({ open, mode = 'create', produto, onClose, onSaved }) {
   const { user } = useAuth();
-  const podeVerCusto = podeVerCampo(user?.role, FIELDS.CUSTO);
+  const podeVerCusto = podeVerCampo(user, FIELDS.CUSTO);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [initialForm, setInitialForm] = useState(EMPTY_FORM);

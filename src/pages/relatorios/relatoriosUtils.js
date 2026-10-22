@@ -179,6 +179,24 @@ export async function exportarRelatorioPDF({ elementId, filename, titulo, period
       scale: 2,
       backgroundColor: '#FFFFFF',
       useCORS: true,
+      // Na captura (só na cópia da página), os contêineres de rolagem da tela voltam à largura
+      // natural; senão o PDF gerado no celular cortaria as colunas das tabelas.
+      onclone: clonedDoc => {
+        clonedDoc.querySelectorAll('.rel-table-scroll, .rel-bar-chart').forEach(el => {
+          el.style.width = 'auto';
+          el.style.minWidth = '0';
+          el.style.overflow = 'visible';
+        });
+        clonedDoc.querySelectorAll('.rel-financeiro-tables, .rel-kpis').forEach(el => {
+          const colunas = clonedDoc.defaultView.getComputedStyle(el).gridTemplateColumns.split(' ').length;
+          el.style.gridTemplateColumns = Array(colunas).fill('1fr').join(' ');
+        });
+        // O html2canvas copia para o clone a largura que o SVG tinha na tela; sem isto o gráfico de
+        // linha do Financeiro ficaria mais estreito que o cartão depois dos ajustes acima.
+        clonedDoc.querySelectorAll('.rel-line-chart').forEach(el => {
+          el.style.width = '100%';
+        });
+      },
     }),
     carregarLogo(marca.simbolo),
   ]);

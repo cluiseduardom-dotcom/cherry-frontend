@@ -101,7 +101,7 @@
 /* KPI cards */
 .rel-kpis {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
@@ -125,6 +125,7 @@
   font-weight: 800;
   color: var(--color-primary);
   letter-spacing: -0.5px;
+  overflow-wrap: anywhere;
 }
 
 .rel-kpi-value--success { color: var(--color-success); }
@@ -177,10 +178,14 @@
   height: 200px;
   align-items: flex-end;
   overflow-x: auto;
+  /* width: 0 + min-width: 100%: a largura mínima das barras não alarga o contêiner da página;
+     se não couberem, o gráfico rola só dentro do cartão. */
+  width: 0;
+  min-width: 100%;
 }
 
 .rel-bar-wrap {
-  flex: 1 0 18px;
+  flex: 1 1 18px;
   min-width: 12px;
   display: flex;
   flex-direction: column;
@@ -246,6 +251,14 @@
   color: var(--color-text-primary);
 }
 
+/* Tabela rola na horizontal só dentro do cartão e não alarga a página (mesmo padrão de .table-scroll) */
+.rel-table-scroll {
+  width: 0;
+  min-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .rel-table {
   width: 100%;
   border-collapse: collapse;
@@ -289,18 +302,38 @@
 /* Financeiro: two tables side by side */
 .rel-financeiro-tables {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-4);
 }
 
 @media (max-width: 1100px) {
-  .rel-kpis { grid-template-columns: repeat(2, 1fr); }
-  .rel-financeiro-tables { grid-template-columns: 1fr; }
+  .rel-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rel-financeiro-tables { grid-template-columns: minmax(0, 1fr); }
+
+  /* Respiro lateral: o rótulo da primeira/última barra (mais largo que a barra) não gera rolagem */
+  .rel-bar-chart { padding-inline: 8px; }
 }
 
 @media (max-width: 768px) {
-  .rel-kpis { grid-template-columns: repeat(2, 1fr); }
+  .rel-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rel-filtros { flex-direction: column; align-items: stretch; }
   .rel-export-btn { margin-left: 0; }
   .rel-table { font-size: var(--font-size-xs); }
+
+  /* Gráfico de barras: barras mais estreitas e menos espaço entre elas para caber no cartão */
+  .rel-bar-chart { gap: 3px; }
+  .rel-bar-wrap { flex-basis: 10px; min-width: 6px; }
+}
+
+@media (max-width: 480px) {
+  /* Cartões de ~170 px: com 17 px, valores como "R$ 11.075,95" ficam em uma linha a 390 e 360 px
+     (a 20 px quebravam no meio do número). overflow-wrap fica só como rede de segurança. */
+  .rel-kpi-value { font-size: var(--font-size-lg); }
+
+  /* Abas: com o respiro de desktop as três somavam ~348 px e alargavam a página a 360 px.
+     Respiro menor as faz caber (~316 px); em telas ainda mais estreitas a barra rola só dentro
+     de si (width: 0 + min-width: 100%, mesmo padrão das tabelas). margin-bottom: 0 evita que o
+     overflow recorte a linha da aba ativa. */
+  .rel-tabs { gap: var(--space-1); width: 0; min-width: 100%; overflow-x: auto; }
+  .rel-tab { padding-inline: var(--space-3); flex: 0 0 auto; white-space: nowrap; margin-bottom: 0; }
 }

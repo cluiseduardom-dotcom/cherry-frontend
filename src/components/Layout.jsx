@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import MobileHeader from './MobileHeader';
+import { useTheme } from '../theme/themeContext';
 import './Layout.css';
 
 const pageTitles = {
@@ -23,7 +24,8 @@ const pageTitles = {
 
 export default function Layout() {
   const location = useLocation();
-  const title = pageTitles[location.pathname] ?? 'Cherry';
+  const { marca } = useTheme();
+  const title = pageTitles[location.pathname] ?? marca.nome;
 
   return (
     <div className="app-layout">

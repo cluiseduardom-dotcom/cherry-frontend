@@ -44,8 +44,23 @@ export async function listarVendas({ page = 1, pageSize = 100, status, canal, da
   return body.data;
 }
 
-export async function cancelarVenda(id) {
-  const body = await apiFetch(`/vendas/${id}/cancelar`, { method: 'PATCH' });
+export async function obterPreviaCancelamento(id) {
+  const body = await apiFetch(`/vendas/${id}/cancelamento/previa`);
+  return body.data;
+}
+
+export async function cancelarVenda(id, { motivo, autorizacao } = {}) {
+  const payload = { motivo };
+  if (autorizacao?.email && autorizacao?.senha) {
+    payload.autorizacao = {
+      email: autorizacao.email.trim(),
+      senha: autorizacao.senha,
+    };
+  }
+  const body = await apiFetch(`/vendas/${id}/cancelar`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
   return body.data;
 }
 

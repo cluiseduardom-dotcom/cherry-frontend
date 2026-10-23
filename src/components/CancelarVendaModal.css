@@ -1,0 +1,75 @@
+/* =====================================================
+   CANCELAR VENDA MODAL
+   ===================================================== */
+
+.cancelar-venda-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-4);
+}
+
+.cancelar-venda-resumo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cancelar-venda-resumo-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cancelar-venda-resumo-value {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.cancelar-venda-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+  line-height: 1.4;
+}
+
+.cancelar-venda-aviso--warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.cancelar-venda-aviso--info {
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-light);
+}
+
+.cancelar-venda-autorizacao-box {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cancelar-venda-autorizacao-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}

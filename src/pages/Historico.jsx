@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Search, Filter, Calendar } from 'lucide-react';
-import { listarVendas, cancelarVenda } from '../services/vendas';
+import { listarVendas } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
-import ConfirmDialog from '../components/ConfirmDialog';
-import { useConfirmAction } from '../hooks/useConfirmAction';
+import CancelarVendaModal from '../components/CancelarVendaModal';
 import { useToast } from '../context/ToastContext';
 import './Historico.css';
 
@@ -52,14 +51,13 @@ export default function Historico() {
   const [clientesPorId, setClientesPorId] = useState(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [cancelandoId, setCancelandoId] = useState(null);
+  const [vendaParaCancelar, setVendaParaCancelar] = useState(null);
   const [search, setSearch] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState('todos');
   const [statusFiltro, setStatusFiltro] = useState('todos');
   const [canalFiltro, setCanalFiltro] = useState('todos');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
   const toast = useToast();
 
   useEffect(() => {
@@ -109,29 +107,6 @@ export default function Historico() {
   const canceladas = filtered.filter(v => v.status === 'cancelada');
   const totalRevenue = concluidas.reduce((sum, v) => sum + Number(v.total), 0);
   const ticketMedio = concluidas.length > 0 ? totalRevenue / concluidas.length : 0;
-
-  function handleCancelar(venda) {
-    pedirConfirmacao({
-      title: 'Cancelar venda',
-      message: `Cancelar a venda #${venda.id}? O estoque dos itens será estornado automaticamente.`,
-      confirmLabel: 'Cancelar venda',
-      tone: 'danger',
-      execute: () => executarCancelar(venda),
-    });
-  }
-
-  async function executarCancelar(venda) {
-    setCancelandoId(venda.id);
-    try {
-      const vendaAtualizada = await cancelarVenda(venda.id);
-      setVendas(prev => prev.map(v => (v.id === venda.id ? { ...v, status: vendaAtualizada.status } : v)));
-      toast.success(`Venda #${venda.id} cancelada com sucesso.`);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setCancelandoId(null);
-    }
-  }
 
   return (
     <div className="page-content">
@@ -292,10 +267,9 @@ export default function Historico() {
                             <button
                               className="btn btn-ghost btn-sm"
                               style={{ color: 'var(--color-danger)' }}
-                              disabled={cancelandoId === venda.id}
-                              onClick={() => handleCancelar(venda)}
+                              onClick={() => setVendaParaCancelar(venda)}
                             >
-                              {cancelandoId === venda.id ? 'Cancelando...' : 'Cancelar'}
+                              Cancelar
                             </button>
                           )}
                         </td>
@@ -315,15 +289,25 @@ export default function Historico() {
         </div>
       )}
 
-      <ConfirmDialog
-        open={acaoPendente !== null}
-        title={acaoPendente?.title}
-        message={acaoPendente?.message}
-        confirmLabel={acaoPendente?.confirmLabel}
-        tone={acaoPendente?.tone}
-        onConfirm={confirmar}
-        onCancel={cancelar}
-      />
+      {vendaParaCancelar && (
+        <CancelarVendaModal
+          open={Boolean(vendaParaCancelar)}
+          venda={vendaParaCancelar}
+          nomeCliente={clientesPorId.get(vendaParaCancelar.cliente_id)}
+          onClose={() => setVendaParaCancelar(null)}
+          onSuccess={vendaAtualizada => {
+            setVendas(prev =>
+              prev.map(v => (v.id === vendaAtualizada.id ? { ...v, status: vendaAtualizada.status } : v))
+            );
+            toast.success(`Venda #${vendaAtualizada.id} cancelada com sucesso.`);
+          }}
+          onVendaJaCancelada={vendaId => {
+            setVendas(prev =>
+              prev.map(v => (v.id === vendaId ? { ...v, status: 'cancelada' } : v))
+            );
+          }}
+        />
+      )}
     </div>
   );
 }

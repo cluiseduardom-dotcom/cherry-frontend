@@ -291,6 +291,7 @@ export default function Historico() {
 
       {vendaParaCancelar && (
         <CancelarVendaModal
+          key={vendaParaCancelar.id}
           open={Boolean(vendaParaCancelar)}
           venda={vendaParaCancelar}
           nomeCliente={clientesPorId.get(vendaParaCancelar.cliente_id)}

@@ -4,9 +4,9 @@ import {
   validarCancelamento,
   montarPayloadCancelamento,
   formatarErroCancelamento,
-} from './CancelarVendaModal.jsx';
+} from '../utils/cancelamentoVenda';
 
-describe('CancelarVendaModal helpers', () => {
+describe('cancelamentoVenda helpers', () => {
   describe('formInicial', () => {
     it('retorna estado inicial limpo para motivo e autorizacao', () => {
       expect(formInicial()).toEqual({

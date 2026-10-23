@@ -78,7 +78,7 @@ const router = createBrowserRouter([
       return {
         path,
         element: (
-          <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]}>
+          <ProtectedRoute allowedRoles={ALLOWED_ROLES_BY_PATH[path]} path={path}>
             <Component />
           </ProtectedRoute>
         ),

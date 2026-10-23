@@ -46,7 +46,7 @@ function inicioMesISO() {
 
 export default function Historico() {
   const { user } = useAuth();
-  const podeCancelar = podeExecutarAcao(user?.role, ACTIONS.CANCELAR_VENDA);
+  const podeCancelar = podeExecutarAcao(user, ACTIONS.CANCELAR_VENDA);
 
   const [vendas, setVendas] = useState([]);
   const [clientesPorId, setClientesPorId] = useState(new Map());

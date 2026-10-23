@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { setAuthBridge } from '../services/api';
-import { loginRequest } from '../services/auth';
+import { buscarMe, formatarUsuario, loginRequest } from '../services/auth';
 import { carregarSessao, limparSessao, salvarSessao } from '../services/authSession';
+import { podeComCapacidade } from '../config/access';
 
 const AuthContext = createContext(null);
 
@@ -20,20 +21,54 @@ export function AuthProvider({ children }) {
     setToken(null);
   }, []);
 
-  useEffect(() => {
-    const sessao = carregarSessao();
-    if (sessao) {
-      setToken(sessao.token);
-      setUser(sessao.user);
-    }
-    setLoading(false);
-  }, []);
+  const temCapacidade = useCallback(
+    (nome) => podeComCapacidade(user, nome),
+    [user]
+  );
 
   useEffect(() => {
     setAuthBridge({
       getToken: () => tokenRef.current,
       onUnauthorized: logout,
     });
+  }, [logout]);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    async function restaurar() {
+      const sessao = carregarSessao();
+      if (!sessao?.token) {
+        setLoading(false);
+        return;
+      }
+
+      setToken(sessao.token);
+      setUser(sessao.user);
+
+      try {
+        const me = await buscarMe(sessao.token);
+        if (!cancelado && me) {
+          const updatedUser = formatarUsuario(me, sessao.user);
+          setUser(updatedUser);
+          salvarSessao({ token: sessao.token, user: updatedUser });
+        }
+      } catch (err) {
+        if (err?.status === 401) {
+          logout();
+        }
+      } finally {
+        if (!cancelado) {
+          setLoading(false);
+        }
+      }
+    }
+
+    restaurar();
+
+    return () => {
+      cancelado = true;
+    };
   }, [logout]);
 
   async function login(email, senha) {
@@ -61,6 +96,7 @@ export function AuthProvider({ children }) {
     error,
     login,
     logout,
+    temCapacidade,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

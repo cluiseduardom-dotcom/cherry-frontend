@@ -1,5 +1,7 @@
+import { useRef, useState, useEffect } from 'react';
 import CampoMascarado from '../CampoMascarado';
-import { aplicarMascaraCPF, aplicarMascaraTelefone, aplicarMascaraCEP } from '../../utils/mascaras';
+import { buscarCep } from '../../services/cep';
+import { aplicarMascaraCPF, aplicarMascaraTelefone, aplicarMascaraCEP, somenteDigitos } from '../../utils/mascaras';
 import { UFS } from '../../utils/usuarios';
 import '../ProductModal.css';
 import './CamposFormulario.css';
@@ -7,6 +9,46 @@ import './CamposFormulario.css';
 // Seções de dados cadastrais compartilhadas entre "Novo usuário" e "Editar dados".
 // `prefixo` evita ids duplicados; `form`/`erros` seguem as chaves de CAMPOS_DADOS.
 export default function DadosCadastraisCampos({ prefixo, form, erros, onChange, disabled }) {
+  const [statusCep, setStatusCep] = useState(''); // '' | 'buscando' | 'nao_encontrado' | 'indisponivel' | 'ok'
+  const requisicaoCep = useRef(0);
+  const controladorCep = useRef(null);
+
+  useEffect(() => () => controladorCep.current?.abort(), []);
+
+  // Só dispara quando o USUÁRIO completa o CEP (não ao carregar um cadastro existente),
+  // para nunca sobrescrever um endereço já salvo sem ação dele.
+  async function aoMudarCep(valor) {
+    onChange('cep', valor);
+    const digitos = somenteDigitos(valor);
+    const numero = ++requisicaoCep.current;
+    controladorCep.current?.abort();
+
+    if (digitos.length !== 8) {
+      setStatusCep('');
+      return;
+    }
+
+    const controlador = new AbortController();
+    controladorCep.current = controlador;
+    setStatusCep('buscando');
+    try {
+      const endereco = await buscarCep(digitos, { signal: controlador.signal });
+      if (numero !== requisicaoCep.current) return; // resposta de um CEP antigo
+      if (!endereco) {
+        setStatusCep('nao_encontrado');
+        return;
+      }
+      // CEP geral de cidade não traz logradouro/bairro: mantém o que já estava digitado.
+      ['logradouro', 'bairro', 'cidade', 'uf'].forEach(campo => {
+        if (endereco[campo]) onChange(campo, endereco[campo]);
+      });
+      setStatusCep('ok');
+    } catch (err) {
+      if (err?.name === 'AbortError' || numero !== requisicaoCep.current) return;
+      setStatusCep('indisponivel');
+    }
+  }
+
   const cls = campo => `input-field${erros[campo] ? ' input-field--erro' : ''}`;
   const erro = campo => erros[campo] && <span className="campo-erro">{erros[campo]}</span>;
   const texto = (campo, rotulo, props = {}) => (
@@ -101,13 +143,17 @@ export default function DadosCadastraisCampos({ prefixo, form, erros, onChange, 
               mascara={aplicarMascaraCEP}
               className={cls('cep')}
               value={form.cep}
-              onChange={valor => onChange('cep', valor)}
+              onChange={aoMudarCep}
               inputMode="numeric"
               maxLength={9}
               placeholder="00000-000"
               disabled={disabled}
             />
             {erro('cep')}
+            {statusCep === 'buscando' && <span className="campo-dica">Buscando endereço...</span>}
+            {statusCep === 'ok' && <span className="campo-dica">Endereço preenchido pelo CEP. Informe o número.</span>}
+            {statusCep === 'nao_encontrado' && <span className="campo-dica">CEP não encontrado. Preencha o endereço manualmente.</span>}
+            {statusCep === 'indisponivel' && <span className="campo-dica">Não foi possível consultar o CEP agora. Preencha manualmente.</span>}
           </div>
           {texto('logradouro', 'Logradouro', { maxLength: 255 })}
           {texto('numero', 'Número', { maxLength: 20 })}

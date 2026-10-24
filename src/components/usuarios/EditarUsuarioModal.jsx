@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { obterUsuario, editarDadosUsuario } from '../../services/usuarios';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../../utils/usuarios';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../../utils/formularioAlterado';
+import { useRolarParaErro } from '../../hooks/useRolarParaErro';
 import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
 import DadosCadastraisCampos from './DadosCadastraisCampos';
 import '../ProductModal.css';
@@ -23,6 +24,8 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
   const [carregando, setCarregando] = useState(false);
   const [carregado, setCarregado] = useState(false);
   const [loading, setLoading] = useState(false);
+  const painelRef = useRef(null);
+  const [falhasEnvio, setFalhasEnvio] = useState(0);
 
   // Carrega o detalhe (único endpoint que traz o CPF) toda vez que o modal abre.
   useEffect(() => {
@@ -55,6 +58,8 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
     return () => { cancelado = true; };
   }, [open, usuario]);
 
+  useRolarParaErro(painelRef, falhasEnvio);
+
   const isDirty = formularioAlterado(form, inicial);
   const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
     useConfirmarFechamentoModal({ open: open && Boolean(usuario), isDirty, onClose });
@@ -79,12 +84,14 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
     const validacao = validarDadosCadastrais(form);
     if (!validacao.valido) {
       setErros(validacao.erros);
+      setFalhasEnvio(n => n + 1);
       return;
     }
 
     const alteracoes = dadosAlterados(validacao.dados, inicial);
     if (Object.keys(alteracoes).length === 0) {
       setApiError('Nenhum dado foi alterado.');
+      setFalhasEnvio(n => n + 1);
       return;
     }
 
@@ -95,6 +102,7 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
     try {
       resultado = await editarDadosUsuario(usuario.id, alteracoes);
     } catch (err) {
+      setFalhasEnvio(n => n + 1);
       setApiError(err?.message || 'Falha ao salvar os dados do usuário.');
       setLoading(false);
       return;
@@ -108,7 +116,7 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
 
   return (
     <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
-      <div className="modal-panel card" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="editar-usuario-titulo">
+      <div className="modal-panel card" ref={painelRef} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="editar-usuario-titulo">
         <div className="modal-header">
           <div>
             <h2 className="modal-title" id="editar-usuario-titulo">Editar dados do usuário</h2>

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { criarUsuario, listarCargosAtribuiveis } from '../../services/usuarios';
 import { validarCriarUsuario, DADOS_VAZIOS } from '../../utils/usuarios';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../../utils/formularioAlterado';
+import { useRolarParaErro } from '../../hooks/useRolarParaErro';
 import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
 import DadosCadastraisCampos from './DadosCadastraisCampos';
 import '../ProductModal.css';
@@ -23,6 +24,8 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
   const [erros, setErros] = useState({});
   const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
+  const painelRef = useRef(null);
+  const [falhasEnvio, setFalhasEnvio] = useState(0);
 
   // Só os cargos que o backend aceitaria (ativos na empresa, abaixo do nível do ator).
   useEffect(() => {
@@ -55,6 +58,8 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
     return () => { cancelado = true; };
   }, [open]);
 
+  useRolarParaErro(painelRef, falhasEnvio);
+
   // Nunca fecha em silêncio (clique fora, ESC, X ou Cancelar) com dados preenchidos.
   const isDirty = formularioAlterado(form, inicial);
   const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
@@ -80,6 +85,7 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
     const validacao = validarCriarUsuario(form, null);
     if (!validacao.valido) {
       setErros(validacao.erros);
+      setFalhasEnvio(n => n + 1);
       return;
     }
 
@@ -91,6 +97,7 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
       const res = await criarUsuario(validacao.dados);
       criado = res.usuario;
     } catch (err) {
+      setFalhasEnvio(n => n + 1);
       setApiError(err?.message || 'Falha ao cadastrar usuário.');
       setLoading(false);
       return;
@@ -106,7 +113,7 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
 
   return (
     <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
-      <div className="modal-panel card" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="criar-usuario-titulo">
+      <div className="modal-panel card" ref={painelRef} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="criar-usuario-titulo">
         <div className="modal-header">
           <h2 className="modal-title" id="criar-usuario-titulo">Novo usuário</h2>
           <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">

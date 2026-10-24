@@ -143,6 +143,7 @@ export default function EquipeComissoesAba({ dataInicio, dataFim }) {
                   <tr key={item.usuario_id}>
                     <td>
                       <strong>{item.nome}</strong>
+                      {item.ativo === false && <span className="badge badge-danger" style={{ marginLeft: 'var(--space-2)' }}>Bloqueado</span>}
                     </td>
                     <td>
                       <span className={`role-badge role-badge--${item.cargo}`}>

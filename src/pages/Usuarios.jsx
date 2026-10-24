@@ -30,7 +30,7 @@ function extrairIniciais(nome) {
 }
 
 export default function Usuarios() {
-  const { addToast } = useToast();
+  const toast = useToast();
 
   const [abaAtiva, setAbaAtiva] = useState('usuarios'); // 'usuarios' | 'trilha'
   const [usuarios, setUsuarios] = useState([]);
@@ -62,24 +62,16 @@ export default function Usuarios() {
   }, [carregarUsuarios]);
 
   function handleUsuarioCriado(novoUsuario) {
-    addToast({
-      type: 'success',
-      title: 'Usuário cadastrado',
-      message: `Usuário "${novoUsuario.nome}" cadastrado com sucesso.`,
-    });
+    toast.success(`Usuário "${novoUsuario.nome}" cadastrado com sucesso.`);
     carregarUsuarios();
     setTrilhaSignal(s => s + 1);
   }
 
   function handleBloqueioConcluido(resultado) {
     const acao = resultado.ativo ? 'desbloqueado' : 'bloqueado';
-    addToast({
-      type: 'success',
-      title: `Usuário ${acao}`,
-      message: resultado.alterado
+    toast.success(resultado.alterado
         ? `Status do usuário "${resultado.nome}" alterado para ${acao}.`
-        : `O usuário "${resultado.nome}" já se encontrava ${acao}.`,
-    });
+        : `O usuário "${resultado.nome}" já se encontrava ${acao}.`);
     carregarUsuarios();
     setTrilhaSignal(s => s + 1);
   }

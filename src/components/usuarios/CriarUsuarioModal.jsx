@@ -85,15 +85,20 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
     setLoading(true);
     setApiError('');
 
+    let criado;
     try {
       const res = await criarUsuario(validacao.dados);
-      onSuccess?.(res.usuario);
-      onClose();
+      criado = res.usuario;
     } catch (err) {
       setApiError(err?.message || 'Falha ao cadastrar usuário.');
-    } finally {
       setLoading(false);
+      return;
     }
+
+    // Já gravou no backend: daqui em diante nada é "falha ao cadastrar".
+    setLoading(false);
+    onClose();
+    onSuccess?.(criado);
   }
 
   const semCargos = !carregandoCargos && cargos.length === 0;

@@ -49,18 +49,22 @@ export default function BloquearUsuarioModal({ open, usuario, onClose, onSuccess
     setLoading(true);
     setApiError('');
 
+    let resultado;
     try {
-      const res = await alterarBloqueioUsuario(usuario.id, {
+      resultado = await alterarBloqueioUsuario(usuario.id, {
         bloqueado: bloqueando,
         motivo: validacao.motivo,
       });
-      onSuccess?.(res);
-      onClose();
     } catch (err) {
       setApiError(err?.message || 'Falha ao alterar o status do usuário.');
-    } finally {
       setLoading(false);
+      return;
     }
+
+    // Já gravou no backend: daqui em diante nada é "falha".
+    setLoading(false);
+    onClose();
+    onSuccess?.(resultado);
   }
 
   return (

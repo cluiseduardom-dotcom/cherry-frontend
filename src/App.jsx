@@ -9,6 +9,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Venda from './pages/Venda';
 import Estoque from './pages/Estoque';
+import Transferencias from './pages/Transferencias';
+import MinhaMaleta from './pages/MinhaMaleta';
 import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
@@ -34,6 +36,8 @@ const ROUTE_COMPONENTS = {
   '/': Dashboard,
   '/venda': Venda,
   '/estoque': Estoque,
+  '/transferencias': Transferencias,
+  '/minha-maleta': MinhaMaleta,
   '/produtos': Produtos,
   '/produtos/:id/precos': PrecificacaoProduto,
   '/clientes': Clientes,

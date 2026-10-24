@@ -11,6 +11,20 @@ import {
   podeExecutarAcao,
 } from './access';
 
+describe('rotas de transferência de estoque', () => {
+  it('Transferências: admin e estoquista; vendedor não', () => {
+    expect(canAccessRoute('/transferencias', 'admin')).toBe(true);
+    expect(canAccessRoute('/transferencias', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/transferencias', 'vendedor')).toBe(false);
+  });
+
+  it('Minha maleta: só vendedor (e quem tem a capacidade de administrador)', () => {
+    expect(canAccessRoute('/minha-maleta', 'vendedor')).toBe(true);
+    expect(canAccessRoute('/minha-maleta', 'estoquista')).toBe(false);
+    expect(canAccessRoute('/minha-maleta', 'faturista')).toBe(false);
+  });
+});
+
 describe('canAccessRoute', () => {
   it('allows admin on every registered route', () => {
     for (const path of Object.keys(ALLOWED_ROLES_BY_PATH)) {

@@ -1,0 +1,493 @@
+/* =========================================================
+   PÁGINA DE COMISSÕES — ESTILOS E COMPONENTES
+   ========================================================= */
+
+.comissoes-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.comissoes-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* Filtro de datas */
+.comissoes-filtros-periodo {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.comissoes-campo-data {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.comissoes-data-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.comissoes-input-data {
+  padding: 6px 10px 6px 32px !important;
+  font-size: var(--font-size-sm) !important;
+  height: 36px;
+}
+
+.comissoes-btn-reset-data {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Abas */
+.comissoes-tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border-light);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.comissoes-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.comissoes-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  margin-bottom: -1px;
+}
+
+.comissoes-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.comissoes-tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Conteúdo da aba */
+.comissoes-aba-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* KPI Summary Cards */
+.comissoes-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.comissoes-kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border-left: 3px solid var(--color-border-light);
+}
+
+.comissoes-kpi-card--success {
+  border-left-color: var(--color-success);
+}
+
+.comissoes-kpi-card--warning {
+  border-left-color: var(--color-warning);
+}
+
+.comissoes-kpi-card--danger {
+  border-left-color: var(--color-danger);
+}
+
+.comissoes-kpi-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.comissoes-kpi-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.comissoes-kpi-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.comissoes-link-action {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.comissoes-link-action:hover {
+  opacity: 0.8;
+}
+
+/* Banners de erro e avisos */
+.comissoes-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.comissoes-alerta-info {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-warning-light);
+  color: #8c5b08;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(243, 163, 45, 0.25);
+}
+
+.comissoes-alerta-info p {
+  margin-top: 2px;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+/* Badges com ícones */
+.comissoes-badge-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Repasses Header & Pills */
+.comissoes-repasses-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.comissoes-status-pills {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.comissoes-status-pill {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border: 1.5px solid var(--color-border-light);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.comissoes-status-pill:hover {
+  border-color: var(--color-border-input);
+  color: var(--color-text-primary);
+}
+
+.comissoes-status-pill--active {
+  background: var(--color-primary-ultra, #fbf0f0);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Padrão da Empresa Card */
+.comissoes-padrao-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.comissoes-padrao-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.comissoes-padrao-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-ultra, #fbf0f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.comissoes-padrao-valor {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: 2px;
+}
+
+/* Modais de Comissões */
+.comissoes-modal {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.comissoes-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.comissoes-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.comissoes-modal-title {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.comissoes-modal-close {
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.comissoes-modal-body {
+  padding: var(--space-5);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.comissoes-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-subtle, #fafafa);
+}
+
+/* Resumo da comissão no histórico */
+.comissoes-historico-resumo {
+  background: var(--color-bg-subtle, #f9fafb);
+  border: 1px solid var(--color-border-light);
+}
+
+.comissoes-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-3);
+}
+
+.comissoes-resumo-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.comissoes-resumo-value {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 2px;
+}
+
+/* Timeline do histórico */
+.comissoes-timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.comissoes-timeline-title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.comissoes-timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-left: 12px;
+  border-left: 2px solid var(--color-border-light);
+  padding-left: var(--space-4);
+  gap: var(--space-4);
+}
+
+.comissoes-timeline-item {
+  position: relative;
+}
+
+.comissoes-timeline-marker {
+  position: absolute;
+  left: calc(-1 * var(--space-4) - 11px);
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comissoes-timeline-content {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.comissoes-timeline-header-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.comissoes-timeline-event-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.comissoes-timeline-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.comissoes-timeline-details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-xs);
+  flex-wrap: wrap;
+}
+
+.comissoes-timeline-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  border-top: 1px dashed var(--color-border-light);
+  padding-top: var(--space-2);
+}
+
+/* Opções de modo de edição de percentual */
+.comissoes-opcoes-modo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.comissoes-radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Loading & Paginação */
+.comissoes-loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-8);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.comissoes-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.comissoes-paginacao-botoes {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

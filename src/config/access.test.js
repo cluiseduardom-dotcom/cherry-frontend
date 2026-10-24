@@ -21,11 +21,12 @@ describe('canAccessRoute', () => {
     }
   });
 
-  it('allows vendedor on venda, produtos, clientes, historico', () => {
+  it('allows vendedor on venda, produtos, clientes, historico, comissoes', () => {
     expect(canAccessRoute('/venda', 'vendedor')).toBe(true);
     expect(canAccessRoute('/produtos', 'vendedor')).toBe(true);
     expect(canAccessRoute('/clientes', 'vendedor')).toBe(true);
     expect(canAccessRoute('/historico', 'vendedor')).toBe(true);
+    expect(canAccessRoute('/comissoes', 'vendedor')).toBe(true);
   });
 
   it('denies vendedor on estoque, configuracoes, relatorios, and financeiro routes', () => {
@@ -45,10 +46,11 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/compras', 'estoquista')).toBe(true);
   });
 
-  it('denies estoquista on clientes, configuracoes, and venda', () => {
+  it('denies estoquista on clientes, configuracoes, venda, and comissoes', () => {
     expect(canAccessRoute('/clientes', 'estoquista')).toBe(false);
     expect(canAccessRoute('/configuracoes', 'estoquista')).toBe(false);
     expect(canAccessRoute('/venda', 'estoquista')).toBe(false);
+    expect(canAccessRoute('/comissoes', 'estoquista')).toBe(false);
   });
 
   it('denies vendedor on compras (matches backend requireEstoquista policy)', () => {
@@ -99,6 +101,7 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/venda', 'faturista')).toBe(false);
     expect(canAccessRoute('/estoque', 'faturista')).toBe(false);
     expect(canAccessRoute('/relatorios', 'faturista')).toBe(false);
+    expect(canAccessRoute('/comissoes', 'faturista')).toBe(false);
   });
 
   it('evaluates capability-based routes (/cancelamentos and /configuracoes/cargos)', () => {

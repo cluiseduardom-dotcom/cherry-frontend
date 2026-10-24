@@ -18,6 +18,7 @@ import {
   Building2,
   AlertTriangle,
   PackageX,
+  BadgePercent,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -47,6 +48,7 @@ const NAV_META_BY_PATH = {
   '/fornecedores':     { icon: Building2,       label: 'Fornecedores',        section: 'principal' },
   '/compras':          { icon: ShoppingCart,    label: 'Compras',             section: 'principal' },
   '/historico':        { icon: History,         label: 'Histórico',           section: 'gestao' },
+  '/comissoes':        { icon: BadgePercent,    label: 'Comissões',           section: 'gestao' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios',          section: 'gestao' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar',      section: 'gestao' },
   '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber',    section: 'gestao' },

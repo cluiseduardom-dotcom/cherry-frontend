@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Plus, AlertTriangle, Package, Filter } from 'lucide-react';
+import { Search, Plus, AlertTriangle, Package, MapPin } from 'lucide-react';
 import { listarProdutos } from '../services/produtos';
 import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
+import NovoLocalModal from '../components/NovoLocalModal';
+import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
+import { rotuloDoLocal, filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
 import { useToast } from '../context/ToastContext';
 import { corDoProduto as colorForProduto } from '../theme/themes';
 import './Estoque.css';
@@ -36,6 +39,7 @@ function StockBar({ value, max = 20 }) {
 export default function Estoque() {
   const { user } = useAuth();
   const podeMovimentar = podeExecutarAcao(user?.role, ACTIONS.MOVIMENTAR_ESTOQUE);
+  const podeCriarLocal = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
 
   const [produtos, setProdutos] = useState([]);
   const [alertas, setAlertas] = useState([]);
@@ -46,6 +50,16 @@ export default function Estoque() {
   const filter = normalizarFiltro(searchParams.get('filtro'));
   const [modalOpen, setModalOpen] = useState(false);
   const toast = useToast();
+
+  // Estoque por local: '' = visão geral (total do produto, como sempre); com um local escolhido
+  // a tela mostra o saldo daquele local (Central, Maleta ou Consignado).
+  const [locais, setLocais] = useState([]);
+  const [localId, setLocalId] = useState('');
+  const [saldosLocal, setSaldosLocal] = useState([]);
+  const [loadingLocal, setLoadingLocal] = useState(false);
+  const [erroLocal, setErroLocal] = useState('');
+  const [novoLocalOpen, setNovoLocalOpen] = useState(false);
+  const localSelecionado = locais.find(l => String(l.id) === localId) ?? null;
 
   // UX-04 (Issue #48): a URL é a fonte única de verdade do filtro — tanto o
   // deeplink da Sidebar (/estoque?filtro=baixo) quanto o clique manual nos
@@ -92,6 +106,38 @@ export default function Estoque() {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  // A lista de locais é complementar: se falhar, a tela segue funcionando na visão geral.
+  function carregarLocais() {
+    return listarLocais()
+      .then(lista => setLocais(Array.isArray(lista) ? lista : []))
+      .catch(() => setLocais([]));
+  }
+
+  useEffect(() => { carregarLocais(); }, []);
+
+  useEffect(() => {
+    if (!localId) return undefined;
+
+    let cancelled = false;
+    setLoadingLocal(true);
+    setErroLocal('');
+
+    saldosDoLocal(localId)
+      .then(dados => { if (!cancelled) setSaldosLocal(dados.items); })
+      .catch(err => { if (!cancelled) { setSaldosLocal([]); setErroLocal(err.message); } })
+      .finally(() => { if (!cancelled) setLoadingLocal(false); });
+
+    return () => { cancelled = true; };
+  }, [localId]);
+
+  const saldosFiltrados = filtrarSaldos(saldosLocal, search);
+
+  function handleLocalCriado(local) {
+    setNovoLocalOpen(false);
+    carregarLocais();
+    toast.success(`Local "${rotuloDoLocal(local)}" criado.`);
+  }
 
   const filtered = produtos.filter(p => {
     const term = search.toLowerCase();
@@ -144,16 +190,24 @@ export default function Estoque() {
           <h1 className="page-title">Estoque</h1>
           <p className="page-subtitle">Controle de inventário e disponibilidade</p>
         </div>
-        {podeMovimentar && (
-          <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
-            <Plus size={16} />
-            Entrada de Estoque
-          </button>
-        )}
+        <div className="estoque-header-actions">
+          {podeCriarLocal && (
+            <button className="btn btn-secondary" onClick={() => setNovoLocalOpen(true)}>
+              <MapPin size={16} />
+              Novo local
+            </button>
+          )}
+          {podeMovimentar && (
+            <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
+              <Plus size={16} />
+              Entrada de Estoque
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Summary cards */}
-      <div className="estoque-summary">
+      {!localId && <div className="estoque-summary">
         <div className="estoque-summary-card card card-padding">
           <div className="estoque-summary-icon" style={{ background: 'var(--color-primary-ultra)', color: 'var(--color-primary)' }}>
             <Package size={20} />
@@ -190,7 +244,30 @@ export default function Estoque() {
             <div className="estoque-summary-label">SKUs ativos</div>
           </div>
         </div>
-      </div>
+      </div>}
+
+      {localId && (
+        <div className="estoque-summary">
+          <div className="estoque-summary-card card card-padding">
+            <div className="estoque-summary-icon" style={{ background: 'var(--color-primary-ultra)', color: 'var(--color-primary)' }}>
+              <MapPin size={20} />
+            </div>
+            <div>
+              <div className="estoque-summary-value">{totalDeUnidades(saldosLocal)}</div>
+              <div className="estoque-summary-label">Itens em {rotuloDoLocal(localSelecionado)}</div>
+            </div>
+          </div>
+          <div className="estoque-summary-card card card-padding">
+            <div className="estoque-summary-icon" style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+              <Package size={20} />
+            </div>
+            <div>
+              <div className="estoque-summary-value">{saldosLocal.length}</div>
+              <div className="estoque-summary-label">SKUs no local</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="estoque-filters">
@@ -204,7 +281,18 @@ export default function Estoque() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <div className="estoque-filter-pills">
+        {locais.length > 0 && (
+          <select
+            className="input-field estoque-local-select"
+            value={localId}
+            onChange={e => setLocalId(e.target.value)}
+            aria-label="Local de estoque"
+          >
+            <option value="">Todos os locais (total)</option>
+            {locais.map(l => <option key={l.id} value={l.id}>{rotuloDoLocal(l)}</option>)}
+          </select>
+        )}
+        {!localId && <div className="estoque-filter-pills">
           {[
             { key: 'todos', label: 'Todos' },
             { key: 'baixo', label: 'Estoque baixo' },
@@ -218,23 +306,61 @@ export default function Estoque() {
               {f.label}
             </button>
           ))}
-        </div>
+        </div>}
       </div>
 
-      {loading && (
+      {localId && loadingLocal && (
+        <div className="empty-state"><p className="text-sm text-secondary">Carregando saldo do local...</p></div>
+      )}
+
+      {localId && !loadingLocal && erroLocal && (
+        <div className="empty-state">
+          <div className="empty-state-title">Não foi possível carregar o saldo do local</div>
+          <p className="text-sm text-secondary">{erroLocal}</p>
+        </div>
+      )}
+
+      {localId && !loadingLocal && !erroLocal && (
+        <div className="card">
+          <table className="estoque-table">
+            <thead>
+              <tr><th>Produto</th><th>SKU</th><th>Saldo no local</th></tr>
+            </thead>
+            <tbody>
+              {saldosFiltrados.map(i => (
+                <tr key={i.produto_id} className="estoque-row">
+                  <td><span className="estoque-product-name">{i.nome}</span></td>
+                  <td><span className="estoque-sku">{i.sku || '—'}</span></td>
+                  <td><strong>{i.saldo}</strong></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {saldosFiltrados.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon"><Package size={24} /></div>
+              <div className="empty-state-title">
+                {saldosLocal.length === 0 ? 'Nenhum produto neste local' : 'Nenhum produto encontrado'}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!localId && loading && (
         <div className="empty-state">
           <p className="text-sm text-secondary">Carregando estoque...</p>
         </div>
       )}
 
-      {!loading && error && (
+      {!localId && !loading && error && (
         <div className="empty-state">
           <div className="empty-state-title">Não foi possível carregar o estoque</div>
           <p className="text-sm text-secondary">{error}</p>
         </div>
       )}
 
-      {!loading && !error && (
+      {!localId && !loading && !error && (
         /* Table */
         <div className="card">
           <table className="estoque-table">
@@ -298,6 +424,15 @@ export default function Estoque() {
             </div>
           )}
         </div>
+      )}
+
+      {podeCriarLocal && (
+        <NovoLocalModal
+          open={novoLocalOpen}
+          locais={locais}
+          onClose={() => setNovoLocalOpen(false)}
+          onSaved={handleLocalCriado}
+        />
       )}
 
       {podeMovimentar && (

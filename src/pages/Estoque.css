@@ -217,3 +217,13 @@
     }
   }
 }
+
+.estoque-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.estoque-local-select {
+  max-width: 260px;
+}

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { criarUsuario, listarCargosAtribuiveis } from '../../services/usuarios';
-import { validarCriarUsuario } from '../../utils/usuarios';
+import { validarCriarUsuario, DADOS_VAZIOS } from '../../utils/usuarios';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
+import DadosCadastraisCampos from './DadosCadastraisCampos';
 import '../ProductModal.css';
 import './CamposFormulario.css';
 
-const FORM_VAZIO = { nome: '', email: '', senha: '', confirmacaoSenha: '', papel: '' };
+const FORM_VAZIO = { nome: '', email: '', senha: '', confirmacaoSenha: '', papel: '', ...DADOS_VAZIOS };
 
 function rotuloDoCargo(c) {
   return c.em_escada ? `${c.rotulo} (nível ${c.nivel})` : `${c.rotulo} (operacional)`;
@@ -124,6 +125,8 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
               </div>
             )}
 
+            <div className="modal-form-section">
+              <h3 className="modal-form-section-title">Acesso</h3>
             <div className="modal-form-grid">
               <div className="input-wrapper modal-form-span-2">
                 <label className="input-label" htmlFor="usuario-nome">Nome completo *</label>
@@ -208,6 +211,15 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
                 {erros.confirmacaoSenha && <span className="campo-erro">{erros.confirmacaoSenha}</span>}
               </div>
             </div>
+            </div>
+
+            <DadosCadastraisCampos
+              prefixo="usuario"
+              form={form}
+              erros={erros}
+              onChange={atualizar}
+              disabled={loading}
+            />
           </div>
 
           <div className="modal-footer">

@@ -7,6 +7,11 @@ import {
   formatarAcaoEvento,
   validarCriarUsuario,
   validarBloqueioUsuario,
+  validarDadosCadastrais,
+  dadosAlterados,
+  dadosParaFormulario,
+  dadosParaCriacao,
+  DADOS_VAZIOS,
 } from './usuarios';
 
 describe('utils/usuarios', () => {
@@ -100,6 +105,7 @@ describe('utils/usuarios', () => {
         senha: 'senha123',
         confirmacaoSenha: 'senha123',
         papel: 'vendedor',
+        telefone: '(11) 91234-5678',
       }, admin);
 
       expect(res.valido).toBe(true);
@@ -108,6 +114,7 @@ describe('utils/usuarios', () => {
         email: 'carlos@empresa.com',
         senha: 'senha123',
         papel: 'vendedor',
+        telefone: '11912345678',
       });
       expect(res.dados.confirmacaoSenha).toBeUndefined();
     });
@@ -176,6 +183,59 @@ describe('utils/usuarios', () => {
       const longo = validarBloqueioUsuario('a'.repeat(301));
       expect(longo.valido).toBe(false);
       expect(longo.erro).toBe('Motivo muito longo');
+    });
+  });
+
+  describe('dados cadastrais', () => {
+    const base = { ...DADOS_VAZIOS, telefone: '(11) 91234-5678' };
+
+    it('exige telefone e aceita o restante vazio', () => {
+      expect(validarDadosCadastrais(DADOS_VAZIOS).erros.telefone).toBeDefined();
+      expect(validarDadosCadastrais({ ...DADOS_VAZIOS, telefone: '123' }).erros.telefone).toBeDefined();
+      const ok = validarDadosCadastrais(base);
+      expect(ok.valido).toBe(true);
+      expect(dadosParaCriacao(ok.dados)).toEqual({ telefone: '11912345678' });
+    });
+
+    it('normaliza máscaras para dígitos e UF para maiúscula', () => {
+      const res = validarDadosCadastrais({ ...base, cpf: '529.982.247-25', cep: '01001-000', uf: 'sp' });
+      expect(res.valido).toBe(true);
+      expect(res.dados).toMatchObject({ cpf: '52998224725', cep: '01001000', uf: 'SP' });
+    });
+
+    it('recusa CPF inválido, CEP curto, UF fora da lista e datas fora do intervalo', () => {
+      const res = validarDadosCadastrais({
+        ...base, cpf: '111.111.111-11', cep: '123', uf: 'XX',
+        data_nascimento: '2999-01-01', data_admissao: '1900-01-01',
+      });
+      expect(Object.keys(res.erros).sort()).toEqual(['cep', 'cpf', 'data_admissao', 'data_nascimento', 'uf']);
+    });
+
+    it('recusa textos acima do limite', () => {
+      expect(validarDadosCadastrais({ ...base, observacoes: 'x'.repeat(1001) }).erros.observacoes).toBeDefined();
+      expect(validarDadosCadastrais({ ...base, numero: 'x'.repeat(21) }).erros.numero).toBeDefined();
+    });
+
+    it('dadosParaFormulario converte null em vazio', () => {
+      const form = dadosParaFormulario({ telefone: '11912345678', cpf: null, uf: 'SP' });
+      expect(form).toMatchObject({ telefone: '11912345678', cpf: '', uf: 'SP', observacoes: '' });
+    });
+
+    it('dadosAlterados manda só o que mudou e limpa com null', () => {
+      const inicial = dadosParaFormulario({ telefone: '11912345678', cpf: '52998224725', cidade: 'Santos' });
+      const atual = validarDadosCadastrais({ ...inicial, telefone: '(11) 91234-5678', cidade: '', observacoes: ' Tarde ' });
+
+      expect(dadosAlterados(atual.dados, inicial)).toEqual({ cidade: null, observacoes: 'Tarde' });
+    });
+
+    it('dadosAlterados vazio quando nada mudou (inclusive só a máscara)', () => {
+      const inicial = dadosParaFormulario({ telefone: '11912345678', cpf: '52998224725' });
+      const atual = validarDadosCadastrais({ ...inicial, cpf: '529.982.247-25' });
+      expect(dadosAlterados(atual.dados, inicial)).toEqual({});
+    });
+
+    it('formata a ação editar na trilha', () => {
+      expect(formatarAcaoEvento('editar').label).toBe('Edição de dados');
     });
   });
 });

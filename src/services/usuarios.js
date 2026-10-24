@@ -11,17 +11,45 @@ export async function listarCargosAtribuiveis() {
   return body.data;
 }
 
-export async function criarUsuario({ nome, email, senha, papel }) {
+const CAMPOS_DADOS = [
+  'telefone', 'cpf', 'data_nascimento', 'cep', 'logradouro', 'numero', 'complemento',
+  'bairro', 'cidade', 'uf', 'data_admissao', 'observacoes',
+];
+
+// Só os campos de dados cadastrais que o endpoint conhece (nada além disso vai no corpo).
+function somenteCamposDados(origem) {
+  return Object.fromEntries(
+    CAMPOS_DADOS.filter(c => origem?.[c] !== undefined).map(c => [c, origem[c]])
+  );
+}
+
+export async function criarUsuario({ nome, email, senha, papel, ...dados }) {
   const payload = {
     nome: String(nome).trim(),
     email: String(email).trim(),
     senha: String(senha),
     papel: String(papel).trim(),
+    ...somenteCamposDados(dados),
   };
 
   const body = await apiFetch('/usuarios', {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+  return body.data;
+}
+
+// Detalhe com dados cadastrais (único endpoint que devolve CPF).
+export async function obterUsuario(id) {
+  const body = await apiFetch(`/usuarios/${id}`);
+  return body.data;
+}
+
+// Edição parcial: manda só os campos informados; null limpa um campo opcional.
+export async function editarDadosUsuario(id, dados) {
+  const body = await apiFetch(`/usuarios/${id}/dados`, {
+    method: 'PATCH',
+    body: JSON.stringify(somenteCamposDados(dados)),
   });
   return body.data;
 }

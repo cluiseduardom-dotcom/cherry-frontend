@@ -15,3 +15,13 @@ export function formatarData(valor) {
 
   return data.toLocaleDateString('pt-BR');
 }
+
+// Data e hora (timestamp ISO do backend) no fuso do navegador; ausente ou inválido vira "—".
+export function formatarDataHora(valor) {
+  if (!valor) return '—';
+
+  const data = new Date(valor);
+  if (Number.isNaN(data.getTime())) return '—';
+
+  return data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}

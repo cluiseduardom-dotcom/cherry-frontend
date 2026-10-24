@@ -22,6 +22,8 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/compras/recebimentos': ['admin', 'estoquista'],
   '/compras/recebimentos/:id': ['admin', 'estoquista'],
   '/historico': ['admin', 'vendedor'],
+  '/comissoes': ['admin', 'vendedor'],
+  '/usuarios': ['admin'],
   '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
   '/contas-pagar': ['admin'],
@@ -36,6 +38,7 @@ export const ALLOWED_ROLES_BY_PATH = {
 export const REQUIRED_CAPABILITIES_BY_PATH = {
   '/cancelamentos': ['ver_cancelamentos'],
   '/configuracoes/cargos': ['gerir_cargos', 'conceder_admin'],
+  '/usuarios': ['gerir_usuarios'],
 };
 
 export function podeComCapacidade(userOrCapacidades, capacidadeOuCapacidades) {

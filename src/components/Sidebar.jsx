@@ -6,6 +6,7 @@ import {
   Package,
   Tag,
   Users,
+  UserCog,
   History,
   BarChart2,
   Settings,
@@ -18,6 +19,7 @@ import {
   Building2,
   AlertTriangle,
   PackageX,
+  BadgePercent,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -47,6 +49,8 @@ const NAV_META_BY_PATH = {
   '/fornecedores':     { icon: Building2,       label: 'Fornecedores',        section: 'principal' },
   '/compras':          { icon: ShoppingCart,    label: 'Compras',             section: 'principal' },
   '/historico':        { icon: History,         label: 'Histórico',           section: 'gestao' },
+  '/comissoes':        { icon: BadgePercent,    label: 'Comissões',           section: 'gestao' },
+  '/usuarios':         { icon: UserCog,         label: 'Usuários',            section: 'gestao' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios',          section: 'gestao' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar',      section: 'gestao' },
   '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber',    section: 'gestao' },
@@ -89,7 +93,7 @@ export default function Sidebar() {
   const [estoqueAlertas, setEstoqueAlertas] = useState([]);
 
   useEffect(() => {
-    if (!canAccessRoute('/estoque', user?.role)) {
+    if (!canAccessRoute('/estoque', user)) {
       setEstoqueAlertas([]);
       return undefined;
     }
@@ -104,7 +108,7 @@ export default function Sidebar() {
       });
 
     return () => { cancelled = true; };
-  }, [user?.role]);
+  }, [user]);
 
   const alertasEstoque = contarAlertasEstoque(estoqueAlertas);
 
@@ -113,7 +117,7 @@ export default function Sidebar() {
     navigate('/login', { replace: true });
   }
 
-  const visibleItems = menuItems.filter(({ path }) => canAccessRoute(path, user?.role));
+  const visibleItems = menuItems.filter(({ path }) => canAccessRoute(path, user));
   const principalItems = visibleItems.filter(({ section }) => section === 'principal');
   const gestaoItems = visibleItems.filter(({ section }) => section === 'gestao');
 

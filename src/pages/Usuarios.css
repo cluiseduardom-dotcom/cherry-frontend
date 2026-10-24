@@ -1,0 +1,121 @@
+/* Gestão de usuários — mesmo padrão visual das demais telas (cartões, tabela do Histórico). */
+.usuarios-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.usuarios-tabs {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.usuarios-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.usuarios-tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.usuarios-tab-btn--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.usuarios-filtros-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.usuarios-busca-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+}
+
+.usuarios-busca-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.usuarios-busca-input {
+  width: 100%;
+  padding-left: 36px;
+}
+
+.usuarios-filtro-status {
+  width: auto;
+  min-width: 190px;
+}
+
+
+.usuarios-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.usuarios-user-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.usuarios-user-nome {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.usuarios-user-email {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.usuarios-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.usuarios-motivo-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  cursor: help;
+  text-align: right;
+  max-width: 260px;
+}

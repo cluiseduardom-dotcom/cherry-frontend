@@ -1,4 +1,20 @@
-import { ArrowLeft, ArrowRight, BarChart2, History, Settings, Tag, Users, Wallet, HandCoins, Target, Receipt, Building2, ShoppingCart } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart2,
+  History,
+  Settings,
+  Tag,
+  Users,
+  UserCog,
+  Wallet,
+  HandCoins,
+  Target,
+  Receipt,
+  Building2,
+  ShoppingCart,
+  BadgePercent,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/access';
@@ -10,6 +26,8 @@ const ITEMS = [
   { path: '/fornecedores', label: 'Fornecedores', sub: 'Cadastro e relacionamento de compras', icon: Building2 },
   { path: '/compras', label: 'Compras', sub: 'Entradas, custos e fornecedores', icon: ShoppingCart },
   { path: '/historico', label: 'Histórico', sub: 'Consultar vendas', icon: History },
+  { path: '/comissoes', label: 'Comissões', sub: 'Minhas comissões, equipe e repasses', icon: BadgePercent },
+  { path: '/usuarios', label: 'Usuários', sub: 'Gerenciar equipe e acessos', icon: UserCog },
   { path: '/relatorios', label: 'Relatórios', sub: 'Análise de dados', icon: BarChart2 },
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },
   { path: '/contas-receber', label: 'Contas a Receber', sub: 'Acompanhar recebimentos', icon: HandCoins },
@@ -20,7 +38,7 @@ const ITEMS = [
 
 export default function Mais() {
   const { user } = useAuth();
-  const items = ITEMS.filter(item => canAccessRoute(item.path, user?.role));
+  const items = ITEMS.filter(item => canAccessRoute(item.path, user));
 
   return (
     <div className="page-content mais-page">

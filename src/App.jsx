@@ -18,6 +18,8 @@ import CompraDetalhe from './pages/CompraDetalhe';
 import Recebimentos from './pages/Recebimentos';
 import RecebimentoDetalhe from './pages/RecebimentoDetalhe';
 import Historico from './pages/Historico';
+import Comissoes from './pages/Comissoes';
+import Usuarios from './pages/Usuarios';
 import Mais from './pages/Mais';
 import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
@@ -41,6 +43,8 @@ const ROUTE_COMPONENTS = {
   '/compras/recebimentos': Recebimentos,
   '/compras/recebimentos/:id': RecebimentoDetalhe,
   '/historico': Historico,
+  '/comissoes': Comissoes,
+  '/usuarios': Usuarios,
   '/mais': Mais,
   '/relatorios': Relatorios,
   '/contas-pagar': ContasPagar,

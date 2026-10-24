@@ -40,6 +40,7 @@ const sections = [
     title: 'Empresa',
     icon: Globe,
     items: [
+      { label: 'Gestão de usuários',    sub: 'Equipe, acessos e auditoria', path: '/usuarios' },
       { label: 'Dados da empresa',      sub: 'CNPJ, endereço e contato' },
       { label: 'Plano e assinatura',    sub: 'Informações de assinatura ainda não configuradas' },
     ],

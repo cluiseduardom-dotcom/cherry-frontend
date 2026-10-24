@@ -6,6 +6,7 @@ import {
   Package,
   Tag,
   Users,
+  UserCog,
   History,
   BarChart2,
   Settings,
@@ -41,7 +42,7 @@ function initials(name) {
 // cada path; aqui só decidimos como mostrar as rotas que o papel pode ver.
 const NAV_META_BY_PATH = {
   '/':                 { icon: LayoutDashboard, label: 'Dashboard',           section: 'principal' },
-  '/venda':            { icon: ShoppingCart,    label: 'Venda',               section: 'principal' },
+  '/venda':            { icon: ShoppingCart,    label: 'Nova Venda',          section: 'principal' },
   '/estoque':          { icon: Package,         label: 'Estoque',             section: 'principal' },
   '/produtos':         { icon: Tag,             label: 'Produtos',            section: 'principal' },
   '/clientes':         { icon: Users,           label: 'Clientes',            section: 'principal' },
@@ -49,6 +50,7 @@ const NAV_META_BY_PATH = {
   '/compras':          { icon: ShoppingCart,    label: 'Compras',             section: 'principal' },
   '/historico':        { icon: History,         label: 'Histórico',           section: 'gestao' },
   '/comissoes':        { icon: BadgePercent,    label: 'Comissões',           section: 'gestao' },
+  '/usuarios':         { icon: UserCog,         label: 'Usuários',            section: 'gestao' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios',          section: 'gestao' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar',      section: 'gestao' },
   '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber',    section: 'gestao' },
@@ -91,7 +93,7 @@ export default function Sidebar() {
   const [estoqueAlertas, setEstoqueAlertas] = useState([]);
 
   useEffect(() => {
-    if (!canAccessRoute('/estoque', user?.role)) {
+    if (!canAccessRoute('/estoque', user)) {
       setEstoqueAlertas([]);
       return undefined;
     }
@@ -106,7 +108,7 @@ export default function Sidebar() {
       });
 
     return () => { cancelled = true; };
-  }, [user?.role]);
+  }, [user]);
 
   const alertasEstoque = contarAlertasEstoque(estoqueAlertas);
 
@@ -115,7 +117,7 @@ export default function Sidebar() {
     navigate('/login', { replace: true });
   }
 
-  const visibleItems = menuItems.filter(({ path }) => canAccessRoute(path, user?.role));
+  const visibleItems = menuItems.filter(({ path }) => canAccessRoute(path, user));
   const principalItems = visibleItems.filter(({ section }) => section === 'principal');
   const gestaoItems = visibleItems.filter(({ section }) => section === 'gestao');
 

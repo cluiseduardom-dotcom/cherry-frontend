@@ -37,6 +37,7 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/contas-receber', 'vendedor')).toBe(false);
     expect(canAccessRoute('/ponto-equilibrio', 'vendedor')).toBe(false);
     expect(canAccessRoute('/despesas-fixas', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/usuarios', 'vendedor')).toBe(false);
   });
 
   it('allows estoquista on estoque, produtos, fornecedores and compras', () => {
@@ -51,6 +52,7 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/configuracoes', 'estoquista')).toBe(false);
     expect(canAccessRoute('/venda', 'estoquista')).toBe(false);
     expect(canAccessRoute('/comissoes', 'estoquista')).toBe(false);
+    expect(canAccessRoute('/usuarios', 'estoquista')).toBe(false);
   });
 
   it('denies vendedor on compras (matches backend requireEstoquista policy)', () => {
@@ -102,6 +104,7 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/estoque', 'faturista')).toBe(false);
     expect(canAccessRoute('/relatorios', 'faturista')).toBe(false);
     expect(canAccessRoute('/comissoes', 'faturista')).toBe(false);
+    expect(canAccessRoute('/usuarios', 'faturista')).toBe(false);
   });
 
   it('evaluates capability-based routes (/cancelamentos and /configuracoes/cargos)', () => {
@@ -123,6 +126,23 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/configuracoes/cargos', userComConcederAdmin)).toBe(true);
     expect(canAccessRoute('/configuracoes/cargos', userComOutraCapacidade)).toBe(false);
     expect(canAccessRoute('/configuracoes/cargos', 'admin')).toBe(true);
+  });
+
+  it('evaluates access to /usuarios (admin or user with gerir_usuarios)', () => {
+    expect(ALLOWED_ROLES_BY_PATH['/usuarios']).toEqual(['admin']);
+    expect(REQUIRED_CAPABILITIES_BY_PATH['/usuarios']).toEqual(['gerir_usuarios']);
+
+    expect(canAccessRoute('/usuarios', 'admin')).toBe(true);
+    expect(canAccessRoute('/usuarios', { role: 'admin' })).toBe(true);
+
+    const userGerente = { role: 'vendedor', cargo: 'gerente', capacidades: ['gerir_usuarios'] };
+    expect(canAccessRoute('/usuarios', userGerente)).toBe(true);
+
+    const userVendedorComum = { role: 'vendedor', cargo: 'vendedor', capacidades: [] };
+    expect(canAccessRoute('/usuarios', userVendedorComum)).toBe(false);
+    expect(canAccessRoute('/usuarios', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/usuarios', 'estoquista')).toBe(false);
+    expect(canAccessRoute('/usuarios', 'faturista')).toBe(false);
   });
 
   it('denies any role on an unregistered path (fail-closed default)', () => {

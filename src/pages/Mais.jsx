@@ -6,6 +6,7 @@ import {
   Settings,
   Tag,
   Users,
+  UserCog,
   Wallet,
   HandCoins,
   Target,
@@ -26,6 +27,7 @@ const ITEMS = [
   { path: '/compras', label: 'Compras', sub: 'Entradas, custos e fornecedores', icon: ShoppingCart },
   { path: '/historico', label: 'Histórico', sub: 'Consultar vendas', icon: History },
   { path: '/comissoes', label: 'Comissões', sub: 'Minhas comissões, equipe e repasses', icon: BadgePercent },
+  { path: '/usuarios', label: 'Usuários', sub: 'Gerenciar equipe e acessos', icon: UserCog },
   { path: '/relatorios', label: 'Relatórios', sub: 'Análise de dados', icon: BarChart2 },
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },
   { path: '/contas-receber', label: 'Contas a Receber', sub: 'Acompanhar recebimentos', icon: HandCoins },
@@ -36,7 +38,7 @@ const ITEMS = [
 
 export default function Mais() {
   const { user } = useAuth();
-  const items = ITEMS.filter(item => canAccessRoute(item.path, user?.role));
+  const items = ITEMS.filter(item => canAccessRoute(item.path, user));
 
   return (
     <div className="page-content mais-page">

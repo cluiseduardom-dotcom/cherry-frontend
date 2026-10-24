@@ -1,0 +1,112 @@
+.usuarios-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.usuarios-tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border-color, #e9ecef);
+  margin-bottom: var(--space-2);
+}
+
+.usuarios-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.usuarios-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.usuarios-tab-btn--active {
+  color: var(--color-primary, #e6004d);
+  border-bottom-color: var(--color-primary, #e6004d);
+  font-weight: 600;
+}
+
+.usuarios-filtros-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.usuarios-busca-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+  max-width: 400px;
+}
+
+.usuarios-busca-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.usuarios-busca-input {
+  padding-left: 36px !important;
+}
+
+.usuarios-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-secondary, #f1f3f5);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color, #dee2e6);
+}
+
+.usuarios-user-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.usuarios-user-nome {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.usuarios-user-email {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.usuarios-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.usuarios-motivo-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: help;
+}

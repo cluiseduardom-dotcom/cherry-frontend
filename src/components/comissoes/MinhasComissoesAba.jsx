@@ -5,11 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   DollarSign,
-  TrendingUp,
-  Clock,
-  Ban,
-  HandCoins,
-  CheckCircle2,
 } from 'lucide-react';
 import { listarMinhasComissoes } from '../../services/comissoes';
 import { formatarMoeda } from '../../utils/mascaras';

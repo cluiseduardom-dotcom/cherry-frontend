@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, AlertTriangle, Percent, Edit2, ShieldAlert } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Percent, Edit2 } from 'lucide-react';
 import { obterPercentuais } from '../../services/comissoes';
 import { formatarPercentual } from '../../utils/formatarComissao';
 import { ROLE_LABEL } from '../../config/papeis';

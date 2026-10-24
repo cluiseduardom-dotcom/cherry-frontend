@@ -42,7 +42,7 @@ function initials(name) {
 // cada path; aqui só decidimos como mostrar as rotas que o papel pode ver.
 const NAV_META_BY_PATH = {
   '/':                 { icon: LayoutDashboard, label: 'Dashboard',           section: 'principal' },
-  '/venda':            { icon: ShoppingCart,    label: 'Nova Venda',          section: 'principal' },
+  '/venda':            { icon: ShoppingCart,    label: 'Venda',               section: 'principal' },
   '/estoque':          { icon: Package,         label: 'Estoque',             section: 'principal' },
   '/produtos':         { icon: Tag,             label: 'Produtos',            section: 'principal' },
   '/clientes':         { icon: Users,           label: 'Clientes',            section: 'principal' },

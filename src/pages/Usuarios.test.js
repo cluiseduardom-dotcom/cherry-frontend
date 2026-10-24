@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatarCargo,
-  formatarDataHora,
-  formatarAcaoEvento,
   cargosPermitidosParaCriacao,
   validarCriarUsuario,
   validarBloqueioUsuario,

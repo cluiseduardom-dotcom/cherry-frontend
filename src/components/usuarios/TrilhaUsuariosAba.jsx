@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { History, RefreshCw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { listarEventosUsuarios } from '../../services/usuarios';
-import { formatarCargo, formatarDataHora, formatarAcaoEvento } from '../../utils/usuarios';
+import { formatarCargo, formatarDataHora, formatarAcaoEvento, rotuloDeCampoDados } from '../../utils/usuarios';
 
 export default function TrilhaUsuariosAba({ refreshSignal }) {
   const [eventos, setEventos] = useState([]);
@@ -38,7 +38,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
         <div>
           <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>Trilha de auditoria</h3>
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-            Histórico completo de cadastros, bloqueios e desbloqueios
+            Histórico completo de cadastros, edições de dados, bloqueios e desbloqueios
           </p>
         </div>
         <button
@@ -67,7 +67,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
           <History size={32} style={{ color: 'var(--color-text-secondary)', margin: '0 auto var(--space-2)' }} />
           <p style={{ fontWeight: 600, margin: 0 }}>Nenhum evento registrado</p>
           <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
-            Ações de criação e bloqueio de usuários aparecerão nesta trilha.
+            Ações de criação, edição e bloqueio de usuários aparecerão nesta trilha.
           </p>
         </div>
       ) : (
@@ -81,7 +81,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
                   <th>Usuário alvo</th>
                   <th>Cargo do alvo</th>
                   <th>Executado por</th>
-                  <th>Motivo</th>
+                  <th>Motivo / Campos alterados</th>
                 </tr>
               </thead>
               <tbody>
@@ -108,8 +108,10 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
                       <td style={{ fontSize: '0.85rem' }}>
                         {ev.executado_por_nome || `ID #${ev.executado_por}`}
                       </td>
-                      <td style={{ fontSize: '0.85rem', color: ev.motivo ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', maxWidth: 260 }}>
-                        {ev.motivo || '—'}
+                      <td style={{ fontSize: '0.85rem', color: (ev.motivo || ev.campos?.length) ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', maxWidth: 260 }}>
+                        {ev.acao === 'editar' && Array.isArray(ev.campos) && ev.campos.length > 0
+                          ? ev.campos.map(rotuloDeCampoDados).join(', ')
+                          : ev.motivo || '—'}
                       </td>
                     </tr>
                   );

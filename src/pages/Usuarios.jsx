@@ -7,13 +7,17 @@ import {
   Search,
   History,
   Lock,
+  Pencil,
   RefreshCw,
   Loader2,
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { listarUsuarios } from '../services/usuarios';
 import { formatarCargo, formatarDataHora } from '../utils/usuarios';
+import { aplicarMascaraTelefone } from '../utils/mascaras';
 import CriarUsuarioModal from '../components/usuarios/CriarUsuarioModal';
+import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
 import BloquearUsuarioModal from '../components/usuarios/BloquearUsuarioModal';
 import TrilhaUsuariosAba from '../components/usuarios/TrilhaUsuariosAba';
 import './Usuarios.css';
@@ -31,6 +35,8 @@ function extrairIniciais(nome) {
 
 export default function Usuarios() {
   const toast = useToast();
+  const { user } = useAuth();
+  const usuarioLogadoId = user?.id;
 
   const [abaAtiva, setAbaAtiva] = useState('usuarios'); // 'usuarios' | 'trilha'
   const [usuarios, setUsuarios] = useState([]);
@@ -42,6 +48,7 @@ export default function Usuarios() {
 
   const [modalCriarAberto, setModalCriarAberto] = useState(false);
   const [usuarioParaBloqueio, setUsuarioParaBloqueio] = useState(null);
+  const [usuarioParaEdicao, setUsuarioParaEdicao] = useState(null);
   const [trilhaSignal, setTrilhaSignal] = useState(0);
 
   const carregarUsuarios = useCallback(async () => {
@@ -63,6 +70,15 @@ export default function Usuarios() {
 
   function handleUsuarioCriado(novoUsuario) {
     toast.success(`Usuário "${novoUsuario.nome}" cadastrado com sucesso.`);
+    carregarUsuarios();
+    setTrilhaSignal(s => s + 1);
+  }
+
+  function handleDadosEditados(resultado) {
+    const nome = resultado.usuario?.nome;
+    toast.success(resultado.alterado
+      ? `Dados de "${nome}" atualizados.`
+      : `Nenhuma alteração nos dados de "${nome}".`);
     carregarUsuarios();
     setTrilhaSignal(s => s + 1);
   }
@@ -200,6 +216,7 @@ export default function Usuarios() {
                   <tr>
                     <th>Usuário</th>
                     <th>Cargo</th>
+                    <th>Telefone</th>
                     <th>Status</th>
                     <th>Cadastrado em</th>
                     <th style={{ textAlign: 'right' }}>Ações</th>
@@ -227,6 +244,9 @@ export default function Usuarios() {
                             {formatarCargo(u.cargo)}
                           </span>
                         </td>
+                        <td style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+                          {u.telefone ? aplicarMascaraTelefone(u.telefone) : '—'}
+                        </td>
                         <td>
                           <span className={`badge ${u.ativo ? 'badge-success' : 'badge-danger'}`}>
                             {u.ativo ? 'Ativo' : 'Bloqueado'}
@@ -237,6 +257,17 @@ export default function Usuarios() {
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           <div className="usuarios-actions-cell" style={{ justifyContent: 'flex-end' }}>
+                            {(podeGerenciar || u.id === usuarioLogadoId) && (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-ghost"
+                                onClick={() => setUsuarioParaEdicao(u)}
+                                title="Editar dados cadastrais"
+                              >
+                                <Pencil size={14} />
+                                <span>Editar dados</span>
+                              </button>
+                            )}
                             {podeGerenciar ? (
                               <button
                                 type="button"
@@ -282,6 +313,13 @@ export default function Usuarios() {
         open={modalCriarAberto}
         onClose={() => setModalCriarAberto(false)}
         onSuccess={handleUsuarioCriado}
+      />
+
+      <EditarUsuarioModal
+        open={Boolean(usuarioParaEdicao)}
+        usuario={usuarioParaEdicao}
+        onClose={() => setUsuarioParaEdicao(null)}
+        onSuccess={handleDadosEditados}
       />
 
       <BloquearUsuarioModal

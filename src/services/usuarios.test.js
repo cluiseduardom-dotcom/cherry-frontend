@@ -6,6 +6,8 @@ import {
   alterarBloqueioUsuario,
   listarEventosUsuarios,
   listarCargosAtribuiveis,
+  obterUsuario,
+  editarDadosUsuario,
 } from './usuarios';
 
 vi.mock('./api', () => ({
@@ -129,6 +131,42 @@ describe('services/usuarios', () => {
 
       expect(api.apiFetch).toHaveBeenCalledWith('/usuarios/cargos');
       expect(r).toEqual([{ cargo: 'vendedor', rotulo: 'Vendedor', nivel: 30, em_escada: true }]);
+    });
+  });
+
+  describe('dados cadastrais', () => {
+    it('criarUsuario envia os dados cadastrais conhecidos e descarta o resto', async () => {
+      api.apiFetch.mockResolvedValueOnce({ success: true, data: {} });
+
+      await criarUsuario({
+        nome: ' Ana ', email: 'a@x.com', senha: 'segredo', papel: 'vendedor',
+        telefone: '11912345678', cpf: '52998224725', empresa_id: 9, ativo: true,
+      });
+
+      const [url, opts] = api.apiFetch.mock.calls[0];
+      expect(url).toBe('/usuarios');
+      expect(JSON.parse(opts.body)).toEqual({
+        nome: 'Ana', email: 'a@x.com', senha: 'segredo', papel: 'vendedor',
+        telefone: '11912345678', cpf: '52998224725',
+      });
+    });
+
+    it('obterUsuario busca GET /usuarios/:id', async () => {
+      api.apiFetch.mockResolvedValueOnce({ success: true, data: { id: 7 } });
+      expect(await obterUsuario(7)).toEqual({ id: 7 });
+      expect(api.apiFetch).toHaveBeenCalledWith('/usuarios/7');
+    });
+
+    it('editarDadosUsuario usa PATCH /dados, preserva null e descarta campos estranhos', async () => {
+      api.apiFetch.mockResolvedValueOnce({ success: true, data: { alterado: true, campos: ['cidade'] } });
+
+      const res = await editarDadosUsuario(7, { cidade: null, telefone: '11999998888', papel: 'admin' });
+
+      const [url, opts] = api.apiFetch.mock.calls[0];
+      expect(url).toBe('/usuarios/7/dados');
+      expect(opts.method).toBe('PATCH');
+      expect(JSON.parse(opts.body)).toEqual({ cidade: null, telefone: '11999998888' });
+      expect(res.alterado).toBe(true);
     });
   });
 });

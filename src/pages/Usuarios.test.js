@@ -75,13 +75,14 @@ describe('Usuarios page logic and validation', () => {
   describe('Validação de formulário de criação de usuário', () => {
     const atorAdmin = { role: 'admin' };
 
-    it('não permite campos adicionais além de nome, email, senha, papel', () => {
+    it('não permite campos fora do contrato (empresa_id, ativo)', () => {
       const res = validarCriarUsuario({
         nome: 'Mariana',
         email: 'mariana@x.com',
         senha: 'segredoForte',
         confirmacaoSenha: 'segredoForte',
         papel: 'vendedor',
+        telefone: '(11) 91234-5678',
         empresa_id: 123,
         ativo: true,
       }, atorAdmin);
@@ -92,6 +93,7 @@ describe('Usuarios page logic and validation', () => {
         email: 'mariana@x.com',
         senha: 'segredoForte',
         papel: 'vendedor',
+        telefone: '11912345678',
       });
       expect(res.dados.empresa_id).toBeUndefined();
       expect(res.dados.ativo).toBeUndefined();

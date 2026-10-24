@@ -8,10 +8,8 @@ import {
   History,
   Lock,
   RefreshCw,
-  AlertCircle,
   Loader2,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { listarUsuarios } from '../services/usuarios';
 import { formatarCargo, formatarDataHora } from '../utils/usuarios';
@@ -19,6 +17,7 @@ import CriarUsuarioModal from '../components/usuarios/CriarUsuarioModal';
 import BloquearUsuarioModal from '../components/usuarios/BloquearUsuarioModal';
 import TrilhaUsuariosAba from '../components/usuarios/TrilhaUsuariosAba';
 import './Usuarios.css';
+import '../components/TabelaGestao.css';
 
 function extrairIniciais(nome) {
   if (!nome) return 'U';
@@ -31,7 +30,6 @@ function extrairIniciais(nome) {
 }
 
 export default function Usuarios() {
-  const { user } = useAuth();
   const { addToast } = useToast();
 
   const [abaAtiva, setAbaAtiva] = useState('usuarios'); // 'usuarios' | 'trilha'
@@ -154,7 +152,7 @@ export default function Usuarios() {
               <Search size={16} className="usuarios-busca-icon" />
               <input
                 type="text"
-                className="form-input usuarios-busca-input"
+                className="input-field usuarios-busca-input"
                 placeholder="Buscar por nome, e-mail ou cargo..."
                 value={busca}
                 onChange={e => setBusca(e.target.value)}
@@ -163,8 +161,7 @@ export default function Usuarios() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               <select
-                className="form-select"
-                style={{ width: 'auto' }}
+                className="input-field usuarios-filtro-status"
                 value={filtroStatus}
                 onChange={e => setFiltroStatus(e.target.value)}
               >
@@ -186,30 +183,27 @@ export default function Usuarios() {
           </div>
 
           {error && (
-            <div className="alert alert-danger" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </div>
+            <div className="modal-error" role="alert">{error}</div>
           )}
 
           {loading ? (
-            <div style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
               <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto var(--space-2)' }} />
               <div>Carregando equipe...</div>
             </div>
           ) : usuariosFiltrados.length === 0 ? (
             <div className="empty-state" style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
-              <Users size={32} style={{ color: 'var(--text-secondary)', margin: '0 auto var(--space-2)' }} />
+              <Users size={32} style={{ color: 'var(--color-text-secondary)', margin: '0 auto var(--space-2)' }} />
               <p style={{ fontWeight: 600, margin: 0 }}>Nenhum usuário encontrado</p>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
                 {busca || filtroStatus !== 'todos'
                   ? 'Nenhum usuário corresponde aos filtros aplicados.'
                   : 'Nenhum usuário cadastrado além do administrador.'}
               </p>
             </div>
           ) : (
-            <div className="table-responsive">
-              <table className="table">
+            <div className="table-scroll">
+              <table className="tabela-gestao">
                 <thead>
                   <tr>
                     <th>Usuário</th>
@@ -237,7 +231,7 @@ export default function Usuarios() {
                           </div>
                         </td>
                         <td>
-                          <span className="badge badge-neutral">
+                          <span className="badge badge-primary">
                             {formatarCargo(u.cargo)}
                           </span>
                         </td>
@@ -246,7 +240,7 @@ export default function Usuarios() {
                             {u.ativo ? 'Ativo' : 'Bloqueado'}
                           </span>
                         </td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        <td style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                           {formatarDataHora(u.criado_em)}
                         </td>
                         <td style={{ textAlign: 'right' }}>
@@ -296,7 +290,6 @@ export default function Usuarios() {
         open={modalCriarAberto}
         onClose={() => setModalCriarAberto(false)}
         onSuccess={handleUsuarioCriado}
-        actor={user}
       />
 
       <BloquearUsuarioModal

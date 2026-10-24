@@ -18,6 +18,7 @@ import ConfirmarRepasseModal from '../components/comissoes/ConfirmarRepasseModal
 import EditarPercentualModal from '../components/comissoes/EditarPercentualModal';
 import { inicioMesISO, fimMesISO, obterAbasPermitidas } from '../utils/formatarComissao';
 import './Comissoes.css';
+import '../components/TabelaGestao.css';
 
 const TAB_ICONS = {
   minhas: BadgePercent,

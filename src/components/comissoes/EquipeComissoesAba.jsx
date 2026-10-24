@@ -123,7 +123,7 @@ export default function EquipeComissoesAba({ dataInicio, dataFim }) {
 
         {!loading && items.length > 0 && (
           <div className="table-scroll">
-            <table className="table">
+            <table className="tabela-gestao">
               <thead>
                 <tr>
                   <th>Vendedor</th>

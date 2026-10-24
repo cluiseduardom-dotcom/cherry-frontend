@@ -5,6 +5,7 @@ import {
   criarUsuario,
   alterarBloqueioUsuario,
   listarEventosUsuarios,
+  listarCargosAtribuiveis,
 } from './usuarios';
 
 vi.mock('./api', () => ({
@@ -117,6 +118,17 @@ describe('services/usuarios', () => {
       await listarEventosUsuarios();
 
       expect(api.apiFetch).toHaveBeenCalledWith('/usuarios/eventos?page=1&pageSize=20');
+    });
+  });
+
+  describe('listarCargosAtribuiveis', () => {
+    it('busca GET /usuarios/cargos e devolve data', async () => {
+      api.apiFetch.mockResolvedValue({ data: [{ cargo: 'vendedor', rotulo: 'Vendedor', nivel: 30, em_escada: true }] });
+
+      const r = await listarCargosAtribuiveis();
+
+      expect(api.apiFetch).toHaveBeenCalledWith('/usuarios/cargos');
+      expect(r).toEqual([{ cargo: 'vendedor', rotulo: 'Vendedor', nivel: 30, em_escada: true }]);
     });
   });
 });

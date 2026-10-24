@@ -78,7 +78,7 @@ export default function EditarPercentualModal({ alvo, open, onClose, onSuccess }
   }
 
   return (
-    <div className="confirm-dialog-overlay" onMouseDown={e => e.target === e.currentTarget && !submitting && onClose()}>
+    <div className="confirm-dialog-overlay" onMouseDown={e => e.target === e.currentTarget && !submitting && valorInput === '' && onClose()}>
       <div className="confirm-dialog comissoes-modal" role="dialog" aria-modal="true">
         <div className="comissoes-modal-header">
           <div className="comissoes-modal-title-row">

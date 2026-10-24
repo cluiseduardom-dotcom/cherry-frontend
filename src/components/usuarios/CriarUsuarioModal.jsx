@@ -1,62 +1,89 @@
 import { useState, useEffect } from 'react';
-import { X, UserPlus, AlertCircle, Loader2 } from 'lucide-react';
-import { criarUsuario } from '../../services/usuarios';
-import {
-  cargosPermitidosParaCriacao,
-  validarCriarUsuario,
-} from '../../utils/usuarios';
+import { X, Loader2 } from 'lucide-react';
+import { criarUsuario, listarCargosAtribuiveis } from '../../services/usuarios';
+import { validarCriarUsuario } from '../../utils/usuarios';
+import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
+import { formularioAlterado } from '../../utils/formularioAlterado';
+import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
+import '../ProductModal.css';
+import './CamposFormulario.css';
 
-export default function CriarUsuarioModal({ open, onClose, onSuccess, actor }) {
-  const [form, setForm] = useState({
-    nome: '',
-    email: '',
-    senha: '',
-    confirmacaoSenha: '',
-    papel: '',
-  });
+const FORM_VAZIO = { nome: '', email: '', senha: '', confirmacaoSenha: '', papel: '' };
+
+function rotuloDoCargo(c) {
+  return c.em_escada ? `${c.rotulo} (nível ${c.nivel})` : `${c.rotulo} (operacional)`;
+}
+
+export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
+  const [form, setForm] = useState(FORM_VAZIO);
+  const [inicial, setInicial] = useState(FORM_VAZIO);
+  const [cargos, setCargos] = useState([]);
+  const [carregandoCargos, setCarregandoCargos] = useState(false);
   const [erros, setErros] = useState({});
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
 
-  const cargosDisponiveis = cargosPermitidosParaCriacao(actor);
-
+  // Só os cargos que o backend aceitaria (ativos na empresa, abaixo do nível do ator).
   useEffect(() => {
-    if (open) {
-      setForm({
-        nome: '',
-        email: '',
-        senha: '',
-        confirmacaoSenha: '',
-        papel: cargosDisponiveis[0]?.cargo || '',
+    if (!open) return undefined;
+
+    let cancelado = false;
+    setForm(FORM_VAZIO);
+    setInicial(FORM_VAZIO);
+    setErros({});
+    setApiError('');
+    setLoading(false);
+    setCarregandoCargos(true);
+
+    listarCargosAtribuiveis()
+      .then(lista => {
+        if (cancelado) return;
+        const itens = Array.isArray(lista) ? lista : [];
+        setCargos(itens);
+        const base = { ...FORM_VAZIO, papel: itens[0]?.cargo || '' };
+        setForm(base);
+        setInicial(base);
+      })
+      .catch(err => {
+        if (!cancelado) setApiError(err?.message || 'Não foi possível carregar os cargos.');
+      })
+      .finally(() => {
+        if (!cancelado) setCarregandoCargos(false);
       });
-      setErros({});
-      setApiError(null);
-      setLoading(false);
-    }
+
+    return () => { cancelado = true; };
   }, [open]);
+
+  // Nunca fecha em silêncio (clique fora, ESC, X ou Cancelar) com dados preenchidos.
+  const isDirty = formularioAlterado(form, inicial);
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open, isDirty, onClose });
 
   if (!open) return null;
 
-  function handleChange(field, value) {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (erros[field]) {
-      setErros(prev => ({ ...prev, [field]: undefined }));
-    }
-    if (apiError) setApiError(null);
+  function tentarFechar() {
+    if (loading) return;
+    solicitarFechamento();
+  }
+
+  function atualizar(campo, valor) {
+    setForm(prev => ({ ...prev, [campo]: valor }));
+    if (erros[campo]) setErros(prev => ({ ...prev, [campo]: undefined }));
+    if (apiError) setApiError('');
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (loading) return;
 
-    const validacao = validarCriarUsuario(form, actor);
+    const validacao = validarCriarUsuario(form, null);
     if (!validacao.valido) {
       setErros(validacao.erros);
       return;
     }
 
     setLoading(true);
-    setApiError(null);
+    setApiError('');
 
     try {
       const res = await criarUsuario(validacao.dados);
@@ -69,165 +96,128 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess, actor }) {
     }
   }
 
+  const semCargos = !carregandoCargos && cargos.length === 0;
+
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
+    <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
+      <div className="modal-panel card" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="criar-usuario-titulo">
         <div className="modal-header">
-          <div className="modal-header-icon" style={{ backgroundColor: 'var(--color-primary-soft, rgba(230, 0, 77, 0.1))', color: 'var(--color-primary, #e6004d)' }}>
-            <UserPlus size={20} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 className="modal-title">Novo usuário</h2>
-            <p className="modal-subtitle">Cadastre um colaborador na empresa com cargo apropriado</p>
-          </div>
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon"
-            onClick={onClose}
-            aria-label="Fechar modal"
-            disabled={loading}
-          >
+          <h2 className="modal-title" id="criar-usuario-titulo">Novo usuário</h2>
+          <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            {apiError && (
-              <div className="alert alert-danger" role="alert" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                <AlertCircle size={18} style={{ flexShrink: 0 }} />
-                <span>{apiError}</span>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="modal-body">
+            {apiError && <div className="modal-error" role="alert">{apiError}</div>}
+
+            {semCargos && !apiError && (
+              <div className="modal-warning">
+                Nenhum cargo habilitado abaixo do seu nível. Peça ao administrador para habilitar os cargos
+                da equipe em Configurações.
               </div>
             )}
 
-            {cargosDisponiveis.length === 0 ? (
-              <div className="alert alert-warning">
-                Seu nível de autorização atual não permite criar usuários com nenhum cargo abaixo do seu.
+            <div className="modal-form-grid">
+              <div className="input-wrapper modal-form-span-2">
+                <label className="input-label" htmlFor="usuario-nome">Nome completo *</label>
+                <input
+                  id="usuario-nome"
+                  type="text"
+                  className={`input-field${erros.nome ? ' input-field--erro' : ''}`}
+                  placeholder="Ex.: Mariana Souza"
+                  value={form.nome}
+                  onChange={e => atualizar('nome', e.target.value)}
+                  maxLength={255}
+                  disabled={loading}
+                  autoFocus
+                />
+                {erros.nome && <span className="campo-erro">{erros.nome}</span>}
               </div>
-            ) : (
-              <>
-                <div className="form-group">
-                  <label htmlFor="usuario-nome" className="form-label">
-                    Nome completo <span style={{ color: 'var(--color-danger, #e53935)' }}>*</span>
-                  </label>
-                  <input
-                    id="usuario-nome"
-                    type="text"
-                    className={`form-input ${erros.nome ? 'form-input--error' : ''}`}
-                    placeholder="Ex.: Mariana Souza"
-                    value={form.nome}
-                    onChange={e => handleChange('nome', e.target.value)}
-                    maxLength={255}
-                    disabled={loading}
-                    autoFocus
-                  />
-                  {erros.nome && <span className="form-error">{erros.nome}</span>}
-                </div>
 
-                <div className="form-group">
-                  <label htmlFor="usuario-email" className="form-label">
-                    E-mail <span style={{ color: 'var(--color-danger, #e53935)' }}>*</span>
-                  </label>
-                  <input
-                    id="usuario-email"
-                    type="email"
-                    className={`form-input ${erros.email ? 'form-input--error' : ''}`}
-                    placeholder="mariana@empresa.com"
-                    value={form.email}
-                    onChange={e => handleChange('email', e.target.value)}
-                    maxLength={255}
-                    disabled={loading}
-                  />
-                  {erros.email && <span className="form-error">{erros.email}</span>}
-                </div>
+              <div className="input-wrapper modal-form-span-2">
+                <label className="input-label" htmlFor="usuario-email">E-mail *</label>
+                <input
+                  id="usuario-email"
+                  type="email"
+                  className={`input-field${erros.email ? ' input-field--erro' : ''}`}
+                  placeholder="mariana@empresa.com"
+                  value={form.email}
+                  onChange={e => atualizar('email', e.target.value)}
+                  maxLength={255}
+                  disabled={loading}
+                />
+                {erros.email && <span className="campo-erro">{erros.email}</span>}
+              </div>
 
-                <div className="form-group">
-                  <label htmlFor="usuario-papel" className="form-label">
-                    Cargo / Papel <span style={{ color: 'var(--color-danger, #e53935)' }}>*</span>
-                  </label>
-                  <select
-                    id="usuario-papel"
-                    className={`form-select ${erros.papel ? 'form-input--error' : ''}`}
-                    value={form.papel}
-                    onChange={e => handleChange('papel', e.target.value)}
-                    disabled={loading}
-                  >
-                    {cargosDisponiveis.map(c => (
-                      <option key={c.cargo} value={c.cargo}>
-                        {c.rotulo} {c.escada ? `(Nível ${c.nivel})` : '(Operacional)'}
-                      </option>
-                    ))}
-                  </select>
-                  {erros.papel && <span className="form-error">{erros.papel}</span>}
-                  <span className="form-hint" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    Apenas cargos ativos de nível estritamente menor que o seu podem ser atribuídos.
-                  </span>
-                </div>
+              <div className="input-wrapper modal-form-span-2">
+                <label className="input-label" htmlFor="usuario-papel">Cargo *</label>
+                <select
+                  id="usuario-papel"
+                  className={`input-field${erros.papel ? ' input-field--erro' : ''}`}
+                  value={form.papel}
+                  onChange={e => atualizar('papel', e.target.value)}
+                  disabled={loading || carregandoCargos || semCargos}
+                >
+                  {carregandoCargos && <option value="">Carregando cargos...</option>}
+                  {cargos.map(c => (
+                    <option key={c.cargo} value={c.cargo}>{rotuloDoCargo(c)}</option>
+                  ))}
+                </select>
+                {erros.papel && <span className="campo-erro">{erros.papel}</span>}
+                <span className="modal-field-hint">
+                  Só aparecem cargos habilitados na empresa e abaixo do seu nível.
+                </span>
+              </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
-                  <div className="form-group">
-                    <label htmlFor="usuario-senha" className="form-label">
-                      Senha provisória <span style={{ color: 'var(--color-danger, #e53935)' }}>*</span>
-                    </label>
-                    <input
-                      id="usuario-senha"
-                      type="password"
-                      className={`form-input ${erros.senha ? 'form-input--error' : ''}`}
-                      placeholder="Mínimo 6 caracteres"
-                      value={form.senha}
-                      onChange={e => handleChange('senha', e.target.value)}
-                      maxLength={128}
-                      disabled={loading}
-                    />
-                    {erros.senha && <span className="form-error">{erros.senha}</span>}
-                  </div>
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="usuario-senha">Senha provisória *</label>
+                <input
+                  id="usuario-senha"
+                  type="password"
+                  className={`input-field${erros.senha ? ' input-field--erro' : ''}`}
+                  placeholder="Mínimo 6 caracteres"
+                  value={form.senha}
+                  onChange={e => atualizar('senha', e.target.value)}
+                  maxLength={128}
+                  autoComplete="new-password"
+                  disabled={loading}
+                />
+                {erros.senha && <span className="campo-erro">{erros.senha}</span>}
+              </div>
 
-                  <div className="form-group">
-                    <label htmlFor="usuario-confirmacao-senha" className="form-label">
-                      Confirmar senha <span style={{ color: 'var(--color-danger, #e53935)' }}>*</span>
-                    </label>
-                    <input
-                      id="usuario-confirmacao-senha"
-                      type="password"
-                      className={`form-input ${erros.confirmacaoSenha ? 'form-input--error' : ''}`}
-                      placeholder="Repita a senha"
-                      value={form.confirmacaoSenha}
-                      onChange={e => handleChange('confirmacaoSenha', e.target.value)}
-                      maxLength={128}
-                      disabled={loading}
-                    />
-                    {erros.confirmacaoSenha && <span className="form-error">{erros.confirmacaoSenha}</span>}
-                  </div>
-                </div>
-              </>
-            )}
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="usuario-confirmacao-senha">Confirmar senha *</label>
+                <input
+                  id="usuario-confirmacao-senha"
+                  type="password"
+                  className={`input-field${erros.confirmacaoSenha ? ' input-field--erro' : ''}`}
+                  placeholder="Repita a senha"
+                  value={form.confirmacaoSenha}
+                  onChange={e => atualizar('confirmacaoSenha', e.target.value)}
+                  maxLength={128}
+                  autoComplete="new-password"
+                  disabled={loading}
+                />
+                {erros.confirmacaoSenha && <span className="campo-erro">{erros.confirmacaoSenha}</span>}
+              </div>
+            </div>
           </div>
 
           <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={onClose}
-              disabled={loading}
-            >
+            <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={loading}>
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading || cargosDisponiveis.length === 0}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Cadastrando...
-                </>
-              ) : (
-                'Criar usuário'
-              )}
+            <button type="submit" className="btn btn-primary" disabled={loading || carregandoCargos || semCargos}>
+              {loading ? (<><Loader2 size={16} className="animate-spin" /> Criando...</>) : 'Criar usuário'}
             </button>
           </div>
         </form>
+
+        {confirmando && (
+          <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
+        )}
       </div>
     </div>
   );

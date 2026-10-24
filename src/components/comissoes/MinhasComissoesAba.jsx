@@ -164,7 +164,7 @@ export default function MinhasComissoesAba({
 
         {!loading && items.length > 0 && (
           <div className="table-scroll">
-            <table className="table">
+            <table className="tabela-gestao">
               <thead>
                 <tr>
                   <th>Data da Venda</th>

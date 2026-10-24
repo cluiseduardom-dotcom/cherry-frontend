@@ -61,7 +61,7 @@ export function formatarAcaoEvento(acao) {
     case 'desbloquear':
       return { label: 'Desbloqueio', badgeClass: 'badge-success' };
     default:
-      return { label: acao || 'Ação desconhecida', badgeClass: 'badge-neutral' };
+      return { label: acao || 'Ação desconhecida', badgeClass: 'badge-primary' };
   }
 }
 

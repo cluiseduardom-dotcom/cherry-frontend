@@ -145,7 +145,7 @@ export default function RepassesComissoesAba({
 
         {!loading && items.length > 0 && (
           <div className="table-scroll">
-            <table className="table">
+            <table className="tabela-gestao">
               <thead>
                 <tr>
                   <th>Declarado em</th>

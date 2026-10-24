@@ -5,6 +5,12 @@ export async function listarUsuarios() {
   return body.data;
 }
 
+// Cargos que o backend aceitaria ao criar (ativos na empresa, abaixo do nível do ator).
+export async function listarCargosAtribuiveis() {
+  const body = await apiFetch('/usuarios/cargos');
+  return body.data;
+}
+
 export async function criarUsuario({ nome, email, senha, papel }) {
   const payload = {
     nome: String(nome).trim(),

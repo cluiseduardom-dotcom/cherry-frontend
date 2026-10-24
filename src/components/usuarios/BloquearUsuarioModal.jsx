@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X, ShieldAlert, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { alterarBloqueioUsuario } from '../../services/usuarios';
 import { validarBloqueioUsuario, formatarCargo } from '../../utils/usuarios';
+import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
+import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
+import '../ProductModal.css';
+import './CamposFormulario.css';
 
 export default function BloquearUsuarioModal({ open, usuario, onClose, onSuccess }) {
   const [motivo, setMotivo] = useState('');
-  const [erro, setErro] = useState(null);
-  const [apiError, setApiError] = useState(null);
+  const [erro, setErro] = useState('');
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const bloqueando = Boolean(usuario?.ativo);
@@ -14,13 +18,23 @@ export default function BloquearUsuarioModal({ open, usuario, onClose, onSuccess
   useEffect(() => {
     if (open) {
       setMotivo('');
-      setErro(null);
-      setApiError(null);
+      setErro('');
+      setApiError('');
       setLoading(false);
     }
   }, [open, usuario]);
 
+  // Motivo digitado e não enviado não se perde com um clique fora.
+  const isDirty = motivo.trim() !== '';
+  const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
+    useConfirmarFechamentoModal({ open: open && Boolean(usuario), isDirty, onClose });
+
   if (!open || !usuario) return null;
+
+  function tentarFechar() {
+    if (loading) return;
+    solicitarFechamento();
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -33,7 +47,7 @@ export default function BloquearUsuarioModal({ open, usuario, onClose, onSuccess
     }
 
     setLoading(true);
-    setApiError(null);
+    setApiError('');
 
     try {
       const res = await alterarBloqueioUsuario(usuario.id, {
@@ -43,145 +57,86 @@ export default function BloquearUsuarioModal({ open, usuario, onClose, onSuccess
       onSuccess?.(res);
       onClose();
     } catch (err) {
-      setApiError(err?.message || 'Falha ao alterar status do usuário.');
+      setApiError(err?.message || 'Falha ao alterar o status do usuário.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+    <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
+      <div className="modal-panel card" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="bloqueio-titulo">
         <div className="modal-header">
-          <div
-            className="modal-header-icon"
-            style={{
-              backgroundColor: bloqueando
-                ? 'var(--color-danger-soft, rgba(229, 57, 53, 0.1))'
-                : 'var(--color-success-soft, rgba(46, 125, 50, 0.1))',
-              color: bloqueando
-                ? 'var(--color-danger, #e53935)'
-                : 'var(--color-success, #2e7d32)',
-            }}
-          >
-            {bloqueando ? <ShieldAlert size={20} /> : <ShieldCheck size={20} />}
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 className="modal-title">
+          <div>
+            <h2 className="modal-title" id="bloqueio-titulo">
               {bloqueando ? 'Bloquear usuário' : 'Desbloquear usuário'}
             </h2>
-            <p className="modal-subtitle">
+            <p className="modal-header-subtitulo">
               {bloqueando
-                ? 'Interrompe o acesso e derruba sessões ativas'
-                : 'Restaura a permissão de acesso ao sistema'}
+                ? 'Interrompe o acesso e derruba as sessões ativas'
+                : 'Devolve o acesso ao sistema'}
             </p>
           </div>
-          <button
-            type="button"
-            className="btn btn-ghost btn-icon"
-            onClick={onClose}
-            aria-label="Fechar modal"
-            disabled={loading}
-          >
+          <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            {apiError && (
-              <div className="alert alert-danger" role="alert" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                <AlertCircle size={18} style={{ flexShrink: 0 }} />
-                <span>{apiError}</span>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="modal-body">
+            {apiError && <div className="modal-error" role="alert">{apiError}</div>}
+
+            <div className="modal-resumo">
+              <strong>{usuario.nome}</strong>
+              <span>{usuario.email}</span>
+              <span>Cargo: {formatarCargo(usuario.cargo)}</span>
+            </div>
+
+            {bloqueando && (
+              <div className="modal-warning">
+                Ao bloquear, todas as sessões deste usuário são encerradas imediatamente.
               </div>
             )}
 
-            <div
-              style={{
-                padding: 'var(--space-3)',
-                borderRadius: 'var(--radius-md, 8px)',
-                backgroundColor: 'var(--bg-secondary, #f8f9fa)',
-                border: '1px solid var(--border-color, #e9ecef)',
-              }}
-            >
-              <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{usuario.nome}</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{usuario.email}</div>
-              <div style={{ fontSize: '0.85rem', marginTop: 4 }}>
-                Cargo: <strong>{formatarCargo(usuario.cargo)}</strong>
-              </div>
-            </div>
-
-            <div
-              className={`alert ${bloqueando ? 'alert-warning' : 'alert-info'}`}
-              style={{ fontSize: '0.85rem' }}
-            >
-              {bloqueando
-                ? 'Atenção: Ao bloquear este usuário, todas as suas sessões e tokens ativos serão revogados imediatamente.'
-                : 'O usuário poderá efetuar login e utilizar os recursos da sua empresa novamente.'}
-            </div>
-
-            <div className="form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label htmlFor="bloqueio-motivo" className="form-label">
-                  Motivo da ação <span style={{ color: 'var(--color-danger, #e53935)' }}>*</span>
-                </label>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  {motivo.length}/300
-                </span>
-              </div>
+            <div className="input-wrapper">
+              <label className="input-label" htmlFor="bloqueio-motivo">Motivo *</label>
               <textarea
                 id="bloqueio-motivo"
-                className={`form-input ${erro ? 'form-input--error' : ''}`}
+                className={`input-field${erro ? ' input-field--erro' : ''}`}
                 rows={3}
-                placeholder={
-                  bloqueando
-                    ? 'Ex.: Colaborador desligado da empresa em 24/10.'
-                    : 'Ex.: Retorno de afastamento autorizado.'
-                }
+                placeholder={bloqueando ? 'Ex.: Colaborador desligado da empresa.' : 'Ex.: Retorno de afastamento autorizado.'}
                 value={motivo}
                 onChange={e => {
                   setMotivo(e.target.value);
-                  if (erro) setErro(null);
-                  if (apiError) setApiError(null);
+                  if (erro) setErro('');
+                  if (apiError) setApiError('');
                 }}
                 maxLength={300}
                 disabled={loading}
                 autoFocus
               />
-              {erro && <span className="form-error">{erro}</span>}
-              <span className="form-hint" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                Mínimo 3 e máximo 300 caracteres. Este registro fica salvo na trilha de auditoria.
+              {erro && <span className="campo-erro">{erro}</span>}
+              <span className="campo-dica">
+                {motivo.length}/300 · de 3 a 300 caracteres. Fica registrado na trilha de auditoria.
               </span>
             </div>
           </div>
 
           <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={onClose}
-              disabled={loading}
-            >
+            <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={loading}>
               Cancelar
             </button>
-            <button
-              type="submit"
-              className={`btn ${bloqueando ? 'btn-danger' : 'btn-primary'}`}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Processando...
-                </>
-              ) : bloqueando ? (
-                'Confirmar bloqueio'
-              ) : (
-                'Confirmar desbloqueio'
-              )}
+            <button type="submit" className={`btn ${bloqueando ? 'btn-danger' : 'btn-primary'}`} disabled={loading}>
+              {loading
+                ? (<><Loader2 size={16} className="animate-spin" /> Processando...</>)
+                : bloqueando ? 'Confirmar bloqueio' : 'Confirmar desbloqueio'}
             </button>
           </div>
         </form>
+
+        {confirmando && (
+          <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { History, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { History, RefreshCw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { listarEventosUsuarios } from '../../services/usuarios';
 import { formatarCargo, formatarDataHora, formatarAcaoEvento } from '../../utils/usuarios';
 
@@ -37,7 +37,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>Trilha de auditoria</h3>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
             Histórico completo de cadastros, bloqueios e desbloqueios
           </p>
         </div>
@@ -54,29 +54,26 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
       </div>
 
       {error && (
-        <div className="alert alert-danger" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
+        <div className="modal-error" role="alert">{error}</div>
       )}
 
       {loading ? (
-        <div style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <div style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
           <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto var(--space-2)' }} />
           <div>Carregando histórico de auditoria...</div>
         </div>
       ) : eventos.length === 0 ? (
         <div className="empty-state" style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
-          <History size={32} style={{ color: 'var(--text-secondary)', margin: '0 auto var(--space-2)' }} />
+          <History size={32} style={{ color: 'var(--color-text-secondary)', margin: '0 auto var(--space-2)' }} />
           <p style={{ fontWeight: 600, margin: 0 }}>Nenhum evento registrado</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
             Ações de criação e bloqueio de usuários aparecerão nesta trilha.
           </p>
         </div>
       ) : (
         <>
-          <div className="table-responsive">
-            <table className="table">
+          <div className="table-scroll">
+            <table className="tabela-gestao">
               <thead>
                 <tr>
                   <th>Data/Hora</th>
@@ -92,7 +89,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
                   const acaoMeta = formatarAcaoEvento(ev.acao);
                   return (
                     <tr key={ev.id}>
-                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                         {formatarDataHora(ev.criado_em)}
                       </td>
                       <td>
@@ -104,14 +101,14 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
                         {ev.alvo_nome || `Usuário #${ev.alvo_usuario_id}`}
                       </td>
                       <td>
-                        <span className="badge badge-neutral">
+                        <span className="badge badge-primary">
                           {formatarCargo(ev.cargo_alvo)}
                         </span>
                       </td>
                       <td style={{ fontSize: '0.85rem' }}>
                         {ev.executado_por_nome || `ID #${ev.executado_por}`}
                       </td>
-                      <td style={{ fontSize: '0.85rem', color: ev.motivo ? 'var(--text-primary)' : 'var(--text-secondary)', maxWidth: 260 }}>
+                      <td style={{ fontSize: '0.85rem', color: ev.motivo ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', maxWidth: 260 }}>
                         {ev.motivo || '—'}
                       </td>
                     </tr>
@@ -122,8 +119,8 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
           </div>
 
           {/* Paginação */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--space-4)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border-color, #eee)' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--space-4)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--color-border-light)' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
               Mostrando {eventos.length} de {paginacao.total} eventos
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>

@@ -114,7 +114,7 @@ export default function PagamentosComissoesAba({ podePagarComissao, podeAlterarM
                     {MODOS_PAGAMENTO_COMISSAO.map(m => <option key={m.valor} value={m.valor}>{m.rotulo}</option>)}
                   </select>
                 ) : (
-                  <strong>{descricaoDoModoComissao(modo).rotulo}</strong>
+                  <strong style={{ display: 'block', marginTop: 'var(--space-1)' }}>{descricaoDoModoComissao(modo).rotulo}</strong>
                 )}
                 <p className="text-xs text-secondary" style={{ marginTop: 'var(--space-1)' }}>
                   {descricaoDoModoComissao(modo).descricao}

@@ -27,7 +27,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
-import { ROLE_LABEL } from '../config/papeis';
+import { rotuloDoUsuario } from '../config/papeis';
 import { listarEstoqueBaixo } from '../services/estoque';
 import './Sidebar.css';
 
@@ -222,7 +222,7 @@ export default function Sidebar() {
         <div className="sidebar-user-avatar">{initials(user?.nome)}</div>
         <div className="sidebar-user-info">
           <span className="sidebar-user-name">{user?.nome}</span>
-          <span className={`role-badge role-badge--${user?.role}`}>{ROLE_LABEL[user?.role]}</span>
+          <span className={`role-badge role-badge--${user?.role}`}>{rotuloDoUsuario(user)}</span>
         </div>
         <button
           type="button"

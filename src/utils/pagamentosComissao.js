@@ -8,6 +8,24 @@ export const FORMAS_PAGAMENTO_COMISSAO = [
   { valor: 'outro', rotulo: 'Outro' },
 ];
 
+// Quando a empresa paga a comissão (escolha do admin; o backend decide o que entra no "a pagar").
+export const MODOS_PAGAMENTO_COMISSAO = [
+  { valor: 'liberada', rotulo: 'Assim que liberada', descricao: 'A comissão liberada já pode ser paga.' },
+  {
+    valor: 'fim_do_mes',
+    rotulo: 'Só no fechamento do mês',
+    descricao: 'Só entram vendas de meses já fechados. As do mês corrente aguardam o fechamento.',
+  },
+];
+
+export function descricaoDoModoComissao(modo) {
+  return MODOS_PAGAMENTO_COMISSAO.find(m => m.valor === modo) ?? MODOS_PAGAMENTO_COMISSAO[0];
+}
+
+export function temAguardandoFechamento(linha) {
+  return Number(linha?.aguardando_fechamento) > 0;
+}
+
 export function rotuloDaFormaComissao(forma) {
   return FORMAS_PAGAMENTO_COMISSAO.find(f => f.valor === forma)?.rotulo ?? forma;
 }

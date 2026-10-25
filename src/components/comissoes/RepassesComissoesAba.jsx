@@ -22,6 +22,7 @@ const STATUS_OPTIONS = [
 export default function RepassesComissoesAba({
   user,
   temCapacidadeVerTodos,
+  podeConfirmar,
   onConfirmar,
   refreshKey,
 }) {
@@ -163,7 +164,7 @@ export default function RepassesComissoesAba({
                   const meta = getRepasseStatusMeta(item.status);
                   const IconStatus = meta.icon;
                   const isOwner = currentUserId && Number(currentUserId) === Number(item.vendedor_id);
-                  const canConfirm = temCapacidadeVerTodos && item.status === 'a_repassar' && !isOwner;
+                  const canConfirm = podeConfirmar && item.status === 'a_repassar' && !isOwner;
 
                   return (
                     <tr key={item.id}>

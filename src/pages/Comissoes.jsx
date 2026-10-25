@@ -52,7 +52,11 @@ export default function Comissoes() {
 
   const podeVerEquipe = user?.role === 'admin' || temCapacidade('ver_vendas_de_todos');
   const podeGerirPercentuais = user?.role === 'admin';
-  const podePagarComissao = user?.role === 'admin';
+  // Dinheiro (confirmar repasse, pagar comissão): Analista financeiro, Diretor, Gerente e Admin.
+  // O backend decide por `gerir_financeiro`; aqui só esconde o que ele recusaria.
+  const podeGerirFinanceiro = temCapacidade('gerir_financeiro');
+  const podePagarComissao = podeGerirFinanceiro;
+  const podeAlterarModoPagamento = user?.role === 'admin';
 
   const abasDisponiveis = useMemo(() => {
     return obterAbasPermitidas({ user, temCapacidade }).map(tab => ({
@@ -189,7 +193,8 @@ export default function Comissoes() {
       {abaAtiva === 'repasses' && (
         <RepassesComissoesAba
           user={user}
-          temCapacidadeVerTodos={podeVerEquipe}
+          temCapacidadeVerTodos={podeVerEquipe || podeGerirFinanceiro}
+          podeConfirmar={podeGerirFinanceiro}
           onConfirmar={repasse => setRepasseParaConfirmar(repasse)}
           refreshKey={repassesRefreshKey}
         />
@@ -198,6 +203,7 @@ export default function Comissoes() {
       {abaAtiva === 'pagamentos' && (
         <PagamentosComissoesAba
           podePagarComissao={podePagarComissao}
+          podeAlterarModo={podeAlterarModoPagamento}
           onPagar={linha => setVendedorParaPagar(linha)}
           refreshKey={pagamentosRefreshKey}
         />
@@ -225,7 +231,7 @@ export default function Comissoes() {
         onSuccess={handleRepasseConfirmado}
       />
 
-      {/* Modal de pagamento de comissão (admin) */}
+      {/* Modal de pagamento de comissão (quem tem gerir_financeiro) */}
       <PagarComissaoModal
         key={vendedorParaPagar?.vendedor_id ?? 'nenhum'}
         linha={vendedorParaPagar}

@@ -71,8 +71,9 @@ export async function atualizarPercentual({ usuario_id, percentual }) {
 
 // ---- Pagamento da comissão AO vendedor (a empresa pagando) ----
 
-// Admin: por vendedor, o líquido liberado ainda não pago ({ items: [{ vendedor_id, vendedor_nome,
-// a_pagar, bruto_a_pagar, descontos, quantidade_comissoes }], totais: { a_pagar } }).
+// Quem tem `gerir_financeiro`: por vendedor, o líquido liberado ainda não pago ({ modo_pagamento,
+// items: [{ vendedor_id, vendedor_nome, a_pagar, bruto_a_pagar, descontos, quantidade_comissoes,
+// aguardando_fechamento }], totais: { a_pagar, aguardando_fechamento } }).
 export async function listarAPagar() {
   const body = await apiFetch('/comissoes/a-pagar');
   return body.data;
@@ -87,11 +88,26 @@ export async function listarPagamentosComissao({ vendedor_id, page = 1, pageSize
   return body.data;
 }
 
-// Só admin. { vendedor_id, valor_esperado, forma, pago_em: 'AAAA-MM-DD', observacao? }
+// Quem tem `gerir_financeiro`. { vendedor_id, valor_esperado, forma, pago_em: 'AAAA-MM-DD', observacao? }
 export async function registrarPagamentoComissao(dados) {
   const body = await apiFetch('/comissoes/pagamentos', {
     method: 'POST',
     body: JSON.stringify(dados),
+  });
+  return body.data;
+}
+
+// Quando a empresa paga a comissão. Leitura: `gerir_financeiro`. Alteração: só admin.
+// { modo_pagamento: 'liberada' | 'fim_do_mes', padrao, atualizado_em, atualizado_por_nome }
+export async function obterConfiguracaoComissao() {
+  const body = await apiFetch('/comissoes/configuracao');
+  return body.data;
+}
+
+export async function definirModoPagamentoComissao(modo_pagamento) {
+  const body = await apiFetch('/comissoes/configuracao', {
+    method: 'PUT',
+    body: JSON.stringify({ modo_pagamento }),
   });
   return body.data;
 }

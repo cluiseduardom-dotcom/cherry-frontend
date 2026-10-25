@@ -8,31 +8,31 @@ import {
 
 describe('Comissoes helpers', () => {
   describe('obterAbasPermitidas', () => {
-    it('vendedor comum vê apenas "Minhas comissões" e "Repasses"', () => {
+    it('vendedor comum vê "Minhas comissões", "Repasses" e "Pagamentos"', () => {
       const abas = obterAbasPermitidas({
         user: { role: 'vendedor' },
         temCapacidade: () => false,
       });
 
-      expect(abas.map(a => a.key)).toEqual(['minhas', 'repasses']);
+      expect(abas.map(a => a.key)).toEqual(['minhas', 'repasses', 'pagamentos']);
     });
 
-    it('vendedor com ver_vendas_de_todos (gerente) vê "Minhas comissões", "Equipe" e "Repasses"', () => {
+    it('vendedor com ver_vendas_de_todos (gerente) vê "Minhas comissões", "Equipe", "Repasses" e "Pagamentos"', () => {
       const abas = obterAbasPermitidas({
         user: { role: 'vendedor' },
         temCapacidade: cap => cap === 'ver_vendas_de_todos',
       });
 
-      expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses']);
+      expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses', 'pagamentos']);
     });
 
-    it('administrador vê todas as 4 abas: Minhas, Equipe, Repasses e Percentuais', () => {
+    it('administrador vê todas as 5 abas: Minhas, Equipe, Repasses, Pagamentos e Percentuais', () => {
       const abas = obterAbasPermitidas({
         user: { role: 'admin' },
         temCapacidade: () => true,
       });
 
-      expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses', 'percentuais']);
+      expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses', 'pagamentos', 'percentuais']);
     });
   });
 

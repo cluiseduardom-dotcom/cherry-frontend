@@ -133,6 +133,8 @@ export default function EquipeComissoesAba({ dataInicio, dataFim }) {
                   <th>Base Total</th>
                   <th>Comissão Total</th>
                   <th>Liberado</th>
+                  <th>Pago</th>
+                  <th>A pagar</th>
                   <th>Pendente</th>
                   <th>Estornado</th>
                   <th>A Repassar</th>
@@ -165,6 +167,8 @@ export default function EquipeComissoesAba({ dataInicio, dataFim }) {
                     <td className="text-success font-medium">
                       {formatarMoeda(item.total_liberado)}
                     </td>
+                    <td>{formatarMoeda(item.total_pago ?? 0)}</td>
+                    <td><strong>{formatarMoeda(item.a_pagar ?? 0)}</strong></td>
                     <td className="text-secondary font-medium">
                       {formatarMoeda(item.total_pendente)}
                     </td>

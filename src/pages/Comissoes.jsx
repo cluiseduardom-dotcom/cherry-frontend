@@ -3,6 +3,7 @@ import {
   BadgePercent,
   Users,
   HandCoins,
+  Wallet,
   Percent,
   Calendar,
   RotateCcw,
@@ -13,6 +14,8 @@ import MinhasComissoesAba from '../components/comissoes/MinhasComissoesAba';
 import EquipeComissoesAba from '../components/comissoes/EquipeComissoesAba';
 import RepassesComissoesAba from '../components/comissoes/RepassesComissoesAba';
 import PercentuaisComissoesAba from '../components/comissoes/PercentuaisComissoesAba';
+import PagamentosComissoesAba from '../components/comissoes/PagamentosComissoesAba';
+import PagarComissaoModal from '../components/comissoes/PagarComissaoModal';
 import HistoricoComissaoModal from '../components/comissoes/HistoricoComissaoModal';
 import ConfirmarRepasseModal from '../components/comissoes/ConfirmarRepasseModal';
 import EditarPercentualModal from '../components/comissoes/EditarPercentualModal';
@@ -24,6 +27,7 @@ const TAB_ICONS = {
   minhas: BadgePercent,
   equipe: Users,
   repasses: HandCoins,
+  pagamentos: Wallet,
   percentuais: Percent,
 };
 
@@ -39,13 +43,16 @@ export default function Comissoes() {
   const [historicoComissaoId, setHistoricoComissaoId] = useState(null);
   const [repasseParaConfirmar, setRepasseParaConfirmar] = useState(null);
   const [alvoEditarPercentual, setAlvoEditarPercentual] = useState(null);
+  const [vendedorParaPagar, setVendedorParaPagar] = useState(null);
 
   // Chaves para recarregar abas secundárias
   const [repassesRefreshKey, setRepassesRefreshKey] = useState(0);
   const [percentuaisRefreshKey, setPercentuaisRefreshKey] = useState(0);
+  const [pagamentosRefreshKey, setPagamentosRefreshKey] = useState(0);
 
   const podeVerEquipe = user?.role === 'admin' || temCapacidade('ver_vendas_de_todos');
   const podeGerirPercentuais = user?.role === 'admin';
+  const podePagarComissao = user?.role === 'admin';
 
   const abasDisponiveis = useMemo(() => {
     return obterAbasPermitidas({ user, temCapacidade }).map(tab => ({
@@ -66,6 +73,11 @@ export default function Comissoes() {
       toast.show('Recebimento de repasse confirmado com sucesso!');
     }
     setRepassesRefreshKey(k => k + 1);
+  }
+
+  function handlePagamentoRegistrado() {
+    toast.success('Pagamento de comissão registrado.');
+    setPagamentosRefreshKey(k => k + 1);
   }
 
   function handlePercentualAtualizado() {
@@ -183,6 +195,14 @@ export default function Comissoes() {
         />
       )}
 
+      {abaAtiva === 'pagamentos' && (
+        <PagamentosComissoesAba
+          podePagarComissao={podePagarComissao}
+          onPagar={linha => setVendedorParaPagar(linha)}
+          refreshKey={pagamentosRefreshKey}
+        />
+      )}
+
       {abaAtiva === 'percentuais' && podeGerirPercentuais && (
         <PercentuaisComissoesAba
           onEditar={alvo => setAlvoEditarPercentual(alvo)}
@@ -203,6 +223,16 @@ export default function Comissoes() {
         open={Boolean(repasseParaConfirmar)}
         onClose={() => setRepasseParaConfirmar(null)}
         onSuccess={handleRepasseConfirmado}
+      />
+
+      {/* Modal de pagamento de comissão (admin) */}
+      <PagarComissaoModal
+        key={vendedorParaPagar?.vendedor_id ?? 'nenhum'}
+        linha={vendedorParaPagar}
+        open={Boolean(vendedorParaPagar)}
+        onClose={() => setVendedorParaPagar(null)}
+        onSuccess={handlePagamentoRegistrado}
+        onConflito={() => setPagamentosRefreshKey(k => k + 1)}
       />
 
       {/* Modal de Edição de Percentual */}

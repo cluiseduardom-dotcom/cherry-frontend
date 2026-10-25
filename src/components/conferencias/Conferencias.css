@@ -1,0 +1,24 @@
+.conf-modal { max-width: 720px; }
+.conf-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+.conf-linha { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.conf-linha-nome { flex: 1; min-width: 140px; font-weight: 500; }
+.conf-linha-saldo { font-size: 12px; color: var(--color-text-secondary); min-width: 80px; }
+.conf-linha-qtd { width: 96px; }
+.conf-linha-dif { min-width: 64px; text-align: right; font-weight: 600; font-size: 13px; }
+.conf-sobra { color: var(--color-success, #1a7f4b); }
+.conf-falta { color: var(--color-danger, #b42318); }
+.conf-resumo { font-size: 13px; margin: 8px 0; }
+.conf-ajuste { display: flex; gap: 8px; align-items: flex-start; margin-top: 8px; }
+.conf-aviso { border: 1px solid var(--color-warning, #b54708); border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 13px; }
+.conf-aviso-acoes { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+.acerto-filtros { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px; }
+.acerto-scroll { overflow-x: auto; }
+.acerto-num { text-align: right; font-variant-numeric: tabular-nums; }
+.acerto-total td { font-weight: 700; border-top: 2px solid var(--color-border, #ddd); }
+.acerto-nao-confere { color: var(--color-danger, #b42318); font-weight: 600; }
+.acerto-nota { font-size: 12px; color: var(--color-text-secondary); margin: 8px 0 0; }
+.conf-hist { display: flex; flex-direction: column; gap: 8px; }
+.conf-hist details { border: 1px solid var(--color-border, #ddd); border-radius: 8px; padding: 8px 12px; }
+.conf-hist summary { cursor: pointer; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.conf-hist table { width: 100%; margin-top: 8px; }

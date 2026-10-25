@@ -22,6 +22,7 @@ import {
   BadgePercent,
   ArrowLeftRight,
   Briefcase,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -47,6 +48,7 @@ const NAV_META_BY_PATH = {
   '/venda':            { icon: ShoppingCart,    label: 'Venda',               section: 'principal' },
   '/estoque':          { icon: Package,         label: 'Estoque',             section: 'principal' },
   '/transferencias':   { icon: ArrowLeftRight, label: 'Transferências',      section: 'principal' },
+  '/acerto-estoque':   { icon: ClipboardCheck, label: 'Acerto de estoque',   section: 'principal' },
   '/minha-maleta':     { icon: Briefcase,       label: 'Minha maleta',        section: 'principal' },
   '/produtos':         { icon: Tag,             label: 'Produtos',            section: 'principal' },
   '/clientes':         { icon: Users,           label: 'Clientes',            section: 'principal' },

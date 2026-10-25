@@ -16,6 +16,7 @@ import {
   BadgePercent,
   ArrowLeftRight,
   Briefcase,
+  ClipboardCheck,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +26,7 @@ import './Mais.css';
 const ITEMS = [
   { path: '/minha-maleta', label: 'Minha maleta', sub: 'Seu estoque, aceites e devoluções', icon: Briefcase },
   { path: '/transferencias', label: 'Transferências', sub: 'Mover estoque entre Central, maletas e consignados', icon: ArrowLeftRight },
+  { path: '/acerto-estoque', label: 'Acerto de estoque', sub: 'Conferir contagem e fechar contas de cada local', icon: ClipboardCheck },
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },
   { path: '/fornecedores', label: 'Fornecedores', sub: 'Cadastro e relacionamento de compras', icon: Building2 },

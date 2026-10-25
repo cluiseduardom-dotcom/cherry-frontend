@@ -4,7 +4,7 @@ import {
   Search, SlidersHorizontal, Barcode, ShoppingCart,
   Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp
 } from 'lucide-react';
-import ProductRow from '../components/ProductRow';
+import ProductCard from '../components/ProductCard';
 import { listarProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
@@ -35,7 +35,7 @@ import './Venda.css';
 // nunca o preco_venda "cru" da tabela produtos — é o que o backend usa
 // para travar o preço da venda. Produto sem preço definido para o canal
 // fica visível na vitrine (price: null) mas não pode ser adicionado ao
-// carrinho — ProductRow desabilita o botão nesse caso.
+// carrinho — ProductCard desabilita o botão nesse caso.
 export function toCartProduct(p) {
   const precoCanal = p.preco_canal?.preco_venda;
   // Filtro de pills usa o nível 1 da categorização estruturada (família, na Cherry)
@@ -525,9 +525,9 @@ export default function Venda() {
           {/* Product list */}
           {!loading && !loadError && (
             filtered.length > 0 ? (
-              <div className="venda-product-list" role="list">
+              <div className="venda-product-list product-grid" role="list">
                 {filtered.map(p => (
-                  <ProductRow key={p.id} product={p} onAddToCart={handleProductClick} rotuloEstoque />
+                  <ProductCard key={p.id} product={p} onAddToCart={handleProductClick} rotuloEstoque />
                 ))}
               </div>
             ) : (

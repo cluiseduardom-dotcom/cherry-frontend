@@ -10,7 +10,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
 import { formatarMoeda } from '../utils/mascaras';
-import ProductRow from '../components/ProductRow';
+import ProductCard from '../components/ProductCard';
 import './Produtos.css';
 
 export function temSku(produto) {
@@ -157,10 +157,11 @@ export default function Produtos() {
       {!loading && !error && (
         <>
           {/* Product list */}
-          <div className="produtos-list" role="list">
+          <div className="produtos-list product-grid" role="list">
             {filtered.map(p => (
-              <ProductRow
+              <ProductCard
                 key={p.id}
+                rotuloEstoque
                 product={{
                   id: p.id,
                   name: p.nome,

@@ -8,6 +8,7 @@ import { filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
 import TransferenciasTabela from '../components/transferencias/TransferenciasTabela';
 import NovaTransferenciaModal from '../components/transferencias/NovaTransferenciaModal';
 import TransferenciaDetalheModal from '../components/transferencias/TransferenciaDetalheModal';
+import AcertoDoLocal from '../components/conferencias/AcertoDoLocal';
 import './Estoque.css';
 
 // Visão do vendedor: o que ele tem na própria maleta, o que está esperando o aceite dele
@@ -161,6 +162,10 @@ export default function MinhaMaleta() {
               <div className="card"><TransferenciasTabela items={recentes} onAbrir={setDetalheId} /></div>
             </>
           )}
+
+          <h2 className="page-subtitle transf-secao">Acerto da maleta</h2>
+          {/* Só leitura: a conferência (contagem) é feita pela equipe. Recarrega ao mudar a maleta. */}
+          <AcertoDoLocal key={`${maleta.id}-${transferencias.length}`} local={maleta} />
         </>
       )}
 

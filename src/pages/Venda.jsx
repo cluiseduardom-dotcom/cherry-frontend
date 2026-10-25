@@ -527,7 +527,7 @@ export default function Venda() {
             filtered.length > 0 ? (
               <div className="venda-product-list" role="list">
                 {filtered.map(p => (
-                  <ProductRow key={p.id} product={p} onAddToCart={handleProductClick} />
+                  <ProductRow key={p.id} product={p} onAddToCart={handleProductClick} rotuloEstoque />
                 ))}
               </div>
             ) : (

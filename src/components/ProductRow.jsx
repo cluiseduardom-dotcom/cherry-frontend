@@ -17,6 +17,7 @@ export default function ProductRow({
   disabled = false,
   selected = false,
   className = '',
+  rotuloEstoque = false,
 }) {
   const [justAdded, setJustAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -135,21 +136,24 @@ export default function ProductRow({
         </div>
       </div>
 
-      {/* 3. Indicador de Estoque */}
+      {/* 3. Indicador de Estoque (com o título "Estoque" quando a tela pede, ex.: Nova Venda) */}
       <div className="product-row-stock-col">
-        {isOutOfStock ? (
-          <span className="product-row-stock-badge product-row-stock-badge--out">
-            Esgotado
-          </span>
-        ) : isLowStock ? (
-          <span className="product-row-stock-badge product-row-stock-badge--low">
-            {stock} restantes
-          </span>
-        ) : (
-          <span className="product-row-stock-text">
-            {stock !== undefined ? `${stock} ${unidade}` : '—'}
-          </span>
-        )}
+        <div className={rotuloEstoque ? 'product-row-stock-stack' : undefined}>
+          {rotuloEstoque && <span className="product-row-stock-label">Estoque</span>}
+          {isOutOfStock ? (
+            <span className="product-row-stock-badge product-row-stock-badge--out">
+              Esgotado
+            </span>
+          ) : isLowStock ? (
+            <span className="product-row-stock-badge product-row-stock-badge--low">
+              {stock} restantes
+            </span>
+          ) : (
+            <span className="product-row-stock-text">
+              {stock !== undefined ? `${stock} ${unidade}` : '—'}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 4. Preço */}

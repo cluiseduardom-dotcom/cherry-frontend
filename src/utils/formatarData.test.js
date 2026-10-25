@@ -21,3 +21,12 @@ describe('formatarData', () => {
     expect(formatarData('2026-13-99')).toBe('Não informada');
   });
 });
+
+describe('formatarDataHora', () => {
+  it('formata timestamp ISO em dd/mm/aaaa hh:mm e tolera valores inválidos', async () => {
+    const { formatarDataHora } = await import('./formatarData');
+    expect(formatarDataHora('2026-10-24T15:30:00')).toMatch(/^24\/10\/2026,? 15:30$/);
+    expect(formatarDataHora(null)).toBe('—');
+    expect(formatarDataHora('lixo')).toBe('—');
+  });
+});

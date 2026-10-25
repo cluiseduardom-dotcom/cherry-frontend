@@ -14,6 +14,8 @@ import {
   Building2,
   ShoppingCart,
   BadgePercent,
+  ArrowLeftRight,
+  Briefcase,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +23,8 @@ import { canAccessRoute } from '../config/access';
 import './Mais.css';
 
 const ITEMS = [
+  { path: '/minha-maleta', label: 'Minha maleta', sub: 'Seu estoque, aceites e devoluções', icon: Briefcase },
+  { path: '/transferencias', label: 'Transferências', sub: 'Mover estoque entre Central, maletas e consignados', icon: ArrowLeftRight },
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },
   { path: '/fornecedores', label: 'Fornecedores', sub: 'Cadastro e relacionamento de compras', icon: Building2 },

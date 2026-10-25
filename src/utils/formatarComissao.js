@@ -24,6 +24,7 @@ export function obterAbasPermitidas({ user, temCapacidade = () => false } = {}) 
   }
 
   lista.push({ key: 'repasses', label: 'Repasses' });
+  lista.push({ key: 'pagamentos', label: 'Pagamentos' });
 
   if (podeGerirPercentuais) {
     lista.push({ key: 'percentuais', label: 'Percentuais' });

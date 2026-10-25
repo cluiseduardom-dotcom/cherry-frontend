@@ -68,3 +68,30 @@ export async function atualizarPercentual({ usuario_id, percentual }) {
   });
   return body.data;
 }
+
+// ---- Pagamento da comissão AO vendedor (a empresa pagando) ----
+
+// Admin: por vendedor, o líquido liberado ainda não pago ({ items: [{ vendedor_id, vendedor_nome,
+// a_pagar, bruto_a_pagar, descontos, quantidade_comissoes }], totais: { a_pagar } }).
+export async function listarAPagar() {
+  const body = await apiFetch('/comissoes/a-pagar');
+  return body.data;
+}
+
+// Admin/gerente: todos; vendedor: só os seus (o backend ignora o filtro para ele).
+export async function listarPagamentosComissao({ vendedor_id, page = 1, pageSize = 20 } = {}) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (vendedor_id) params.set('vendedor_id', String(vendedor_id));
+
+  const body = await apiFetch(`/comissoes/pagamentos?${params.toString()}`);
+  return body.data;
+}
+
+// Só admin. { vendedor_id, valor_esperado, forma, pago_em: 'AAAA-MM-DD', observacao? }
+export async function registrarPagamentoComissao(dados) {
+  const body = await apiFetch('/comissoes/pagamentos', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+  return body.data;
+}

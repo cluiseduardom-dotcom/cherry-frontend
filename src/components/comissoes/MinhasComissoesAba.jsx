@@ -114,6 +114,22 @@ export default function MinhasComissoesAba({
             <span className="comissoes-kpi-sub">Por cancelamento de vendas</span>
           </div>
 
+          <div className="comissoes-kpi-card card card-padding comissoes-kpi-card--success">
+            <span className="comissoes-kpi-title">Já Recebido</span>
+            <span className="comissoes-kpi-value text-success">
+              {formatarMoeda(totais.total_pago ?? 0)}
+            </span>
+            <span className="comissoes-kpi-sub">Pago a você pela empresa</span>
+          </div>
+
+          <div className="comissoes-kpi-card card card-padding">
+            <span className="comissoes-kpi-title">A Receber</span>
+            <span className="comissoes-kpi-value">
+              {formatarMoeda(totais.a_receber ?? 0)}
+            </span>
+            <span className="comissoes-kpi-sub">Liberado e ainda não pago</span>
+          </div>
+
           <div className="comissoes-kpi-card card card-padding">
             <span className="comissoes-kpi-title">Dinheiro a Repassar</span>
             <span className="comissoes-kpi-value">
@@ -173,6 +189,7 @@ export default function MinhasComissoesAba({
                   <th>%</th>
                   <th>Comissão</th>
                   <th>Liberado</th>
+                  <th>Pago</th>
                   <th>Pendente</th>
                   <th>Status</th>
                   <th style={{ textAlign: 'right' }}>Ações</th>
@@ -197,6 +214,7 @@ export default function MinhasComissoesAba({
                       <td className="text-success font-medium">
                         {formatarMoeda(item.valor_liberado)}
                       </td>
+                      <td>{formatarMoeda(item.valor_pago ?? 0)}</td>
                       <td className="text-secondary font-medium">
                         {formatarMoeda(item.valor_pendente)}
                       </td>

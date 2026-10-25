@@ -95,6 +95,25 @@ describe('removeFromKitDraft', () => {
 });
 
 describe('buildVendaItens', () => {
+  it('com local escolhido, TODO item (avulso e componente de kit) leva local_id numérico', () => {
+    const cart = [
+      { type: 'avulso', id: 10, qty: 3, sku: 'X', name: 'X', price: 1, stock: 9, color: '#fff' },
+      { type: 'kit', kitKey: 'k', expanded: false, components: [
+        { id: 1, qty: 2, sku: 'A', name: 'A', price: 1, stock: 9, color: '#fff' },
+      ] },
+    ];
+    expect(buildVendaItens(cart, '7')).toEqual([
+      { produto_id: 10, quantidade: 3, local_id: 7 },
+      { produto_id: 1, quantidade: 2, kit_id: 1, local_id: 7 },
+    ]);
+  });
+
+  it('sem local não envia local_id (o backend decide)', () => {
+    const cart = [{ type: 'avulso', id: 10, qty: 1, sku: 'X', name: 'X', price: 1, stock: 9, color: '#fff' }];
+    expect('local_id' in buildVendaItens(cart, '')[0]).toBe(false);
+    expect('local_id' in buildVendaItens(cart)[0]).toBe(false);
+  });
+
   it('item avulso vira { produto_id, quantidade }, sem kit_id', () => {
     const cart = [{ type: 'avulso', id: 10, qty: 3, sku: 'X', name: 'X', price: 1, stock: 9, color: '#fff' }];
     const itens = buildVendaItens(cart);

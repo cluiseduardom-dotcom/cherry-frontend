@@ -8,10 +8,16 @@ import ProductRow from '../components/ProductRow';
 import { listarProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
+import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
+import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
 import PagamentoPDV from '../components/PagamentoPDV';
 import { selecionarProdutosPdv } from '../utils/produtosPdv';
+import {
+  aplicarSaldosNosProdutos, locaisDeVenda, localPadraoDeVenda, mapaDeSaldos, reduzirSaldosAposVenda,
+} from '../utils/locaisVenda';
+import { rotuloDoLocal } from '../utils/locaisEstoque';
 import {
   calcularResumoPagamento,
   confirmarPagamentoPendente,
@@ -79,18 +85,21 @@ export function removeFromKitDraft(kitDraft, id) {
 }
 
 /* --- Payload da venda: agrupa linhas do carrinho em itens da API --- */
-export function buildVendaItens(cart) {
+export function buildVendaItens(cart, localId) {
   const itens = [];
+  // local_id explícito em todo item quando há local escolhido; sem local, o backend decide
+  // (Maleta ativa do vendedor, senão Central).
+  const comLocal = (item) => (localId ? { ...item, local_id: Number(localId) } : item);
   let nextKitId = 1;
 
   for (const row of cart) {
     if (row.type === 'kit') {
       const kitId = nextKitId++;
       for (const component of row.components) {
-        itens.push({ produto_id: component.id, quantidade: component.qty, kit_id: kitId });
+        itens.push(comLocal({ produto_id: component.id, quantidade: component.qty, kit_id: kitId }));
       }
     } else {
-      itens.push({ produto_id: row.id, quantidade: row.qty });
+      itens.push(comLocal({ produto_id: row.id, quantidade: row.qty }));
     }
   }
 
@@ -122,7 +131,14 @@ function rowQtyCount(row) {
 }
 
 export default function Venda() {
+  const { user } = useAuth();
   const [produtos, setProdutos] = useState([]);
+  // Local de saída: Central ou a própria Maleta. `saldos` = estoque do local escolhido
+  // ({ produto_id: saldo }); null = sem local (usa o estoque do catálogo).
+  const [opcoesLocal, setOpcoesLocal] = useState([]);
+  const [localId, setLocalId] = useState('');
+  const [saldos, setSaldos] = useState(null);
+  const [saldosErro, setSaldosErro] = useState('');
   const [loading, setLoading]   = useState(true);
   const [loadError, setLoadError] = useState('');
 
@@ -165,8 +181,30 @@ export default function Venda() {
     listarClientes().then(data => {
       if (!cancelled) setClientes(Array.isArray(data) ? data : data.items ?? []);
     }).catch(() => {});
+    listarLocais().then(locais => {
+      if (cancelled) return;
+      const opcoes = locaisDeVenda(locais, user?.id);
+      setOpcoesLocal(opcoes);
+      const padrao = localPadraoDeVenda(opcoes);
+      if (padrao) setLocalId(String(padrao.id));
+    }).catch(() => {}); // sem locais: PDV segue como antes (backend escolhe o local)
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id]);
+
+  // Estoque do local escolhido. Enquanto carrega (ou se falhar) tudo conta como 0: nunca
+  // vende com saldo desconhecido.
+  useEffect(() => {
+    if (!localId) return undefined;
+    let cancelled = false;
+    setSaldos({});
+    setSaldosErro('');
+    saldosDoLocal(localId).then(data => {
+      if (!cancelled) setSaldos(mapaDeSaldos(data.items));
+    }).catch(err => {
+      if (!cancelled) setSaldosErro(err.message || 'Não foi possível carregar o estoque do local.');
+    });
+    return () => { cancelled = true; };
+  }, [localId]);
 
   // UX-02 (VERTUMNO-UX-FOUNDATION-P0): "venda em andamento" cobre tudo que o
   // usuário perderia silenciosamente se saísse do PDV agora — itens no
@@ -199,7 +237,10 @@ export default function Venda() {
 
   // Vitrine do PDV: só o que dá para vender (esgotados ao final; sem preço e
   // insumos ficam de fora) — ver utils/produtosPdv.js.
-  const produtosVitrine = useMemo(() => selecionarProdutosPdv(produtos), [produtos]);
+  const produtosVitrine = useMemo(
+    () => selecionarProdutosPdv(aplicarSaldosNosProdutos(produtos, localId ? saldos : null)),
+    [produtos, saldos, localId]
+  );
 
   const categories = useMemo(
     () => ['Todos', ...new Set(produtosVitrine.map(p => p.category).filter(Boolean))],
@@ -354,7 +395,7 @@ export default function Venda() {
       const venda = await criarVenda({
         canal: 'loja_fisica',
         cliente_id: clienteId ? Number(clienteId) : undefined,
-        itens: buildVendaItens(cart),
+        itens: buildVendaItens(cart, localId),
         pagamentos: pagamentosParaEnvio(pagamentos),
         desconto: Number(desconto || 0),
         juros: Number(juros || 0),
@@ -362,7 +403,8 @@ export default function Venda() {
       });
 
       saleIdempotencyKeyRef.current = null;
-      setProdutos(prev => reduceEstoqueAposVenda(prev, venda.itens));
+      if (localId) setSaldos(prev => reduzirSaldosAposVenda(prev, venda.itens));
+      else setProdutos(prev => reduceEstoqueAposVenda(prev, venda.itens));
       setSaleTotal(Number(venda.total));
       setSaleSuccess(true);
       limparVenda();
@@ -401,7 +443,30 @@ export default function Venda() {
           <h1 className="page-title">Nova Venda</h1>
           <p className="page-subtitle">Selecione os produtos e finalize o atendimento</p>
         </div>
+        {opcoesLocal.length > 1 && (
+          <div className="venda-local">
+            <label htmlFor="venda-local" className="venda-local-label">Vender do local</label>
+            <select
+              id="venda-local"
+              className="input-field"
+              value={localId}
+              onChange={e => setLocalId(e.target.value)}
+              disabled={vendaEmAndamento}
+            >
+              {opcoesLocal.map(l => <option key={l.id} value={l.id}>{rotuloDoLocal(l)}</option>)}
+            </select>
+            {vendaEmAndamento && (
+              <span className="venda-local-hint">Finalize ou limpe a venda para trocar o local.</span>
+            )}
+          </div>
+        )}
       </div>
+
+      {saldosErro && (
+        <p className="text-sm venda-payment-error" role="alert">
+          Não foi possível carregar o estoque do local: {saldosErro} Nenhum produto pode ser vendido até recarregar.
+        </p>
+      )}
 
       <div className="venda-layout">
         {/* ===== LEFT COLUMN ===== */}

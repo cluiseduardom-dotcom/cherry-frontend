@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import CancelarVendaModal from '../components/CancelarVendaModal';
 import { useToast } from '../context/ToastContext';
+import { detalheDosPagamentos, resumoFormasDePagamento } from '../utils/formaPagamentoVenda';
 import './Historico.css';
 
 const STATUS_LABEL = {
@@ -225,6 +226,7 @@ export default function Historico() {
                   <th>Cliente</th>
                   <th>Canal</th>
                   <th>Total</th>
+                  <th>Pagamento</th>
                   <th>Status</th>
                   {podeCancelar && <th></th>}
                 </tr>
@@ -255,6 +257,12 @@ export default function Historico() {
                       <td className="historico-items">{CANAL_LABEL[venda.canal] ?? venda.canal}</td>
                       <td className="historico-total">
                         {Number(venda.total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </td>
+                      <td
+                        className="historico-items"
+                        title={detalheDosPagamentos(venda, v => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })) || undefined}
+                      >
+                        {resumoFormasDePagamento(venda)}
                       </td>
                       <td>
                         <span className={`badge ${venda.status === 'finalizada' ? 'badge-success' : 'badge-danger'}`}>

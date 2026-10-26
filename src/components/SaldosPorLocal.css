@@ -1,0 +1,24 @@
+.saldos-por-local { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+
+.saldos-por-local-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.saldos-por-local-seta--aberta { transform: rotate(180deg); }
+
+.saldos-por-local-lista { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+
+.saldos-por-local-linha { display: flex; justify-content: space-between; gap: 8px; }
+
+.saldos-por-local-msg { color: var(--color-text-muted); }
+.saldos-por-local-msg--erro { color: var(--color-danger); }

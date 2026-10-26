@@ -189,3 +189,5 @@
   justify-content: flex-end;
   margin-top: 6px;
 }
+
+.product-card-image-wrapper--zoom { cursor: zoom-in; }

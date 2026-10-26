@@ -60,3 +60,10 @@ export function filtrarSaldos(items, termo) {
 export function totalDeUnidades(items) {
   return (items ?? []).reduce((soma, i) => soma + i.saldo, 0);
 }
+
+// Locais em que o produto tem saldo (> 0), na ordem do backend; rótulo já formatado.
+export function saldosComEstoque(locais) {
+  return (Array.isArray(locais) ? locais : [])
+    .filter(l => Number(l.saldo) > 0)
+    .map(l => ({ local_id: l.local_id, rotulo: rotuloDoLocal(l), saldo: Number(l.saldo) }));
+}

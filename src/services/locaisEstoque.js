@@ -24,3 +24,10 @@ export async function criarLocal(dados) {
   });
   return body.data;
 }
+
+// Saldo do produto em cada local ({ produto_id, estoque_total, consistente, locais: [{ local_id, tipo, nome, usuario_id, saldo }] }).
+// Só equipe de estoque/admin (mesma regra da tela de Estoque).
+export async function saldosPorLocalDoProduto(produtoId) {
+  const body = await apiFetch(`/produtos/${produtoId}/estoque-locais`);
+  return body.data;
+}

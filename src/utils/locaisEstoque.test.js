@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  rotuloDoLocal, usuariosSemMaleta, validarNovoLocal, filtrarSaldos, totalDeUnidades, FORM_LOCAL_VAZIO,
+  rotuloDoLocal, saldosComEstoque, usuariosSemMaleta, validarNovoLocal, filtrarSaldos, totalDeUnidades, FORM_LOCAL_VAZIO,
 } from './locaisEstoque';
 
 describe('rotuloDoLocal', () => {
@@ -78,5 +78,20 @@ describe('filtrarSaldos / totalDeUnidades', () => {
   it('soma as unidades', () => {
     expect(totalDeUnidades(items)).toBe(5);
     expect(totalDeUnidades(undefined)).toBe(0);
+  });
+});
+
+describe('saldosComEstoque', () => {
+  it('mantém só locais com saldo > 0 e formata o rótulo', () => {
+    const locais = [
+      { local_id: 1, tipo: 'central', nome: 'Central', saldo: 98 },
+      { local_id: 3, tipo: 'transito', nome: 'Em trânsito', saldo: 0 },
+      { local_id: 5, tipo: 'maleta', nome: 'Coleção de Outubro', usuario_nome: 'Ana', saldo: '5' },
+    ];
+    expect(saldosComEstoque(locais)).toEqual([
+      { local_id: 1, rotulo: 'Central', saldo: 98 },
+      { local_id: 5, rotulo: 'Coleção de Outubro (Ana)', saldo: 5 },
+    ]);
+    expect(saldosComEstoque(undefined)).toEqual([]);
   });
 });

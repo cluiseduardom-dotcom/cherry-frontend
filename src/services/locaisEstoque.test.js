@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as api from './api';
-import { listarLocais, saldosDoLocal, criarLocal } from './locaisEstoque';
+import { listarLocais, saldosDoLocal, criarLocal, saldosPorLocalDoProduto } from './locaisEstoque';
 
 vi.mock('./api', () => ({ apiFetch: vi.fn() }));
 
@@ -34,5 +34,12 @@ describe('services/locaisEstoque', () => {
   it('propaga o erro do backend sem mascarar', async () => {
     api.apiFetch.mockRejectedValueOnce(new Error('Usuário já possui maleta'));
     await expect(criarLocal({ tipo: 'maleta', usuario_id: 3 })).rejects.toThrow('Usuário já possui maleta');
+  });
+
+  it('saldosPorLocalDoProduto chama GET /produtos/:id/estoque-locais e devolve body.data', async () => {
+    api.apiFetch.mockResolvedValueOnce({ data: { produto_id: 1, estoque_total: 103, locais: [] } });
+    const r = await saldosPorLocalDoProduto(1);
+    expect(api.apiFetch).toHaveBeenLastCalledWith('/produtos/1/estoque-locais');
+    expect(r.estoque_total).toBe(103);
   });
 });

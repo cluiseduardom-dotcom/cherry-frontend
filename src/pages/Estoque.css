@@ -227,3 +227,5 @@
 .estoque-local-select {
   max-width: 260px;
 }
+
+.estoque-total-label { font-size: 11px; color: var(--color-text-muted); }

@@ -16,6 +16,7 @@ import PagamentoPDV from '../components/PagamentoPDV';
 import { selecionarProdutosPdv } from '../utils/produtosPdv';
 import {
   aplicarSaldosNosProdutos, locaisDeVenda, localPadraoDeVenda, mapaDeSaldos, reduzirSaldosAposVenda,
+  rotuloEstoqueDoLocal,
 } from '../utils/locaisVenda';
 import { rotuloDoLocal } from '../utils/locaisEstoque';
 import {
@@ -240,6 +241,11 @@ export default function Venda() {
   const produtosVitrine = useMemo(
     () => selecionarProdutosPdv(aplicarSaldosNosProdutos(produtos, localId ? saldos : null)),
     [produtos, saldos, localId]
+  );
+
+  const rotuloEstoque = useMemo(
+    () => (localId ? rotuloEstoqueDoLocal(opcoesLocal.find(l => String(l.id) === String(localId))) : 'Estoque'),
+    [opcoesLocal, localId]
   );
 
   const categories = useMemo(
@@ -527,7 +533,7 @@ export default function Venda() {
             filtered.length > 0 ? (
               <div className="venda-product-list product-grid" role="list">
                 {filtered.map(p => (
-                  <ProductCard key={p.id} product={p} onAddToCart={handleProductClick} rotuloEstoque />
+                  <ProductCard key={p.id} product={p} onAddToCart={handleProductClick} rotuloEstoque estoqueRotulo={rotuloEstoque} />
                 ))}
               </div>
             ) : (

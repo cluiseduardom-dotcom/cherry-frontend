@@ -166,7 +166,7 @@ export default function Produtos() {
             {filtered.map(p => (
               <ProductCard
                 key={p.id}
-                rotuloEstoque
+                ocultarEstoque
                 product={{
                   id: p.id,
                   name: p.nome,

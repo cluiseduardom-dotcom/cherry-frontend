@@ -17,10 +17,12 @@ import {
   ArrowLeftRight,
   Briefcase,
   ClipboardCheck,
+  LogOut,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/access';
+import { rotuloDoUsuario } from '../config/papeis';
 import './Mais.css';
 
 const ITEMS = [
@@ -43,8 +45,14 @@ const ITEMS = [
 ];
 
 export default function Mais() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const items = ITEMS.filter(item => canAccessRoute(item.path, user));
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
 
   return (
     <div className="page-content mais-page">
@@ -70,6 +78,18 @@ export default function Mais() {
             <ArrowRight size={17} className="mais-card-arrow" />
           </Link>
         ))}
+      </div>
+
+      {/* No celular o menu lateral não existe: é aqui que o usuário sai da conta. */}
+      <div className="mais-conta card card-padding">
+        <div className="mais-conta-info">
+          <span className="mais-conta-nome">{user?.nome}</span>
+          <span className="mais-conta-papel">{rotuloDoUsuario(user)}</span>
+        </div>
+        <button type="button" className="btn btn-ghost mais-conta-sair" onClick={handleLogout}>
+          <LogOut size={16} />
+          Sair
+        </button>
       </div>
     </div>
   );

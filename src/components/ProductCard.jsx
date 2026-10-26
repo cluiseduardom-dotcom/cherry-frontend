@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Check, Package } from 'lucide-react';
+import FotosViewer from './FotosViewer';
 import { formatarMoeda } from '../utils/mascaras';
 import './ProductCard.css';
 
@@ -15,6 +16,7 @@ import './ProductCard.css';
  * - `rotuloEstoque`: mostra a linha "Estoque: N un" (Nova Venda).
  * - `estoqueRotulo`: troca o texto do rótulo da linha de estoque (ex.: "Saldo no local").
  * - `ocultarPreco` / `ocultarEstoque`: para telas que não têm esse dado.
+ * - Tocar na foto abre o visualizador com todas as fotos do produto (sem acionar o card).
  * - `children`: conteúdo extra no rodapé (ex.: barra de estoque e status na tela Estoque).
  */
 export default function ProductCard({
@@ -31,6 +33,7 @@ export default function ProductCard({
 }) {
   const [justAdded, setJustAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [verFotos, setVerFotos] = useState(false);
 
   if (!product) return null;
 
@@ -68,9 +71,28 @@ export default function ProductCard({
   }
 
   function handleKeyDown(e) {
+    // Teclas vindas do visualizador de fotos (portal) também borbulham até aqui: só vale o card em si.
+    if (e.target !== e.currentTarget) return;
     if (isClickable && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
       handleAdd();
+    }
+  }
+
+  const temFoto = Boolean(imageUrl) && !imageError;
+  const produtoId = product.id;
+
+  function abrirFotos(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setVerFotos(true);
+  }
+
+  function fotoKeyDown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      setVerFotos(true);
     }
   }
 
@@ -94,7 +116,16 @@ export default function ProductCard({
       aria-disabled={isDisabled || undefined}
       aria-label={isClickable ? `Adicionar ${name} ao carrinho` : undefined}
     >
-      <div className="product-card-image-wrapper">
+      <div
+        className={`product-card-image-wrapper ${temFoto && produtoId != null ? 'product-card-image-wrapper--zoom' : ''}`}
+        {...(temFoto && produtoId != null ? {
+          onClick: abrirFotos,
+          onKeyDown: fotoKeyDown,
+          role: 'button',
+          tabIndex: 0,
+          'aria-label': `Ver fotos de ${name}`,
+        } : {})}
+      >
         {imageUrl && !imageError ? (
           <img
             src={imageUrl}
@@ -171,6 +202,16 @@ export default function ProductCard({
           </div>
         )}
       </div>
+      {verFotos && (
+        <div onClick={e => e.stopPropagation()}>
+          <FotosViewer
+            produtoId={produtoId}
+            nome={name}
+            fotoInicial={imageUrl}
+            onClose={() => setVerFotos(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

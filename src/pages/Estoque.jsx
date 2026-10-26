@@ -11,6 +11,7 @@ import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { rotuloDoLocal, filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
 import { useToast } from '../context/ToastContext';
 import ProductCard from '../components/ProductCard';
+import SaldosPorLocal from '../components/SaldosPorLocal';
 import { corDoProduto as colorForProduto } from '../theme/themes';
 import './Estoque.css';
 
@@ -380,7 +381,9 @@ export default function Estoque() {
                   }}
                   ocultarEstoque
                 >
+                  <span className="estoque-total-label">Total em todos os locais</span>
                   <StockBar value={p.estoque_atual} />
+                  <SaldosPorLocal produtoId={p.id} />
                   {status === 'esgotado' && <span className="badge badge-danger">Esgotado</span>}
                   {status === 'baixo'    && <span className="badge badge-warning"><AlertTriangle size={10} />Baixo</span>}
                   {status === 'ok'       && <span className="badge badge-success">Normal</span>}

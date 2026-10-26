@@ -1,3 +1,5 @@
+import { rotuloDoLocal } from './locaisEstoque';
+
 // Local de saída da venda no PDV. O backend só aceita o Central ou a PRÓPRIA Maleta ativa
 // (consignado, maleta alheia e Em trânsito = 403); aqui só se oferece o que ele aceita.
 // Sem `local_id` o backend usa a Maleta ativa do vendedor, senão o Central: o padrão abaixo espelha isso.
@@ -39,4 +41,11 @@ export function reduzirSaldosAposVenda(saldos, itensVenda) {
     novo[item.produto_id] = Math.max(0, (novo[item.produto_id] ?? 0) - item.quantidade);
   }
   return novo;
+}
+
+// Rótulo da linha de estoque na vitrine do PDV: "Disponível em Central" quando há local de saída;
+// sem local (catálogo), mantém "Estoque".
+export function rotuloEstoqueDoLocal(local) {
+  const nome = rotuloDoLocal(local);
+  return nome ? `Disponível em ${nome}` : 'Estoque';
 }

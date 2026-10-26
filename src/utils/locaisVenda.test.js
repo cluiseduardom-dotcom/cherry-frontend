@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   aplicarSaldosNosProdutos, locaisDeVenda, localPadraoDeVenda, mapaDeSaldos, reduzirSaldosAposVenda,
+  rotuloEstoqueDoLocal,
 } from './locaisVenda';
 
 const central = { id: 1, tipo: 'central', nome: 'Central' };
@@ -52,5 +53,10 @@ describe('saldos', () => {
     const itens = [{ produto_id: 1, quantidade: 2 }, { produto_id: 1, quantidade: 1, kit_id: 1 }, { produto_id: 9, quantidade: 1 }];
     expect(reduzirSaldosAposVenda({ 1: 3, 2: 5 }, itens)).toEqual({ 1: 0, 2: 5, 9: 0 });
     expect(reduzirSaldosAposVenda(null, itens)).toBeNull();
+  });
+
+  test('rótulo de estoque cita o local de saída; sem local mantém "Estoque"', () => {
+    expect(rotuloEstoqueDoLocal({ tipo: 'central', nome: 'Central' })).toBe('Disponível em Central');
+    expect(rotuloEstoqueDoLocal(undefined)).toBe('Estoque');
   });
 });

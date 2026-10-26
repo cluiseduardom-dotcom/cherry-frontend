@@ -6,6 +6,7 @@ import { FIELDS, podeVerCampo } from '../config/access';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
+import ProdutoFotos from './ProdutoFotos';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -83,7 +84,7 @@ export function montarPayload(form, mode) {
   return payload;
 }
 
-export default function ProductModal({ open, mode = 'create', produto, onClose, onSaved }) {
+export default function ProductModal({ open, mode = 'create', produto, onClose, onSaved, onFotosAlteradas }) {
   const { user } = useAuth();
   const podeVerCusto = podeVerCampo(user, FIELDS.CUSTO);
 
@@ -285,6 +286,17 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                 />
                 Produto ativo
               </label>
+
+              {mode === 'edit' && produto?.id ? (
+                <ProdutoFotos
+                  produtoId={produto.id}
+                  onChange={imagens => onFotosAlteradas?.(produto.id, imagens)}
+                />
+              ) : (
+                <span className="modal-field-hint modal-form-span-2">
+                  Salve o produto para adicionar fotos.
+                </span>
+              )}
             </div>
           </div>
 

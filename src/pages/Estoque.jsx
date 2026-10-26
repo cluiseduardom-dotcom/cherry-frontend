@@ -10,6 +10,7 @@ import NovoLocalModal from '../components/NovoLocalModal';
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { rotuloDoLocal, filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
 import { useToast } from '../context/ToastContext';
+import ProductCard from '../components/ProductCard';
 import { corDoProduto as colorForProduto } from '../theme/themes';
 import './Estoque.css';
 
@@ -321,21 +322,17 @@ export default function Estoque() {
       )}
 
       {localId && !loadingLocal && !erroLocal && (
-        <div className="card">
-          <table className="estoque-table">
-            <thead>
-              <tr><th>Produto</th><th>SKU</th><th>Saldo no local</th></tr>
-            </thead>
-            <tbody>
-              {saldosFiltrados.map(i => (
-                <tr key={i.produto_id} className="estoque-row">
-                  <td><span className="estoque-product-name">{i.nome}</span></td>
-                  <td><span className="estoque-sku">{i.sku || '—'}</span></td>
-                  <td><strong>{i.saldo}</strong></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div>
+          <div className="product-grid" role="list">
+            {saldosFiltrados.map(i => (
+              <ProductCard
+                key={i.produto_id}
+                product={{ id: i.produto_id, name: i.nome, sku: i.sku, stock: i.saldo, color: colorForProduto(i.produto_id) }}
+                ocultarPreco
+                estoqueRotulo="Saldo no local"
+              />
+            ))}
+          </div>
           {saldosFiltrados.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><Package size={24} /></div>
@@ -361,62 +358,36 @@ export default function Estoque() {
       )}
 
       {!localId && !loading && !error && (
-        /* Table */
-        <div className="card">
-          <table className="estoque-table">
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>SKU</th>
-                <th>Categorias</th>
-                <th>Preço</th>
-                <th>Estoque</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(p => {
-                const status =
-                  p.estoque_atual === 0 ? 'esgotado' :
-                  p.estoque_atual <= p.estoque_minimo ? 'baixo' :
-                  'ok';
-                return (
-                  <tr key={p.id} className={`estoque-row estoque-row--${status}`}>
-                    <td>
-                      <div className="estoque-product-cell">
-                        <div
-                          className="estoque-product-thumb"
-                          style={{ background: `linear-gradient(135deg, ${colorForProduto(p.id)}33, ${colorForProduto(p.id)}66)`, color: colorForProduto(p.id) }}
-                        >
-                          {p.nome.split(' ').slice(0, 2).map(w => w[0]).join('')}
-                        </div>
-                        <span className="estoque-product-name">{p.nome}</span>
-                      </div>
-                    </td>
-                    <td><span className="estoque-sku">{p.sku || '—'}</span></td>
-                    <td>
-                      {p.categorias?.length > 0 ? (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                          {[...p.categorias].sort((a, b) => a.nivel - b.nivel).map(c => (
-                            <span key={c.id} className="badge badge-primary">{c.nome}</span>
-                          ))}
-                        </div>
-                      ) : '—'}
-                    </td>
-                    <td className="estoque-price">
-                      {Number(p.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </td>
-                    <td><StockBar value={p.estoque_atual} /></td>
-                    <td>
-                      {status === 'esgotado' && <span className="badge badge-danger">Esgotado</span>}
-                      {status === 'baixo'    && <span className="badge badge-warning"><AlertTriangle size={10} />Baixo</span>}
-                      {status === 'ok'       && <span className="badge badge-success">Normal</span>}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div>
+          <div className="product-grid" role="list">
+            {filtered.map(p => {
+              const status =
+                p.estoque_atual === 0 ? 'esgotado' :
+                p.estoque_atual <= p.estoque_minimo ? 'baixo' :
+                'ok';
+              return (
+                <ProductCard
+                  key={p.id}
+                  product={{
+                    id: p.id,
+                    name: p.nome,
+                    sku: p.sku,
+                    price: p.preco_venda,
+                    stock: p.estoque_atual,
+                    color: colorForProduto(p.id),
+                    categorias: p.categorias,
+                    imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
+                  }}
+                  ocultarEstoque
+                >
+                  <StockBar value={p.estoque_atual} />
+                  {status === 'esgotado' && <span className="badge badge-danger">Esgotado</span>}
+                  {status === 'baixo'    && <span className="badge badge-warning"><AlertTriangle size={10} />Baixo</span>}
+                  {status === 'ok'       && <span className="badge badge-success">Normal</span>}
+                </ProductCard>
+              );
+            })}
+          </div>
           {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><Package size={24} /></div>

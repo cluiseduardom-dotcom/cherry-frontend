@@ -21,9 +21,7 @@
 }
 
 .produtos-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2, 8px);
+  align-content: start;
 }
 
 .produtos-grid {

@@ -96,10 +96,15 @@ export default function Produtos() {
   function handleSaved(produtoSalvo) {
     setProdutos(prev => {
       if (modalMode === 'create') return [produtoSalvo, ...prev];
-      return prev.map(p => (p.id === produtoSalvo.id ? produtoSalvo : p));
+      // Mescla: a resposta da edição não traz categorias nem foto, que precisam continuar no card.
+      return prev.map(p => (p.id === produtoSalvo.id ? { ...p, ...produtoSalvo } : p));
     });
     setModalOpen(false);
     toast.success(modalMode === 'create' ? 'Produto criado com sucesso.' : 'Produto atualizado com sucesso.');
+  }
+
+  function handleFotosAlteradas(produtoId, imagens) {
+    setProdutos(prev => prev.map(p => (p.id === produtoId ? { ...p, imagem_url: imagens[0]?.url ?? null } : p)));
   }
 
   function openCategorizarModal(produto) {
@@ -247,6 +252,7 @@ export default function Produtos() {
         produto={editingProduto}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}
+        onFotosAlteradas={handleFotosAlteradas}
       />
 
       <CategorizarProdutoModal

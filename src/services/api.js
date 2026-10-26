@@ -21,7 +21,8 @@ export async function apiFetch(path, { skipAuthRedirect = false, headers, ...opt
     response = await fetch(`${BASE_URL}${path}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        // Upload (FormData): o navegador define o Content-Type com o boundary; fixar JSON quebraria o envio.
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },

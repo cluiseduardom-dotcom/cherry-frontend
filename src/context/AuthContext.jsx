@@ -71,6 +71,12 @@ export function AuthProvider({ children }) {
     };
   }, [logout]);
 
+  // Troca de senha devolve um token novo (o antigo cai por token_version): mantém a sessão atual.
+  function atualizarToken(novoToken) {
+    setToken(novoToken);
+    if (user) salvarSessao({ token: novoToken, user });
+  }
+
   async function login(email, senha) {
     setLoading(true);
     setError('');
@@ -96,6 +102,7 @@ export function AuthProvider({ children }) {
     error,
     login,
     logout,
+    atualizarToken,
     temCapacidade,
   };
 

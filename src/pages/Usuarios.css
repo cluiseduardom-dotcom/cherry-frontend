@@ -119,3 +119,22 @@
   text-align: right;
   max-width: 260px;
 }
+
+/* Celular: a tabela de 6 colunas escondia as ações fora da tela (só rolando de lado). Vira lista
+   de cartões: usuário + cargo/status em cima, ações embaixo; telefone e data só no desktop. */
+@media (max-width: 640px) {
+  .tabela-usuarios thead { display: none; }
+  .tabela-usuarios, .tabela-usuarios tbody { display: block; width: 100%; }
+  .tabela-usuarios tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border, #eee);
+  }
+  .tabela-usuarios td { display: block; padding: 0; border: 0; }
+  .tabela-usuarios .usuarios-col-secundaria { display: none; }
+  .tabela-usuarios .usuarios-col-acoes { grid-column: 1 / -1; text-align: left !important; }
+  .tabela-usuarios .usuarios-actions-cell { flex-wrap: wrap; justify-content: flex-start !important; gap: 8px; }
+}

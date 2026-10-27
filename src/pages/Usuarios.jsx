@@ -211,14 +211,14 @@ export default function Usuarios() {
             </div>
           ) : (
             <div className="table-scroll">
-              <table className="tabela-gestao">
+              <table className="tabela-gestao tabela-usuarios">
                 <thead>
                   <tr>
                     <th>Usuário</th>
                     <th>Cargo</th>
-                    <th>Telefone</th>
+                    <th className="usuarios-col-secundaria">Telefone</th>
                     <th>Status</th>
-                    <th>Cadastrado em</th>
+                    <th className="usuarios-col-secundaria">Cadastrado em</th>
                     <th style={{ textAlign: 'right' }}>Ações</th>
                   </tr>
                 </thead>
@@ -244,7 +244,7 @@ export default function Usuarios() {
                             {formatarCargo(u.cargo)}
                           </span>
                         </td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+                        <td className="usuarios-col-secundaria" style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
                           {u.telefone ? aplicarMascaraTelefone(u.telefone) : '—'}
                         </td>
                         <td>
@@ -252,10 +252,10 @@ export default function Usuarios() {
                             {u.ativo ? 'Ativo' : 'Bloqueado'}
                           </span>
                         </td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                        <td className="usuarios-col-secundaria" style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                           {formatarDataHora(u.criado_em)}
                         </td>
-                        <td style={{ textAlign: 'right' }}>
+                        <td className="usuarios-col-acoes" style={{ textAlign: 'right' }}>
                           <div className="usuarios-actions-cell" style={{ justifyContent: 'flex-end' }}>
                             {(podeGerenciar || u.id === usuarioLogadoId) && (
                               <button

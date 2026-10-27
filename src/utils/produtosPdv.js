@@ -21,3 +21,18 @@ export function selecionarProdutosPdv(produtos) {
   // sort estável: preserva a ordem original dentro de cada grupo
   return [...exibiveis].sort((a, b) => Number(ehEsgotado(a)) - Number(ehEsgotado(b)));
 }
+
+// Produtos que o PDV esconde só por falta de preço no canal (insumos não contam: nunca são
+// vendidos). Usado para avisar o operador, em vez de a vitrine parecer simplesmente vazia.
+export function contarSemPrecoNoCanal(produtos) {
+  return produtos.filter(p => p.price == null && !ehInsumo(p)).length;
+}
+
+export function mensagemSemPreco(qtd, podeDefinirPreco) {
+  if (!qtd) return '';
+  const produtos = qtd === 1 ? '1 produto ativo está' : `${qtd} produtos ativos estão`;
+  const acao = podeDefinirPreco
+    ? 'Defina o preço em Produtos, no botão $ de cada produto.'
+    : 'Peça a um administrador para definir o preço.';
+  return `${produtos} sem preço neste canal e não aparece${qtd === 1 ? '' : 'm'} aqui. ${acao}`;
+}

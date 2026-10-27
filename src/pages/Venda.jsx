@@ -13,7 +13,8 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
 import PagamentoPDV from '../components/PagamentoPDV';
-import { selecionarProdutosPdv } from '../utils/produtosPdv';
+import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from '../utils/produtosPdv';
+import { canAccessRoute } from '../config/access';
 import {
   aplicarSaldosNosProdutos, locaisDeVenda, localPadraoDeVenda, mapaDeSaldos, reduzirSaldosAposVenda,
   rotuloEstoqueDoLocal,
@@ -241,6 +242,13 @@ export default function Venda() {
   const produtosVitrine = useMemo(
     () => selecionarProdutosPdv(aplicarSaldosNosProdutos(produtos, localId ? saldos : null)),
     [produtos, saldos, localId]
+  );
+
+  // Produtos ativos que ficam fora da vitrine só por não terem preço no canal: avisa em vez de
+  // deixar a tela parecer vazia sem explicação.
+  const avisoSemPreco = useMemo(
+    () => mensagemSemPreco(contarSemPrecoNoCanal(produtos), canAccessRoute('/produtos/:id/precos', user)),
+    [produtos, user]
   );
 
   const rotuloEstoque = useMemo(
@@ -472,6 +480,10 @@ export default function Venda() {
         <p className="text-sm venda-payment-error" role="alert">
           Não foi possível carregar o estoque do local: {saldosErro} Nenhum produto pode ser vendido até recarregar.
         </p>
+      )}
+
+      {!loading && avisoSemPreco && (
+        <p className="text-sm venda-aviso-sem-preco" role="status">{avisoSemPreco}</p>
       )}
 
       <div className="venda-layout">

@@ -172,7 +172,7 @@ export default function Produtos() {
                   name: p.nome,
                   sku: p.sku,
                   semSku: !temSku(p),
-                  price: p.preco_venda,
+                  price: p.preco_canal?.preco_venda ?? null,
                   stock: p.estoque_atual,
                   unidade: p.unidade,
                   imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,

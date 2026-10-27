@@ -373,7 +373,7 @@ export default function Estoque() {
                     id: p.id,
                     name: p.nome,
                     sku: p.sku,
-                    price: p.preco_venda,
+                    price: p.preco_canal?.preco_venda ?? null,
                     stock: p.estoque_atual,
                     color: colorForProduto(p.id),
                     categorias: p.categorias,

@@ -5,7 +5,6 @@ const formBase = {
   nome: 'Anel Prata',
   descricao: '',
   unidade: 'UN',
-  preco_venda: '49.9',
   custo: '20',
   estoque_atual: '10',
   estoque_minimo: '2',
@@ -13,7 +12,7 @@ const formBase = {
 };
 
 describe('validar', () => {
-  it('não exige mais SKU nem categoria — só nome e preço (e custo para quem pode ver)', () => {
+  it('não exige SKU, categoria nem preço de venda — só nome (e custo para quem pode ver)', () => {
     expect(validar(formBase, 'create', true)).toBe('');
   });
 
@@ -21,12 +20,18 @@ describe('validar', () => {
     expect(validar({ ...formBase, nome: '' }, 'create', true)).toBe('Nome é obrigatório');
   });
 
-  it('continua exigindo preço de venda válido', () => {
-    expect(validar({ ...formBase, preco_venda: '0' }, 'create', true)).toBe('Preço de venda deve ser maior que zero');
+  it('continua exigindo custo válido para quem pode ver custo', () => {
+    expect(validar({ ...formBase, custo: '0' }, 'create', true)).toBe('Custo deve ser maior que zero');
+    expect(validar({ ...formBase, custo: '' }, 'create', true)).toBe('Custo deve ser maior que zero');
   });
 });
 
 describe('montarPayload', () => {
+  it('não envia preco_venda: o preço é definido por canal em "Precificar por canal"', () => {
+    expect('preco_venda' in montarPayload(formBase, 'create')).toBe(false);
+    expect('preco_venda' in montarPayload(formBase, 'edit')).toBe(false);
+  });
+
   it('nunca envia sku nem categoria — o bug que este modal corrige', () => {
     const payload = montarPayload(formBase, 'create');
     expect('sku' in payload).toBe(false);

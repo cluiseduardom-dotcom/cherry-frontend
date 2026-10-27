@@ -210,7 +210,8 @@ export default function Produtos() {
                       <>
                         <button
                           className="produto-action-btn"
-                          aria-label="Editar"
+                          aria-label="Editar produto"
+                          title="Editar produto"
                           onClick={(e) => {
                             e.stopPropagation();
                             openEditModal(p);
@@ -220,7 +221,8 @@ export default function Produtos() {
                         </button>
                         <button
                           className="produto-action-btn produto-action-btn--danger"
-                          aria-label="Excluir"
+                          aria-label="Excluir produto"
+                          title="Excluir produto"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(p.id);

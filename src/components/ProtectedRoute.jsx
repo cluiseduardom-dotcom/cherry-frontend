@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { homeRouteForRole, canAccessRoute, podeComCapacidade } from '../config/access';
+import { homeRouteForRole, canAccessRoute, podeComCapacidade, rotaSoPlataforma } from '../config/access';
 
 const ROTA_TROCA_SENHA = '/conta/seguranca';
 
@@ -29,6 +29,11 @@ export default function ProtectedRoute({ children, allowedRoles, path }) {
   // do Layout não tem `path`: sem a checagem de `path` o redirecionamento entraria em laço.
   if (user.senha_temporaria && path && path !== ROTA_TROCA_SENHA) {
     return <Navigate to={ROTA_TROCA_SENHA} replace />;
+  }
+
+  // Operador da plataforma: nem o admin com a capacidade 'administrador' entra sem a marca.
+  if (path && rotaSoPlataforma(path) && user.plataforma_admin !== true) {
+    return <Navigate to={homeRouteForRole(user.role)} replace />;
   }
 
   if (podeComCapacidade(user, 'administrador')) {

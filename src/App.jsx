@@ -15,6 +15,7 @@ import AcertoEstoque from './pages/AcertoEstoque';
 import Consumo from './pages/Consumo';
 import AlterarSenha from './pages/AlterarSenha';
 import DadosEmpresa from './pages/DadosEmpresa';
+import PlataformaTaxas from './pages/PlataformaTaxas';
 import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
@@ -68,6 +69,7 @@ const ROUTE_COMPONENTS = {
   '/configuracoes/categorias': CategoriasProduto,
   '/configuracoes/sku': ConfiguracaoSku,
   '/configuracoes/empresa': DadosEmpresa,
+  '/plataforma/taxas': PlataformaTaxas,
 };
 
 const registeredPaths = Object.keys(ALLOWED_ROLES_BY_PATH);

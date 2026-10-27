@@ -1,0 +1,127 @@
+/* Vertumno — taxas a receber por empresa/mês (operador da plataforma). */
+.plataforma-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.plataforma-mes {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.plataforma-mes-rotulo {
+  min-width: 0;
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.plataforma-resumo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.plataforma-resumo-item {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.plataforma-resumo-item--destaque {
+  border-left: 3px solid var(--color-primary);
+}
+
+.plataforma-resumo-valor {
+  font-size: var(--font-size-lg, 1.25rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.tabela-plataforma {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-plataforma th,
+.tabela-plataforma td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+}
+
+.tabela-plataforma th {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.tabela-plataforma .plataforma-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.plataforma-empresa-nome {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.plataforma-estorno {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.plataforma-taxa {
+  font-weight: 700;
+}
+
+.plataforma-nota {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.plataforma-erro {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 640px) {
+  .plataforma-resumo { grid-template-columns: 1fr; }
+  .plataforma-resumo-item--destaque { order: -1; }
+
+  .tabela-plataforma thead { display: none; }
+  .tabela-plataforma, .tabela-plataforma tbody { display: block; width: 100%; }
+  .tabela-plataforma tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    align-items: baseline;
+    padding: 12px var(--space-4);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .tabela-plataforma td { display: block; padding: 0; border: 0; }
+  .tabela-plataforma td.plataforma-num { text-align: right; }
+  .tabela-plataforma .plataforma-col-detalhe { display: none; }
+  .plataforma-linha-movel {
+    display: block;
+    margin-top: 2px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (min-width: 641px) {
+  .plataforma-linha-movel { display: none; }
+}

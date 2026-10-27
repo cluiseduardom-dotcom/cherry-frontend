@@ -57,7 +57,14 @@ describe('formatarUsuario', () => {
       role: 'vendedor', // user.role passa a ser o perfil
       tema: 'cherry',
       senha_temporaria: false,
+      plataforma_admin: false,
     });
+  });
+
+  it('marca plataforma_admin só quando /auth/me confirma com true', () => {
+    expect(formatarUsuario({ perfil: 'admin', plataforma_admin: true }, {}).plataforma_admin).toBe(true);
+    expect(formatarUsuario({ perfil: 'admin', plataforma_admin: 'true' }, {}).plataforma_admin).toBe(false);
+    expect(formatarUsuario({ perfil: 'admin' }, { plataforma_admin: true }).plataforma_admin).toBe(false);
   });
 
   it('marca senha_temporaria quando /auth/me avisa', () => {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Globe, ChevronRight, FolderTree } from 'lucide-react';
+import { User, Globe, ChevronRight, FolderTree, Landmark } from 'lucide-react';
 import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
 import { useToast } from '../context/ToastContext';
 import './Configuracoes.css';
@@ -33,6 +33,15 @@ const sections = [
   },
 ];
 
+// Só para o operador da plataforma (user.plataforma_admin): o backend é quem barra de fato.
+const secaoPlataforma = {
+  title: 'Vertumno',
+  icon: Landmark,
+  items: [
+    { label: 'Taxas a receber', sub: 'Taxa da plataforma por loja, mês a mês', path: '/plataforma/taxas' },
+  ],
+};
+
 export default function Configuracoes() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -61,7 +70,7 @@ export default function Configuracoes() {
 
       <div className="configuracoes-layout">
         <div className="configuracoes-sections">
-          {sections.map(({ title, icon: Icon, items }) => (
+          {(user?.plataforma_admin ? [...sections, secaoPlataforma] : sections).map(({ title, icon: Icon, items }) => (
             <div key={title} className="card">
               <div className="config-section-header">
                 <div className="config-section-icon">

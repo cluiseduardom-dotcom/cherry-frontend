@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Tag, DollarSign, Edit, Trash2, Layers } from 'lucide-react';
+import { Search, Plus, Tag, DollarSign, Edit, Trash2, Layers, Boxes } from 'lucide-react';
 import { listarProdutos, excluirProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
+import FichaVendaModal from '../components/FichaVendaModal';
 import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
@@ -31,6 +32,7 @@ export default function Produtos() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [editingProduto, setEditingProduto] = useState(null);
+  const [fichaProduto, setFichaProduto] = useState(null);
   const [categorizarModalOpen, setCategorizarModalOpen] = useState(false);
   const [categorizandoProduto, setCategorizandoProduto] = useState(null);
 
@@ -206,6 +208,19 @@ export default function Produtos() {
                         <Layers size={14} />
                       </button>
                     )}
+                    {podeGerenciar && p.tipo !== 'insumo' && (
+                      <button
+                        className="produto-action-btn"
+                        aria-label="Ficha de venda"
+                        title="Ficha de venda (insumos)"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFichaProduto(p);
+                        }}
+                      >
+                        <Boxes size={14} />
+                      </button>
+                    )}
                     {podeGerenciar && (
                       <>
                         <button
@@ -247,6 +262,13 @@ export default function Produtos() {
           )}
         </>
       )}
+
+      <FichaVendaModal
+        open={fichaProduto !== null}
+        produto={fichaProduto}
+        onClose={() => setFichaProduto(null)}
+        onSaved={() => { setFichaProduto(null); toast.success('Ficha de venda salva.'); }}
+      />
 
       <ProductModal
         open={modalOpen}

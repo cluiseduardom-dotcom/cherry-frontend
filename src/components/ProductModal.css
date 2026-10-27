@@ -133,3 +133,7 @@
     grid-column: span 1;
   }
 }
+
+.ficha-linha { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.ficha-linha select { flex: 1; min-width: 0; }
+.ficha-qtd { width: 90px; }

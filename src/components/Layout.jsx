@@ -3,6 +3,8 @@ import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import MobileHeader from './MobileHeader';
 import { useTheme } from '../theme/themeContext';
+import { useAuth } from '../context/AuthContext';
+import { NotificacoesProvider } from '../context/NotificacoesContext';
 import './Layout.css';
 
 const pageTitles = {
@@ -20,21 +22,25 @@ const pageTitles = {
   '/ponto-equilibrio': 'Ponto de Equilíbrio',
   '/despesas-fixas': 'Despesas Fixas',
   '/configuracoes': 'Configurações',
+  '/avisos': 'Avisos',
 };
 
 export default function Layout() {
   const location = useLocation();
   const { marca } = useTheme();
+  const { user } = useAuth();
   const title = pageTitles[location.pathname] ?? marca.nome;
 
   return (
-    <div className="app-layout">
-      <Sidebar />
-      <main className="app-main">
-        <MobileHeader title={title} />
-        <Outlet />
-      </main>
-      <BottomNav />
-    </div>
+    <NotificacoesProvider key={user?.id ?? 'anonimo'}>
+      <div className="app-layout">
+        <Sidebar />
+        <main className="app-main">
+          <MobileHeader title={title} />
+          <Outlet />
+        </main>
+        <BottomNav />
+      </div>
+    </NotificacoesProvider>
   );
 }

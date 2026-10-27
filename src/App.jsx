@@ -24,6 +24,7 @@ import Historico from './pages/Historico';
 import Comissoes from './pages/Comissoes';
 import Usuarios from './pages/Usuarios';
 import Mais from './pages/Mais';
+import Avisos from './pages/Avisos';
 import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
 import ContasPagar from './pages/ContasPagar';
@@ -52,6 +53,7 @@ const ROUTE_COMPONENTS = {
   '/comissoes': Comissoes,
   '/usuarios': Usuarios,
   '/mais': Mais,
+  '/avisos': Avisos,
   '/relatorios': Relatorios,
   '/contas-pagar': ContasPagar,
   '/contas-receber': ContasReceber,

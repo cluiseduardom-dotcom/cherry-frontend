@@ -76,3 +76,12 @@ export async function listarEventosUsuarios({ page = 1, pageSize = 20 } = {}) {
   const body = await apiFetch(`/usuarios/eventos?${params.toString()}`);
   return body.data;
 }
+
+// Só admin. Devolve a senha temporária em texto UMA vez; o usuário precisa trocá-la no primeiro acesso.
+export async function redefinirSenhaUsuario(id, senhaConfirmacao) {
+  const body = await apiFetch(`/usuarios/${id}/redefinir-senha`, {
+    method: 'POST',
+    body: JSON.stringify({ senha_confirmacao: senhaConfirmacao }),
+  });
+  return body.data;
+}

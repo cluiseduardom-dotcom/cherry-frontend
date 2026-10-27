@@ -45,7 +45,7 @@ export default function Produtos() {
       setError('');
       try {
         const data = await listarProdutos({ canal: 'loja_fisica' });
-        if (!cancelled) setProdutos(data.items);
+        if (!cancelled) setProdutos(data.items.filter(p => p.ativo));
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {

@@ -39,6 +39,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/configuracoes': ['admin'],
   '/configuracoes/categorias': ['admin'],
   '/configuracoes/sku': ['admin'],
+  '/configuracoes/empresa': ['admin'],
 };
 
 export const REQUIRED_CAPABILITIES_BY_PATH = {

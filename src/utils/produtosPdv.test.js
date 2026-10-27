@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { selecionarProdutosPdv } from './produtosPdv.js';
+import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from './produtosPdv.js';
 
 const p = (id, extra = {}) => ({ id, name: `P${id}`, price: 10, stock: 5, tipo: 'acabado', ...extra });
 
@@ -33,5 +33,32 @@ describe('selecionarProdutosPdv', () => {
     const original = [p(1, { stock: 0 }), p(2)];
     selecionarProdutosPdv(original);
     expect(original.map(x => x.id)).toEqual([1, 2]);
+  });
+});
+
+describe('contarSemPrecoNoCanal', () => {
+  it('conta só produtos sem preço e que não são insumo', () => {
+    expect(contarSemPrecoNoCanal([p(1), p(2, { price: null }), p(3, { price: null, tipo: 'insumo' })])).toBe(1);
+  });
+
+  it('lista vazia ou toda com preço = 0', () => {
+    expect(contarSemPrecoNoCanal([])).toBe(0);
+    expect(contarSemPrecoNoCanal([p(1)])).toBe(0);
+  });
+});
+
+describe('mensagemSemPreco', () => {
+  it('sem produtos afetados não há mensagem', () => {
+    expect(mensagemSemPreco(0, true)).toBe('');
+  });
+
+  it('singular e plural', () => {
+    expect(mensagemSemPreco(1, true)).toContain('1 produto ativo está sem preço');
+    expect(mensagemSemPreco(3, true)).toContain('3 produtos ativos estão sem preço');
+  });
+
+  it('quem pode definir preço é orientado a usar o botão $; os demais pedem a um administrador', () => {
+    expect(mensagemSemPreco(2, true)).toContain('botão $');
+    expect(mensagemSemPreco(2, false)).toContain('administrador');
   });
 });

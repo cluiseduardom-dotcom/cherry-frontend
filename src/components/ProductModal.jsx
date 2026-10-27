@@ -13,7 +13,6 @@ const EMPTY_FORM = {
   nome: '',
   descricao: '',
   unidade: 'UN',
-  preco_venda: '',
   custo: '',
   estoque_atual: '',
   estoque_minimo: '',
@@ -26,7 +25,6 @@ function formFromProduto(produto) {
     nome: produto.nome ?? '',
     descricao: produto.descricao ?? '',
     unidade: produto.unidade ?? 'UN',
-    preco_venda: produto.preco_venda ?? '',
     custo: produto.custo ?? '',
     estoque_atual: produto.estoque_atual ?? '',
     estoque_minimo: produto.estoque_minimo ?? '',
@@ -36,11 +34,6 @@ function formFromProduto(produto) {
 
 export function validar(form, mode, podeVerCusto) {
   if (!form.nome.trim()) return 'Nome é obrigatório';
-
-  const preco = Number(form.preco_venda);
-  if (form.preco_venda === '' || Number.isNaN(preco) || preco <= 0) {
-    return 'Preço de venda deve ser maior que zero';
-  }
 
   if (podeVerCusto) {
     const custo = Number(form.custo);
@@ -71,7 +64,6 @@ export function montarPayload(form, mode) {
     nome: form.nome.trim(),
     descricao: form.descricao.trim(),
     unidade: form.unidade,
-    preco_venda: Number(form.preco_venda),
     custo: Number(form.custo),
     estoque_minimo: form.estoque_minimo === '' ? undefined : Number(form.estoque_minimo),
     ativo: form.ativo,
@@ -210,19 +202,6 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                 </select>
               </div>
 
-              <div className="input-wrapper">
-                <label className="input-label" htmlFor="pm-preco">Preço de venda *</label>
-                <input
-                  id="pm-preco"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="input-field"
-                  value={form.preco_venda}
-                  onChange={e => updateField('preco_venda', e.target.value)}
-                />
-              </div>
-
               {podeVerCusto && (
                 <div className="input-wrapper">
                   <label className="input-label" htmlFor="pm-custo">Custo *</label>
@@ -236,6 +215,10 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                     onChange={e => updateField('custo', e.target.value)}
                   />
                 </div>
+              )}
+
+              {mode === 'create' && (
+                <p className="text-sm">O preço de venda é definido depois, em "Precificar por canal".</p>
               )}
 
               {mode === 'create' ? (

@@ -27,6 +27,8 @@ export function formatarUsuario(me, usuarioBase = {}) {
     tema: usuarioBase?.tema,
     // Senha definida por um admin: o backend só deixa trocar a senha até concluir a troca.
     senha_temporaria: me?.senha_temporaria === true,
+    // Operador da plataforma (Vertumno): a tela de taxas a receber só aparece para ele.
+    plataforma_admin: me?.plataforma_admin === true,
   };
 }
 

@@ -74,7 +74,7 @@ const NAV_META_BY_PATH = {
 // do Hub de Compras — não deve virar item próprio de menu (o brief pede
 // explicitamente para não criar menus principais separados para
 // Recebimentos).
-const ROTAS_SEM_ITEM_PROPRIO = ['/mais', '/compras/recebimentos', '/conta/seguranca'];
+const ROTAS_SEM_ITEM_PROPRIO = ['/mais', '/compras/recebimentos', '/conta/seguranca', '/plataforma/taxas'];
 
 // UX-04 (Issue #48): /produtos/estoque-baixo já retorna todo produto com
 // estoque_atual <= estoque_minimo — o mesmo conjunto que Estoque.jsx usa

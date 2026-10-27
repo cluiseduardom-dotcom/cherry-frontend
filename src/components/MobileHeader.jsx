@@ -1,9 +1,15 @@
 import { Bell, Menu, Cherry } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useNotificacoes } from '../context/NotificacoesContext';
+import { rotuloContador } from '../utils/notificacoes';
 import { useTheme } from '../theme/themeContext';
 import './MobileHeader.css';
 
 export default function MobileHeader({ title }) {
   const { marca } = useTheme();
+  const navigate = useNavigate();
+  const { naoLidos } = useNotificacoes();
+  const contador = rotuloContador(naoLidos);
 
   return (
     <header className="mobile-header">
@@ -21,11 +27,16 @@ export default function MobileHeader({ title }) {
         <span className="mobile-header-title">{title || marca.nome}</span>
       </div>
       <div className="mobile-header-actions">
-        <button className="mobile-header-btn" aria-label="Notificações">
+        <button
+          type="button"
+          className="mobile-header-btn"
+          aria-label={naoLidos > 0 ? `Avisos (${naoLidos} novos)` : 'Avisos'}
+          onClick={() => navigate('/avisos')}
+        >
           <Bell size={20} strokeWidth={2} />
-          <span className="mobile-header-notif-dot" />
+          {contador && <span className="mobile-header-notif-count">{contador}</span>}
         </button>
-        <button className="mobile-header-btn" aria-label="Menu">
+        <button type="button" className="mobile-header-btn" aria-label="Menu" onClick={() => navigate('/mais')}>
           <Menu size={20} strokeWidth={2} />
         </button>
       </div>

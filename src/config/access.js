@@ -28,6 +28,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/comissoes': ['admin', 'vendedor'],
   '/usuarios': ['admin'],
   '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
+  '/avisos': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
   '/contas-pagar': ['admin'],
   '/contas-receber': ['admin'],

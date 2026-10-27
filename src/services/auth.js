@@ -66,3 +66,12 @@ export async function loginRequest(email, senha) {
     user,
   };
 }
+
+// Troca da própria senha. O backend devolve um token novo (as demais sessões caem).
+export async function alterarSenha({ senha_atual, nova_senha }) {
+  const body = await apiFetch('/auth/senha', {
+    method: 'POST',
+    body: JSON.stringify({ senha_atual, nova_senha }),
+  });
+  return (body?.data ?? body).token;
+}

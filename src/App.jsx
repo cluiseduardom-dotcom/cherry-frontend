@@ -13,6 +13,7 @@ import Transferencias from './pages/Transferencias';
 import MinhaMaleta from './pages/MinhaMaleta';
 import AcertoEstoque from './pages/AcertoEstoque';
 import Consumo from './pages/Consumo';
+import AlterarSenha from './pages/AlterarSenha';
 import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
@@ -56,6 +57,7 @@ const ROUTE_COMPONENTS = {
   '/usuarios': Usuarios,
   '/mais': Mais,
   '/avisos': Avisos,
+  '/conta/seguranca': AlterarSenha,
   '/relatorios': Relatorios,
   '/contas-pagar': ContasPagar,
   '/contas-receber': ContasReceber,

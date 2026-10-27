@@ -17,7 +17,7 @@ const sections = [
     icon: User,
     items: [
       { label: 'Perfil de usuário',     sub: 'Nome, foto e cargo' },
-      { label: 'Segurança',             sub: 'Senha e autenticação' },
+      { label: 'Segurança',             sub: 'Alterar senha', path: '/conta/seguranca' },
     ],
   },
   {

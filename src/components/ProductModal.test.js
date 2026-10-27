@@ -4,6 +4,7 @@ import { validar, montarPayload } from './ProductModal.jsx';
 const formBase = {
   nome: 'Anel Prata',
   descricao: '',
+  tipo: 'acabado',
   unidade: 'UN',
   custo: '20',
   estoque_atual: '10',
@@ -41,5 +42,15 @@ describe('montarPayload', () => {
   it('envia estoque_atual só no modo create', () => {
     expect('estoque_atual' in montarPayload(formBase, 'create')).toBe(true);
     expect('estoque_atual' in montarPayload(formBase, 'edit')).toBe(false);
+  });
+});
+
+describe('tipo do produto', () => {
+  it('envia tipo na criação (acabado por padrão, insumo quando escolhido)', () => {
+    expect(montarPayload(formBase, 'create').tipo).toBe('acabado');
+    expect(montarPayload({ ...formBase, tipo: 'insumo' }, 'create').tipo).toBe('insumo');
+  });
+  it('não envia tipo na edição', () => {
+    expect(montarPayload({ ...formBase, tipo: 'insumo' }, 'edit').tipo).toBeUndefined();
   });
 });

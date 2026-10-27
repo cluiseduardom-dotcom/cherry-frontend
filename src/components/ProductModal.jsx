@@ -12,6 +12,7 @@ import './ProductModal.css';
 const EMPTY_FORM = {
   nome: '',
   descricao: '',
+  tipo: 'acabado',
   unidade: 'UN',
   custo: '',
   estoque_atual: '',
@@ -24,6 +25,7 @@ function formFromProduto(produto) {
   return {
     nome: produto.nome ?? '',
     descricao: produto.descricao ?? '',
+    tipo: produto.tipo ?? 'acabado',
     unidade: produto.unidade ?? 'UN',
     custo: produto.custo ?? '',
     estoque_atual: produto.estoque_atual ?? '',
@@ -70,6 +72,7 @@ export function montarPayload(form, mode) {
   };
 
   if (mode === 'create') {
+    payload.tipo = form.tipo === 'insumo' ? 'insumo' : 'acabado';
     payload.estoque_atual = form.estoque_atual === '' ? undefined : Number(form.estoque_atual);
   }
 
@@ -186,6 +189,22 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                   onChange={e => updateField('descricao', e.target.value)}
                 />
               </div>
+
+              {mode === 'create' && (
+                <div className="input-wrapper">
+                  <label className="input-label" htmlFor="pm-tipo">Tipo</label>
+                  <select
+                    id="pm-tipo"
+                    className="input-field"
+                    value={form.tipo}
+                    onChange={e => updateField('tipo', e.target.value)}
+                  >
+                    <option value="acabado">Produto (vendido ao cliente)</option>
+                    <option value="insumo">Insumo (embalagem, tag, etc.)</option>
+                  </select>
+                  <span className="modal-field-hint">Insumos são baixados automaticamente pela ficha de venda do produto</span>
+                </div>
+              )}
 
               <div className="input-wrapper">
                 <label className="input-label" htmlFor="pm-unidade">Unidade</label>

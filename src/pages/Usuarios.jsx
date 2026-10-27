@@ -3,6 +3,7 @@ import {
   Users,
   UserPlus,
   ShieldAlert,
+  KeyRound,
   ShieldCheck,
   Search,
   History,
@@ -18,6 +19,7 @@ import { formatarCargo, formatarDataHora } from '../utils/usuarios';
 import { aplicarMascaraTelefone } from '../utils/mascaras';
 import CriarUsuarioModal from '../components/usuarios/CriarUsuarioModal';
 import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
+import RedefinirSenhaModal from '../components/usuarios/RedefinirSenhaModal';
 import BloquearUsuarioModal from '../components/usuarios/BloquearUsuarioModal';
 import TrilhaUsuariosAba from '../components/usuarios/TrilhaUsuariosAba';
 import './Usuarios.css';
@@ -37,6 +39,8 @@ export default function Usuarios() {
   const toast = useToast();
   const { user } = useAuth();
   const usuarioLogadoId = user?.id;
+  // Redefinir senha de outro usuário segue só com admin (o backend também exige).
+  const ehAdmin = user?.role === 'admin';
 
   const [abaAtiva, setAbaAtiva] = useState('usuarios'); // 'usuarios' | 'trilha'
   const [usuarios, setUsuarios] = useState([]);
@@ -48,6 +52,7 @@ export default function Usuarios() {
 
   const [modalCriarAberto, setModalCriarAberto] = useState(false);
   const [usuarioParaBloqueio, setUsuarioParaBloqueio] = useState(null);
+  const [usuarioParaSenha, setUsuarioParaSenha] = useState(null);
   const [usuarioParaEdicao, setUsuarioParaEdicao] = useState(null);
   const [trilhaSignal, setTrilhaSignal] = useState(0);
 
@@ -268,6 +273,17 @@ export default function Usuarios() {
                                 <span>Editar dados</span>
                               </button>
                             )}
+                            {ehAdmin && u.id !== usuarioLogadoId && (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-ghost"
+                                onClick={() => setUsuarioParaSenha(u)}
+                                title="Redefinir senha (gera uma senha temporária)"
+                              >
+                                <KeyRound size={14} />
+                                <span>Redefinir senha</span>
+                              </button>
+                            )}
                             {podeGerenciar ? (
                               <button
                                 type="button"
@@ -320,6 +336,13 @@ export default function Usuarios() {
         usuario={usuarioParaEdicao}
         onClose={() => setUsuarioParaEdicao(null)}
         onSuccess={handleDadosEditados}
+      />
+
+      <RedefinirSenhaModal
+        open={Boolean(usuarioParaSenha)}
+        usuario={usuarioParaSenha}
+        onClose={() => setUsuarioParaSenha(null)}
+        onSuccess={() => setTrilhaSignal(s => s + 1)}
       />
 
       <BloquearUsuarioModal

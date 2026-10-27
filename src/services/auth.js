@@ -25,6 +25,8 @@ export function formatarUsuario(me, usuarioBase = {}) {
     capacidades: Array.isArray(me?.capacidades) ? me.capacidades : (usuarioBase?.capacidades || []),
     role: perfil,
     tema: usuarioBase?.tema,
+    // Senha definida por um admin: o backend só deixa trocar a senha até concluir a troca.
+    senha_temporaria: me?.senha_temporaria === true,
   };
 }
 

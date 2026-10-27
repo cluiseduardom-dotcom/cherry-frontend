@@ -74,7 +74,11 @@ export function AuthProvider({ children }) {
   // Troca de senha devolve um token novo (o antigo cai por token_version): mantém a sessão atual.
   function atualizarToken(novoToken) {
     setToken(novoToken);
-    if (user) salvarSessao({ token: novoToken, user });
+    if (user) {
+      const atualizado = { ...user, senha_temporaria: false };
+      setUser(atualizado);
+      salvarSessao({ token: novoToken, user: atualizado });
+    }
   }
 
   async function login(email, senha) {

@@ -56,7 +56,13 @@ describe('formatarUsuario', () => {
       capacidades: ['cancelar_venda', 'ver_cancelamentos'],
       role: 'vendedor', // user.role passa a ser o perfil
       tema: 'cherry',
+      senha_temporaria: false,
     });
+  });
+
+  it('marca senha_temporaria quando /auth/me avisa', () => {
+    expect(formatarUsuario({ perfil: 'vendedor', senha_temporaria: true }, {}).senha_temporaria).toBe(true);
+    expect(formatarUsuario({ perfil: 'vendedor' }, {}).senha_temporaria).toBe(false);
   });
 
   it('configura perfil e role para faturista', () => {

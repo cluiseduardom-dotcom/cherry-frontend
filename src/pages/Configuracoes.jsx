@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Bell, User, Palette, Globe, ChevronRight, FolderTree } from 'lucide-react';
+import { User, Globe, ChevronRight, FolderTree } from 'lucide-react';
 import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
 import { useToast } from '../context/ToastContext';
 import './Configuracoes.css';
@@ -24,28 +24,11 @@ const sections = [
     ],
   },
   {
-    title: 'Aparência',
-    icon: Palette,
-    items: [
-      { label: 'Tema',                  sub: 'Claro, escuro ou automático' },
-      { label: 'Idioma e região',       sub: 'Português (Brasil)' },
-    ],
-  },
-  {
-    title: 'Notificações',
-    icon: Bell,
-    items: [
-      { label: 'Alertas de estoque',    sub: 'Notificações de estoque baixo' },
-      { label: 'Resumo diário',         sub: 'Relatório por e-mail às 20h' },
-    ],
-  },
-  {
     title: 'Empresa',
     icon: Globe,
     items: [
       { label: 'Gestão de usuários',    sub: 'Equipe, acessos e auditoria', path: '/usuarios' },
-      { label: 'Dados da empresa',      sub: 'CNPJ, endereço e contato' },
-      { label: 'Plano e assinatura',    sub: 'Informações de assinatura ainda não configuradas' },
+      { label: 'Dados da empresa',      sub: 'CNPJ, endereço e contato', path: '/configuracoes/empresa' },
     ],
   },
 ];
@@ -126,22 +109,6 @@ export default function Configuracoes() {
             >
               <User size={15} />
               Editar perfil
-            </button>
-          </div>
-
-          <div className="card card-padding plan-card">
-            <div className="plan-card-header">
-              <span className="plan-badge badge badge-primary">PRO</span>
-              <span className="plan-card-title">Plano ativo</span>
-            </div>
-            <div className="plan-card-desc">
-              Informações de plano e assinatura ainda não estão disponíveis neste ambiente.
-            </div>
-            <div className="plan-card-expiry">
-              <span className="text-secondary">Sem data de renovação configurada.</span>
-            </div>
-            <button type="button" className="btn btn-ghost btn-full" style={{ marginTop: 'var(--space-3)' }} disabled>
-              Gerenciar plano
             </button>
           </div>
         </div>

@@ -14,6 +14,7 @@ import MinhaMaleta from './pages/MinhaMaleta';
 import AcertoEstoque from './pages/AcertoEstoque';
 import Consumo from './pages/Consumo';
 import AlterarSenha from './pages/AlterarSenha';
+import DadosEmpresa from './pages/DadosEmpresa';
 import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
@@ -66,6 +67,7 @@ const ROUTE_COMPONENTS = {
   '/configuracoes': Configuracoes,
   '/configuracoes/categorias': CategoriasProduto,
   '/configuracoes/sku': ConfiguracaoSku,
+  '/configuracoes/empresa': DadosEmpresa,
 };
 
 const registeredPaths = Object.keys(ALLOWED_ROLES_BY_PATH);

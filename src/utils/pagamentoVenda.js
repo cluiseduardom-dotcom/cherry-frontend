@@ -311,7 +311,8 @@ export function pagamentosAposMudancaDoCarrinho(carrinho, pagamentos) {
   return carrinho.length === 0 ? [] : pagamentos;
 }
 
-// Payload para a API: só o que foi confirmado, sem o campo interno `status`.
+// Payload para a API: só o que foi confirmado, sem os campos internos `status` e `pix`
+// (dados do QR, só para a tela). `cobranca_codigo` segue: é o que liga o Pix à cobrança paga.
 export function pagamentosParaEnvio(pagamentos) {
-  return pagamentos.filter(pagamentoConfirmado).map(({ status: _status, ...resto }) => resto);
+  return pagamentos.filter(pagamentoConfirmado).map(({ status: _status, pix: _pix, ...resto }) => resto);
 }

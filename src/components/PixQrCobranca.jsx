@@ -82,7 +82,7 @@ export default function PixQrCobranca({ pagamento, consultar = consultarCobranca
     <PixQrPainel
       qrCode={pagamento.pix?.qr_code}
       qrCodeBase64={pagamento.pix?.qr_code_base64}
-      restante={tempoRestante(pagamento.pix?.expira_em, agora)}
+      restante={tempoRestante(pagamento.pix?.expira_em, agora, pagamento.pix?.expira_em_segundos, pagamento.pix?.recebido_em)}
       copiado={copiado}
       onCopiar={copiar}
     />

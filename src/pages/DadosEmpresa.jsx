@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CampoMascarado from '../components/CampoMascarado';
+import MercadoPagoConexao from '../components/MercadoPagoConexao';
 import { useToast } from '../context/ToastContext';
 import { obterDadosEmpresa, atualizarDadosEmpresa } from '../services/empresa';
 import { buscarCep } from '../services/cep';
@@ -165,6 +166,8 @@ export default function DadosEmpresa() {
           </div>
         </form>
       )}
+
+      <MercadoPagoConexao />
     </div>
   );
 }

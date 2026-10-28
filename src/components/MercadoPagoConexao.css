@@ -1,0 +1,4 @@
+/* Bloco de conexão com o Mercado Pago, abaixo do formulário de Dados da empresa. */
+.mp-conexao {
+  margin-top: var(--space-6);
+}

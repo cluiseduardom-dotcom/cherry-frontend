@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Banknote, Check, Clock, CreditCard, HandCoins, QrCode, Wallet, X, XCircle,
 } from 'lucide-react';
+import PixQrCobranca from './PixQrCobranca';
 import { formatarMoeda } from '../utils/mascaras';
+import { gatewayIndisponivel, pagamentoComCobranca, pagamentoDoGateway } from '../utils/pixGateway';
 import {
   FORMAS_PAGAMENTO,
   MAX_PARCELAS,
@@ -64,6 +66,8 @@ export default function PagamentoPDV({
   onConfirmarPendente,
   onRecusarPendente,
   onRemover,
+  criarCobrancaPix, // opcional: com ele, o Pix vira cobrança com QR no Mercado Pago; sem ele, Pix manual
+  onGatewayIndisponivel,
   passoInicial = null, // só para testes de renderização: abre o passo de uma forma
   parcelasIniciais = '1',
 }) {
@@ -73,6 +77,7 @@ export default function PagamentoPDV({
   const [parcelas, setParcelas] = useState(parcelasIniciais);
   const [mesesPrazo, setMesesPrazo] = useState('1');
   const [erroBruto, setErro] = useState(SEM_ERRO);
+  const [criandoPix, setCriandoPix] = useState(false);
   const passoRef = useRef(null);
 
   // O passo abre abaixo dos cards: em telas baixas/estreitas ele pode ficar fora
@@ -120,13 +125,49 @@ export default function PagamentoPDV({
     return true;
   }
 
+  // Pix com cobrança no Mercado Pago: cria a cobrança e lança o pagamento aguardando, com o QR.
+  // Se a loja não usa o Mercado Pago (409), cai no Pix manual de sempre sem travar a venda.
+  async function registrarPixGateway() {
+    const r = montarPagamento({
+      forma: 'pix',
+      textoValor: valorTexto,
+      saldoCentavos: alocavelCentavos,
+      temCliente,
+    });
+    if (r.erro) {
+      setErro({ campo: r.campo, mensagem: r.erro });
+      return;
+    }
+    setCriandoPix(true);
+    try {
+      const cobranca = await criarCobrancaPix(r.pagamento.valor);
+      onAdicionar(pagamentoComCobranca(r.pagamento, cobranca));
+      limparEntrada();
+    } catch (err) {
+      if (gatewayIndisponivel(err)) {
+        onGatewayIndisponivel?.();
+        onAdicionar(r.pagamento);
+        limparEntrada();
+      } else {
+        setErro({ campo: 'forma', mensagem: err.message });
+      }
+    } finally {
+      setCriandoPix(false);
+    }
+  }
+
   function tocarForma(f) {
+    if (criandoPix) return;
     setErro(SEM_ERRO);
     if (f.detalhe) {
       setPasso(passo === f.valor ? null : f.valor);
       return;
     }
     setPasso(null);
+    if (f.valor === 'pix' && criarCobrancaPix) {
+      registrarPixGateway();
+      return;
+    }
     registrar(f.valor);
   }
 
@@ -187,7 +228,14 @@ export default function PagamentoPDV({
             <X size={16} aria-hidden="true" />
           </button>
         </div>
-        {status === STATUS_PAGAMENTO.PENDENTE && (
+        {status === STATUS_PAGAMENTO.PENDENTE && pagamentoDoGateway(p) && (
+          <PixQrCobranca
+            pagamento={p}
+            onPago={() => onConfirmarPendente(index)}
+            onEncerrada={() => onRecusarPendente(index)}
+          />
+        )}
+        {status === STATUS_PAGAMENTO.PENDENTE && !pagamentoDoGateway(p) && (
           <div className="pdv-pay-item-acoes">
             <button type="button" className="btn btn-primary btn-sm" onClick={() => onConfirmarPendente(index)}>
               <Check size={14} /> Confirmar recebimento
@@ -265,10 +313,11 @@ export default function PagamentoPDV({
                     type="button"
                     className={`pdv-pay-forma pdv-pay-forma--${f.valor} ${passo === f.valor ? 'pdv-pay-forma--ativa' : ''}`}
                     aria-pressed={passo === f.valor}
+                    disabled={criandoPix}
                     onClick={() => tocarForma(f)}
                   >
                     <Icone size={20} aria-hidden="true" />
-                    <span>{f.rotulo}</span>
+                    <span>{f.valor === 'pix' && criandoPix ? 'Gerando QR…' : f.rotulo}</span>
                   </button>
                 );
               })}

@@ -54,7 +54,11 @@ export default function PlataformaTaxas() {
         <div className="plataforma-resumo">
           <div className="card plataforma-resumo-item plataforma-resumo-item--destaque">
             <span className="text-xs text-secondary">Total a receber</span>
-            <span className="plataforma-resumo-valor">{formatarMoeda(totais.total_taxa)}</span>
+            <span className="plataforma-resumo-valor">{formatarMoeda(totais.total_a_receber ?? totais.total_taxa)}</span>
+          </div>
+          <div className="card plataforma-resumo-item">
+            <span className="text-xs text-secondary">Já retido no Mercado Pago</span>
+            <span className="plataforma-resumo-valor">{formatarMoeda(totais.total_cobrado_gateway ?? 0)}</span>
           </div>
           <div className="card plataforma-resumo-item">
             <span className="text-xs text-secondary">Vendas apuradas</span>
@@ -93,6 +97,11 @@ export default function PlataformaTaxas() {
                     <span className="plataforma-linha-movel">
                       {i.qtd_vendas} venda(s) · base {formatarMoeda(i.total_base)} · {formatarPercentuais(i.percentuais)}
                     </span>
+                    {Number(i.total_cobrado_gateway) > 0 && (
+                      <span className="plataforma-estorno">
+                        {formatarMoeda(i.total_cobrado_gateway)} já retido no Mercado Pago (taxa total {formatarMoeda(i.total_taxa)})
+                      </span>
+                    )}
                     {i.qtd_estornadas > 0 && (
                       <span className="plataforma-estorno">
                         {i.qtd_estornadas} venda(s) cancelada(s) fora do total ({formatarMoeda(i.total_estornado)})
@@ -102,7 +111,7 @@ export default function PlataformaTaxas() {
                   <td className="plataforma-num plataforma-col-detalhe" data-label="Vendas">{i.qtd_vendas}</td>
                   <td className="plataforma-num plataforma-col-detalhe" data-label="Base">{formatarMoeda(i.total_base)}</td>
                   <td className="plataforma-col-detalhe" data-label="Percentual">{formatarPercentuais(i.percentuais)}</td>
-                  <td className="plataforma-num plataforma-taxa">{formatarMoeda(i.total_taxa)}</td>
+                  <td className="plataforma-num plataforma-taxa">{formatarMoeda(i.total_a_receber ?? i.total_taxa)}</td>
                 </tr>
               ))}
             </tbody>
@@ -112,7 +121,7 @@ export default function PlataformaTaxas() {
 
       <p className="plataforma-nota">
         Valores apurados no momento de cada venda, com o percentual vigente na data. Vendas canceladas não entram no total.
-        O mês segue o horário de Brasília. A cobrança é consolidada e manual por enquanto.
+        O que o Mercado Pago já reteve nos Pix do PDV é abatido, para não cobrar duas vezes. O mês segue o horário de Brasília. A cobrança é consolidada e manual por enquanto.
       </p>
     </div>
   );

@@ -1,0 +1,43 @@
+/* QR do Pix cobrado pelo Mercado Pago, dentro do item "aguardando" do PagamentoPDV. */
+.pix-qr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+.pix-qr-imagem {
+  width: 132px;
+  height: 132px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  object-fit: contain;
+}
+.pix-qr-imagem--vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+.pix-qr-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.pix-qr-status {
+  margin: 0;
+  font-weight: 600;
+}
+.pix-qr-status small {
+  display: block;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .pix-qr { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .pix-qr-info { align-items: center; }
+}

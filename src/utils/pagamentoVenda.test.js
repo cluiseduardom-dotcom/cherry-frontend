@@ -289,6 +289,13 @@ describe('cenários de PDV (fluxo completo)', () => {
 });
 
 describe('pagamentosParaEnvio', () => {
+  it('Pix do gateway envia cobranca_codigo e não envia os dados do QR', () => {
+    expect(pagamentosParaEnvio([{
+      forma_pagamento: 'pix', valor: 5, numero_parcelas: 1, status: 'confirmado',
+      cobranca_codigo: 'abc', pix: { qr_code: '000201', qr_code_base64: 'AAA', expira_em: 'x' },
+    }])).toEqual([{ forma_pagamento: 'pix', valor: 5, numero_parcelas: 1, cobranca_codigo: 'abc' }]);
+  });
+
   it('remove o campo interno status do payload', () => {
     expect(pagamentosParaEnvio([{ forma_pagamento: 'pix', valor: 5, numero_parcelas: 1, status: 'confirmado' }]))
       .toEqual([{ forma_pagamento: 'pix', valor: 5, numero_parcelas: 1 }]);

@@ -21,7 +21,7 @@
 
 .plataforma-resumo {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-3);
 }
 
@@ -95,6 +95,10 @@
   background: var(--color-danger-light);
   color: var(--color-danger);
   font-size: var(--font-size-sm);
+}
+
+@media (max-width: 900px) {
+  .plataforma-resumo { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {

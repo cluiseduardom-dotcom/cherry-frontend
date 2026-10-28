@@ -13,6 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
 import PagamentoPDV from '../components/PagamentoPDV';
+import { criarCobrancaPix } from '../services/pagamentosGateway';
 import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from '../utils/produtosPdv';
 import { canAccessRoute } from '../config/access';
 import {
@@ -157,6 +158,9 @@ export default function Venda() {
   const [desconto, setDesconto] = useState('0');
   const [juros, setJuros] = useState('0');
   const [pagamentos, setPagamentos] = useState([]);
+  // Pix com QR no Mercado Pago: tenta enquanto a loja puder; um 409 do backend (loja sem Mercado Pago
+  // conectado ou integração desligada) desliga e o PDV segue com o Pix manual.
+  const [pixGatewayAtivo, setPixGatewayAtivo] = useState(true);
 
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
@@ -806,6 +810,8 @@ export default function Venda() {
                       onConfirmarPendente={confirmarPagamento}
                       onRecusarPendente={recusarPagamento}
                       onRemover={removerPagamento}
+                      criarCobrancaPix={pixGatewayAtivo ? criarCobrancaPix : undefined}
+                      onGatewayIndisponivel={() => setPixGatewayAtivo(false)}
                     />
                   )}
                 </div>

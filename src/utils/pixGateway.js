@@ -14,18 +14,26 @@ export function situacaoCobranca(cobranca) {
   return 'encerrada';
 }
 
-// "29:05" até a expiração; "00:00" depois dela; "" sem data válida.
-export function tempoRestante(expiraEm, agora = Date.now()) {
-  const alvo = new Date(expiraEm).getTime();
-  if (!expiraEm || Number.isNaN(alvo)) return '';
-  const segundos = Math.max(0, Math.floor((alvo - agora) / 1000));
+// "29:05" até a expiração; "00:00" depois dela; "" sem dado válido.
+// Preferência: segundos restantes que o servidor informou (`segundosServidor`) no instante `recebidoEm`;
+// só o tempo decorrido desde então vem do relógio local, então um relógio do PC errado não distorce a
+// contagem. Sem isso (API antiga), cai no cálculo por data absoluta.
+export function tempoRestante(expiraEm, agora = Date.now(), segundosServidor, recebidoEm) {
+  let segundos;
+  if (Number.isFinite(segundosServidor) && Number.isFinite(recebidoEm)) {
+    segundos = Math.max(0, Math.floor(segundosServidor - Math.max(0, agora - recebidoEm) / 1000));
+  } else {
+    const alvo = new Date(expiraEm).getTime();
+    if (!expiraEm || Number.isNaN(alvo)) return '';
+    segundos = Math.max(0, Math.floor((alvo - agora) / 1000));
+  }
   const mm = String(Math.floor(segundos / 60)).padStart(2, '0');
   const ss = String(segundos % 60).padStart(2, '0');
   return `${mm}:${ss}`;
 }
 
 // Pagamento pendente que carrega a cobrança. `pix` é só para a tela (QR e validade): nunca vai à API.
-export function pagamentoComCobranca(pagamento, cobranca) {
+export function pagamentoComCobranca(pagamento, cobranca, recebidoEm = Date.now()) {
   return {
     ...pagamento,
     cobranca_codigo: cobranca.codigo,
@@ -33,6 +41,8 @@ export function pagamentoComCobranca(pagamento, cobranca) {
       qr_code: cobranca.qr_code,
       qr_code_base64: cobranca.qr_code_base64,
       expira_em: cobranca.expira_em,
+      expira_em_segundos: cobranca.expira_em_segundos,
+      recebido_em: recebidoEm,
     },
   };
 }

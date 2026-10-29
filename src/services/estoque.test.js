@@ -6,7 +6,7 @@ vi.mock('./api', () => ({
   apiFetch: apiFetchMock,
 }));
 
-import { listarMovimentacoesRelatorio } from './estoque';
+import { EVENTO_ESTOQUE_ALTERADO, listarMovimentacoesRelatorio, registrarMovimentacaoEstoque } from './estoque';
 
 describe('listarMovimentacoesRelatorio', () => {
   beforeEach(() => {
@@ -26,5 +26,33 @@ describe('listarMovimentacoesRelatorio', () => {
     expect(apiFetchMock).toHaveBeenCalledWith(
       '/produtos/movimentacoes?page=2&pageSize=50&produto_id=10&data_de=2026-09-01&data_ate=2026-09-30'
     );
+  });
+});
+
+describe('registrarMovimentacaoEstoque', () => {
+  beforeEach(() => {
+    apiFetchMock.mockReset();
+    vi.unstubAllGlobals();
+  });
+
+  it('avisa o menu (evento) depois de registrar a movimentação', async () => {
+    const dispatchEvent = vi.fn();
+    vi.stubGlobal('window', { dispatchEvent });
+    apiFetchMock.mockResolvedValue({ data: { id: 1, estoque_resultante: 12 } });
+
+    const resultado = await registrarMovimentacaoEstoque(7, { tipo: 'entrada', quantidade: 10 });
+
+    expect(resultado).toEqual({ id: 1, estoque_resultante: 12 });
+    expect(dispatchEvent).toHaveBeenCalledTimes(1);
+    expect(dispatchEvent.mock.calls[0][0].type).toBe(EVENTO_ESTOQUE_ALTERADO);
+  });
+
+  it('não avisa o menu quando o backend recusa a movimentação', async () => {
+    const dispatchEvent = vi.fn();
+    vi.stubGlobal('window', { dispatchEvent });
+    apiFetchMock.mockRejectedValue(new Error('Estoque insuficiente'));
+
+    await expect(registrarMovimentacaoEstoque(7, { tipo: 'saida', quantidade: 99 })).rejects.toThrow('Estoque insuficiente');
+    expect(dispatchEvent).not.toHaveBeenCalled();
   });
 });

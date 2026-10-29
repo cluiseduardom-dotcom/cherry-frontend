@@ -168,6 +168,58 @@
 }
 
 /* --- Alertas de estoque (UX-04, Issue #48) --- */
+/* Grupos expansíveis do menu (utils/menuGrupos.js) */
+.sidebar-grupo-btn {
+  width: 100%;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar-grupo-btn--ativo {
+  border-color: var(--sidebar-active-border);
+  color: var(--sidebar-active-text);
+}
+
+.sidebar-grupo-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.sidebar-grupo-chevron--aberto {
+  transform: rotate(180deg);
+}
+
+.sidebar-grupo-lista {
+  margin: 0 0 var(--space-1) var(--space-4);
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--sidebar-active-border);
+}
+
+.sidebar-nav-item--filho {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.sidebar-grupo-badge {
+  margin-left: auto;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+.sidebar-grupo-badge + .sidebar-grupo-chevron {
+  margin-left: var(--space-2);
+}
+
 .sidebar-stock-alerts {
   display: flex;
   flex-direction: column;

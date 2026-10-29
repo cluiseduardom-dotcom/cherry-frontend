@@ -24,38 +24,44 @@ import {
   Briefcase,
   ClipboardCheck,
   PackageMinus,
+  ChevronDown,
+  Store,
+  Boxes,
+  Landmark,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
 import { rotuloDoUsuario } from '../config/papeis';
 import { EVENTO_ESTOQUE_ALTERADO, listarEstoqueBaixo } from '../services/estoque';
+import { montarMenu, grupoContemRota, lerGruposAbertos, salvarGruposAbertos } from '../utils/menuGrupos';
 import Avatar from './Avatar';
 import './Sidebar.css';
 
 // Metadados de apresentação por rota — access.js decide quem pode ver
 // cada path; aqui só decidimos como mostrar as rotas que o papel pode ver.
 const NAV_META_BY_PATH = {
-  '/':                 { icon: LayoutDashboard, label: 'Dashboard',           section: 'principal' },
-  '/venda':            { icon: ShoppingCart,    label: 'Venda',               section: 'principal' },
-  '/estoque':          { icon: Package,         label: 'Estoque',             section: 'principal' },
-  '/transferencias':   { icon: ArrowLeftRight, label: 'Transferências',      section: 'principal' },
-  '/acerto-estoque':   { icon: ClipboardCheck, label: 'Acerto de estoque',   section: 'principal' },
-  '/consumo':          { icon: PackageMinus,   label: 'Consumo de insumos',  section: 'principal' },
-  '/minha-maleta':     { icon: Briefcase,       label: 'Minha maleta',        section: 'principal' },
-  '/produtos':         { icon: Tag,             label: 'Produtos',            section: 'principal' },
-  '/clientes':         { icon: Users,           label: 'Clientes',            section: 'principal' },
-  '/fornecedores':     { icon: Building2,       label: 'Fornecedores',        section: 'principal' },
-  '/compras':          { icon: ShoppingCart,    label: 'Compras',             section: 'principal' },
-  '/historico':        { icon: History,         label: 'Histórico',           section: 'gestao' },
-  '/comissoes':        { icon: BadgePercent,    label: 'Comissões',           section: 'gestao' },
-  '/usuarios':         { icon: UserCog,         label: 'Usuários',            section: 'gestao' },
-  '/relatorios':       { icon: BarChart2,       label: 'Relatórios',          section: 'gestao' },
-  '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar',      section: 'gestao' },
-  '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber',    section: 'gestao' },
-  '/ponto-equilibrio': { icon: Target,          label: 'Ponto de Equilíbrio', section: 'gestao' },
-  '/despesas-fixas':   { icon: Receipt,         label: 'Despesas Fixas',      section: 'gestao' },
-  '/configuracoes':    { icon: Settings,        label: 'Configurações',       section: 'gestao' },
+  '/':                 { icon: LayoutDashboard, label: 'Dashboard' },
+  '/venda':            { icon: ShoppingCart,    label: 'Venda' },
+  '/estoque':          { icon: Package,         label: 'Estoque' },
+  '/transferencias':   { icon: ArrowLeftRight, label: 'Transferências' },
+  '/acerto-estoque':   { icon: ClipboardCheck, label: 'Acerto de estoque' },
+  '/consumo':          { icon: PackageMinus,   label: 'Consumo de insumos' },
+  '/minha-maleta':     { icon: Briefcase,       label: 'Minha maleta' },
+  '/produtos':         { icon: Tag,             label: 'Produtos' },
+  '/clientes':         { icon: Users,           label: 'Clientes' },
+  '/fornecedores':     { icon: Building2,       label: 'Fornecedores' },
+  '/compras':          { icon: ShoppingCart,    label: 'Compras' },
+  '/historico':        { icon: History,         label: 'Histórico' },
+  '/comissoes':        { icon: BadgePercent,    label: 'Comissões' },
+  '/usuarios':         { icon: UserCog,         label: 'Usuários' },
+  '/relatorios':       { icon: BarChart2,       label: 'Relatórios' },
+  '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar' },
+  '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber' },
+  '/ponto-equilibrio': { icon: Target,          label: 'Ponto de Equilíbrio' },
+  '/despesas-fixas':   { icon: Receipt,         label: 'Despesas Fixas' },
+  '/configuracoes':    { icon: Settings,        label: 'Configurações' },
 };
 
 // Rotas com segmento dinâmico (ex: /produtos/:id/precos) não têm entrada em
@@ -80,9 +86,17 @@ export function contarAlertasEstoque(alertas) {
   };
 }
 
-const menuItems = Object.keys(ALLOWED_ROLES_BY_PATH)
-  .filter(path => !path.includes(':') && !ROTAS_SEM_ITEM_PROPRIO.includes(path))
-  .map(path => ({ path, ...NAV_META_BY_PATH[path] }));
+const rotasDoMenu = Object.keys(ALLOWED_ROLES_BY_PATH)
+  .filter(path => !path.includes(':') && !ROTAS_SEM_ITEM_PROPRIO.includes(path));
+
+// Ícones dos grupos (a estrutura e as regras ficam em utils/menuGrupos.js).
+const ICONES_GRUPO = {
+  vendas: Store,
+  estoque: Boxes,
+  compras: ShoppingCart,
+  financeiro: Landmark,
+  administracao: ShieldCheck,
+};
 
 export default function Sidebar() {
   const location = useLocation();
@@ -90,6 +104,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { marca } = useTheme();
   const [estoqueAlertas, setEstoqueAlertas] = useState([]);
+  const [gruposAbertos, setGruposAbertos] = useState(() => lerGruposAbertos());
 
   // O aviso é recarregado ao trocar de tela, ao voltar para a aba e quando uma movimentação de
   // estoque é registrada (evento). Antes só carregava no login e ficava desatualizado.
@@ -135,9 +150,125 @@ export default function Sidebar() {
     navigate('/login', { replace: true });
   }
 
-  const visibleItems = menuItems.filter(({ path }) => canAccessRoute(path, user));
-  const principalItems = visibleItems.filter(({ section }) => section === 'principal');
-  const gestaoItems = visibleItems.filter(({ section }) => section === 'gestao');
+  const menu = montarMenu(rotasDoMenu, path => canAccessRoute(path, user));
+
+  // Ao entrar numa rota de um grupo fechado (link de outra tela, voltar do navegador), ele abre.
+  useEffect(() => {
+    const grupoAtual = menu.find(e => e.tipo === 'grupo' && grupoContemRota(e.itens, rotaAtual));
+    if (grupoAtual) {
+      setGruposAbertos(prev => (prev[grupoAtual.id] ? prev : { ...prev, [grupoAtual.id]: true }));
+    }
+    // menu muda só com o usuário; a rota é o gatilho.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rotaAtual, user]);
+
+  function alternarGrupo(id) {
+    setGruposAbertos(prev => {
+      const proximo = { ...prev, [id]: !prev[id] };
+      salvarGruposAbertos(proximo);
+      return proximo;
+    });
+  }
+
+  function renderItem(path, { filho = false } = {}) {
+    const meta = NAV_META_BY_PATH[path];
+    if (!meta) return null;
+    const { icon: Icon, label } = meta;
+    return (
+      <div key={path}>
+        <NavLink
+          to={path}
+          end={path === '/'}
+          className={({ isActive }) =>
+            `sidebar-nav-item ${filho ? 'sidebar-nav-item--filho' : ''} ${isActive ? 'sidebar-nav-item--active' : ''}`
+          }
+        >
+          <span className="sidebar-nav-icon">
+            <Icon size={filho ? 16 : 18} strokeWidth={2} />
+          </span>
+          <span className="sidebar-nav-label-text">{label}</span>
+        </NavLink>
+        {path === '/estoque' && renderAlertasEstoque()}
+      </div>
+    );
+  }
+
+  // UX-04 (Issue #48): dois alertas independentes — cada um com sua própria contagem, ícone, texto e
+  // deeplink para o filtro correspondente em Estoque. Um tipo não esconde o outro; só não renderiza
+  // quando a contagem daquele tipo é zero. Nunca dependem só de cor: sempre têm texto + ícone.
+  function renderAlertasEstoque() {
+    if (alertasEstoque.baixo === 0 && alertasEstoque.esgotado === 0) return null;
+    return (
+      <div className="sidebar-stock-alerts">
+        {alertasEstoque.baixo > 0 && (
+          <Link
+            to="/estoque?filtro=baixo"
+            className="sidebar-stock-alert sidebar-stock-alert--baixo"
+            aria-label={`${alertasEstoque.baixo} ${alertasEstoque.baixo === 1 ? 'produto com' : 'produtos com'} estoque baixo. Ver lista filtrada em Estoque.`}
+            title={`${alertasEstoque.baixo} ${alertasEstoque.baixo === 1 ? 'produto com' : 'produtos com'} estoque baixo`}
+          >
+            <AlertTriangle size={14} strokeWidth={2} />
+            <span>Estoque baixo: {alertasEstoque.baixo}</span>
+          </Link>
+        )}
+        {alertasEstoque.esgotado > 0 && (
+          <Link
+            to="/estoque?filtro=esgotado"
+            className="sidebar-stock-alert sidebar-stock-alert--esgotado"
+            aria-label={`${alertasEstoque.esgotado} ${alertasEstoque.esgotado === 1 ? 'produto esgotado' : 'produtos esgotados'}. Ver lista filtrada em Estoque.`}
+            title={`${alertasEstoque.esgotado} ${alertasEstoque.esgotado === 1 ? 'produto esgotado' : 'produtos esgotados'}`}
+          >
+            <PackageX size={14} strokeWidth={2} />
+            <span>Esgotados: {alertasEstoque.esgotado}</span>
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  function renderGrupo(grupo) {
+    const Icon = ICONES_GRUPO[grupo.id];
+    const aberto = Boolean(gruposAbertos[grupo.id]);
+    const ativo = grupoContemRota(grupo.itens, rotaAtual);
+    const totalAlertas = grupo.id === 'estoque' ? alertasEstoque.baixo + alertasEstoque.esgotado : 0;
+    const idLista = `sidebar-grupo-${grupo.id}`;
+    return (
+      <div key={grupo.id} className="sidebar-grupo">
+        <button
+          type="button"
+          className={`sidebar-nav-item sidebar-grupo-btn ${ativo && !aberto ? 'sidebar-grupo-btn--ativo' : ''}`}
+          aria-expanded={aberto}
+          aria-controls={idLista}
+          onClick={() => alternarGrupo(grupo.id)}
+        >
+          <span className="sidebar-nav-icon">
+            <Icon size={18} strokeWidth={2} />
+          </span>
+          <span className="sidebar-nav-label-text">{grupo.label}</span>
+          {!aberto && totalAlertas > 0 && (
+            <span
+              className="sidebar-grupo-badge"
+              aria-label={`${totalAlertas} ${totalAlertas === 1 ? 'alerta' : 'alertas'} de estoque`}
+              title={`${totalAlertas} ${totalAlertas === 1 ? 'alerta' : 'alertas'} de estoque`}
+            >
+              {totalAlertas}
+            </span>
+          )}
+          <ChevronDown
+            size={16}
+            strokeWidth={2}
+            className={`sidebar-grupo-chevron ${aberto ? 'sidebar-grupo-chevron--aberto' : ''}`}
+            aria-hidden="true"
+          />
+        </button>
+        {aberto && (
+          <div id={idLista} className="sidebar-grupo-lista">
+            {grupo.itens.map(path => renderItem(path, { filho: true }))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <aside className="sidebar">
@@ -162,71 +293,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        <div className="sidebar-nav-label">Menu Principal</div>
-        {principalItems.map(({ icon: Icon, label, path }) => (
-          <div key={path}>
-            <NavLink
-              to={path}
-              end={path === '/'}
-              className={({ isActive }) =>
-                `sidebar-nav-item ${isActive ? 'sidebar-nav-item--active' : ''}`
-              }
-            >
-              <span className="sidebar-nav-icon">
-                <Icon size={18} strokeWidth={2} />
-              </span>
-              <span className="sidebar-nav-label-text">{label}</span>
-            </NavLink>
-
-            {/* UX-04 (Issue #48): dois alertas independentes — cada um com
-                sua própria contagem, ícone, texto e deeplink para o filtro
-                correspondente em Estoque. Um tipo não esconde o outro; só
-                não renderiza quando a contagem daquele tipo é zero. Nunca
-                dependem só de cor: sempre têm texto + ícone diferentes. */}
-            {path === '/estoque' && (alertasEstoque.baixo > 0 || alertasEstoque.esgotado > 0) && (
-              <div className="sidebar-stock-alerts">
-                {alertasEstoque.baixo > 0 && (
-                  <Link
-                    to="/estoque?filtro=baixo"
-                    className="sidebar-stock-alert sidebar-stock-alert--baixo"
-                    aria-label={`${alertasEstoque.baixo} ${alertasEstoque.baixo === 1 ? 'produto com' : 'produtos com'} estoque baixo. Ver lista filtrada em Estoque.`}
-                    title={`${alertasEstoque.baixo} ${alertasEstoque.baixo === 1 ? 'produto com' : 'produtos com'} estoque baixo`}
-                  >
-                    <AlertTriangle size={14} strokeWidth={2} />
-                    <span>Estoque baixo: {alertasEstoque.baixo}</span>
-                  </Link>
-                )}
-                {alertasEstoque.esgotado > 0 && (
-                  <Link
-                    to="/estoque?filtro=esgotado"
-                    className="sidebar-stock-alert sidebar-stock-alert--esgotado"
-                    aria-label={`${alertasEstoque.esgotado} ${alertasEstoque.esgotado === 1 ? 'produto esgotado' : 'produtos esgotados'}. Ver lista filtrada em Estoque.`}
-                    title={`${alertasEstoque.esgotado} ${alertasEstoque.esgotado === 1 ? 'produto esgotado' : 'produtos esgotados'}`}
-                  >
-                    <PackageX size={14} strokeWidth={2} />
-                    <span>Esgotados: {alertasEstoque.esgotado}</span>
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-
-        <div className="sidebar-nav-label" style={{ marginTop: 'var(--space-4)' }}>Gestão</div>
-        {gestaoItems.map(({ icon: Icon, label, path }) => (
-          <NavLink
-            key={path}
-            to={path}
-            className={({ isActive }) =>
-              `sidebar-nav-item ${isActive ? 'sidebar-nav-item--active' : ''}`
-            }
-          >
-            <span className="sidebar-nav-icon">
-              <Icon size={18} strokeWidth={2} />
-            </span>
-            <span className="sidebar-nav-label-text">{label}</span>
-          </NavLink>
-        ))}
+        {menu.map(entrada => (entrada.tipo === 'grupo' ? renderGrupo(entrada) : renderItem(entrada.path)))}
       </nav>
 
       {/* User footer */}

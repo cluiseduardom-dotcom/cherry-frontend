@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User, Globe, ChevronRight, FolderTree, Landmark } from 'lucide-react';
+import Avatar from '../components/Avatar';
 import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
 import { useToast } from '../context/ToastContext';
 import './Configuracoes.css';
@@ -57,7 +58,6 @@ export default function Configuracoes() {
   const emailUsuario = user?.email || '—';
   const roleLabels = { admin: 'Administrador(a)', vendedor: 'Vendedor(a)', estoquista: 'Estoquista' };
   const roleLabel = roleLabels[user?.role] || 'Usuário';
-  const iniciais = nomeUsuario.split(' ').filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join('');
 
   return (
     <div className="page-content">
@@ -106,7 +106,7 @@ export default function Configuracoes() {
         {/* Profile card */}
         <div className="configuracoes-profile">
           <div className="card card-padding profile-card">
-            <div className="profile-card-avatar">{iniciais}</div>
+            <Avatar nome={nomeUsuario} fotoUrl={user?.foto_url} className="profile-card-avatar" />
             <div className="profile-card-name">{nomeUsuario}</div>
             <div className="profile-card-role"><span className={`role-badge role-badge--${user?.role || "admin"}`}>{roleLabel}</span></div>
             <div className="profile-card-email">{emailUsuario}</div>

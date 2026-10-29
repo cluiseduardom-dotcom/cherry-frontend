@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Avatar from '../components/Avatar';
 import {
   TrendingUp, ShoppingBag, Package, Users, BarChart3, ArrowRight, Star, PackageX, CheckCircle2, Hourglass,
 } from 'lucide-react';
@@ -227,7 +228,7 @@ export default function Dashboard() {
         <div className="dashboard-hero-side">
           {user?.nome && (
             <div className="dashboard-hero-user">
-              <span className="dashboard-hero-avatar" aria-hidden="true">{initials(user.nome)}</span>
+              <Avatar nome={user.nome} fotoUrl={user.foto_url} className="dashboard-hero-avatar" />
               <span className="dashboard-hero-user-info">
                 <span className="dashboard-hero-user-name">{user.nome}</span>
                 {ROLE_LABEL[user.role] && <span className="dashboard-hero-user-role">{ROLE_LABEL[user.role]}</span>}

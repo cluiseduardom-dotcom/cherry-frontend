@@ -79,3 +79,32 @@ export function pagamentoComCobranca(pagamento, cobranca, recebidoEm = Date.now(
 export function pagamentoDoGateway(pagamento) {
   return Boolean(pagamento?.cobranca_codigo);
 }
+
+// Proteção do PDV: o Pix do Mercado Pago é dinheiro real que já pode ter saído da conta do cliente.
+// Se o operador descartar a venda (limpar, esvaziar o carrinho, remover o Pix ou sair da tela) com
+// ele pago ou ainda aguardando o QR, o dinheiro fica na cobrança sem venda — e só volta ao cliente por
+// devolução manual. Retorna 'pago' (já confirmado pelo provedor), 'aguardando' (QR aberto) ou null.
+// Pix já encerrado (recusado: expirou/cancelou) não oferece risco. 'pago' prevalece sobre 'aguardando'.
+export function riscoPixGateway(pagamentos) {
+  const doGateway = (pagamentos ?? []).filter(pagamentoDoGateway);
+  if (doGateway.some(p => (p.status ?? 'confirmado') === 'confirmado')) return 'pago';
+  if (doGateway.some(p => p.status === 'pendente')) return 'aguardando';
+  return null;
+}
+
+// Texto do diálogo de confirmação. `acao` = o que o operador está tentando fazer, em verbo no infinitivo
+// ("limpar a venda", "sair do PDV"...).
+export function confirmacaoPerdaPix(risco, acao) {
+  if (risco === 'pago') {
+    return {
+      title: 'Há um Pix já pago nesta venda',
+      message: `O cliente já pagou um Pix pelo Mercado Pago e a venda ainda não foi finalizada. Se você ${acao} agora, o pagamento fica sem venda e só volta ao cliente por devolução (Comissões → Pix a devolver). Para não perder, finalize a venda.`,
+      confirmLabel: 'Descartar mesmo assim',
+    };
+  }
+  return {
+    title: 'Há um Pix aguardando pagamento',
+    message: `Existe um QR Code de Pix aberto nesta venda. Se o cliente pagar depois que você ${acao}, o dinheiro fica sem venda e só volta por devolução (Comissões → Pix a devolver). Confirme que o cliente não vai pagar antes de continuar.`,
+    confirmLabel: 'Descartar mesmo assim',
+  };
+}

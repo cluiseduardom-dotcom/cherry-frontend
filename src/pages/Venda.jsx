@@ -12,7 +12,7 @@ import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
-import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO } from '../utils/pixGateway';
+import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO, riscoPixGateway, confirmacaoPerdaPix, pagamentoDoGateway } from '../utils/pixGateway';
 import PagamentoPDV from '../components/PagamentoPDV';
 import { consultarDisponibilidadePix, criarCobrancaPix } from '../services/pagamentosGateway';
 import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from '../utils/produtosPdv';
@@ -30,8 +30,11 @@ import {
   pagamentosParaEnvio,
   recusarPagamentoPendente,
   removerPagamentoDaLista,
+  STATUS_PAGAMENTO,
 } from '../utils/pagamentoVenda';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import { corDoProduto as colorForProduto } from '../theme/themes';
 import './Venda.css';
 
@@ -258,6 +261,19 @@ export default function Venda() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [vendaEmAndamento]);
 
+  // Proteção do Pix do Mercado Pago (pago ou com QR aberto): descartar a venda com ele deixa o dinheiro
+  // sem venda. Toda ação que descarta pagamentos pede confirmação antes; ver utils/pixGateway.js.
+  const riscoPix = riscoPixGateway(pagamentos);
+  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
+
+  function protegerPix(acaoDescricao, executar, { descarta = true } = {}) {
+    if (!descarta || !riscoPix) {
+      executar();
+      return;
+    }
+    pedirConfirmacao({ ...confirmacaoPerdaPix(riscoPix, acaoDescricao), tone: 'danger', execute: executar });
+  }
+
   // Vitrine do PDV: só o que dá para vender (esgotados ao final; sem preço e
   // insumos ficam de fora) — ver utils/produtosPdv.js.
   const produtosVitrine = useMemo(
@@ -308,8 +324,11 @@ export default function Venda() {
 
   function removeFromCart(id) {
     const proximo = cart.filter(i => !(i.type === 'avulso' && i.id === id));
-    setCart(proximo);
-    setPagamentos(prev => pagamentosAposMudancaDoCarrinho(proximo, prev));
+    // Esvaziar o carrinho zera os pagamentos (pagamentosAposMudancaDoCarrinho): só aí há perda.
+    protegerPix('remover este item', () => {
+      setCart(proximo);
+      setPagamentos(prev => pagamentosAposMudancaDoCarrinho(proximo, prev));
+    }, { descarta: proximo.length === 0 });
   }
 
   function changeQty(id, delta) {
@@ -357,8 +376,10 @@ export default function Venda() {
 
   function removeKitFromCart(kitKey) {
     const proximo = cart.filter(row => row.kitKey !== kitKey);
-    setCart(proximo);
-    setPagamentos(prev => pagamentosAposMudancaDoCarrinho(proximo, prev));
+    protegerPix('remover este kit', () => {
+      setCart(proximo);
+      setPagamentos(prev => pagamentosAposMudancaDoCarrinho(proximo, prev));
+    }, { descarta: proximo.length === 0 });
   }
 
   function toggleKitExpanded(kitKey) {
@@ -395,7 +416,9 @@ export default function Venda() {
   }
 
   function removerPagamento(index) {
-    setPagamentos(prev => removerPagamentoDaLista(prev, index));
+    protegerPix('remover este Pix', () => setPagamentos(prev => removerPagamentoDaLista(prev, index)), {
+      descarta: pagamentoDoGateway(pagamentos[index]) && pagamentos[index]?.status !== STATUS_PAGAMENTO.RECUSADO,
+    });
   }
 
   function limparVenda() {
@@ -453,7 +476,28 @@ export default function Venda() {
 
   return (
     <div className="page-content venda-page">
-      {blocker.state === 'blocked' && (
+      <ConfirmDialog
+        open={acaoPendente !== null}
+        title={acaoPendente?.title}
+        message={acaoPendente?.message}
+        confirmLabel={acaoPendente?.confirmLabel}
+        tone={acaoPendente?.tone}
+        onConfirm={confirmar}
+        onCancel={cancelar}
+      />
+
+      {blocker.state === 'blocked' && riscoPix && (
+        <ConfirmDialog
+          open
+          {...confirmacaoPerdaPix(riscoPix, 'sair do PDV')}
+          tone="danger"
+          cancelLabel="Continuar no PDV"
+          onConfirm={() => blocker.proceed()}
+          onCancel={() => blocker.reset()}
+        />
+      )}
+
+      {blocker.state === 'blocked' && !riscoPix && (
         <ConfirmarDescarteDialog
           onContinuar={() => blocker.reset()}
           onDescartar={() => blocker.proceed()}
@@ -603,7 +647,7 @@ export default function Venda() {
                   Montar kit
                 </button>
                 {cart.length > 0 && (
-                  <button className="btn btn-ghost btn-sm cart-clear-btn" onClick={limparVenda}>
+                  <button className="btn btn-ghost btn-sm cart-clear-btn" onClick={() => protegerPix('limpar a venda', limparVenda)}>
                     <Trash2 size={14} />
                     Limpar
                   </button>

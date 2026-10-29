@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO, gatewayIndisponivel, situacaoCobranca, tempoRestante, pagamentoComCobranca, pagamentoDoGateway } from './pixGateway';
+import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO, gatewayIndisponivel, situacaoCobranca, tempoRestante, pagamentoComCobranca, pagamentoDoGateway, riscoPixGateway, confirmacaoPerdaPix } from './pixGateway';
 
 describe('gatewayIndisponivel', () => {
   it('só o 409 cai no Pix manual', () => {
@@ -102,5 +102,37 @@ describe('avisoPixIndisponivel', () => {
     expect(avisoPixIndisponivel('nao_configurado').texto).toContain('neste ambiente');
     expect(avisoPixIndisponivel(undefined, { podeConectar: true })).toMatchObject({ acao: null });
     expect(avisoPixIndisponivel('qualquer').texto).toContain('indisponível no momento');
+  });
+});
+
+describe('riscoPixGateway', () => {
+  const gw = status => ({ forma_pagamento: 'pix', status, cobranca_codigo: 'cob_1', valor: 10 });
+
+  it('sem Pix do gateway não há risco (inclui Pix manual e lista vazia)', () => {
+    expect(riscoPixGateway([])).toBeNull();
+    expect(riscoPixGateway(undefined)).toBeNull();
+    expect(riscoPixGateway([{ forma_pagamento: 'pix', status: 'pendente' }, { forma_pagamento: 'dinheiro', status: 'confirmado' }])).toBeNull();
+  });
+
+  it('QR aberto = aguardando; confirmado = pago; pago prevalece', () => {
+    expect(riscoPixGateway([gw('pendente')])).toBe('aguardando');
+    expect(riscoPixGateway([gw('confirmado')])).toBe('pago');
+    expect(riscoPixGateway([gw('pendente'), gw('confirmado')])).toBe('pago');
+  });
+
+  it('Pix encerrado (recusado) não oferece risco', () => {
+    expect(riscoPixGateway([gw('recusado')])).toBeNull();
+  });
+});
+
+describe('confirmacaoPerdaPix', () => {
+  it('textos distintos para pago e aguardando, citando a ação e a devolução', () => {
+    const pago = confirmacaoPerdaPix('pago', 'limpar a venda');
+    const aguardando = confirmacaoPerdaPix('aguardando', 'sair do PDV');
+    expect(pago.title).toContain('já pago');
+    expect(pago.message).toContain('limpar a venda');
+    expect(pago.message).toContain('Pix a devolver');
+    expect(aguardando.title).toContain('aguardando');
+    expect(aguardando.message).toContain('sair do PDV');
   });
 });

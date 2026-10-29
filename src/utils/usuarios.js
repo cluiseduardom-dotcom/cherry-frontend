@@ -24,6 +24,7 @@ const rotuloDoCampo = {
   telefone: 'Telefone', cpf: 'CPF', data_nascimento: 'Data de nascimento', cep: 'CEP',
   logradouro: 'Logradouro', numero: 'Número', complemento: 'Complemento', bairro: 'Bairro',
   cidade: 'Cidade', uf: 'UF', data_admissao: 'Data de admissão', observacoes: 'Observações',
+  foto: 'Foto',
 };
 
 export function rotuloDeCampoDados(campo) {

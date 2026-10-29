@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { listarUsuarios } from '../services/usuarios';
 import { formatarCargo, formatarDataHora } from '../utils/usuarios';
 import { aplicarMascaraTelefone } from '../utils/mascaras';
+import Avatar from '../components/Avatar';
 import CriarUsuarioModal from '../components/usuarios/CriarUsuarioModal';
 import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
 import RedefinirSenhaModal from '../components/usuarios/RedefinirSenhaModal';
@@ -25,19 +26,9 @@ import TrilhaUsuariosAba from '../components/usuarios/TrilhaUsuariosAba';
 import './Usuarios.css';
 import '../components/TabelaGestao.css';
 
-function extrairIniciais(nome) {
-  if (!nome) return 'U';
-  return nome
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(p => p[0].toUpperCase())
-    .join('');
-}
-
 export default function Usuarios() {
   const toast = useToast();
-  const { user } = useAuth();
+  const { user, atualizarFoto } = useAuth();
   const usuarioLogadoId = user?.id;
   // Redefinir senha de outro usuário segue só com admin (o backend também exige).
   const ehAdmin = user?.role === 'admin';
@@ -84,6 +75,14 @@ export default function Usuarios() {
     toast.success(resultado.alterado
       ? `Dados de "${nome}" atualizados.`
       : `Nenhuma alteração nos dados de "${nome}".`);
+    carregarUsuarios();
+    setTrilhaSignal(s => s + 1);
+  }
+
+  // A foto é gravada na hora (independente de "Salvar alterações"): atualiza a lista, a trilha e,
+  // se for a do próprio usuário logado, o menu.
+  function handleFotoAlterada(usuarioId, fotoUrl) {
+    if (usuarioId === usuarioLogadoId) atualizarFoto(fotoUrl);
     carregarUsuarios();
     setTrilhaSignal(s => s + 1);
   }
@@ -229,7 +228,6 @@ export default function Usuarios() {
                 </thead>
                 <tbody>
                   {usuariosFiltrados.map(u => {
-                    const iniciais = extrairIniciais(u.nome);
                     const podeGerenciar = Boolean(u.pode_gerenciar);
                     const motivoBloqueioGestao = u.motivo_bloqueio_gestao;
 
@@ -237,7 +235,7 @@ export default function Usuarios() {
                       <tr key={u.id}>
                         <td>
                           <div className="usuarios-user-cell">
-                            <div className="usuarios-avatar">{iniciais}</div>
+                            <Avatar nome={u.nome} fotoUrl={u.foto_url} className="usuarios-avatar" vazio="U" />
                             <div>
                               <div className="usuarios-user-nome">{u.nome}</div>
                               <div className="usuarios-user-email">{u.email}</div>
@@ -334,8 +332,10 @@ export default function Usuarios() {
       <EditarUsuarioModal
         open={Boolean(usuarioParaEdicao)}
         usuario={usuarioParaEdicao}
+        usuarioLogadoId={usuarioLogadoId}
         onClose={() => setUsuarioParaEdicao(null)}
         onSuccess={handleDadosEditados}
+        onFotoAlterada={handleFotoAlterada}
       />
 
       <RedefinirSenhaModal

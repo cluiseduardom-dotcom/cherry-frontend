@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { obterUsuario, editarDadosUsuario } from '../../services/usuarios';
+import { enviarMinhaFoto, removerMinhaFoto, enviarFotoUsuario, removerFotoUsuario } from '../../services/usuarioFotos';
+import FotoPerfilEditor from '../FotoPerfilEditor';
 import {
   validarDadosCadastrais,
   dadosAlterados,
@@ -16,7 +18,7 @@ import DadosCadastraisCampos from './DadosCadastraisCampos';
 import '../ProductModal.css';
 import './CamposFormulario.css';
 
-export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }) {
+export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onClose, onSuccess, onFotoAlterada }) {
   const [form, setForm] = useState(DADOS_VAZIOS);
   const [inicial, setInicial] = useState(DADOS_VAZIOS);
   const [erros, setErros] = useState({});
@@ -24,6 +26,7 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
   const [carregando, setCarregando] = useState(false);
   const [carregado, setCarregado] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fotoUrl, setFotoUrl] = useState(null);
   const painelRef = useRef(null);
   const [falhasEnvio, setFalhasEnvio] = useState(0);
 
@@ -37,6 +40,7 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
     setErros({});
     setApiError('');
     setLoading(false);
+    setFotoUrl(usuario.foto_url ?? null);
     setCarregado(false);
     setCarregando(true);
 
@@ -69,6 +73,15 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
   function tentarFechar() {
     if (loading) return;
     solicitarFechamento();
+  }
+
+  // A foto é gravada na hora, fora do "Salvar alterações". A própria foto usa /auth/foto; a de outro
+  // usuário, /usuarios/:id/foto (o backend aplica a hierarquia).
+  const ehProprio = usuario.id === usuarioLogadoId;
+
+  function aoAlterarFoto(novaUrl) {
+    setFotoUrl(novaUrl);
+    onFotoAlterada?.(usuario.id, novaUrl);
   }
 
   function atualizar(campo, valor) {
@@ -140,6 +153,16 @@ export default function EditarUsuarioModal({ open, usuario, onClose, onSuccess }
               </div>
             ) : carregado ? (
               <>
+                <div style={{ marginBottom: 'var(--space-4)' }}>
+                  <span className="input-label">Foto de perfil</span>
+                  <FotoPerfilEditor
+                    nome={usuario.nome}
+                    fotoUrl={fotoUrl}
+                    enviar={ehProprio ? enviarMinhaFoto : (arquivo) => enviarFotoUsuario(usuario.id, arquivo)}
+                    remover={ehProprio ? removerMinhaFoto : () => removerFotoUsuario(usuario.id)}
+                    onAlterada={aoAlterarFoto}
+                  />
+                </div>
                 <span className="campo-dica" style={{ display: 'block', marginBottom: 'var(--space-3)' }}>
                   Nome, e-mail e cargo não são editados aqui. A alteração fica registrada na trilha de auditoria
                   (apenas quais campos mudaram, nunca os valores).

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { History, RefreshCw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import Avatar from '../Avatar';
 import { listarEventosUsuarios } from '../../services/usuarios';
 import { formatarCargo, formatarDataHora, formatarAcaoEvento, rotuloDeCampoDados } from '../../utils/usuarios';
 
@@ -98,6 +99,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
                         </span>
                       </td>
                       <td style={{ fontWeight: 500 }}>
+                        <Avatar nome={ev.alvo_nome} fotoUrl={ev.alvo_foto_url} className="trilha-avatar" vazio="U" />
                         {ev.alvo_nome || `Usuário #${ev.alvo_usuario_id}`}
                       </td>
                       <td>
@@ -106,6 +108,7 @@ export default function TrilhaUsuariosAba({ refreshSignal }) {
                         </span>
                       </td>
                       <td style={{ fontSize: '0.85rem' }}>
+                        <Avatar nome={ev.executado_por_nome} fotoUrl={ev.executado_por_foto_url} className="trilha-avatar" vazio="U" />
                         {ev.executado_por_nome || `ID #${ev.executado_por}`}
                       </td>
                       <td style={{ fontSize: '0.85rem', color: (ev.motivo || ev.campos?.length) ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', maxWidth: 260 }}>

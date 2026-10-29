@@ -73,6 +73,22 @@
 }
 
 
+.trilha-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: var(--space-2);
+}
+
 .usuarios-avatar {
   width: 36px;
   height: 36px;

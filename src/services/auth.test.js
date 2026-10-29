@@ -58,7 +58,15 @@ describe('formatarUsuario', () => {
       tema: 'cherry',
       senha_temporaria: false,
       plataforma_admin: false,
+      foto_url: null,
     });
+  });
+
+  it('foto_url: /auth/me manda (inclusive null = sem foto); sem o campo, mantém a da sessão', () => {
+    expect(formatarUsuario({ perfil: 'vendedor', foto_url: 'https://f/1.webp' }, {}).foto_url).toBe('https://f/1.webp');
+    expect(formatarUsuario({ perfil: 'vendedor', foto_url: null }, { foto_url: 'https://f/antiga.webp' }).foto_url).toBeNull();
+    expect(formatarUsuario({ perfil: 'vendedor' }, { foto_url: 'https://f/sessao.webp' }).foto_url).toBe('https://f/sessao.webp');
+    expect(formatarUsuario({ perfil: 'vendedor' }, {}).foto_url).toBeNull();
   });
 
   it('marca plataforma_admin só quando /auth/me confirma com true', () => {

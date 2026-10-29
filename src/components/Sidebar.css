@@ -233,6 +233,13 @@
   letter-spacing: 0.5px;
 }
 
+.sidebar-user-avatar-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+}
+
 .sidebar-user-info {
   display: flex;
   flex-direction: column;

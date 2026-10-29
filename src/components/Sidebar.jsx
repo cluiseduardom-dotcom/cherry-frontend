@@ -30,17 +30,8 @@ import { useTheme } from '../theme/themeContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
 import { rotuloDoUsuario } from '../config/papeis';
 import { listarEstoqueBaixo } from '../services/estoque';
+import Avatar from './Avatar';
 import './Sidebar.css';
-
-function initials(name) {
-  if (!name) return '';
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(part => part[0].toUpperCase())
-    .join('');
-}
 
 // Metadados de apresentação por rota — access.js decide quem pode ver
 // cada path; aqui só decidimos como mostrar as rotas que o papel pode ver.
@@ -74,7 +65,7 @@ const NAV_META_BY_PATH = {
 // do Hub de Compras — não deve virar item próprio de menu (o brief pede
 // explicitamente para não criar menus principais separados para
 // Recebimentos).
-const ROTAS_SEM_ITEM_PROPRIO = ['/mais', '/compras/recebimentos', '/conta/seguranca', '/plataforma/taxas'];
+const ROTAS_SEM_ITEM_PROPRIO = ['/mais', '/compras/recebimentos', '/conta/seguranca', '/conta/perfil', '/plataforma/taxas'];
 
 // UX-04 (Issue #48): /produtos/estoque-baixo já retorna todo produto com
 // estoque_atual <= estoque_minimo — o mesmo conjunto que Estoque.jsx usa
@@ -221,7 +212,9 @@ export default function Sidebar() {
 
       {/* User footer */}
       <div className="sidebar-footer">
-        <div className="sidebar-user-avatar">{initials(user?.nome)}</div>
+        <Link to="/conta/perfil" className="sidebar-user-avatar-link" aria-label="Minha foto de perfil" title="Minha foto de perfil">
+          <Avatar nome={user?.nome} fotoUrl={user?.foto_url} className="sidebar-user-avatar" />
+        </Link>
         <div className="sidebar-user-info">
           <span className="sidebar-user-name">{user?.nome}</span>
           <span className={`role-badge role-badge--${user?.role}`}>{rotuloDoUsuario(user)}</span>

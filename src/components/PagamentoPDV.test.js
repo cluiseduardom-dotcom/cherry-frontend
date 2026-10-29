@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import PagamentoPDV from './PagamentoPDV.jsx';
 import { calcularResumoPagamento } from '../utils/pagamentoVenda.js';
 
@@ -8,7 +9,7 @@ const noop = () => {};
 
 function render(total, pagamentos = [], extra = {}) {
   return renderToStaticMarkup(
-    createElement(PagamentoPDV, {
+    createElement(MemoryRouter, null, createElement(PagamentoPDV, {
       resumo: calcularResumoPagamento(total, pagamentos),
       pagamentos,
       temCliente: false,
@@ -17,7 +18,7 @@ function render(total, pagamentos = [], extra = {}) {
       onRecusarPendente: noop,
       onRemover: noop,
       ...extra,
-    })
+    }))
   );
 }
 
@@ -158,25 +159,34 @@ describe('PagamentoPDV — ordem e densidade (ajustes pós validação visual)',
 });
 
 describe('PagamentoPDV: aviso de Pix automático indisponível', () => {
+  const AVISO = { texto: 'Pix automático desligado', acao: null };
   const pixManual = { forma_pagamento: 'pix', valor: 50, numero_parcelas: 1, status: 'pendente' };
 
   it('mostra o aviso junto do Pix manual aguardando, mesmo quando ele cobre o total (formas somem)', () => {
-    const html = render(50, [pixManual], { avisoPix: 'Pix automático desligado' });
+    const html = render(50, [pixManual], { avisoPix: AVISO });
     expect(html).not.toContain('Como o cliente vai pagar?');
     expect(html).toContain('pdv-pay-aviso-pix');
     expect(html).toContain('role="status"');
     expect(html).toContain('Pix automático desligado');
+    expect(html).not.toContain('<a ');
   });
 
   it('não mostra o aviso sem Pix manual aguardando', () => {
-    expect(render(50, [], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
-    expect(render(50, [{ ...pixManual, status: 'confirmado' }], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
-    expect(render(50, [{ forma_pagamento: 'dinheiro', valor: 50, numero_parcelas: 1, status: 'pendente' }], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
+    expect(render(50, [], { avisoPix: AVISO })).not.toContain('Pix automático desligado');
+    expect(render(50, [{ ...pixManual, status: 'confirmado' }], { avisoPix: AVISO })).not.toContain('Pix automático desligado');
+    expect(render(50, [{ forma_pagamento: 'dinheiro', valor: 50, numero_parcelas: 1, status: 'pendente' }], { avisoPix: AVISO })).not.toContain('Pix automático desligado');
   });
 
   it('Pix com cobrança no Mercado Pago (QR) não leva o aviso', () => {
     const comQr = { ...pixManual, cobranca_codigo: 'abc', pix: { qr_code: 'x', expira_em_segundos: 60, recebido_em: 0 } };
-    expect(render(50, [comQr], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
+    expect(render(50, [comQr], { avisoPix: AVISO })).not.toContain('Pix automático desligado');
+  });
+
+  it('admin: mostra o atalho para conectar, em nova aba', () => {
+    const html = render(50, [pixManual], { avisoPix: { texto: 'Conecte', acao: { to: '/configuracoes/empresa', rotulo: 'Conectar Mercado Pago' } } });
+    expect(html).toContain('href="/configuracoes/empresa"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('Conectar Mercado Pago');
   });
 
   it('sem texto de aviso (Pix automático ativo) não renderiza nada', () => {

@@ -6,21 +6,33 @@ export function gatewayIndisponivel(erro) {
   return erro?.status === 409;
 }
 
-// Texto para o operador quando o Pix automático não está disponível. O Pix continua funcionando como
-// manual (o operador confere o recebimento no banco); só a cobrança com QR e a baixa automática não.
-// `motivo` vem do backend; qualquer outro valor (ou ausência) cai no aviso genérico.
-export function avisoPixIndisponivel(motivo) {
-  const final = 'O Pix será lançado como manual: confirme o recebimento no seu banco antes de concluir a venda.';
+// Aviso para o operador quando o Pix automático não está disponível: { texto, acao }. O Pix continua
+// funcionando como manual (o operador confere o recebimento no banco); só a cobrança com QR e a baixa
+// automática não. `motivo` vem do backend; qualquer outro valor (ou ausência) cai no aviso genérico.
+// `podeConectar` (admin) troca o "peça ao administrador" por um atalho direto para a conexão.
+export const ROTA_CONEXAO_MERCADO_PAGO = '/configuracoes/empresa';
+
+export function avisoPixIndisponivel(motivo, { podeConectar = false } = {}) {
+  const final = 'Este Pix será manual: confirme o recebimento no seu banco antes de concluir a venda.';
 
   if (motivo === 'loja_nao_conectada') {
-    return `Pix automático desligado: a loja ainda não conectou o Mercado Pago (o administrador conecta em Dados da empresa). ${final}`;
+    if (podeConectar) {
+      return {
+        texto: `Pix automático desligado: o Mercado Pago ainda não está conectado. Conecte para cobrar por QR e baixar sozinho. ${final}`,
+        acao: { to: ROTA_CONEXAO_MERCADO_PAGO, rotulo: 'Conectar Mercado Pago' },
+      };
+    }
+    return {
+      texto: `Pix automático desligado: a loja ainda não conectou o Mercado Pago. Peça ao administrador para conectar em Dados da empresa. ${final}`,
+      acao: null,
+    };
   }
 
   if (motivo === 'nao_configurado') {
-    return `Pix automático não está ativo neste ambiente. ${final}`;
+    return { texto: `Pix automático não está ativo neste ambiente. ${final}`, acao: null };
   }
 
-  return `Pix automático indisponível no momento. ${final}`;
+  return { texto: `Pix automático indisponível no momento. ${final}`, acao: null };
 }
 
 // Situação da cobrança para a tela: aguardando | pago | encerrada (expirou, cancelou, falhou ou estornou).

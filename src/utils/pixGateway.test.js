@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { avisoPixIndisponivel, gatewayIndisponivel, situacaoCobranca, tempoRestante, pagamentoComCobranca, pagamentoDoGateway } from './pixGateway';
+import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO, gatewayIndisponivel, situacaoCobranca, tempoRestante, pagamentoComCobranca, pagamentoDoGateway } from './pixGateway';
 
 describe('gatewayIndisponivel', () => {
   it('só o 409 cai no Pix manual', () => {
@@ -72,17 +72,35 @@ describe('pagamentoComCobranca', () => {
 });
 
 describe('avisoPixIndisponivel', () => {
-  it('explica o motivo e deixa claro que o Pix segue manual', () => {
-    expect(avisoPixIndisponivel('loja_nao_conectada')).toContain('não conectou o Mercado Pago');
-    expect(avisoPixIndisponivel('nao_configurado')).toContain('neste ambiente');
+  const MOTIVOS = ['loja_nao_conectada', 'nao_configurado', null, undefined, 'outro'];
 
-    for (const motivo of ['loja_nao_conectada', 'nao_configurado', null, undefined, 'outro']) {
-      expect(avisoPixIndisponivel(motivo)).toContain('lançado como manual');
+  it('sempre deixa claro que o Pix segue manual e que o operador confere no banco', () => {
+    for (const motivo of MOTIVOS) {
+      for (const podeConectar of [true, false]) {
+        const { texto } = avisoPixIndisponivel(motivo, { podeConectar });
+        expect(texto).toContain('Este Pix será manual');
+        expect(texto).toContain('confirme o recebimento no seu banco');
+      }
     }
   });
 
-  it('motivo desconhecido cai no aviso genérico', () => {
-    expect(avisoPixIndisponivel(undefined)).toContain('indisponível no momento');
-    expect(avisoPixIndisponivel('qualquer')).toContain('indisponível no momento');
+  it('admin com loja não conectada: texto direto e atalho para a conexão', () => {
+    const aviso = avisoPixIndisponivel('loja_nao_conectada', { podeConectar: true });
+    expect(aviso.texto).toContain('Conecte para cobrar por QR');
+    expect(aviso.texto).not.toContain('administrador');
+    expect(aviso.acao).toEqual({ to: ROTA_CONEXAO_MERCADO_PAGO, rotulo: 'Conectar Mercado Pago' });
+  });
+
+  it('quem não é admin é orientado a pedir ao administrador, sem atalho', () => {
+    const aviso = avisoPixIndisponivel('loja_nao_conectada');
+    expect(aviso.texto).toContain('Peça ao administrador');
+    expect(aviso.acao).toBeNull();
+  });
+
+  it('ambiente sem integração e motivo desconhecido: sem atalho, mesmo para admin', () => {
+    expect(avisoPixIndisponivel('nao_configurado', { podeConectar: true })).toMatchObject({ acao: null });
+    expect(avisoPixIndisponivel('nao_configurado').texto).toContain('neste ambiente');
+    expect(avisoPixIndisponivel(undefined, { podeConectar: true })).toMatchObject({ acao: null });
+    expect(avisoPixIndisponivel('qualquer').texto).toContain('indisponível no momento');
   });
 });

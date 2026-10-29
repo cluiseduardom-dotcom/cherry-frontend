@@ -12,7 +12,7 @@ import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
-import { avisoPixIndisponivel } from '../utils/pixGateway';
+import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO } from '../utils/pixGateway';
 import PagamentoPDV from '../components/PagamentoPDV';
 import { consultarDisponibilidadePix, criarCobrancaPix } from '../services/pagamentosGateway';
 import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from '../utils/produtosPdv';
@@ -828,7 +828,7 @@ export default function Venda() {
                       onRecusarPendente={recusarPagamento}
                       onRemover={removerPagamento}
                       criarCobrancaPix={pixGatewayAtivo ? criarCobrancaPix : undefined}
-                      avisoPix={pixGatewayAtivo ? null : avisoPixIndisponivel(pixGatewayMotivo)}
+                      avisoPix={pixGatewayAtivo ? null : avisoPixIndisponivel(pixGatewayMotivo, { podeConectar: canAccessRoute(ROTA_CONEXAO_MERCADO_PAGO, user) })}
                       onGatewayIndisponivel={() => setPixGatewayAtivo(false)}
                     />
                   )}

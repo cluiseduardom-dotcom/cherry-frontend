@@ -11,6 +11,13 @@ export async function criarCobrancaPix(valor) {
   return body.data;
 }
 
+// Antes de cobrar: { pix: boolean, motivo: null | 'nao_configurado' | 'loja_nao_conectada' }.
+// Só o estado da integração; não consulta o Mercado Pago. Contrato: backend GET /pagamentos-gateway/disponibilidade.
+export async function consultarDisponibilidadePix() {
+  const body = await apiFetch('/pagamentos-gateway/disponibilidade');
+  return body.data;
+}
+
 export async function consultarCobrancaPix(codigo) {
   const body = await apiFetch(`/pagamentos-gateway/${encodeURIComponent(codigo)}`);
   return body.data;

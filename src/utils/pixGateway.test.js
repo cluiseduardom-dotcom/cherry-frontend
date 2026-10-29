@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { gatewayIndisponivel, situacaoCobranca, tempoRestante, pagamentoComCobranca, pagamentoDoGateway } from './pixGateway';
+import { avisoPixIndisponivel, gatewayIndisponivel, situacaoCobranca, tempoRestante, pagamentoComCobranca, pagamentoDoGateway } from './pixGateway';
 
 describe('gatewayIndisponivel', () => {
   it('só o 409 cai no Pix manual', () => {
@@ -68,5 +68,21 @@ describe('pagamentoComCobranca', () => {
     expect(typeof p.pix.recebido_em).toBe('number');
     expect(pagamentoDoGateway(p)).toBe(true);
     expect(pagamentoDoGateway({ forma_pagamento: 'pix', valor: 10 })).toBe(false);
+  });
+});
+
+describe('avisoPixIndisponivel', () => {
+  it('explica o motivo e deixa claro que o Pix segue manual', () => {
+    expect(avisoPixIndisponivel('loja_nao_conectada')).toContain('não conectou o Mercado Pago');
+    expect(avisoPixIndisponivel('nao_configurado')).toContain('neste ambiente');
+
+    for (const motivo of ['loja_nao_conectada', 'nao_configurado', null, undefined, 'outro']) {
+      expect(avisoPixIndisponivel(motivo)).toContain('lançado como manual');
+    }
+  });
+
+  it('motivo desconhecido cai no aviso genérico', () => {
+    expect(avisoPixIndisponivel(undefined)).toContain('indisponível no momento');
+    expect(avisoPixIndisponivel('qualquer')).toContain('indisponível no momento');
   });
 });

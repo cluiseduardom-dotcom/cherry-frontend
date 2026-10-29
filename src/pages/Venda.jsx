@@ -12,8 +12,9 @@ import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
+import { avisoPixIndisponivel } from '../utils/pixGateway';
 import PagamentoPDV from '../components/PagamentoPDV';
-import { criarCobrancaPix } from '../services/pagamentosGateway';
+import { consultarDisponibilidadePix, criarCobrancaPix } from '../services/pagamentosGateway';
 import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from '../utils/produtosPdv';
 import { canAccessRoute } from '../config/access';
 import {
@@ -161,6 +162,22 @@ export default function Venda() {
   // Pix com QR no Mercado Pago: tenta enquanto a loja puder; um 409 do backend (loja sem Mercado Pago
   // conectado ou integração desligada) desliga e o PDV segue com o Pix manual.
   const [pixGatewayAtivo, setPixGatewayAtivo] = useState(true);
+  // Motivo informado pelo backend quando o Pix automático está desligado (null = não informado/ativo).
+  const [pixGatewayMotivo, setPixGatewayMotivo] = useState(null);
+
+  // Pergunta ao backend antes de cobrar. Se a consulta falhar (API antiga, rede), segue como antes:
+  // tenta o Pix automático e o 409 ainda derruba para o manual.
+  useEffect(() => {
+    let cancelled = false;
+    consultarDisponibilidadePix()
+      .then(d => {
+        if (cancelled || !d || d.pix !== false) return;
+        setPixGatewayAtivo(false);
+        setPixGatewayMotivo(d.motivo ?? null);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
@@ -811,6 +828,7 @@ export default function Venda() {
                       onRecusarPendente={recusarPagamento}
                       onRemover={removerPagamento}
                       criarCobrancaPix={pixGatewayAtivo ? criarCobrancaPix : undefined}
+                      avisoPix={pixGatewayAtivo ? null : avisoPixIndisponivel(pixGatewayMotivo)}
                       onGatewayIndisponivel={() => setPixGatewayAtivo(false)}
                     />
                   )}

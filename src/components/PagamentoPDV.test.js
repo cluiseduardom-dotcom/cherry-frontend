@@ -156,3 +156,22 @@ describe('PagamentoPDV — ordem e densidade (ajustes pós validação visual)',
     expect((html.match(/Pagamento completo/g) || []).length).toBe(1);
   });
 });
+
+describe('PagamentoPDV: aviso de Pix automático indisponível', () => {
+  it('não mostra o aviso antes de o operador escolher Pix', () => {
+    const html = render(50, [], { avisoPix: 'Pix automático desligado' });
+    expect(html).not.toContain('Pix automático desligado');
+  });
+
+  it('mostra o aviso (role=status) depois da escolha, quando há texto', () => {
+    const html = render(50, [], { avisoPix: 'Pix automático desligado', avisoPixInicial: true });
+    expect(html).toContain('pdv-pay-aviso-pix');
+    expect(html).toContain('role="status"');
+    expect(html).toContain('Pix automático desligado');
+  });
+
+  it('sem texto de aviso (Pix automático ativo) não renderiza nada', () => {
+    const html = render(50, [], { avisoPix: null, avisoPixInicial: true });
+    expect(html).not.toContain('pdv-pay-aviso-pix');
+  });
+});

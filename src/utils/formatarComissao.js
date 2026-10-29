@@ -26,6 +26,11 @@ export function obterAbasPermitidas({ user, temCapacidade = () => false } = {}) 
   lista.push({ key: 'repasses', label: 'Repasses' });
   lista.push({ key: 'pagamentos', label: 'Pagamentos' });
 
+  // Dinheiro saindo (devolver Pix pago): mesma regra de pagar comissão. O backend decide por `gerir_financeiro`.
+  if (temCapacidade('gerir_financeiro')) {
+    lista.push({ key: 'pix_devolver', label: 'Pix a devolver' });
+  }
+
   if (podeGerirPercentuais) {
     lista.push({ key: 'percentuais', label: 'Percentuais' });
   }

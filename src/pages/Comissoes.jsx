@@ -4,6 +4,7 @@ import {
   Users,
   HandCoins,
   Wallet,
+  Undo2,
   Percent,
   Calendar,
   RotateCcw,
@@ -15,11 +16,14 @@ import EquipeComissoesAba from '../components/comissoes/EquipeComissoesAba';
 import RepassesComissoesAba from '../components/comissoes/RepassesComissoesAba';
 import PercentuaisComissoesAba from '../components/comissoes/PercentuaisComissoesAba';
 import PagamentosComissoesAba from '../components/comissoes/PagamentosComissoesAba';
+import PixDevolverAba from '../components/comissoes/PixDevolverAba';
+import DevolverPixModal from '../components/comissoes/DevolverPixModal';
 import PagarComissaoModal from '../components/comissoes/PagarComissaoModal';
 import HistoricoComissaoModal from '../components/comissoes/HistoricoComissaoModal';
 import ConfirmarRepasseModal from '../components/comissoes/ConfirmarRepasseModal';
 import EditarPercentualModal from '../components/comissoes/EditarPercentualModal';
 import { inicioMesISO, fimMesISO, obterAbasPermitidas } from '../utils/formatarComissao';
+import { mensagemDevolucao } from '../utils/pixDevolucao';
 import './Comissoes.css';
 import '../components/TabelaGestao.css';
 
@@ -29,6 +33,7 @@ const TAB_ICONS = {
   repasses: HandCoins,
   pagamentos: Wallet,
   percentuais: Percent,
+  pix_devolver: Undo2,
 };
 
 export default function Comissoes() {
@@ -44,6 +49,8 @@ export default function Comissoes() {
   const [repasseParaConfirmar, setRepasseParaConfirmar] = useState(null);
   const [alvoEditarPercentual, setAlvoEditarPercentual] = useState(null);
   const [vendedorParaPagar, setVendedorParaPagar] = useState(null);
+  const [pixParaDevolver, setPixParaDevolver] = useState(null);
+  const [pixRefreshKey, setPixRefreshKey] = useState(0);
 
   // Chaves para recarregar abas secundárias
   const [repassesRefreshKey, setRepassesRefreshKey] = useState(0);
@@ -64,6 +71,11 @@ export default function Comissoes() {
       icon: TAB_ICONS[tab.key] || BadgePercent,
     }));
   }, [user, temCapacidade]);
+
+  function handlePixDevolvido(resultado) {
+    toast?.success?.(mensagemDevolucao(resultado?.status));
+    setPixRefreshKey(k => k + 1);
+  }
 
   function handleRedefinirPeriodo() {
     setDataInicio(inicioMesISO());
@@ -209,6 +221,10 @@ export default function Comissoes() {
         />
       )}
 
+      {abaAtiva === 'pix_devolver' && podeGerirFinanceiro && (
+        <PixDevolverAba onDevolver={item => setPixParaDevolver(item)} refreshKey={pixRefreshKey} />
+      )}
+
       {abaAtiva === 'percentuais' && podeGerirPercentuais && (
         <PercentuaisComissoesAba
           onEditar={alvo => setAlvoEditarPercentual(alvo)}
@@ -239,6 +255,15 @@ export default function Comissoes() {
         onClose={() => setVendedorParaPagar(null)}
         onSuccess={handlePagamentoRegistrado}
         onConflito={() => setPagamentosRefreshKey(k => k + 1)}
+      />
+
+      {/* Modal de devolução de Pix pago (quem tem gerir_financeiro) */}
+      <DevolverPixModal
+        key={pixParaDevolver?.codigo ?? 'nenhum'}
+        item={pixParaDevolver}
+        open={Boolean(pixParaDevolver)}
+        onClose={() => setPixParaDevolver(null)}
+        onSuccess={handlePixDevolvido}
       />
 
       {/* Modal de Edição de Percentual */}

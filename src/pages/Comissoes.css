@@ -491,3 +491,24 @@
     transform: rotate(360deg);
   }
 }
+
+/* Vendedor com foto (Equipe, A pagar, Pagamentos, Repasses) */
+.comissoes-vendedor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.comissoes-avatar {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

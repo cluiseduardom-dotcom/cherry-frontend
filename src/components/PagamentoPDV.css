@@ -253,3 +253,5 @@
   font-size: var(--font-size-sm);
   line-height: 1.4;
 }
+
+.pdv-pay-aviso-pix-link { font-weight: 600; color: var(--color-primary); text-decoration: underline; white-space: nowrap; }

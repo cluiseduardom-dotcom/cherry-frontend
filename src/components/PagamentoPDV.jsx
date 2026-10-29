@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Banknote, Check, Clock, CreditCard, HandCoins, QrCode, Wallet, X, XCircle,
 } from 'lucide-react';
@@ -68,7 +69,7 @@ export default function PagamentoPDV({
   onRemover,
   criarCobrancaPix, // opcional: com ele, o Pix vira cobrança com QR no Mercado Pago; sem ele, Pix manual
   onGatewayIndisponivel,
-  avisoPix = null, // texto quando o Pix automático está desligado; aparece junto do Pix manual aguardando
+  avisoPix = null, // { texto, acao } quando o Pix automático está desligado; aparece junto do Pix manual aguardando
   passoInicial = null, // só para testes de renderização: abre o passo de uma forma
   parcelasIniciais = '1',
 }) {
@@ -276,7 +277,18 @@ export default function PagamentoPDV({
             {pendentes.map(renderItem)}
           </ul>
           {avisoPix && pixManualAguardando && (
-            <p className="pdv-pay-aviso-pix" role="status">{avisoPix}</p>
+            <p className="pdv-pay-aviso-pix" role="status">
+              {avisoPix.texto}
+              {avisoPix.acao && (
+                <>
+                  {' '}
+                  {/* Nova aba: sair do PDV perderia o carrinho */}
+                  <Link className="pdv-pay-aviso-pix-link" to={avisoPix.acao.to} target="_blank" rel="noopener">
+                    {avisoPix.acao.rotulo}
+                  </Link>
+                </>
+              )}
+            </p>
           )}
         </div>
       )}

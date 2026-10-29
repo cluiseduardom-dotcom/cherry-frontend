@@ -1,5 +1,12 @@
 import { apiFetch } from './api';
 
+// Evento global: o menu lateral escuta e recarrega o aviso de estoque baixo/esgotado.
+export const EVENTO_ESTOQUE_ALTERADO = 'estoque:alterado';
+
+function avisarEstoqueAlterado() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(EVENTO_ESTOQUE_ALTERADO));
+}
+
 export async function listarEstoqueBaixo() {
   const body = await apiFetch('/produtos/estoque-baixo');
   return body.data;
@@ -10,6 +17,7 @@ export async function registrarMovimentacaoEstoque(produtoId, dados) {
     method: 'POST',
     body: JSON.stringify(dados),
   });
+  avisarEstoqueAlterado();
   return body.data;
 }
 

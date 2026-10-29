@@ -29,7 +29,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
 import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
 import { rotuloDoUsuario } from '../config/papeis';
-import { listarEstoqueBaixo } from '../services/estoque';
+import { EVENTO_ESTOQUE_ALTERADO, listarEstoqueBaixo } from '../services/estoque';
 import Avatar from './Avatar';
 import './Sidebar.css';
 
@@ -91,6 +91,10 @@ export default function Sidebar() {
   const { marca } = useTheme();
   const [estoqueAlertas, setEstoqueAlertas] = useState([]);
 
+  // O aviso é recarregado ao trocar de tela, ao voltar para a aba e quando uma movimentação de
+  // estoque é registrada (evento). Antes só carregava no login e ficava desatualizado.
+  const rotaAtual = location.pathname;
+
   useEffect(() => {
     if (!canAccessRoute('/estoque', user)) {
       setEstoqueAlertas([]);
@@ -98,16 +102,31 @@ export default function Sidebar() {
     }
 
     let cancelled = false;
-    listarEstoqueBaixo()
-      .then(alertas => {
-        if (!cancelled) setEstoqueAlertas(Array.isArray(alertas) ? alertas : []);
-      })
-      .catch(() => {
-        if (!cancelled) setEstoqueAlertas([]);
-      });
 
-    return () => { cancelled = true; };
-  }, [user]);
+    function carregar() {
+      listarEstoqueBaixo()
+        .then(alertas => {
+          if (!cancelled) setEstoqueAlertas(Array.isArray(alertas) ? alertas : []);
+        })
+        .catch(() => {
+          if (!cancelled) setEstoqueAlertas([]);
+        });
+    }
+
+    function aoVoltarParaAba() {
+      if (document.visibilityState === 'visible') carregar();
+    }
+
+    carregar();
+    window.addEventListener(EVENTO_ESTOQUE_ALTERADO, carregar);
+    document.addEventListener('visibilitychange', aoVoltarParaAba);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener(EVENTO_ESTOQUE_ALTERADO, carregar);
+      document.removeEventListener('visibilitychange', aoVoltarParaAba);
+    };
+  }, [user, rotaAtual]);
 
   const alertasEstoque = contarAlertasEstoque(estoqueAlertas);
 

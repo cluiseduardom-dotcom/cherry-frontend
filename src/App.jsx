@@ -14,6 +14,7 @@ import MinhaMaleta from './pages/MinhaMaleta';
 import AcertoEstoque from './pages/AcertoEstoque';
 import Consumo from './pages/Consumo';
 import AlterarSenha from './pages/AlterarSenha';
+import MinhaConta from './pages/MinhaConta';
 import DadosEmpresa from './pages/DadosEmpresa';
 import PlataformaTaxas from './pages/PlataformaTaxas';
 import Produtos from './pages/Produtos';
@@ -60,6 +61,7 @@ const ROUTE_COMPONENTS = {
   '/mais': Mais,
   '/avisos': Avisos,
   '/conta/seguranca': AlterarSenha,
+  '/conta/perfil': MinhaConta,
   '/relatorios': Relatorios,
   '/contas-pagar': ContasPagar,
   '/contas-receber': ContasReceber,

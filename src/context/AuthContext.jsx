@@ -81,6 +81,14 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Foto de perfil trocada/removida pelo próprio usuário: reflete no menu sem recarregar.
+  function atualizarFoto(fotoUrl) {
+    if (!user) return;
+    const atualizado = { ...user, foto_url: fotoUrl ?? null };
+    setUser(atualizado);
+    salvarSessao({ token: tokenRef.current, user: atualizado });
+  }
+
   async function login(email, senha) {
     setLoading(true);
     setError('');
@@ -107,6 +115,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     atualizarToken,
+    atualizarFoto,
     temCapacidade,
   };
 

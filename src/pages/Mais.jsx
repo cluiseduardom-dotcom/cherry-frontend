@@ -19,6 +19,7 @@ import {
   ClipboardCheck,
   PackageMinus,
   KeyRound,
+  Camera,
   LogOut,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -44,6 +45,7 @@ const ITEMS = [
   { path: '/contas-receber', label: 'Contas a Receber', sub: 'Acompanhar recebimentos', icon: HandCoins },
   { path: '/ponto-equilibrio', label: 'Ponto de Equilíbrio', sub: 'Analisar necessidade de faturamento', icon: Target },
   { path: '/despesas-fixas', label: 'Despesas Fixas', sub: 'Gerenciar custos recorrentes', icon: Receipt },
+  { path: '/conta/perfil', label: 'Minha foto', sub: 'Foto de perfil da sua conta', icon: Camera },
   { path: '/conta/seguranca', label: 'Alterar senha', sub: 'Trocar a senha da sua conta', icon: KeyRound },
   { path: '/configuracoes', label: 'Configurações', sub: 'Preferências do sistema', icon: Settings },
 ];

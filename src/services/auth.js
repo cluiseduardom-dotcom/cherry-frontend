@@ -29,6 +29,8 @@ export function formatarUsuario(me, usuarioBase = {}) {
     senha_temporaria: me?.senha_temporaria === true,
     // Operador da plataforma (Vertumno): a tela de taxas a receber só aparece para ele.
     plataforma_admin: me?.plataforma_admin === true,
+    // Foto de perfil (null = iniciais). Vem de /auth/me; no login, do próprio retorno do login.
+    foto_url: me && 'foto_url' in me ? (me.foto_url ?? null) : (usuarioBase?.foto_url ?? null),
   };
 }
 
@@ -51,6 +53,7 @@ export async function loginRequest(email, senha) {
     nivel: null,
     capacidades: [],
     tema: resolverTema(usuario.empresa?.tema),
+    foto_url: usuario.foto_url ?? null,
   };
 
   let me;

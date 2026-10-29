@@ -6,6 +6,23 @@ export function gatewayIndisponivel(erro) {
   return erro?.status === 409;
 }
 
+// Texto para o operador quando o Pix automático não está disponível. O Pix continua funcionando como
+// manual (o operador confere o recebimento no banco); só a cobrança com QR e a baixa automática não.
+// `motivo` vem do backend; qualquer outro valor (ou ausência) cai no aviso genérico.
+export function avisoPixIndisponivel(motivo) {
+  const final = 'O Pix será lançado como manual: confirme o recebimento no seu banco antes de concluir a venda.';
+
+  if (motivo === 'loja_nao_conectada') {
+    return `Pix automático desligado: a loja ainda não conectou o Mercado Pago (o administrador conecta em Dados da empresa). ${final}`;
+  }
+
+  if (motivo === 'nao_configurado') {
+    return `Pix automático não está ativo neste ambiente. ${final}`;
+  }
+
+  return `Pix automático indisponível no momento. ${final}`;
+}
+
 // Situação da cobrança para a tela: aguardando | pago | encerrada (expirou, cancelou, falhou ou estornou).
 export function situacaoCobranca(cobranca) {
   if (!cobranca) return 'aguardando';

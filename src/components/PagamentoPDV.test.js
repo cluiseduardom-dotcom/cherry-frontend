@@ -158,20 +158,28 @@ describe('PagamentoPDV — ordem e densidade (ajustes pós validação visual)',
 });
 
 describe('PagamentoPDV: aviso de Pix automático indisponível', () => {
-  it('não mostra o aviso antes de o operador escolher Pix', () => {
-    const html = render(50, [], { avisoPix: 'Pix automático desligado' });
-    expect(html).not.toContain('Pix automático desligado');
-  });
+  const pixManual = { forma_pagamento: 'pix', valor: 50, numero_parcelas: 1, status: 'pendente' };
 
-  it('mostra o aviso (role=status) depois da escolha, quando há texto', () => {
-    const html = render(50, [], { avisoPix: 'Pix automático desligado', avisoPixInicial: true });
+  it('mostra o aviso junto do Pix manual aguardando, mesmo quando ele cobre o total (formas somem)', () => {
+    const html = render(50, [pixManual], { avisoPix: 'Pix automático desligado' });
+    expect(html).not.toContain('Como o cliente vai pagar?');
     expect(html).toContain('pdv-pay-aviso-pix');
     expect(html).toContain('role="status"');
     expect(html).toContain('Pix automático desligado');
   });
 
+  it('não mostra o aviso sem Pix manual aguardando', () => {
+    expect(render(50, [], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
+    expect(render(50, [{ ...pixManual, status: 'confirmado' }], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
+    expect(render(50, [{ forma_pagamento: 'dinheiro', valor: 50, numero_parcelas: 1, status: 'pendente' }], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
+  });
+
+  it('Pix com cobrança no Mercado Pago (QR) não leva o aviso', () => {
+    const comQr = { ...pixManual, cobranca_codigo: 'abc', pix: { qr_code: 'x', expira_em_segundos: 60, recebido_em: 0 } };
+    expect(render(50, [comQr], { avisoPix: 'Pix automático desligado' })).not.toContain('Pix automático desligado');
+  });
+
   it('sem texto de aviso (Pix automático ativo) não renderiza nada', () => {
-    const html = render(50, [], { avisoPix: null, avisoPixInicial: true });
-    expect(html).not.toContain('pdv-pay-aviso-pix');
+    expect(render(50, [pixManual], { avisoPix: null })).not.toContain('pdv-pay-aviso-pix');
   });
 });

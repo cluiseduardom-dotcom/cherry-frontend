@@ -68,8 +68,7 @@ export default function PagamentoPDV({
   onRemover,
   criarCobrancaPix, // opcional: com ele, o Pix vira cobrança com QR no Mercado Pago; sem ele, Pix manual
   onGatewayIndisponivel,
-  avisoPix = null, // texto quando o Pix automático está desligado; aparece depois que o operador escolhe Pix
-  avisoPixInicial = false, // só para testes de renderização
+  avisoPix = null, // texto quando o Pix automático está desligado; aparece junto do Pix manual aguardando
   passoInicial = null, // só para testes de renderização: abre o passo de uma forma
   parcelasIniciais = '1',
 }) {
@@ -80,7 +79,6 @@ export default function PagamentoPDV({
   const [mesesPrazo, setMesesPrazo] = useState('1');
   const [erroBruto, setErro] = useState(SEM_ERRO);
   const [criandoPix, setCriandoPix] = useState(false);
-  const [avisoPixVisivel, setAvisoPixVisivel] = useState(avisoPixInicial);
   const passoRef = useRef(null);
 
   // O passo abre abaixo dos cards: em telas baixas/estreitas ele pode ficar fora
@@ -149,7 +147,6 @@ export default function PagamentoPDV({
     } catch (err) {
       if (gatewayIndisponivel(err)) {
         onGatewayIndisponivel?.();
-        setAvisoPixVisivel(true);
         onAdicionar(r.pagamento);
         limparEntrada();
       } else {
@@ -168,7 +165,6 @@ export default function PagamentoPDV({
       return;
     }
     setPasso(null);
-    if (f.valor === 'pix' && !criarCobrancaPix) setAvisoPixVisivel(true);
     if (f.valor === 'pix' && criarCobrancaPix) {
       registrarPixGateway();
       return;
@@ -191,6 +187,9 @@ export default function PagamentoPDV({
   // Índices originais são preservados: onConfirmar/onRecusar/onRemover agem por índice.
   const itens = pagamentos.map((p, index) => ({ p, index }));
   const pendentes = itens.filter(({ p }) => p.status === STATUS_PAGAMENTO.PENDENTE);
+  // O aviso vai junto do Pix manual aguardando: é onde o operador precisa dele, e esse bloco continua
+  // na tela mesmo quando o Pix cobre o restante todo (e o seletor de formas some).
+  const pixManualAguardando = pendentes.some(({ p }) => p.forma_pagamento === 'pix' && !pagamentoDoGateway(p));
   const realizados = itens.filter(({ p }) => p.status !== STATUS_PAGAMENTO.PENDENTE);
 
   function renderItem({ p, index }) {
@@ -276,6 +275,9 @@ export default function PagamentoPDV({
           <ul className="pdv-pay-list" aria-label="Pagamentos aguardando confirmação">
             {pendentes.map(renderItem)}
           </ul>
+          {avisoPix && pixManualAguardando && (
+            <p className="pdv-pay-aviso-pix" role="status">{avisoPix}</p>
+          )}
         </div>
       )}
 
@@ -328,9 +330,6 @@ export default function PagamentoPDV({
               })}
             </div>
             <CampoErro id="venda-erro-forma" erro={erro} campo="forma" />
-            {avisoPixVisivel && avisoPix && (
-              <p className="pdv-pay-aviso-pix" role="status">{avisoPix}</p>
-            )}
           </fieldset>
 
           {formaDoPasso && (

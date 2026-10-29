@@ -167,7 +167,6 @@
   text-overflow: ellipsis;
 }
 
-/* --- Alertas de estoque (UX-04, Issue #48) --- */
 /* Grupos expansíveis do menu (utils/menuGrupos.js) */
 .sidebar-grupo-btn {
   width: 100%;
@@ -193,14 +192,22 @@
 }
 
 .sidebar-grupo-lista {
-  margin: 0 0 var(--space-1) var(--space-4);
-  padding-left: var(--space-2);
+  margin: 0 0 var(--space-1) var(--space-3);
+  padding-left: var(--space-1);
   border-left: 1px solid var(--sidebar-active-border);
 }
 
 .sidebar-nav-item--filho {
-  padding-top: 6px;
-  padding-bottom: 6px;
+  gap: var(--space-2);
+  padding: 6px var(--space-2);
+}
+
+/* Nomes longos dos subitens (ex.: "Consumo de insumos") quebram em duas linhas em vez de cortar. */
+.sidebar-nav-item--filho .sidebar-nav-label-text {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.25;
 }
 
 .sidebar-grupo-badge {
@@ -220,6 +227,7 @@
   margin-left: var(--space-2);
 }
 
+/* --- Alertas de estoque (UX-04, Issue #48) --- */
 .sidebar-stock-alerts {
   display: flex;
   flex-direction: column;

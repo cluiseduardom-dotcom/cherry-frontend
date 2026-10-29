@@ -26,13 +26,26 @@ describe('Comissoes helpers', () => {
       expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses', 'pagamentos']);
     });
 
-    it('administrador vê todas as 5 abas: Minhas, Equipe, Repasses, Pagamentos e Percentuais', () => {
+    it('administrador vê todas as 6 abas: Minhas, Equipe, Repasses, Pagamentos, Pix a devolver e Percentuais', () => {
       const abas = obterAbasPermitidas({
         user: { role: 'admin' },
         temCapacidade: () => true,
       });
 
-      expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses', 'pagamentos', 'percentuais']);
+      expect(abas.map(a => a.key)).toEqual(['minhas', 'equipe', 'repasses', 'pagamentos', 'pix_devolver', 'percentuais']);
+    });
+  });
+
+  describe('aba "Pix a devolver" (dinheiro saindo)', () => {
+    it('só aparece com a capacidade gerir_financeiro, mesmo sem ver a equipe', () => {
+      const financeiro = obterAbasPermitidas({ user: { role: 'vendedor' }, temCapacidade: cap => cap === 'gerir_financeiro' });
+      expect(financeiro.map(a => a.key)).toEqual(['minhas', 'repasses', 'pagamentos', 'pix_devolver']);
+
+      const gerente = obterAbasPermitidas({ user: { role: 'vendedor' }, temCapacidade: cap => cap === 'ver_vendas_de_todos' });
+      expect(gerente.map(a => a.key)).not.toContain('pix_devolver');
+
+      const vendedor = obterAbasPermitidas({ user: { role: 'vendedor' }, temCapacidade: () => false });
+      expect(vendedor.map(a => a.key)).not.toContain('pix_devolver');
     });
   });
 

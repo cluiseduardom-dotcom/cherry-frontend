@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Avatar from '../Avatar';
 import { AlertCircle, CalendarClock, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 import { definirModoPagamentoComissao, listarAPagar, listarPagamentosComissao } from '../../services/comissoes';
 import { useToast } from '../../context/ToastContext';
@@ -144,7 +145,12 @@ export default function PagamentosComissoesAba({ podePagarComissao, podeAlterarM
                     <tbody>
                       {aPagar.items.map(linha => (
                         <tr key={linha.vendedor_id}>
-                          <td><strong>{linha.vendedor_nome}</strong></td>
+                          <td>
+                            <span className="comissoes-vendedor">
+                              <Avatar nome={linha.vendedor_nome} fotoUrl={linha.vendedor_foto_url} className="comissoes-avatar" vazio="U" />
+                              <strong>{linha.vendedor_nome}</strong>
+                            </span>
+                          </td>
                           <td>{linha.quantidade_comissoes}</td>
                           <td>{formatarMoeda(linha.bruto_a_pagar)}</td>
                           <td className={Number(linha.descontos) < 0 ? 'text-danger' : 'text-secondary'}>{formatarMoeda(linha.descontos)}</td>
@@ -195,7 +201,12 @@ export default function PagamentosComissoesAba({ podePagarComissao, podeAlterarM
                   {pagamentos.map(p => (
                     <tr key={p.id}>
                       <td>{formatarData(p.pago_em)}</td>
-                      <td>{p.vendedor_nome}</td>
+                      <td>
+                        <span className="comissoes-vendedor">
+                          <Avatar nome={p.vendedor_nome} fotoUrl={p.vendedor_foto_url} className="comissoes-avatar" vazio="U" />
+                          {p.vendedor_nome}
+                        </span>
+                      </td>
                       <td><strong>{formatarMoeda(p.valor)}</strong></td>
                       <td>{rotuloDaFormaComissao(p.forma)}</td>
                       <td>{p.itens.filter(i => Number(i.valor) > 0).map(i => `#${i.venda_id}`).join(', ') || '—'}</td>

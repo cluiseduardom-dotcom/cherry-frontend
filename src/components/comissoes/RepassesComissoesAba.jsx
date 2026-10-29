@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Avatar from '../Avatar';
 import {
   HandCoins,
   AlertCircle,
@@ -170,7 +171,10 @@ export default function RepassesComissoesAba({
                     <tr key={item.id}>
                       <td>{formatarDataHora(item.declarado_em)}</td>
                       <td>
-                        <strong>{item.vendedor_nome}</strong>
+                        <span className="comissoes-vendedor">
+                          <Avatar nome={item.vendedor_nome} fotoUrl={item.vendedor_foto_url} className="comissoes-avatar" vazio="U" />
+                          <strong>{item.vendedor_nome}</strong>
+                        </span>
                       </td>
                       <td>
                         <strong>#{item.venda_id}</strong>

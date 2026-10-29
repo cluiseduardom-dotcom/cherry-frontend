@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Avatar from '../Avatar';
 import { AlertCircle, Users } from 'lucide-react';
 import { listarComissoesEquipe } from '../../services/comissoes';
 import { formatarMoeda } from '../../utils/mascaras';
@@ -144,7 +145,10 @@ export default function EquipeComissoesAba({ dataInicio, dataFim }) {
                 {items.map(item => (
                   <tr key={item.usuario_id}>
                     <td>
-                      <strong>{item.nome}</strong>
+                      <span className="comissoes-vendedor">
+                        <Avatar nome={item.nome} fotoUrl={item.foto_url} className="comissoes-avatar" vazio="U" />
+                        <strong>{item.nome}</strong>
+                      </span>
                       {item.ativo === false && <span className="badge badge-danger" style={{ marginLeft: 'var(--space-2)' }}>Bloqueado</span>}
                     </td>
                     <td>

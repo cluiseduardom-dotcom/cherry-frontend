@@ -40,6 +40,7 @@ const secaoPlataforma = {
   icon: Landmark,
   items: [
     { label: 'Taxas a receber', sub: 'Taxa da plataforma por loja, mês a mês', path: '/plataforma/taxas' },
+    { label: 'Planos e condições', sub: 'Plano e exceção de taxa de cada empresa', path: '/plataforma/empresas' },
   ],
 };
 

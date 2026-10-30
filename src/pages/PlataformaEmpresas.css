@@ -1,0 +1,98 @@
+/* Vertumno — planos e exceções de taxa por empresa (operador da plataforma). Reaproveita .plataforma-page de PlataformaTaxas.css. */
+.plataforma-empresa-card {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.plataforma-empresa-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.plataforma-empresa-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.plataforma-regra {
+  text-align: right;
+  min-width: 0;
+}
+
+.plataforma-tag {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--color-border-light);
+  color: var(--color-text-secondary);
+}
+
+.plataforma-detalhes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.plataforma-detalhes dt {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.plataforma-detalhes dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.plataforma-acoes {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.plataforma-hist-titulo {
+  font-size: var(--font-size-sm);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.plataforma-hist-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.plataforma-hist-lista li {
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.plataforma-hist-inativo {
+  opacity: 0.6;
+}
+
+.plataforma-hist-sub {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .plataforma-detalhes {
+    grid-template-columns: 1fr;
+  }
+
+  .plataforma-regra {
+    text-align: left;
+  }
+}

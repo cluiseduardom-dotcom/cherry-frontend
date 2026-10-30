@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileDown, FileSpreadsheet } from 'lucide-react';
 import { obterTaxasPlataforma } from '../services/plataforma';
 import { formatarMoeda } from '../utils/mascaras';
+import { exportarTaxasCsv, exportarTaxasPdf } from '../utils/exportarTaxasPlataforma';
 import { mesAtualBrasilia, deslocarMes, rotuloMes, formatarPercentuais } from '../utils/plataforma';
 import './PlataformaTaxas.css';
 
@@ -34,6 +35,16 @@ export default function PlataformaTaxas() {
           <h1 className="page-title">Taxas a receber</h1>
           <p className="page-subtitle">Vertumno · taxa da plataforma apurada por loja</p>
         </div>
+        {dados && !semMovimento && (
+          <div className="plataforma-exportar">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => exportarTaxasPdf(dados, mes).catch(() => setErro('Não foi possível gerar o PDF.'))}>
+              <FileDown size={16} /> PDF
+            </button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => exportarTaxasCsv(dados, mes)}>
+              <FileSpreadsheet size={16} /> Excel
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="plataforma-mes">

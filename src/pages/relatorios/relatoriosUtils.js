@@ -162,7 +162,7 @@ function desenharRodape(pdf, { pageWidth, pageHeight, pagina, totalPaginas, logo
   pdf.setFontSize(9);
   pdf.setTextColor(130, 130, 130);
   const textoX = logo ? PDF_MARGIN + largura + 4 : PDF_MARGIN;
-  pdf.text(`© GiroOne 2026 · Exportado em ${dataExportacao}`, textoX, pageHeight - 10);
+  pdf.text(`© VERTUMNO 2026 · Exportado em ${dataExportacao}`, textoX, pageHeight - 10);
   pdf.text(`Página ${pagina} de ${totalPaginas}`, pageWidth - PDF_MARGIN, pageHeight - 10, { align: 'right' });
 }
 

@@ -239,7 +239,7 @@ Backend aceita admin/estoquista para categorias, enquanto a rota visual aceita a
 
 **Prioridade: P2**
 
-Não tratar como bug sem decisão de RBAC. Definir claramente a intenção para Vertunmo/GiroOne.
+Não tratar como bug sem decisão de RBAC. Definir claramente a intenção para Vertunmo/GiroNex.
 
 ---
 

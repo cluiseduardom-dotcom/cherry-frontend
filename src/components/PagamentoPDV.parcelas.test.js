@@ -84,7 +84,7 @@ describe('PagamentoPDV — nada de taxa da plataforma na tela do cliente/operado
       render(100, [{ forma_pagamento: 'pix', valor: 100, numero_parcelas: 1, status: 'pendente' }]),
     ];
     for (const html of estados) {
-      expect(html).not.toMatch(/taxa|mdr|vertumno|giroone|gateway|plataforma/i);
+      expect(html).not.toMatch(/taxa|mdr|vertumno|giroone|gironex|gateway|plataforma/i);
     }
   });
 });

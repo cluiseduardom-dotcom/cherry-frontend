@@ -4,6 +4,7 @@ import { listarVendas } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
+import Avatar from '../components/Avatar';
 import CancelarVendaModal from '../components/CancelarVendaModal';
 import { useToast } from '../context/ToastContext';
 import { detalheDosPagamentos, resumoFormasDePagamento } from '../utils/formaPagamentoVenda';
@@ -224,6 +225,7 @@ export default function Historico() {
                   <th>Nº Venda</th>
                   <th>Data</th>
                   <th>Cliente</th>
+                  <th>Vendedor</th>
                   <th>Canal</th>
                   <th>Total</th>
                   <th>Pagamento</th>
@@ -249,6 +251,16 @@ export default function Historico() {
                               {nomeCliente.split(' ').slice(0, 2).map(w => w[0]).join('')}
                             </div>
                             {nomeCliente}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-secondary">—</span>
+                        )}
+                      </td>
+                      <td>
+                        {venda.vendedor_nome ? (
+                          <div className="historico-customer">
+                            <Avatar nome={venda.vendedor_nome} fotoUrl={venda.vendedor_foto_url} className="historico-avatar" />
+                            {venda.vendedor_nome}
                           </div>
                         ) : (
                           <span className="text-sm text-secondary">—</span>

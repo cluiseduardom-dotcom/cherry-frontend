@@ -4,7 +4,7 @@ import { formatarMoeda } from '../utils/mascaras';
 import './ProductRow.css';
 
 /**
- * ProductRow — Linha de produto horizontal padrão VERTUMNO (GiroOne).
+ * ProductRow — Linha de produto horizontal padrão VERTUMNO (GiroNex).
  *
  * Agnóstico a segmento (semijoias, confeitaria, minimercado, eletrônicos, etc).
  * Suporta imagens com qualquer proporção sem distorção (object-fit: contain),

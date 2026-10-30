@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Transformar o Cherry em uma base profissional, consistente e preparada para evolução como produto GiroOne, sem adicionar complexidade antes de consolidar arquitetura, UX, segurança e qualidade.
+Transformar o Cherry em uma base profissional, consistente e preparada para evolução como produto GiroNex, sem adicionar complexidade antes de consolidar arquitetura, UX, segurança e qualidade.
 
 ## Fontes de verdade
 

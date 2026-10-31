@@ -25,3 +25,17 @@
   color: var(--color-text-secondary);
   line-height: 1.5;
 }
+
+.pagamento-recebido-voltar {
+  margin-top: var(--space-4);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-primary, #3f4ae0);
+  border: 0;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+}

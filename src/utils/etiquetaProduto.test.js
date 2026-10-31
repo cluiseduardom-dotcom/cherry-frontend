@@ -107,6 +107,25 @@ describe('folha A4', () => {
     expect(pos[4]).toEqual({ pagina: 1, x: 5, y: 10 });
   });
 
+  it('posição inicial pula etiquetas já usadas e vira a página quando passa do fim da folha', () => {
+    const cfg = { ...PRESET_FOLHA_A4, colunas: 2, linhas: 2, larguraMm: 30, alturaMm: 15, espacoHorizontalMm: 2, espacoVerticalMm: 1, margemEsquerdaMm: 5, margemTopoMm: 10 };
+    const pos = posicoesNaFolha(3, { ...cfg, posicaoInicial: 3 });
+
+    expect(pos[0]).toEqual({ pagina: 0, x: 5, y: 26 });
+    expect(pos[1]).toEqual({ pagina: 0, x: 37, y: 26 });
+    expect(pos[2]).toEqual({ pagina: 1, x: 5, y: 10 });
+    expect(posicoesNaFolha(1, { ...cfg, posicaoInicial: 4 })[0]).toEqual({ pagina: 0, x: 37, y: 26 });
+    expect(posicoesNaFolha(1, cfg)[0]).toEqual({ pagina: 0, x: 5, y: 10 });
+  });
+
+  it('valida a posição inicial (inteiro de 1 até colunas x linhas)', () => {
+    expect(validarFolha({ ...PRESET_FOLHA_A4, posicaoInicial: 65 })).toBe('');
+    expect(validarFolha({ ...PRESET_FOLHA_A4, posicaoInicial: 66 })).toMatch(/posição inicial/);
+    expect(validarFolha({ ...PRESET_FOLHA_A4, posicaoInicial: 0 })).toMatch(/posição inicial/);
+    expect(validarFolha({ ...PRESET_FOLHA_A4, posicaoInicial: 2.5 })).toMatch(/posição inicial/);
+    expect(validarFolha({ ...PRESET_FOLHA_A4, posicaoInicial: NaN })).toMatch(/posição inicial/);
+  });
+
   it('expandirCopias repete cada item e limita as cópias (0..999)', () => {
     const lista = expandirCopias([{ ...ETIQUETA, copias: 3 }, { ...ETIQUETA, codigo: '000043', copias: 0 }, { ...ETIQUETA, codigo: '000044', copias: 5000 }]);
 

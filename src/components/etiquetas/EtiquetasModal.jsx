@@ -89,6 +89,7 @@ export default function EtiquetasModal({ itens, onClose }) {
     colunas: numero(folha.colunas), linhas: numero(folha.linhas),
     margemEsquerdaMm: numero(folha.margemEsquerdaMm), margemTopoMm: numero(folha.margemTopoMm),
     espacoHorizontalMm: numero(folha.espacoHorizontalMm), espacoVerticalMm: numero(folha.espacoVerticalMm),
+    posicaoInicial: numero(folha.posicaoInicial),
   }), [folha]);
   const erroFolha = formato === FORMATO_A4 ? validarFolha(cfgFolha) : '';
   const tamanhoAtivo = useMemo(
@@ -190,6 +191,7 @@ export default function EtiquetasModal({ itens, onClose }) {
                   ['colunas', 'Colunas'], ['linhas', 'Linhas'],
                   ['margemEsquerdaMm', 'Margem esquerda (mm)'], ['margemTopoMm', 'Margem do topo (mm)'],
                   ['espacoHorizontalMm', 'Espaço entre colunas (mm)'], ['espacoVerticalMm', 'Espaço entre linhas (mm)'],
+                  ['posicaoInicial', 'Começar na posição da folha (1 = canto superior esquerdo)'],
                 ].map(([campo, rotulo]) => (
                   <label key={campo}>{rotulo}
                     <input className="input-field" inputMode="decimal" value={folha[campo]} onChange={(e) => setFolha({ ...folha, [campo]: e.target.value })} />

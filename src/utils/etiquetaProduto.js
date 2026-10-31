@@ -15,6 +15,8 @@ export const PRESET_NIMBOT_D110 = { larguraMm: 30, alturaMm: 15 };
 export const PRESET_FOLHA_A4 = {
   larguraMm: 38.1, alturaMm: 21.2, colunas: 5, linhas: 13,
   margemEsquerdaMm: 4.7, margemTopoMm: 10.7, espacoHorizontalMm: 2.5, espacoVerticalMm: 0,
+  // Posição (1 = canto superior esquerdo, em ordem de leitura) da primeira etiqueta: para reaproveitar folha já usada.
+  posicaoInicial: 1,
 };
 
 const MM_POR_PT = 25.4 / 72;
@@ -95,6 +97,12 @@ export function validarFolha(cfg) {
   if (!(larguraMm > 0) || !(alturaMm > 0)) return 'Largura e altura da etiqueta devem ser maiores que zero.';
   if (!Number.isInteger(colunas) || !Number.isInteger(linhas) || colunas < 1 || linhas < 1) return 'Colunas e linhas devem ser números inteiros a partir de 1.';
 
+  const posicaoInicial = cfg.posicaoInicial ?? 1;
+
+  if (!Number.isInteger(posicaoInicial) || posicaoInicial < 1 || posicaoInicial > colunas * linhas) {
+    return `A posição inicial deve ser um número inteiro de 1 a ${colunas * linhas}.`;
+  }
+
   const larguraTotal = margemEsquerdaMm + colunas * larguraMm + (colunas - 1) * espacoHorizontalMm;
   const alturaTotal = margemTopoMm + linhas * alturaMm + (linhas - 1) * espacoVerticalMm;
 
@@ -105,17 +113,20 @@ export function validarFolha(cfg) {
 }
 
 // Posições (mm, canto superior esquerdo) de cada etiqueta, em ordem de leitura, página por página.
+// cfg.posicaoInicial (1 = primeira) pula as posições já usadas da primeira folha; as folhas seguintes começam cheias.
 export function posicoesNaFolha(total, cfg) {
   const porPagina = cfg.colunas * cfg.linhas;
+  const deslocamento = (cfg.posicaoInicial ?? 1) - 1;
   const posicoes = [];
 
   for (let i = 0; i < total; i += 1) {
-    const naPagina = i % porPagina;
+    const indice = i + deslocamento;
+    const naPagina = indice % porPagina;
     const coluna = naPagina % cfg.colunas;
     const linha = Math.floor(naPagina / cfg.colunas);
 
     posicoes.push({
-      pagina: Math.floor(i / porPagina),
+      pagina: Math.floor(indice / porPagina),
       x: cfg.margemEsquerdaMm + coluna * (cfg.larguraMm + cfg.espacoHorizontalMm),
       y: cfg.margemTopoMm + linha * (cfg.alturaMm + cfg.espacoVerticalMm),
     });

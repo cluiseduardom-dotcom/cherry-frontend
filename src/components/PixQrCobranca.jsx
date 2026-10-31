@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Copy, QrCode } from 'lucide-react';
 import { consultarCobrancaPix } from '../services/pagamentosGateway';
-import { situacaoCobranca, tempoRestante } from '../utils/pixGateway';
+import { tempoRestante } from '../utils/pixGateway';
+import useAcompanharCobranca from '../hooks/useAcompanharCobranca';
 import './PixQrCobranca.css';
 
 // Parte visual, sem efeitos: recebe tudo por props (testável sem DOM).
@@ -33,40 +34,19 @@ export function PixQrPainel({ qrCode, qrCodeBase64, restante, copiado, onCopiar 
 export default function PixQrCobranca({ pagamento, consultar = consultarCobrancaPix, onPago, onEncerrada, intervaloMs = 4000 }) {
   const [agora, setAgora] = useState(() => Date.now());
   const [copiado, setCopiado] = useState(false);
-  const aoPagar = useRef(onPago);
-  const aoEncerrar = useRef(onEncerrada);
-
-  useEffect(() => {
-    aoPagar.current = onPago;
-    aoEncerrar.current = onEncerrada;
-  }, [onPago, onEncerrada]);
 
   useEffect(() => {
     const relogio = setInterval(() => setAgora(Date.now()), 1000);
     return () => clearInterval(relogio);
   }, []);
 
-  const codigo = pagamento.cobranca_codigo;
-
-  useEffect(() => {
-    let ativo = true;
-    let timer = null;
-
-    async function rodada() {
-      try {
-        const situacao = situacaoCobranca(await consultar(codigo));
-        if (!ativo) return;
-        if (situacao === 'pago') { aoPagar.current?.(); return; }
-        if (situacao === 'encerrada') { aoEncerrar.current?.(); return; }
-      } catch {
-        // falha momentânea de rede: tenta na próxima rodada
-      }
-      if (ativo) timer = setTimeout(rodada, intervaloMs);
-    }
-
-    timer = setTimeout(rodada, intervaloMs);
-    return () => { ativo = false; clearTimeout(timer); };
-  }, [codigo, consultar, intervaloMs]);
+  useAcompanharCobranca({
+    codigo: pagamento.cobranca_codigo,
+    consultar,
+    onPago: () => onPago?.(),
+    onEncerrada: () => onEncerrada?.(),
+    intervaloMs,
+  });
 
   async function copiar() {
     try {

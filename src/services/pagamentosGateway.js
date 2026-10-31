@@ -22,3 +22,14 @@ export async function consultarCobrancaPix(codigo) {
   const body = await apiFetch(`/pagamentos-gateway/${encodeURIComponent(codigo)}`);
   return body.data;
 }
+
+// Link de pagamento de cartão (crédito/débito, até 12x) pelo Mercado Pago. Contrato: backend POST /pagamentos-gateway/cartao.
+// Resposta: { codigo, status, valor, metodo:'cartao_link', link_url, parcelas_maximas, expira_em, expira_em_segundos,
+// expirada, tipo_cartao, parcelas }. `tipo_cartao` e `parcelas` só vêm preenchidos depois de pago (lidos do Mercado Pago).
+export async function criarLinkCartao(valor) {
+  const body = await apiFetch('/pagamentos-gateway/cartao', {
+    method: 'POST',
+    body: JSON.stringify({ valor }),
+  });
+  return body.data;
+}

@@ -12,9 +12,11 @@ import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
-import { avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO, riscoPixGateway, confirmacaoPerdaPix, pagamentoDoGateway } from '../utils/pixGateway';
+import {
+  avisoPixIndisponivel, ROTA_CONEXAO_MERCADO_PAGO, riscoPixGateway, confirmacaoPerdaPix, pagamentoDoGateway, confirmarLinkCartao,
+} from '../utils/pixGateway';
 import PagamentoPDV from '../components/PagamentoPDV';
-import { consultarDisponibilidadePix, criarCobrancaPix } from '../services/pagamentosGateway';
+import { consultarDisponibilidadePix, criarCobrancaPix, criarLinkCartao } from '../services/pagamentosGateway';
 import { selecionarProdutosPdv, contarSemPrecoNoCanal, mensagemSemPreco } from '../utils/produtosPdv';
 import { canAccessRoute } from '../config/access';
 import {
@@ -264,6 +266,9 @@ export default function Venda() {
   // Proteção do Pix do Mercado Pago (pago ou com QR aberto): descartar a venda com ele deixa o dinheiro
   // sem venda. Toda ação que descarta pagamentos pede confirmação antes; ver utils/pixGateway.js.
   const riscoPix = riscoPixGateway(pagamentos);
+  // Texto do aviso: de cartão só quando TODA cobrança em risco é de cartão (Pix + cartão usa o texto do Pix).
+  const cobrancasEmRisco = pagamentos.filter(p => pagamentoDoGateway(p) && p.status !== STATUS_PAGAMENTO.RECUSADO);
+  const riscoDeCartao = cobrancasEmRisco.length > 0 && cobrancasEmRisco.every(p => p.forma_pagamento !== 'pix');
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   function protegerPix(acaoDescricao, executar, { descarta = true } = {}) {
@@ -271,7 +276,7 @@ export default function Venda() {
       executar();
       return;
     }
-    pedirConfirmacao({ ...confirmacaoPerdaPix(riscoPix, acaoDescricao), tone: 'danger', execute: executar });
+    pedirConfirmacao({ ...confirmacaoPerdaPix(riscoPix, acaoDescricao, { cartao: riscoDeCartao }), tone: 'danger', execute: executar });
   }
 
   // Vitrine do PDV: só o que dá para vender (esgotados ao final; sem preço e
@@ -411,12 +416,17 @@ export default function Venda() {
     setPagamentos(prev => confirmarPagamentoPendente(prev, index));
   }
 
+  // O link de cartão foi pago: a linha vira crédito/débito com as parcelas que o cliente escolheu no Mercado Pago.
+  function confirmarLinkDeCartao(index, cobranca) {
+    setPagamentos(prev => confirmarLinkCartao(prev, index, cobranca));
+  }
+
   function recusarPagamento(index) {
     setPagamentos(prev => recusarPagamentoPendente(prev, index));
   }
 
   function removerPagamento(index) {
-    protegerPix('remover este Pix', () => setPagamentos(prev => removerPagamentoDaLista(prev, index)), {
+    protegerPix(pagamentos[index]?.forma_pagamento === 'pix' ? 'remover este Pix' : 'remover este pagamento de cartão', () => setPagamentos(prev => removerPagamentoDaLista(prev, index)), {
       descarta: pagamentoDoGateway(pagamentos[index]) && pagamentos[index]?.status !== STATUS_PAGAMENTO.RECUSADO,
     });
   }
@@ -489,7 +499,7 @@ export default function Venda() {
       {blocker.state === 'blocked' && riscoPix && (
         <ConfirmDialog
           open
-          {...confirmacaoPerdaPix(riscoPix, 'sair do PDV')}
+          {...confirmacaoPerdaPix(riscoPix, 'sair do PDV', { cartao: riscoDeCartao })}
           tone="danger"
           cancelLabel="Continuar no PDV"
           onConfirm={() => blocker.proceed()}
@@ -872,6 +882,8 @@ export default function Venda() {
                       onRecusarPendente={recusarPagamento}
                       onRemover={removerPagamento}
                       criarCobrancaPix={pixGatewayAtivo ? criarCobrancaPix : undefined}
+                      criarLinkCartao={pixGatewayAtivo ? criarLinkCartao : undefined}
+                      onConfirmarLinkCartao={confirmarLinkDeCartao}
                       avisoPix={pixGatewayAtivo ? null : avisoPixIndisponivel(pixGatewayMotivo, { podeConectar: canAccessRoute(ROTA_CONEXAO_MERCADO_PAGO, user) })}
                       onGatewayIndisponivel={() => setPixGatewayAtivo(false)}
                     />

@@ -80,6 +80,64 @@ export function pagamentoDoGateway(pagamento) {
   return Boolean(pagamento?.cobranca_codigo);
 }
 
+// ---- Link de pagamento de cartão (Mercado Pago Checkout Pro) ----
+// Enquanto o cliente não paga, o pagamento vive no PDV como 'cartao_link' (só para a tela: nunca vai à API).
+// Quando o Mercado Pago confirma, vira `credito` ou `debito` com o nº de parcelas que o CLIENTE escolheu
+// na página do Mercado Pago, lidos da cobrança (o operador não digita nada).
+export const FORMA_LINK_CARTAO = 'cartao_link';
+
+export function pagamentoLinkCartao(pagamento) {
+  return pagamento?.forma_pagamento === FORMA_LINK_CARTAO;
+}
+
+// Cobrança paga em cartão pelo gateway, já convertida em crédito/débito (para os avisos de perda).
+export function pagamentoCartaoDoGateway(pagamento) {
+  return pagamentoDoGateway(pagamento) && pagamento.forma_pagamento !== 'pix';
+}
+
+export function pagamentoComLinkCartao(pagamento, cobranca, recebidoEm = Date.now()) {
+  return {
+    ...pagamento,
+    forma_pagamento: FORMA_LINK_CARTAO,
+    numero_parcelas: 1,
+    cobranca_codigo: cobranca.codigo,
+    link: {
+      url: cobranca.link_url,
+      parcelas_maximas: cobranca.parcelas_maximas,
+      expira_em: cobranca.expira_em,
+      expira_em_segundos: cobranca.expira_em_segundos,
+      recebido_em: recebidoEm,
+    },
+  };
+}
+
+// Só vale como pago com o tipo de cartão e as parcelas já lidos do Mercado Pago: sem eles a venda seria
+// recusada pelo backend, então a tela continua aguardando em vez de confirmar às cegas.
+export function situacaoLinkCartao(cobranca) {
+  if (cobranca?.status === 'pago' && !['credito', 'debito'].includes(cobranca.tipo_cartao)) return 'aguardando';
+  return situacaoCobranca(cobranca);
+}
+
+// Troca o pagamento 'cartao_link' pendente por crédito/débito confirmado, com as parcelas do Mercado Pago.
+export function confirmarLinkCartao(pagamentos, indice, cobranca) {
+  const atual = pagamentos[indice];
+  if (!pagamentoLinkCartao(atual) || atual.status !== 'pendente') return pagamentos;
+  if (!['credito', 'debito'].includes(cobranca?.tipo_cartao)) return pagamentos;
+
+  const parcelas = cobranca.tipo_cartao === 'debito' ? 1 : Number(cobranca.parcelas);
+  if (!Number.isInteger(parcelas) || parcelas < 1) return pagamentos;
+
+  return pagamentos.map((p, i) => (i === indice
+    ? { ...p, forma_pagamento: cobranca.tipo_cartao, numero_parcelas: parcelas, status: 'confirmado', link: undefined }
+    : p));
+}
+
+// Texto para enviar o link ao cliente (WhatsApp). O link é do Mercado Pago; nada sensível vai junto.
+export function linkWhatsApp(url, valorFormatado) {
+  const texto = `Link para pagar ${valorFormatado} no cartão: ${url}`;
+  return `https://wa.me/?text=${encodeURIComponent(texto)}`;
+}
+
 // Proteção do PDV: o Pix do Mercado Pago é dinheiro real que já pode ter saído da conta do cliente.
 // Se o operador descartar a venda (limpar, esvaziar o carrinho, remover o Pix ou sair da tela) com
 // ele pago ou ainda aguardando o QR, o dinheiro fica na cobrança sem venda — e só volta ao cliente por
@@ -94,7 +152,22 @@ export function riscoPixGateway(pagamentos) {
 
 // Texto do diálogo de confirmação. `acao` = o que o operador está tentando fazer, em verbo no infinitivo
 // ("limpar a venda", "sair do PDV"...).
-export function confirmacaoPerdaPix(risco, acao) {
+export function confirmacaoPerdaPix(risco, acao, { cartao = false } = {}) {
+  if (cartao) {
+    if (risco === 'pago') {
+      return {
+        title: 'Há um pagamento de cartão já pago nesta venda',
+        message: `O cliente já pagou no cartão pelo link do Mercado Pago e a venda ainda não foi finalizada. Se você ${acao} agora, o pagamento fica sem venda e só volta ao cliente por estorno no painel do Mercado Pago. Para não perder, finalize a venda.`,
+        confirmLabel: 'Descartar mesmo assim',
+      };
+    }
+    return {
+      title: 'Há um link de cartão aguardando pagamento',
+      message: `Existe um link de pagamento de cartão aberto nesta venda. Se o cliente pagar depois que você ${acao}, o dinheiro fica sem venda e só volta por estorno no painel do Mercado Pago. Confirme que o cliente não vai pagar antes de continuar.`,
+      confirmLabel: 'Descartar mesmo assim',
+    };
+  }
+
   if (risco === 'pago') {
     return {
       title: 'Há um Pix já pago nesta venda',

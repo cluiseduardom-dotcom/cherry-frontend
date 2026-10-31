@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Banknote, Check, Clock, CreditCard, HandCoins, QrCode, Wallet, X, XCircle,
+  Banknote, Check, Clock, CreditCard, HandCoins, Link2, QrCode, Wallet, X, XCircle,
 } from 'lucide-react';
 import PixQrCobranca from './PixQrCobranca';
+import LinkCartaoCobranca from './LinkCartaoCobranca';
 import { formatarMoeda } from '../utils/mascaras';
-import { gatewayIndisponivel, pagamentoComCobranca, pagamentoDoGateway } from '../utils/pixGateway';
+import {
+  gatewayIndisponivel, pagamentoComCobranca, pagamentoComLinkCartao, pagamentoDoGateway, pagamentoLinkCartao,
+} from '../utils/pixGateway';
 import {
   FORMAS_PAGAMENTO,
   MAX_PARCELAS,
@@ -20,6 +23,7 @@ import {
   rotuloStatusPagamento,
   sanitizarValorDigitado,
   textoValorExibido,
+  validarNovoPagamento,
   vencimentoParcela,
   vencimentosCrediario,
 } from '../utils/pagamentoVenda';
@@ -68,6 +72,8 @@ export default function PagamentoPDV({
   onRecusarPendente,
   onRemover,
   criarCobrancaPix, // opcional: com ele, o Pix vira cobrança com QR no Mercado Pago; sem ele, Pix manual
+  criarLinkCartao, // opcional: com ele, aparece "Link de cartão" (crédito/débito pelo Mercado Pago)
+  onConfirmarLinkCartao, // (index, cobranca): o link foi pago; vira crédito/débito com as parcelas do Mercado Pago
   onGatewayIndisponivel,
   avisoPix = null, // { texto, acao } quando o Pix automático está desligado; aparece junto do Pix manual aguardando
   passoInicial = null, // só para testes de renderização: abre o passo de uma forma
@@ -80,6 +86,7 @@ export default function PagamentoPDV({
   const [mesesPrazo, setMesesPrazo] = useState('1');
   const [erroBruto, setErro] = useState(SEM_ERRO);
   const [criandoPix, setCriandoPix] = useState(false);
+  const [criandoLink, setCriandoLink] = useState(false);
   const passoRef = useRef(null);
 
   // O passo abre abaixo dos cards: em telas baixas/estreitas ele pode ficar fora
@@ -158,8 +165,29 @@ export default function PagamentoPDV({
     }
   }
 
+  // Link de cartão: cria a cobrança no Mercado Pago e lança o pagamento aguardando, com o link para o cliente.
+  // Diferente do Pix, não há versão "manual": sem Mercado Pago o botão nem aparece, e qualquer erro é mostrado.
+  async function registrarLinkCartao() {
+    const v = validarNovoPagamento(valorTexto, alocavelCentavos);
+    if (v.erro) {
+      setErro({ campo: 'valor', mensagem: v.erro });
+      return;
+    }
+    setCriandoLink(true);
+    setErro(SEM_ERRO);
+    try {
+      const cobranca = await criarLinkCartao(v.valor);
+      onAdicionar(pagamentoComLinkCartao({ valor: v.valor, status: STATUS_PAGAMENTO.PENDENTE }, cobranca));
+      limparEntrada();
+    } catch (err) {
+      setErro({ campo: 'forma', mensagem: err.message });
+    } finally {
+      setCriandoLink(false);
+    }
+  }
+
   function tocarForma(f) {
-    if (criandoPix) return;
+    if (criandoPix || criandoLink) return;
     setErro(SEM_ERRO);
     if (f.detalhe) {
       setPasso(passo === f.valor ? null : f.valor);
@@ -233,7 +261,14 @@ export default function PagamentoPDV({
             <X size={16} aria-hidden="true" />
           </button>
         </div>
-        {status === STATUS_PAGAMENTO.PENDENTE && pagamentoDoGateway(p) && (
+        {status === STATUS_PAGAMENTO.PENDENTE && pagamentoLinkCartao(p) && (
+          <LinkCartaoCobranca
+            pagamento={p}
+            onPago={(cobranca) => onConfirmarLinkCartao?.(index, cobranca)}
+            onEncerrada={() => onRecusarPendente(index)}
+          />
+        )}
+        {status === STATUS_PAGAMENTO.PENDENTE && pagamentoDoGateway(p) && !pagamentoLinkCartao(p) && (
           <PixQrCobranca
             pagamento={p}
             onPago={() => onConfirmarPendente(index)}
@@ -332,7 +367,7 @@ export default function PagamentoPDV({
                     type="button"
                     className={`pdv-pay-forma pdv-pay-forma--${f.valor} ${passo === f.valor ? 'pdv-pay-forma--ativa' : ''}`}
                     aria-pressed={passo === f.valor}
-                    disabled={criandoPix}
+                    disabled={criandoPix || criandoLink}
                     onClick={() => tocarForma(f)}
                   >
                     <Icone size={20} aria-hidden="true" />
@@ -340,6 +375,17 @@ export default function PagamentoPDV({
                   </button>
                 );
               })}
+              {criarLinkCartao && (
+                <button
+                  type="button"
+                  className="pdv-pay-forma pdv-pay-forma--link"
+                  disabled={criandoPix || criandoLink}
+                  onClick={() => { setPasso(null); registrarLinkCartao(); }}
+                >
+                  <Link2 size={20} aria-hidden="true" />
+                  <span>{criandoLink ? 'Gerando link…' : 'Link de cartão'}</span>
+                </button>
+              )}
             </div>
             <CampoErro id="venda-erro-forma" erro={erro} campo="forma" />
           </fieldset>

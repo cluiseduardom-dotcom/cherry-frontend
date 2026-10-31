@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Eye, X, Trash2, ShoppingCart, PackageCheck, Ban, ClipboardList, ScanLine } from 'lucide-react';
+import { Plus, Search, Eye, X, Trash2, ShoppingCart, PackageCheck, Ban, ClipboardList } from 'lucide-react';
 import { listarCompras, criarCompra, cancelarCompra } from '../services/compras';
 import { listarFornecedores } from '../services/fornecedores';
 import { listarProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
-import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
+import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
+import { itensEtiquetaDaCompra } from '../utils/etiquetasDaCompra';
 import { formatarData } from '../utils/formatarData';
 import CancelarCompraModal from '../components/compras/CancelarCompraModal';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
@@ -114,7 +115,8 @@ export default function Compras() {
   const [createIntent, setCreateIntent] = useState('escolha');
   const [form, setForm] = useState(emptyForm());
   const [initialForm, setInitialForm] = useState(form);
-  const [scannerParaItem, setScannerParaItem] = useState(null);
+  // Itens da compra recém-registrada, para imprimir as etiquetas (o código nasce na entrada no estoque).
+  const [etiquetaItens, setEtiquetaItens] = useState(null);
   const [cancelAlvo, setCancelAlvo] = useState(null);
 
   function fecharModalDireto() {
@@ -215,6 +217,7 @@ export default function Compras() {
       await criarCompra(payload);
       fecharModalDireto();
       toast.success('Compra registrada com sucesso. O estoque foi atualizado.');
+      setEtiquetaItens(itensEtiquetaDaCompra(payload.itens, produtos));
       await load();
     } catch (err) {
       setFormError(err.message);
@@ -477,7 +480,6 @@ export default function Compras() {
                           <option value="">Selecione...</option>
                           {produtos.map(p => <option key={p.id} value={p.id}>{p.sku ? p.sku + ' — ' : ''}{p.nome}</option>)}
                         </select>
-                        <button type="button" className="produto-action-btn" title="Ler código do produto" onClick={() => setScannerParaItem(index)}><ScanLine size={14} /></button>
                       </div>
                     </div>
                     <div className="compra-field">
@@ -511,19 +513,8 @@ export default function Compras() {
         <ConfirmarDescarteDialog onContinuar={continuarEditando} onDescartar={confirmarDescarte} />
       )}
 
-      {scannerParaItem !== null && (
-        <BarcodeScannerModal
-          onClose={() => setScannerParaItem(null)}
-          onDetect={produto => {
-            const disponivel = produtos.some(p => p.id === produto.produto_id);
-            if (!disponivel) {
-              setFormError(`"${produto.nome}" foi encontrado, mas não está disponível no canal desta compra.`);
-              return;
-            }
-            updateItem(scannerParaItem, 'produto_id', String(produto.produto_id));
-            setScannerParaItem(null);
-          }}
-        />
+      {etiquetaItens && (
+        <EtiquetasModal itens={etiquetaItens} onClose={() => setEtiquetaItens(null)} />
       )}
 
       {cancelAlvo && (

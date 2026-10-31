@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { homeRouteForRole, ALLOWED_ROLES_BY_PATH } from './config/access';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import PagamentoRecebido from './pages/PagamentoRecebido';
 import Dashboard from './pages/Dashboard';
 import Venda from './pages/Venda';
 import Estoque from './pages/Estoque';
@@ -95,6 +96,8 @@ function Fallback() {
 
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
+  // Pública (cliente final volta do Mercado Pago): sem login, sem API.
+  { path: '/pagamento-recebido', element: <PagamentoRecebido /> },
   {
     element: <ProtectedRoute><Layout /></ProtectedRoute>,
     children: registeredPaths.map(path => {

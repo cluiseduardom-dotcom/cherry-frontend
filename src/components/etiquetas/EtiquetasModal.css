@@ -1,0 +1,12 @@
+.etiquetas-modal { width: min(640px, 100%); max-height: 92vh; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-3); }
+.etiquetas-formatos { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.etiquetas-formatos label, .etiquetas-preco { display: flex; align-items: center; gap: 6px; font-size: var(--font-size-sm); }
+.etiquetas-medidas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.etiquetas-medidas label { display: flex; flex-direction: column; gap: 4px; font-size: var(--font-size-sm); }
+.etiquetas-dica { grid-column: 1 / -1; margin: 0; }
+.etiquetas-previa { align-self: flex-start; max-width: 100%; border: 1px dashed var(--color-border); background: #fff; image-rendering: pixelated; }
+.etiquetas-tabela { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.etiquetas-tabela th, .etiquetas-tabela td { padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--color-border-light); }
+.etiquetas-tabela .numeric { text-align: right; }
+.etiquetas-copias { width: 64px; text-align: right; }
+.etiquetas-acoes { display: flex; gap: 4px; justify-content: flex-end; }

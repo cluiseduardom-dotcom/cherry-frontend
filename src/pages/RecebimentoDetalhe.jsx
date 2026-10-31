@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, ScanLine, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ScanLine, Tag, TriangleAlert } from 'lucide-react';
 import { buscarRecebimento, alterarStatusRecebimento, aprovarRecebimento } from '../services/recebimentos';
 import { listarFornecedores } from '../services/fornecedores';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
+import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
@@ -53,6 +54,7 @@ export default function RecebimentoDetalhe() {
   const [proximoStatus, setProximoStatus] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [scannerAberto, setScannerAberto] = useState(false);
+  const [etiquetasAbertas, setEtiquetasAbertas] = useState(false);
   const [itemDestacadoId, setItemDestacadoId] = useState(null);
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
@@ -76,6 +78,14 @@ export default function RecebimentoDetalhe() {
   }
 
   useEffect(() => { load(); }, [id]);
+
+  // Itens com produto cadastrado e quantidade recebida: viram etiquetas (uma por unidade recebida, ajustável).
+  const itensParaEtiqueta = useMemo(
+    () => (recebimento?.itens || [])
+      .filter(i => i.produto_id && Number(i.quantidade_recebida) > 0)
+      .map(i => ({ produto_id: i.produto_id, nome: i.descricao_snapshot, quantidade: Number(i.quantidade_recebida) })),
+    [recebimento],
+  );
 
   const divergencia = useMemo(() => calcularDivergenciaItensRecebimento(recebimento?.itens), [recebimento]);
   const fornecedorNome = fornecedores.find(f => f.id === recebimento?.fornecedor_id)?.nome;
@@ -205,6 +215,12 @@ export default function RecebimentoDetalhe() {
       </div>
 
       <div className="card card-padding compra-recebimento-acoes-card">
+        {podeGerenciar && itensParaEtiqueta.length > 0 && (
+          <button type="button" className="btn btn-secondary" onClick={() => setEtiquetasAbertas(true)}>
+            <Tag size={16} /> Imprimir etiquetas
+          </button>
+        )}
+
         {podeConferir && (
           <button type="button" className="btn btn-primary" onClick={() => setScannerAberto(true)}>
             <ScanLine size={16} /> {labelConferencia} (scanner)
@@ -230,6 +246,10 @@ export default function RecebimentoDetalhe() {
 
       {scannerAberto && (
         <BarcodeScannerModal onClose={() => setScannerAberto(false)} onDetect={handleScanDetect} />
+      )}
+
+      {etiquetasAbertas && (
+        <EtiquetasModal itens={itensParaEtiqueta} onClose={() => setEtiquetasAbertas(false)} />
       )}
 
       <ConfirmDialog

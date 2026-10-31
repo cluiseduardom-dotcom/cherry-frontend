@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Plus, AlertTriangle, Package, MapPin } from 'lucide-react';
+import { Search, Plus, AlertTriangle, Package, MapPin, Tag } from 'lucide-react';
 import { listarProdutos } from '../services/produtos';
 import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
 import NovoLocalModal from '../components/NovoLocalModal';
+import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { rotuloDoLocal, filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
 import { useToast } from '../context/ToastContext';
@@ -41,6 +42,8 @@ function StockBar({ value, max = 20 }) {
 export default function Estoque() {
   const { user } = useAuth();
   const podeMovimentar = podeExecutarAcao(user?.role, ACTIONS.MOVIMENTAR_ESTOQUE);
+  // Itens para a janela de etiquetas (null = fechada). Vem do botão "Etiquetas" do card ou de uma entrada recém-salva.
+  const [etiquetaItens, setEtiquetaItens] = useState(null);
   const podeCriarLocal = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
 
   const [produtos, setProdutos] = useState([]);
@@ -156,7 +159,7 @@ export default function Estoque() {
   const outCount      = alertas.filter(a => a.estoque_atual === 0).length;
   const totalItems    = produtos.reduce((s, p) => s + p.estoque_atual, 0);
 
-  function handleMovimentacaoSaved(movimentacao) {
+  function handleMovimentacaoSaved(movimentacao, opcoes = {}) {
     const produtoAtualizado = produtos.find(p => p.id === movimentacao.produto_id);
     if (!produtoAtualizado) {
       setModalOpen(false);
@@ -183,6 +186,10 @@ export default function Estoque() {
 
     setModalOpen(false);
     toast.success('Movimentação registrada com sucesso.');
+
+    if (opcoes.imprimirEtiquetas) {
+      setEtiquetaItens([{ produto_id: atualizado.id, nome: atualizado.nome, quantidade: opcoes.quantidade }]);
+    }
   }
 
   return (
@@ -387,6 +394,15 @@ export default function Estoque() {
                   {status === 'esgotado' && <span className="badge badge-danger">Esgotado</span>}
                   {status === 'baixo'    && <span className="badge badge-warning"><AlertTriangle size={10} />Baixo</span>}
                   {status === 'ok'       && <span className="badge badge-success">Normal</span>}
+                  {podeMovimentar && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost estoque-etiqueta-btn"
+                      onClick={() => setEtiquetaItens([{ produto_id: p.id, nome: p.nome, quantidade: 1 }])}
+                    >
+                      <Tag size={14} /> Etiquetas
+                    </button>
+                  )}
                 </ProductCard>
               );
             })}
@@ -407,6 +423,10 @@ export default function Estoque() {
           onClose={() => setNovoLocalOpen(false)}
           onSaved={handleLocalCriado}
         />
+      )}
+
+      {podeMovimentar && etiquetaItens && (
+        <EtiquetasModal itens={etiquetaItens} onClose={() => setEtiquetaItens(null)} />
       )}
 
       {podeMovimentar && (

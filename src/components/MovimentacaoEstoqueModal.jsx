@@ -44,10 +44,13 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  // Só vale para entrada: depois de salvar, abre a impressão de etiquetas com a quantidade desta entrada.
+  const [imprimirEtiquetas, setImprimirEtiquetas] = useState(true);
 
   useEffect(() => {
     if (open) {
       setForm(EMPTY_FORM);
+      setImprimirEtiquetas(true);
       setError('');
       setSaving(false);
     }
@@ -96,7 +99,10 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
         motivo: form.motivo.trim() || undefined,
       };
       const movimentacao = await registrarMovimentacaoEstoque(Number(form.produtoId), payload);
-      onSaved(movimentacao);
+      onSaved(movimentacao, {
+        imprimirEtiquetas: form.tipo === 'entrada' && imprimirEtiquetas,
+        quantidade: payload.quantidade,
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -167,6 +173,13 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
                   onChange={e => updateField('quantidade', e.target.value)}
                 />
               </div>
+
+              {form.tipo === 'entrada' && (
+                <label className="modal-form-span-2 mm-imprimir-etiquetas">
+                  <input type="checkbox" checked={imprimirEtiquetas} onChange={e => setImprimirEtiquetas(e.target.checked)} />
+                  {' '}Imprimir etiquetas desta entrada depois de salvar
+                </label>
+              )}
 
               <div className="input-wrapper modal-form-span-2">
                 <label className="input-label" htmlFor="mm-motivo">Motivo</label>

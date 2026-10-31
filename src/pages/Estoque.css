@@ -229,3 +229,5 @@
 }
 
 .estoque-total-label { font-size: 11px; color: var(--color-text-muted); }
+
+.estoque-etiqueta-btn { align-self: flex-start; margin-top: var(--space-2); padding-inline: 0; }

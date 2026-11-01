@@ -38,6 +38,8 @@ import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { corDoProduto as colorForProduto } from '../theme/themes';
+import FiltrosVenda from '../components/FiltrosVenda';
+import { FILTROS_PADRAO, aplicarFiltrosVitrine, contarFiltrosAtivos } from '../utils/filtrosVitrine';
 import './Venda.css';
 
 // O preço exibido/vendido é sempre o vigente para o canal (preco_canal),
@@ -153,6 +155,8 @@ export default function Venda() {
 
   const [search, setSearch]         = useState('');
   const [activeCategory, setCategory] = useState('Todos');
+  const [filtros, setFiltros] = useState(FILTROS_PADRAO);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [cart, setCart]             = useState([]);
   const [saleSuccess, setSaleSuccess] = useState(false);
   const [saleTotal, setSaleTotal]   = useState(0);
@@ -305,13 +309,16 @@ export default function Venda() {
 
   /* --- Filtered products --- */
   const filtered = useMemo(() => {
-    return produtosVitrine.filter(p => {
+    const porBusca = produtosVitrine.filter(p => {
       const matchCat = activeCategory === 'Todos' || p.category === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                           p.sku.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [produtosVitrine, search, activeCategory]);
+    return aplicarFiltrosVitrine(porBusca, filtros);
+  }, [produtosVitrine, search, activeCategory, filtros]);
+
+  const filtrosAtivos = contarFiltrosAtivos(filtros);
 
   /* --- Cart operations (itens avulsos) --- */
   function addToCart(product) {
@@ -577,10 +584,27 @@ export default function Venda() {
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <button className="btn btn-ghost venda-filter-btn" aria-label="Filtrar">
+            <button
+              type="button"
+              className={`btn btn-ghost venda-filter-btn${filtrosAtivos > 0 ? ' venda-filter-btn--ativo' : ''}`}
+              aria-label={filtrosAtivos > 0 ? `Filtrar (${filtrosAtivos} ativo${filtrosAtivos > 1 ? 's' : ''})` : 'Filtrar'}
+              aria-expanded={filtrosAbertos}
+              aria-controls="venda-filtros-painel"
+              onClick={() => setFiltrosAbertos(v => !v)}
+            >
               <SlidersHorizontal size={16} />
+              {filtrosAtivos > 0 && <span className="venda-filter-badge" aria-hidden="true">{filtrosAtivos}</span>}
             </button>
           </div>
+
+          {filtrosAbertos && (
+            <FiltrosVenda
+              filtros={filtros}
+              onChange={setFiltros}
+              onLimpar={() => setFiltros(FILTROS_PADRAO)}
+              ativos={filtrosAtivos}
+            />
+          )}
 
           {kitMode && (
             <div className="kit-mode-banner">

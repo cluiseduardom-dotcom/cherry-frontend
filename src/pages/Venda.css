@@ -34,6 +34,63 @@
 .venda-filter-btn {
   flex-shrink: 0;
   padding: 10px 14px;
+  position: relative;
+}
+
+.venda-filter-btn--ativo {
+  color: var(--color-primary);
+  background: var(--color-primary-ultra);
+}
+
+.venda-filter-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* Painel de filtros (abre abaixo da busca) */
+.venda-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.venda-filtros-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.venda-filtros-faixa {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.venda-filtros-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.venda-filtros-acoes {
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Category pills */

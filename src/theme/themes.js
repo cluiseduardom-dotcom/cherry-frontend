@@ -1,15 +1,16 @@
 // Registro dos temas visuais. As cores ficam em src/theme/themes.css;
 // aqui ficam só a identificação do tema e os textos de marca.
 //
-// Nesta fase NÃO existe seleção automática pela empresa autenticada: o tema
-// padrão vale sempre, e um tema personalizado só pode ser pré-visualizado em
-// desenvolvimento (ver lerTemaDev). A ligação com a empresa virá do backend.
+// O tema de uma empresa vem do backend: no login (empresa do usuário) e no endereço
+// público /c/<slug> (só a identidade visual, antes do login). O padrão é o VERTUMNO.
 
 import vertumnoLogo from '../assets/vertumno-logo.png';
 import vertumnoSimbolo from '../assets/vertumno-simbolo.png';
 import cherryLogo from '../assets/cherry-logo.png';
 import cherrySimbolo from '../assets/cherry-simbolo.png';
 import cherryOrnamento from '../assets/cherry-ornamento.png';
+import valvazoriLogo from '../assets/valvazori-logo.png';
+import valvazoriSimbolo from '../assets/valvazori-simbolo.png';
 
 export const TEMA_PADRAO = 'vertumno';
 
@@ -26,6 +27,8 @@ export const TEMAS = {
       logo: vertumnoLogo,
       simbolo: vertumnoSimbolo,
       logoAlt: 'VERTUMNO — Gestão que impulsiona',
+      // Frase de marca exibida no login (null: o tema não tem).
+      tagline: 'GESTÃO QUE IMPULSIONA',
       slogan: 'Informação organizada gera decisões melhores.',
       sloganAutor: 'VERTUMNO',
       ornamento: null,
@@ -47,6 +50,7 @@ export const TEMAS = {
       logo: cherryLogo,
       simbolo: cherrySimbolo,
       logoAlt: 'Cherry Semijoias',
+      tagline: null,
       slogan: 'Detalhes que brilham todos os dias.',
       sloganAutor: 'Cherry Semijoias',
       ornamento: cherryOrnamento,
@@ -54,6 +58,26 @@ export const TEMAS = {
       paleta: ['#A70636', '#D33A63', '#760426', '#B8860B', '#C58B55', '#91052F', '#5D031E', '#6F5F66', '#E0527A'],
       loginTitulo: 'Cherry Semijoias',
       loginDescricao: 'Sistema completo de gestão para semijoias. Vendas, estoque, clientes e relatórios em um só lugar.',
+    },
+  },
+  valvazori: {
+    id: 'valvazori',
+    marca: {
+      nome: 'Valvazori',
+      nomeCompleto: 'Valvazori Imports',
+      subtitulo: null,
+      // Logo fornecido pelo cliente (azul-marinho), recortado em fundo transparente.
+      logo: valvazoriLogo,
+      simbolo: valvazoriSimbolo,
+      logoAlt: 'Valvazori Imports',
+      tagline: null,
+      slogan: 'Informação organizada gera decisões melhores.',
+      sloganAutor: 'Valvazori Imports',
+      ornamento: null,
+      mostrarIcone: false,
+      paleta: ['#102961', '#1D4291', '#0B1D47', '#3F4D63', '#6B7A90', '#2F5BB7', '#16346F', '#5B6B82', '#08153A'],
+      loginTitulo: 'Valvazori Imports',
+      loginDescricao: 'Sistema completo de gestão. Vendas, estoque, clientes e relatórios em um só lugar.',
     },
   },
 };
@@ -66,7 +90,7 @@ export function resolverTema(chave) {
 }
 
 // Pré-visualização explícita, só em desenvolvimento:
-//   ?tema=cherry | ?tema=vertumno   escolhe o tema (e guarda na sessão)
+//   ?tema=cherry | vertumno | valvazori   escolhe o tema (e guarda na sessão)
 //   ?tema=padrao                    limpa a escolha
 // Em produção (isDev falso) isto é ignorado por completo.
 export function lerTemaDev({ search = '', storage = null, isDev = false } = {}) {

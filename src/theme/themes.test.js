@@ -28,6 +28,7 @@ function tokensDoBloco(seletor) {
 
 const padrao = tokensDoBloco(':root,\\s*html\\[data-theme="vertumno"\\]');
 const cherry = tokensDoBloco('html\\[data-theme="cherry"\\]');
+const valvazori = tokensDoBloco('html\\[data-theme="valvazori"\\]');
 
 const HEX_CHERRY = ['#A70636', '#91052F', '#D33A63', '#F8DCE4', '#FCF2F4', '#5D031E', '#760426'];
 const HEX_NAVY = ['#0B2545', '#091D38', '#1F5FBF', '#E8F0FB', '#13315C', '#F4F6F9'];
@@ -44,6 +45,22 @@ function arquivosCss(dir, acc = []) {
 describe('tokens dos temas', () => {
   it('os dois temas definem exatamente o mesmo conjunto de tokens', () => {
     expect(Object.keys(cherry).sort()).toEqual(Object.keys(padrao).sort());
+  });
+
+  it('o tema Valvazori define exatamente o mesmo conjunto de tokens dos demais', () => {
+    expect(Object.keys(valvazori).sort()).toEqual(Object.keys(padrao).sort());
+  });
+
+  it('tema Valvazori: azul-marinho do logo do cliente, menu claro, sem cores Cherry nem o azul do padrão', () => {
+    expect(valvazori['--color-primary']).toBe('#102961');
+    expect(valvazori['--color-primary-rgb']).toBe('16, 41, 97');
+    expect(valvazori['--sidebar-bg']).toBe('#FFFFFF');
+    const valores = Object.values(valvazori).join(' ');
+    for (const hex of HEX_CHERRY) expect(valores).not.toContain(hex);
+    for (const hex of ['#0B2545', '#1F5FBF', '#B8922E']) expect(valores).not.toContain(hex);
+    for (const token of ['--color-primary', '--color-bg', '--chart-a', '--sidebar-text-strong']) {
+      expect(valvazori[token]).not.toBe(padrao[token]);
+    }
   });
 
   it('tema padrão VERTUMNO: azul-marinho, azul e dourado, sem nenhuma cor Cherry', () => {
@@ -119,7 +136,8 @@ describe('seleção de tema', () => {
   it('reconhece os temas registrados', () => {
     expect(resolverTema('cherry')).toBe('cherry');
     expect(resolverTema('vertumno')).toBe('vertumno');
-    expect(Object.keys(TEMAS).sort()).toEqual(['cherry', 'vertumno']);
+    expect(resolverTema('valvazori')).toBe('valvazori');
+    expect(Object.keys(TEMAS).sort()).toEqual(['cherry', 'valvazori', 'vertumno']);
   });
 
   it('aplicarTema grava data-theme e usa o padrão quando não há tema', () => {
@@ -242,6 +260,27 @@ describe('marca por tema', () => {
     expect(sidebarCss).toMatch(/height:\s*100dvh/);
     expect(sidebarCss).toMatch(/\.sidebar \{[^}]*position:\s*fixed[^}]*bottom:\s*0/s);
     expect(sidebarCss).toMatch(/\.sidebar-nav \{[^}]*min-height:\s*0[^}]*overflow-y:\s*auto/s);
+  });
+
+  it('o tema Valvazori tem logo e símbolo próprios (fundo transparente) e sem frase de marca do VERTUMNO', () => {
+    for (const arquivo of ['valvazori-logo.png', 'valvazori-simbolo.png']) {
+      expect(statSync(join(SRC, 'assets', arquivo)).size).toBeGreaterThan(1_000);
+    }
+    expect(TEMAS.valvazori.marca.nomeCompleto).toBe('Valvazori Imports');
+    expect(TEMAS.valvazori.marca.logo).not.toBe(TEMAS.vertumno.marca.logo);
+    expect(TEMAS.valvazori.marca.simbolo).not.toBe(TEMAS.vertumno.marca.simbolo);
+    expect(TEMAS.valvazori.marca.tagline).toBeNull();
+    expect(TEMAS.cherry.marca.tagline).toBeNull();
+    expect(TEMAS.vertumno.marca.tagline).toBe('GESTÃO QUE IMPULSIONA');
+  });
+
+  it('todo tema tem paleta de avatar em hex e textos de login', () => {
+    for (const tema of Object.values(TEMAS)) {
+      expect(tema.marca.paleta.length).toBeGreaterThan(0);
+      for (const cor of tema.marca.paleta) expect(cor).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      expect(tema.marca.loginTitulo).toBeTruthy();
+      expect(tema.marca.loginDescricao).toBeTruthy();
+    }
   });
 
   it('não há seleção por empresa nem por id fixo no registro de temas', () => {

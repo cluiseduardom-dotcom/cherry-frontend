@@ -44,3 +44,25 @@ export async function encerrarCondicaoEmpresa(empresaId, dados) {
   const body = await apiFetch(`/plataforma/empresas/${encodeURIComponent(empresaId)}/condicao/encerrar`, jsonPost(dados));
   return body.data;
 }
+
+// ---- Identidade visual por cliente (só plataforma_admin; o backend é quem barra de fato) ----
+
+// → { temas: ['vertumno', ...], empresas: [{ empresa_id, empresa_nome, status, tema_visual, slug }] }
+export async function listarIdentidades() {
+  const body = await apiFetch('/plataforma/empresas/identidade');
+  return body.data;
+}
+
+export async function obterHistoricoIdentidade(empresaId) {
+  const body = await apiFetch(`/plataforma/empresas/${encodeURIComponent(empresaId)}/identidade/historico`);
+  return body.data;
+}
+
+// dados: só o que muda — { tema_visual?, slug? } (slug null remove o endereço).
+export async function atualizarIdentidade(empresaId, dados) {
+  const body = await apiFetch(`/plataforma/empresas/${encodeURIComponent(empresaId)}/identidade`, {
+    method: 'PATCH',
+    body: JSON.stringify(dados),
+  });
+  return body.data;
+}

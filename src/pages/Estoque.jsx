@@ -433,6 +433,7 @@ export default function Estoque() {
         <MovimentacaoEstoqueModal
           open={modalOpen}
           produtos={produtos}
+          user={user}
           onClose={() => setModalOpen(false)}
           onSaved={handleMovimentacaoSaved}
         />

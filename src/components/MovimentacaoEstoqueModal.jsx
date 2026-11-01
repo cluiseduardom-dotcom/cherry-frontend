@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { registrarMovimentacaoEstoque } from '../services/estoque';
+import {
+  MOTIVOS_ESTOQUE,
+  TIPO_LABEL,
+  montarPayloadMovimentacao,
+  motivosDoTipo,
+  podeAjustarParaMais,
+  tiposDisponiveis,
+  validarMovimentacao,
+} from '../utils/movimentacaoEstoque';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
@@ -8,39 +18,15 @@ import './ProductModal.css';
 
 const EMPTY_FORM = {
   produtoId: '',
-  tipo: 'entrada',
+  tipo: 'saida',
   quantidade: '',
-  motivo: '',
+  motivoCodigo: '',
+  observacao: '',
 };
 
-const TIPO_LABEL = {
-  entrada: 'Entrada',
-  saida: 'Saída',
-  ajuste: 'Ajuste (define o estoque)',
-};
-
-function validar(form, produtoSelecionado) {
-  if (!form.produtoId) return 'Selecione um produto';
-  if (!produtoSelecionado) return 'Produto inválido';
-
-  const quantidade = Number(form.quantidade);
-  if (form.quantidade === '' || Number.isNaN(quantidade) || !Number.isInteger(quantidade)) {
-    return 'Quantidade inválida';
-  }
-
-  if (form.tipo === 'ajuste') {
-    if (quantidade < 0) return 'Quantidade inválida';
-  } else {
-    if (quantidade <= 0) return 'Quantidade deve ser maior que zero';
-    if (form.tipo === 'saida' && quantidade > produtoSelecionado.estoque_atual) {
-      return `Estoque insuficiente (disponível: ${produtoSelecionado.estoque_atual})`;
-    }
-  }
-
-  return '';
-}
-
-export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSaved }) {
+// `user` define o que pode ser oferecido (entrada sem compra e estoque inicial dependem de permissão).
+// O backend valida de novo: a tela só evita oferecer o que seria recusado.
+export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose, onSaved }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -70,10 +56,18 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
   }
 
   const produtoSelecionado = produtos.find(p => String(p.id) === form.produtoId) ?? null;
+  const tipos = tiposDisponiveis(user);
+  const motivos = motivosDoTipo(form.tipo, user);
+  const motivoSelecionado = MOTIVOS_ESTOQUE[form.tipo]?.[form.motivoCodigo];
 
   function updateField(field, value) {
     setForm(prev => {
       const next = { ...prev, [field]: value };
+      // Cada tipo tem a sua lista de motivos: trocar o tipo limpa o motivo escolhido.
+      if (field === 'tipo') {
+        next.motivoCodigo = '';
+        next.observacao = '';
+      }
       if (field === 'tipo' && value === 'ajuste' && prev.quantidade === '' && produtoSelecionado) {
         next.quantidade = String(produtoSelecionado.estoque_atual);
       }
@@ -84,7 +78,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const validationError = validar(form, produtoSelecionado);
+    const validationError = validarMovimentacao(form, produtoSelecionado);
     if (validationError) {
       setError(validationError);
       return;
@@ -93,11 +87,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
     setError('');
     setSaving(true);
     try {
-      const payload = {
-        tipo: form.tipo,
-        quantidade: Number(form.quantidade),
-        motivo: form.motivo.trim() || undefined,
-      };
+      const payload = montarPayloadMovimentacao(form);
       const movimentacao = await registrarMovimentacaoEstoque(Number(form.produtoId), payload);
       onSaved(movimentacao, {
         imprimirEtiquetas: form.tipo === 'entrada' && imprimirEtiquetas,
@@ -123,6 +113,11 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
         <form onSubmit={handleSubmit} noValidate>
           <div className="modal-body">
             {error && <div className="modal-error">{error}</div>}
+
+            <p className="modal-field-hint">
+              Mercadoria comprada entra pelo estoque registrando uma <Link to="/compras">Compra</Link>
+              {' '}(ou um Recebimento). Aqui ficam saídas, ajustes e as entradas sem compra.
+            </p>
 
             <div className="modal-form-grid">
               <div className="input-wrapper modal-form-span-2">
@@ -153,8 +148,8 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
                   value={form.tipo}
                   onChange={e => updateField('tipo', e.target.value)}
                 >
-                  {Object.entries(TIPO_LABEL).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                  {tipos.map(value => (
+                    <option key={value} value={value}>{TIPO_LABEL[value]}</option>
                   ))}
                 </select>
               </div>
@@ -182,15 +177,37 @@ export default function MovimentacaoEstoqueModal({ open, produtos, onClose, onSa
               )}
 
               <div className="input-wrapper modal-form-span-2">
-                <label className="input-label" htmlFor="mm-motivo">Motivo</label>
-                <input
+                <label className="input-label" htmlFor="mm-motivo">Motivo *</label>
+                <select
                   id="mm-motivo"
+                  className="input-field"
+                  value={form.motivoCodigo}
+                  onChange={e => updateField('motivoCodigo', e.target.value)}
+                >
+                  <option value="">Selecione o motivo</option>
+                  {motivos.map(m => (
+                    <option key={m.codigo} value={m.codigo}>{m.rotulo}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-wrapper modal-form-span-2">
+                <label className="input-label" htmlFor="mm-observacao">
+                  {motivoSelecionado?.observacaoObrigatoria ? 'Observação *' : 'Observação'}
+                </label>
+                <input
+                  id="mm-observacao"
                   type="text"
                   className="input-field"
-                  maxLength={255}
-                  value={form.motivo}
-                  onChange={e => updateField('motivo', e.target.value)}
+                  maxLength={200}
+                  value={form.observacao}
+                  onChange={e => updateField('observacao', e.target.value)}
                 />
+                {form.tipo === 'ajuste' && !podeAjustarParaMais(user) && (
+                  <span className="modal-field-hint">
+                    Seu cargo pode ajustar o estoque para menos. Ajustar para mais exige permissão do administrador.
+                  </span>
+                )}
               </div>
             </div>
           </div>

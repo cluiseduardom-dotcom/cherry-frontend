@@ -1,12 +1,14 @@
-import { useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { TEMAS, TEMA_PADRAO, aplicarTema, lerTemaDev, resolverTema } from './themes';
 import { ThemeContext } from './themeContext';
 import { useAuth } from '../context/AuthContext';
+import { carregarMarcaLembrada, lembrarMarca } from '../services/marca';
 
-// Esta implantação serve a Cherry; preserve esse padrão no deploy atual.
-// Instalações dedicadas ao VERTUMNO definem VITE_DEFAULT_THEME=vertumno.
-// A prévia ?tema=vertumno continua disponível nos ambientes autorizados abaixo.
-const TEMA_INICIAL = resolverTema(import.meta.env.VITE_DEFAULT_THEME || 'cherry');
+// O padrão é o VERTUMNO (a identidade da plataforma). Cada cliente tem a sua marca própria, que vem
+// do backend: pelo endereço /c/<slug> (antes do login) e pela empresa do usuário (depois do login).
+// VITE_DEFAULT_THEME só existe para instalações dedicadas a um único tema.
+// A prévia ?tema=... continua disponível nos ambientes autorizados abaixo.
+const TEMA_INICIAL = resolverTema(import.meta.env.VITE_DEFAULT_THEME || TEMA_PADRAO);
 
 function temaInicial() {
   if (typeof window === 'undefined') return TEMA_INICIAL;
@@ -36,19 +38,34 @@ function temaInicial() {
     isDev: podePrevisualizar,
   });
 
-  return resolverTema(temaDev || TEMA_INICIAL);
+  // Sem prévia: a última marca usada neste navegador (ex.: equipe da Cherry abrindo /login direto);
+  // sem nada lembrado, o padrão VERTUMNO.
+  const lembrada = carregarMarcaLembrada();
+  return resolverTema(temaDev || lembrada?.tema || TEMA_INICIAL);
 }
 
 export function ThemeProvider({ children }) {
   const { user } = useAuth();
-  const [temaBase] = useState(temaInicial);
+  const [temaBase, setTemaBase] = useState(temaInicial);
   const tema = user ? resolverTema(user.tema) : resolverTema(temaBase);
+
+  // Tema de quem ainda não entrou (usado pelo endereço /c/<slug>).
+  const definirTemaBase = useCallback(chave => setTemaBase(resolverTema(chave)), []);
 
   useLayoutEffect(() => {
     aplicarTema(document.documentElement, tema);
   }, [tema]);
 
-  const value = useMemo(() => ({ tema, ...TEMAS[tema] }), [tema]);
+  // Quem entrou deixa a marca da sua empresa lembrada neste navegador.
+  useLayoutEffect(() => {
+    if (!user) return;
+    const tema = resolverTema(user.tema);
+    const lembrada = carregarMarcaLembrada();
+    // O endereço lembrado só vale se for da mesma marca de quem entrou.
+    lembrarMarca({ tema, slug: lembrada?.tema === tema ? lembrada.slug : null });
+  }, [user]);
+
+  const value = useMemo(() => ({ tema, definirTemaBase, ...TEMAS[tema] }), [tema, definirTemaBase]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

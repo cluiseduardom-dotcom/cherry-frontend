@@ -1,31 +1,42 @@
 import { useCallback, useEffect, useState } from 'react';
-import { listarEmpresasComercial, listarPlanosComerciais } from '../services/plataforma';
+import { listarEmpresasComercial, listarIdentidades, listarPlanosComerciais } from '../services/plataforma';
 import { formatarData, formatarPercentual, rotuloOrigem } from '../utils/plataforma';
+import { linkDaMarca, rotuloTema } from '../utils/identidade';
 import { useToast } from '../context/ToastContext';
 import PlataformaComercialModal from '../components/PlataformaComercialModal';
 import PlataformaHistoricoModal from '../components/PlataformaHistoricoModal';
+import PlataformaIdentidadeModal from '../components/PlataformaIdentidadeModal';
 import './PlataformaEmpresas.css';
 
 const MENSAGEM_SUCESSO = {
   plano: 'Plano alterado.',
   condicao: 'Exceção de taxa registrada.',
   encerrar: 'Exceção de taxa encerrada.',
+  identidade: 'Identidade visual atualizada.',
 };
+
+function indexarIdentidades(dados) {
+  const porEmpresa = {};
+  (dados?.empresas ?? []).forEach(i => { porEmpresa[i.empresa_id] = i; });
+  return { temas: dados?.temas ?? [], porEmpresa };
+}
 
 // Operador da plataforma: plano e exceção de taxa de cada empresa. Quem pode é decidido pelo backend.
 export default function PlataformaEmpresas() {
   const toast = useToast();
   const [empresas, setEmpresas] = useState(null);
   const [planos, setPlanos] = useState([]);
+  const [identidades, setIdentidades] = useState({ temas: [], porEmpresa: {} });
   const [erro, setErro] = useState('');
-  const [acao, setAcao] = useState(null); // { modo: 'plano' | 'condicao' | 'encerrar' | 'historico', empresa }
+  const [acao, setAcao] = useState(null); // { modo: 'plano' | 'condicao' | 'encerrar' | 'historico' | 'identidade', empresa }
 
   const carregar = useCallback(async () => {
     setErro('');
     try {
-      const [listaEmpresas, listaPlanos] = await Promise.all([listarEmpresasComercial(), listarPlanosComerciais()]);
+      const [listaEmpresas, listaPlanos, ident] = await Promise.all([listarEmpresasComercial(), listarPlanosComerciais(), listarIdentidades()]);
       setEmpresas(listaEmpresas);
       setPlanos(listaPlanos);
+      setIdentidades(indexarIdentidades(ident));
     } catch (err) {
       setEmpresas(null);
       setErro(err?.message || 'Não foi possível carregar as empresas.');
@@ -34,11 +45,12 @@ export default function PlataformaEmpresas() {
 
   useEffect(() => {
     let ativo = true;
-    Promise.all([listarEmpresasComercial(), listarPlanosComerciais()])
-      .then(([listaEmpresas, listaPlanos]) => {
+    Promise.all([listarEmpresasComercial(), listarPlanosComerciais(), listarIdentidades()])
+      .then(([listaEmpresas, listaPlanos, ident]) => {
         if (!ativo) return;
         setEmpresas(listaEmpresas);
         setPlanos(listaPlanos);
+        setIdentidades(indexarIdentidades(ident));
       })
       .catch(err => { if (ativo) setErro(err?.message || 'Não foi possível carregar as empresas.'); });
     return () => { ativo = false; };
@@ -90,6 +102,21 @@ export default function PlataformaEmpresas() {
               </dd>
             </div>
             <div>
+              <dt>Identidade visual</dt>
+              <dd>
+                {identidades.porEmpresa[e.empresa_id]
+                  ? <>
+                      {rotuloTema(identidades.porEmpresa[e.empresa_id].tema_visual)}
+                      <span className="plataforma-hist-sub">
+                        {identidades.porEmpresa[e.empresa_id].slug
+                          ? linkDaMarca(window.location.origin, identidades.porEmpresa[e.empresa_id].slug)
+                          : 'Sem link próprio (login padrão)'}
+                      </span>
+                    </>
+                  : <span className="text-secondary">—</span>}
+              </dd>
+            </div>
+            <div>
               <dt>Exceção</dt>
               <dd>
                 {e.condicao
@@ -107,6 +134,9 @@ export default function PlataformaEmpresas() {
             {e.condicao && (
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAcao({ modo: 'encerrar', empresa: e })}>Encerrar exceção</button>
             )}
+            {identidades.porEmpresa[e.empresa_id] && (
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setAcao({ modo: 'identidade', empresa: e })}>Identidade visual</button>
+            )}
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAcao({ modo: 'historico', empresa: e })}>Histórico</button>
           </div>
         </div>
@@ -120,7 +150,16 @@ export default function PlataformaEmpresas() {
       {acao && acao.modo === 'historico' && (
         <PlataformaHistoricoModal empresa={acao.empresa} onClose={() => setAcao(null)} />
       )}
-      {acao && acao.modo !== 'historico' && (
+      {acao && acao.modo === 'identidade' && identidades.porEmpresa[acao.empresa.empresa_id] && (
+        <PlataformaIdentidadeModal
+          key={`identidade-${acao.empresa.empresa_id}`}
+          empresa={{ ...acao.empresa, ...identidades.porEmpresa[acao.empresa.empresa_id] }}
+          temas={identidades.temas}
+          onClose={() => setAcao(null)}
+          onSaved={() => aoSalvar('identidade')}
+        />
+      )}
+      {acao && acao.modo !== 'historico' && acao.modo !== 'identidade' && (
         <PlataformaComercialModal
           key={`${acao.modo}-${acao.empresa.empresa_id}`}
           modo={acao.modo}

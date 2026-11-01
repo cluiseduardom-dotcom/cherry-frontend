@@ -872,3 +872,63 @@
     font-size: clamp(36px, 9vw, 46px);
   }
 }
+
+/* Valvazori Imports: mesmo layout do VERTUMNO, com o azul-marinho do logo do cliente. */
+.login-page-tema-valvazori .login-brand-logo {
+  width: min(100%, 200px);
+  max-width: 200px;
+}
+
+.login-page-tema-valvazori > .login-side {
+  background:
+    radial-gradient(ellipse at 70% 8%, rgba(47, 91, 183, .28), transparent 42%),
+    linear-gradient(135deg, #0B1D47 0%, #102961 52%, #08153A 100%) !important;
+}
+
+.login-page-tema-valvazori > .login-side::before {
+  border-left-color: rgba(147, 169, 214, .35);
+}
+
+.login-page-tema-valvazori > .login-side::after {
+  border-top: 2px solid rgba(201, 213, 234, .7);
+  box-shadow: 0 -1px 12px rgba(201, 213, 234, .15);
+}
+
+/* O símbolo é um quadrado azul-marinho: sobre o painel azul precisa de moldura clara. */
+.login-page-tema-valvazori .login-side-brand-symbol {
+  width: clamp(110px, 10vw, 150px);
+  border-radius: 6px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .9), 0 10px 24px rgba(0, 0, 0, .35);
+  filter: none;
+  margin-bottom: 22px;
+}
+
+.login-page-tema-valvazori .login-side-feature-dot {
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .18);
+}
+
+.login-page-tema-valvazori .login-side-feature-check {
+  stroke: #102961;
+}
+
+.login-page-tema-valvazori .login-submit {
+  background: linear-gradient(110deg, #0B1D47, #102961);
+  box-shadow: 0 7px 18px rgba(11, 29, 71, .22);
+}
+
+.login-page-tema-valvazori .login-title {
+  color: #0B1D47;
+}
+
+.login-page-tema-valvazori .input-field {
+  background: #EEF2FA;
+  border-color: #D5DDEE;
+}
+
+
+/* /c/<slug> consultando a marca: tela neutra, sem desenhar a marca errada. */
+.login-page--carregando {
+  min-height: 100vh;
+  background: #ffffff;
+}

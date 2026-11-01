@@ -3,6 +3,7 @@
    Cada tema define exatamente o mesmo conjunto de tokens.
    - vertumno (padrão): azul-marinho, azul, cinza, branco, dourado discreto.
    - cherry:            vinho, bordô, rosa-claro, branco, dourado.
+   - valvazori:         azul-marinho do logo do cliente (#102961), cinza-azulado, branco.
    O tema padrão vale em :root; um tema personalizado só vale quando
    <html data-theme="..."> estiver definido (ver src/theme/ThemeProvider.jsx).
    Não misturar paletas: componentes devem usar apenas os tokens.
@@ -165,4 +166,85 @@ html[data-theme="cherry"] {
   /* Pequenos acentos dourados: filete sob os títulos de seção e marca do item ativo no celular */
   --section-accent: var(--color-accent);
   --nav-active-accent: var(--color-accent);
+}
+
+/* Valvazori Imports: a única cor oficial é o azul-marinho do logo (#102961);
+   o restante da rampa, os fundos e o menu claro são derivados dela. */
+html[data-theme="valvazori"] {
+  /* Marca */
+  --color-primary:        #102961;
+  --color-primary-dark:   #0B1D47;
+  --color-primary-light:  #2F5BB7;
+  --color-primary-ultra:  #E9EEF8;
+  --color-primary-rgb:    16, 41, 97;
+
+  --color-secondary:       #2F5BB7;
+  --color-secondary-ultra: #E9EEF8;
+  --color-secondary-rgb:   47, 91, 183;
+
+  --color-accent:             #5B6B82;
+  --color-accent-soft:        #EEF1F6;
+  --color-accent-soft-hover:  #E1E6EF;
+
+  /* Rampa da marca */
+  --brand-50:  #F3F5FA;
+  --brand-100: #E9EEF8;
+  --brand-200: #CBD6EC;
+  --brand-300: #93A9D6;
+  --brand-400: #2F5BB7;
+  --brand-500: #102961;
+  --brand-600: #0B1D47;
+  --brand-700: #08153A;
+  --brand-800: #050E29;
+  --brand-900: #030818;
+
+  /* Fundos */
+  --color-bg:         #F4F6FA;
+  --color-bg-surface: #FAFBFD;
+  --color-bg-sidebar: #FFFFFF;
+  --color-bg-hover:   #E9EEF8;
+
+  /* Texto */
+  --color-text-primary:   #14213A;
+  --color-text-secondary: #3F4D63;
+  --color-text-muted:     #6B7A90;
+  --color-text-subtle:    #5B6B82;
+  --color-text-price:     #102961;
+
+  /* Bordas */
+  --color-border:       #D9DFEA;
+  --color-border-light: #E3E8F0;
+  --color-border-input: #D9DFEA;
+
+  /* Papéis */
+  --color-role-admin:    #102961;
+  --color-role-admin-bg: #E9EEF8;
+
+  /* Dashboard: faixa de boas-vindas e gráficos */
+  --color-hero-from:  #0B1D47;
+  --color-hero-to:    #102961;
+  --color-hero-muted: #C9D5EA;
+  --chart-a: #102961;
+  --chart-b: #2F5BB7;
+  --chart-c: #9AA8BC;
+
+  /* Menu lateral claro: o logo do cliente é azul-marinho sobre fundo transparente,
+     então precisa de fundo branco para ser lido. */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #E3E8F0;
+  --sidebar-divider: #E3E8F0;
+  --sidebar-text: #3F4D63;
+  --sidebar-text-strong: #102961;
+  --sidebar-text-muted: #6B7A90;
+  --sidebar-hover-bg: #EEF2FA;
+  --sidebar-hover-text: #102961;
+  --sidebar-active-bg: linear-gradient(180deg, #1B3B84, #102961);
+  --sidebar-active-text: #FFFFFF;
+  --sidebar-active-border: #2F5BB7;
+  --sidebar-active-shadow: 0 4px 14px rgba(16, 41, 97, 0.28);
+  --brand-symbol-bg: #FFFFFF;
+
+  /* Sem acentos extras */
+  --section-accent: transparent;
+  --nav-active-accent: transparent;
 }

@@ -11,7 +11,7 @@ export default function Login() {
   const location = useLocation();
   const { login, isAuthenticated, user } = useAuth();
   const { marca, tema } = useTheme();
-  const isCherry = tema === 'cherry' || marca.nome === 'Cherry';
+  const isCherry = tema === 'cherry';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -43,7 +43,7 @@ export default function Login() {
   }
 
   return (
-    <div className={`login-page ${isCherry ? 'login-page-cherry' : 'login-page-vertumno'}`}>
+    <div className={`login-page ${isCherry ? 'login-page-cherry' : `login-page-vertumno login-page-tema-${tema}`}`}>
       <div className="login-bg" aria-hidden="true">
         <div className="login-bg-blob login-bg-blob--1" />
         <div className="login-bg-blob login-bg-blob--2" />
@@ -64,8 +64,8 @@ export default function Login() {
               {marca.subtitulo && <span className="login-sub">{marca.subtitulo}</span>}
             </div>
           )}
-          {!isCherry && (
-            <span className="login-brand-tagline">GESTÃO QUE IMPULSIONA</span>
+          {marca.tagline && (
+            <span className="login-brand-tagline">{marca.tagline}</span>
           )}
         </div>
 
@@ -145,8 +145,8 @@ export default function Login() {
             aria-hidden="true"
           />
           <h2 className="login-side-title">{marca.loginTitulo}</h2>
-          {!isCherry && (
-            <p className="login-side-tagline">GESTÃO QUE IMPULSIONA</p>
+          {marca.tagline && (
+            <p className="login-side-tagline">{marca.tagline}</p>
           )}
           <p className="login-side-desc">{marca.loginDescricao}</p>
           <div className="login-side-features">

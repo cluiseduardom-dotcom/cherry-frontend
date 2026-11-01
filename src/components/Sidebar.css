@@ -345,6 +345,20 @@
   border-radius: 12px;
 }
 
+/* Valvazori: o logo do cliente é transparente e azul-marinho sobre o menu branco; sem a dissolução
+   de bordas (que existe para fundir as imagens escuras dos outros temas) e com respiro ao redor. */
+html[data-theme="valvazori"] .sidebar-logo--imagem {
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--sidebar-divider);
+}
+
+html[data-theme="valvazori"] .sidebar-logo-img {
+  width: 72%;
+  margin: 0 auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
 /* Telas baixas (ex.: 1024x768): logo e itens mais compactos para o menu inteiro caber sem rolagem */
 @media (min-width: 769px) and (max-height: 820px) {
   .sidebar-logo-img {

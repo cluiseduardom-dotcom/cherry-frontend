@@ -72,7 +72,7 @@ export default function PagamentoPDV({
   onRecusarPendente,
   onRemover,
   criarCobrancaPix, // opcional: com ele, o Pix vira cobrança com QR no Mercado Pago; sem ele, Pix manual
-  criarLinkCartao, // opcional: com ele, aparece "Link de cartão" (crédito/débito pelo Mercado Pago)
+  criarLinkCartao, // opcional: com ele, aparece "Link de cartão" (crédito pelo Mercado Pago; débito só na Fase 3)
   onConfirmarLinkCartao, // (index, cobranca): o link foi pago; vira crédito/débito com as parcelas do Mercado Pago
   onGatewayIndisponivel,
   avisoPix = null, // { texto, acao } quando o Pix automático está desligado; aparece junto do Pix manual aguardando

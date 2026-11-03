@@ -5,6 +5,8 @@ import {
   Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
+import { buscarProdutoPorCodigo } from '../services/produtosCodigos';
 import { listarProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
@@ -65,6 +67,24 @@ export function toCartProduct(p) {
     color: colorForProduto(p.id),
     imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
   };
+}
+
+// Produto lido pelo código de barras (resposta de /produtos/buscar-codigo) → produto da vitrine do PDV, já com o
+// preço do canal. Recusa com mensagem clara o que o PDV também recusaria no clique (inativo, sem preço, sem estoque).
+export function produtoLidoParaCarrinho(produtoLido, produtos, cart = []) {
+  const produto = produtos.find(p => p.id === produtoLido?.id);
+  const nome = produtoLido?.nome ?? 'Produto';
+
+  if (!produto) return { erro: `${nome} não está à venda nesta loja (inativo ou fora da vitrine).` };
+  if (produto.price == null) return { erro: `${produto.name} está sem preço na loja. Defina o preço antes de vender.` };
+  if (produto.stock != null && produto.stock <= 0) return { erro: `${produto.name} está sem estoque.` };
+
+  const noCarrinho = cart.find(i => i.type === 'avulso' && i.id === produto.id);
+  if (noCarrinho && produto.stock != null && noCarrinho.qty >= produto.stock) {
+    return { erro: `Todo o estoque de ${produto.name} (${produto.stock}) já está no carrinho.` };
+  }
+
+  return { produto };
 }
 
 /* --- Kit draft (montagem de kit) — lógica pura, testável isoladamente --- */
@@ -154,6 +174,8 @@ export default function Venda() {
   const [loadError, setLoadError] = useState('');
 
   const [search, setSearch]         = useState('');
+  const [scannerAberto, setScannerAberto] = useState(false);
+  const [avisoBusca, setAvisoBusca] = useState('');
   const [activeCategory, setCategory] = useState('Todos');
   const [filtros, setFiltros] = useState(FILTROS_PADRAO);
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
@@ -367,6 +389,37 @@ export default function Venda() {
     }
   }
 
+  // Leitura pela câmera (modal contínuo): adiciona e devolve a mensagem que o modal mostra; erro aparece no modal.
+  function adicionarProdutoLido(produtoLido) {
+    const r = produtoLidoParaCarrinho(produtoLido, produtos, cart);
+    if (r.erro) throw new Error(r.erro);
+    handleProductClick(r.produto);
+    return `${r.produto.name} adicionado${kitMode ? ' ao kit' : ' ao carrinho'}.`;
+  }
+
+  // Enter na busca: leitor USB/Bluetooth (digita o código + Enter) ou código digitado à mão. SKU exato resolve na
+  // hora; senão pergunta ao backend pelo código de barras da etiqueta.
+  async function buscarPorCodigoNaBusca() {
+    const codigo = search.trim();
+    if (!codigo) return;
+    setAvisoBusca('');
+
+    const porSku = produtos.find(p => p.sku.toLowerCase() === codigo.toLowerCase());
+    try {
+      const alvo = porSku ? { id: porSku.id, nome: porSku.name } : await buscarProdutoPorCodigo(codigo);
+      const r = produtoLidoParaCarrinho(alvo, produtos, cart);
+      if (r.erro) {
+        setAvisoBusca(r.erro);
+        return;
+      }
+      handleProductClick(r.produto);
+      setSearch('');
+    } catch (err) {
+      // 404 = não é código de etiqueta: a busca por nome continua valendo, só avisa.
+      if (err?.status !== 404) setAvisoBusca(err.message);
+    }
+  }
+
   function startKitMode() {
     setKitMode(true);
     setKitDraft([]);
@@ -518,6 +571,15 @@ export default function Venda() {
         />
       )}
 
+      {scannerAberto && (
+        <BarcodeScannerModal
+          continuo
+          titulo={kitMode ? 'Ler código (montando kit)' : 'Ler código de barras'}
+          onDetect={adicionarProdutoLido}
+          onClose={() => setScannerAberto(false)}
+        />
+      )}
+
       {blocker.state === 'blocked' && !riscoPix && (
         <ConfirmarDescarteDialog
           onContinuar={() => blocker.reset()}
@@ -585,7 +647,13 @@ export default function Venda() {
                 className="input-field"
                 placeholder="Buscar produto ou SKU..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={e => { setSearch(e.target.value); setAvisoBusca(''); }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    buscarPorCodigoNaBusca();
+                  }
+                }}
               />
             </div>
             <button
@@ -600,6 +668,7 @@ export default function Venda() {
               {filtrosAtivos > 0 && <span className="venda-filter-badge" aria-hidden="true">{filtrosAtivos}</span>}
             </button>
           </div>
+          {avisoBusca && <p className="text-sm venda-aviso-busca" role="alert">{avisoBusca}</p>}
 
           {filtrosAbertos && (
             <FiltrosVenda
@@ -661,7 +730,7 @@ export default function Venda() {
           )}
 
           {/* Barcode button */}
-          <button className="btn btn-ghost btn-full venda-barcode-btn">
+          <button type="button" className="btn btn-ghost btn-full venda-barcode-btn" onClick={() => setScannerAberto(true)}>
             <Barcode size={18} />
             Ler código de barras
           </button>

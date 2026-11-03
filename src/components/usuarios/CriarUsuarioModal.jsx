@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { criarUsuario, listarCargosAtribuiveis } from '../../services/usuarios';
+import { gerarLoginBase, normalizarLogin } from '../../utils/loginUsuario';
 import { validarCriarUsuario, DADOS_VAZIOS } from '../../utils/usuarios';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../../utils/formularioAlterado';
@@ -10,7 +11,7 @@ import DadosCadastraisCampos from './DadosCadastraisCampos';
 import '../ProductModal.css';
 import './CamposFormulario.css';
 
-const FORM_VAZIO = { nome: '', email: '', senha: '', confirmacaoSenha: '', papel: '', ...DADOS_VAZIOS };
+const FORM_VAZIO = { nome: '', login: '', email: '', senha: '', confirmacaoSenha: '', papel: '', ...DADOS_VAZIOS };
 
 function rotuloDoCargo(c) {
   return c.em_escada ? `${c.rotulo} (nível ${c.nivel})` : `${c.rotulo} (operacional)`;
@@ -73,7 +74,14 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
   }
 
   function atualizar(campo, valor) {
-    setForm(prev => ({ ...prev, [campo]: valor }));
+    setForm(prev => {
+      const proximo = { ...prev, [campo]: valor };
+      // O usuário (login) acompanha o nome enquanto ninguém o editou à mão.
+      if (campo === 'nome' && (prev.login === '' || prev.login === gerarLoginBase(prev.nome))) {
+        proximo.login = gerarLoginBase(valor);
+      }
+      return proximo;
+    });
     if (erros[campo]) setErros(prev => ({ ...prev, [campo]: undefined }));
     if (apiError) setApiError('');
   }
@@ -149,6 +157,26 @@ export default function CriarUsuarioModal({ open, onClose, onSuccess }) {
                   autoFocus
                 />
                 {erros.nome && <span className="campo-erro">{erros.nome}</span>}
+              </div>
+
+              <div className="input-wrapper modal-form-span-2">
+                <label className="input-label" htmlFor="usuario-login">Usuário (para entrar)</label>
+                <input
+                  id="usuario-login"
+                  type="text"
+                  className={`input-field${erros.login ? ' input-field--erro' : ''}`}
+                  placeholder="Gerado pelo nome (ex.: EGASIL)"
+                  value={form.login}
+                  onChange={e => atualizar('login', normalizarLogin(e.target.value).slice(0, 20))}
+                  maxLength={20}
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  disabled={loading}
+                />
+                {erros.login
+                  ? <span className="campo-erro">{erros.login}</span>
+                  : <span className="modal-field-hint">Iniciais + sobrenome. Se já existir na loja, o sistema acrescenta um número (ex.: EGASIL2).</span>}
               </div>
 
               <div className="input-wrapper modal-form-span-2">

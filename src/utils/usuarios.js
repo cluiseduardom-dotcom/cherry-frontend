@@ -1,3 +1,4 @@
+import { loginValido, normalizarLogin } from './loginUsuario';
 import { somenteDigitos, cpfValido } from './mascaras';
 
 export const UFS = Object.freeze([
@@ -179,8 +180,14 @@ export function formatarAcaoEvento(acao) {
   }
 }
 
-export function validarCriarUsuario({ nome, email, senha, confirmacaoSenha, papel, ...camposDados }, ator) {
+export function validarCriarUsuario({ nome, email, senha, confirmacaoSenha, papel, login, ...camposDados }, ator) {
   const erros = {};
+
+  // Usuário (login): opcional; vazio = o backend gera pelo nome.
+  const loginNorm = normalizarLogin(login ?? '');
+  if (loginNorm && !loginValido(loginNorm)) {
+    erros.login = 'Usuário deve ter de 2 a 20 letras ou números';
+  }
 
   const nomeTrim = nome ? String(nome).trim() : '';
   if (!nomeTrim) {
@@ -233,6 +240,7 @@ export function validarCriarUsuario({ nome, email, senha, confirmacaoSenha, pape
       email: emailTrim,
       senha: senhaStr,
       papel,
+      ...(loginNorm ? { login: loginNorm } : {}),
       ...dadosParaCriacao(cadastrais.dados),
     },
   };

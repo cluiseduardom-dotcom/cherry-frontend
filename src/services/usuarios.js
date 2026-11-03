@@ -23,12 +23,14 @@ function somenteCamposDados(origem) {
   );
 }
 
-export async function criarUsuario({ nome, email, senha, papel, ...dados }) {
+export async function criarUsuario({ nome, email, senha, papel, login, ...dados }) {
   const payload = {
     nome: String(nome).trim(),
     email: String(email).trim(),
     senha: String(senha),
     papel: String(papel).trim(),
+    // Sem login: o backend gera pelo nome (repetido ganha número).
+    ...(login ? { login } : {}),
     ...somenteCamposDados(dados),
   };
 
@@ -82,6 +84,15 @@ export async function redefinirSenhaUsuario(id, senhaConfirmacao) {
   const body = await apiFetch(`/usuarios/${id}/redefinir-senha`, {
     method: 'POST',
     body: JSON.stringify({ senha_confirmacao: senhaConfirmacao }),
+  });
+  return body.data;
+}
+
+// Troca o código de usuário (login por loja). Resposta: { alterado, login }.
+export async function alterarLoginUsuario(id, login) {
+  const body = await apiFetch(`/usuarios/${id}/login`, {
+    method: 'PATCH',
+    body: JSON.stringify({ login }),
   });
   return body.data;
 }

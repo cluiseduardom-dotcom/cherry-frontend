@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, Check } from 'lucide-react';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Eye, EyeOff, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
 import { homeRouteForRole } from '../config/access';
+import { carregarMarcaLembrada } from '../services/marca';
+import { ehEmail } from '../utils/loginUsuario';
 import './Login.css';
 
 export default function Login() {
@@ -12,11 +14,15 @@ export default function Login() {
   const { login, isAuthenticated, user } = useAuth();
   const { marca, tema } = useTheme();
   const isCherry = tema === 'cherry';
+  const { slug: slugDaUrl } = useParams();
+  // Loja do código de usuário: a da página /c/<slug>, ou a última usada neste navegador.
+  const slugLoja = slugDaUrl || carregarMarcaLembrada()?.slug || null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [ajudaSenha, setAjudaSenha] = useState(false);
 
   if (isAuthenticated) {
     const from = location.state?.from?.pathname;
@@ -30,9 +36,13 @@ export default function Login() {
       setError('Preencha todos os campos.');
       return;
     }
+    if (!ehEmail(email) && !slugLoja) {
+      setError('Para entrar com o usuário, use o endereço da sua loja (ex.: app.vertumno.com.br/c/sualoja) ou entre com o e-mail.');
+      return;
+    }
     setLoading(true);
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(email, password, ehEmail(email) ? undefined : slugLoja);
       const from = location.state?.from?.pathname;
       navigate(from || homeRouteForRole(loggedUser.role), { replace: true });
     } catch (err) {
@@ -83,17 +93,20 @@ export default function Login() {
           )}
 
           <div className="input-wrapper">
-            <label className="input-label" htmlFor="login-email">E-mail</label>
+            <label className="input-label" htmlFor="login-email">Usuário ou e-mail</label>
             <div className="input-icon-wrapper">
-              <Mail size={18} className="input-icon" />
+              <User size={18} className="input-icon" />
               <input
                 id="login-email"
-                type="email"
+                type="text"
                 className="input-field"
-                placeholder="seu@email.com"
+                placeholder="Ex.: EGASIL ou seu@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                autoComplete="email"
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
             </div>
           </div>
@@ -101,8 +114,11 @@ export default function Login() {
           <div className="input-wrapper">
             <div className="login-pass-label">
               <label className="input-label" htmlFor="login-password">Senha</label>
-              <button type="button" className="login-forgot">Esqueceu a senha?</button>
+              <button type="button" className="login-forgot" aria-expanded={ajudaSenha} onClick={() => setAjudaSenha(v => !v)}>Esqueceu a senha?</button>
             </div>
+            {ajudaSenha && (
+              <p className="login-ajuda-senha" role="status">Peça ao administrador da loja para redefinir a sua senha (Usuários → Redefinir senha).</p>
+            )}
             <div className="input-icon-wrapper login-pass-wrapper">
               <Lock size={18} className="input-icon" />
               <input

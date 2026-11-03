@@ -120,3 +120,49 @@ describe('itens da transferência', () => {
     expect(adicionarItem(itens, null)).toBe(itens);
   });
 });
+
+import { incluirItemLido, rotasDoAtalho } from './transferencias';
+
+describe('incluirItemLido (bipar peças na transferência)', () => {
+  const saldos = [
+    { produto_id: 1, nome: 'teste01', sku: 'COL-1', saldo: 2 },
+    { produto_id: 2, nome: 'teste02', sku: 'ANE-2', saldo: 5 },
+  ];
+  // Formato real de /produtos/buscar-codigo: id do código, produto em produto_id.
+  const lido = (produto_id) => ({ id: 900 + produto_id, produto_id, nome: 'x' });
+
+  it('cada leitura soma 1 e informa o total de peças', () => {
+    const a = incluirItemLido([], saldos, lido(1));
+    expect(a.itens).toEqual([{ produto_id: 1, nome: 'teste01', sku: 'COL-1', quantidade: 1 }]);
+    expect(a.mensagem).toBe('teste01: 1 · total 1 peça');
+    const b = incluirItemLido(a.itens, saldos, lido(1));
+    expect(b.itens[0].quantidade).toBe(2);
+    const c = incluirItemLido(b.itens, saldos, lido(2));
+    expect(c.mensagem).toBe('teste02: 1 · total 3 peças');
+  });
+
+  it('não passa do saldo da origem', () => {
+    const itens = [{ produto_id: 1, nome: 'teste01', quantidade: 2 }];
+    expect(incluirItemLido(itens, saldos, lido(1)).erro).toMatch(/Todo o saldo de teste01 \(2\)/);
+  });
+
+  it('produto sem saldo na origem é recusado', () => {
+    expect(incluirItemLido([], saldos, lido(7)).erro).toMatch(/não tem saldo no local de origem/);
+  });
+});
+
+describe('rotasDoAtalho', () => {
+  const locais = [
+    { id: 1, tipo: 'central' }, { id: 2, tipo: 'transito' },
+    { id: 3, tipo: 'maleta', usuario_id: 58, ativo: true }, { id: 4, tipo: 'maleta', usuario_id: 59, ativo: false },
+  ];
+  it('montar: Central → maletas ativas', () => {
+    expect(rotasDoAtalho(locais, 'montar')).toEqual({ origens: [locais[0]], destinos: [locais[2]] });
+  });
+  it('devolver: maletas ativas → Central', () => {
+    expect(rotasDoAtalho(locais, 'devolver')).toEqual({ origens: [locais[2]], destinos: [locais[0]] });
+  });
+  it('sem atalho: null (usa as rotas normais)', () => {
+    expect(rotasDoAtalho(locais, null)).toBeNull();
+  });
+});

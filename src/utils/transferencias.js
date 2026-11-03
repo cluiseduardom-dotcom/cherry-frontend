@@ -132,3 +132,34 @@ export function atualizarQuantidade(itens, produtoId, quantidade) {
 export function totalDeUnidades(itens) {
   return (itens ?? []).reduce((soma, i) => soma + Number(i.quantidade ?? 0), 0);
 }
+
+// Item lido pelo código de barras (resposta de /produtos/buscar-codigo: produto em `produto_id`) → lista da
+// transferência. Cada leitura soma 1, até o saldo da origem. Devolve { itens, mensagem } ou { erro }.
+export function incluirItemLido(itens, saldos, produtoLido) {
+  const produtoId = Number(produtoLido?.produto_id ?? produtoLido?.id);
+  const saldo = (saldos ?? []).find(s => Number(s.produto_id) === produtoId);
+  const nome = saldo?.nome ?? produtoLido?.nome ?? 'Produto';
+
+  if (!saldo || Number(saldo.saldo) <= 0) return { erro: `${nome} não tem saldo no local de origem.` };
+
+  const atual = itens.find(i => Number(i.produto_id) === produtoId);
+  const qtd = Number(atual?.quantidade ?? 0);
+  if (qtd >= Number(saldo.saldo)) return { erro: `Todo o saldo de ${nome} (${saldo.saldo}) já está na lista.` };
+
+  const novos = atual
+    ? itens.map(i => (Number(i.produto_id) === produtoId ? { ...i, quantidade: qtd + 1 } : i))
+    : [...itens, { produto_id: saldo.produto_id, nome: saldo.nome, sku: saldo.sku ?? null, quantidade: 1 }];
+  const pecas = totalDeUnidades(novos);
+
+  return { itens: novos, mensagem: `${nome}: ${qtd + 1} · total ${pecas} ${pecas === 1 ? 'peça' : 'peças'}` };
+}
+
+// Atalhos da equipe: montar a maleta (Central → maleta) e receber a devolução (maleta → Central).
+export function rotasDoAtalho(locais, atalho) {
+  const lista = locais ?? [];
+  const central = lista.filter(l => l.tipo === 'central');
+  const maletas = lista.filter(l => l.tipo === 'maleta' && l.ativo !== false);
+  if (atalho === 'montar') return { origens: central, destinos: maletas };
+  if (atalho === 'devolver') return { origens: maletas, destinos: central };
+  return null;
+}

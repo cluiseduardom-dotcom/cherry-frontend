@@ -54,3 +54,4 @@
 @media (prefers-reduced-motion: reduce) {
   .scanner-video-box--ok, .scanner-video-box--erro { animation: none; }
 }
+.scanner-concluir-lote { width: 100%; min-height: 48px; }

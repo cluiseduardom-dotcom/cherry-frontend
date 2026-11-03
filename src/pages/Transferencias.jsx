@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeftRight, Plus } from 'lucide-react';
+import { ArrowLeftRight, Plus, Briefcase, Undo2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { listarTransferencias } from '../services/transferenciasEstoque';
@@ -25,6 +25,7 @@ export default function Transferencias() {
   const [erro, setErro] = useState('');
   const [locais, setLocais] = useState([]);
   const [novaOpen, setNovaOpen] = useState(false);
+  const [atalho, setAtalho] = useState(null); // 'montar' | 'devolver' | null (transferência livre)
   const [detalheId, setDetalheId] = useState(null);
 
   const carregar = useCallback(async () => {
@@ -50,9 +51,20 @@ export default function Transferencias() {
     setPage(1);
   }
 
+  const equipe = user?.role === 'admin' || user?.role === 'estoquista';
+  const temMaleta = locais.some(l => l.tipo === 'maleta' && l.ativo !== false);
+
+  function abrir(qual) {
+    setAtalho(qual);
+    setNovaOpen(true);
+  }
+
   function handleCriada(t) {
     setNovaOpen(false);
-    toast.success(`Transferência #${t.id} criada. Aguardando aceite.`);
+    if (t.aviso) toast.warning(`Transferência #${t.id} criada, mas ficou aguardando aceite: ${t.aviso}`);
+    else if (t.status === 'concluida') toast.success(`Devolução #${t.id} registrada: as peças já estão no destino.`);
+    else if (atalho === 'montar') toast.success(`Maleta: transferência #${t.id} enviada. Entra na maleta quando o vendedor aceitar.`);
+    else toast.success(`Transferência #${t.id} criada. Aguardando aceite.`);
     carregar();
   }
 
@@ -64,7 +76,21 @@ export default function Transferencias() {
           <p className="page-subtitle">Movimentação de estoque entre Central, maletas e consignados</p>
         </div>
         <div className="estoque-header-actions">
-          <button className="btn btn-primary" onClick={() => setNovaOpen(true)} disabled={locais.length < 2}>
+          {equipe && (
+            <>
+              <button className="btn btn-primary" onClick={() => abrir('montar')} disabled={!temMaleta}
+                title={temMaleta ? 'Central → maleta do vendedor, bipando as peças' : 'Crie a maleta do vendedor em Estoque → Novo local'}>
+                <Briefcase size={16} />
+                Montar maleta
+              </button>
+              <button className="btn btn-secondary" onClick={() => abrir('devolver')} disabled={!temMaleta}
+                title={temMaleta ? 'Maleta do vendedor → Central, bipando as peças que voltaram' : 'Crie a maleta do vendedor em Estoque → Novo local'}>
+                <Undo2 size={16} />
+                Receber devolução
+              </button>
+            </>
+          )}
+          <button className="btn btn-ghost" onClick={() => abrir(null)} disabled={locais.length < 2}>
             <Plus size={16} />
             Nova transferência
           </button>
@@ -115,7 +141,11 @@ export default function Transferencias() {
         </div>
       )}
 
-      <NovaTransferenciaModal open={novaOpen} locais={locais} user={user} onClose={() => setNovaOpen(false)} onSaved={handleCriada} />
+      {equipe && !temMaleta && locais.length > 0 && (
+        <p className="text-sm text-secondary">Para montar maletas, crie primeiro a maleta de cada vendedor em Estoque → Novo local.</p>
+      )}
+
+      <NovaTransferenciaModal open={novaOpen} locais={locais} user={user} atalho={atalho} onClose={() => setNovaOpen(false)} onSaved={handleCriada} />
 
       <TransferenciaDetalheModal
         id={detalheId}

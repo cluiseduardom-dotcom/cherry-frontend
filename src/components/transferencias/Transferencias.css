@@ -20,3 +20,7 @@
 .transf-secao { margin: 16px 0 8px; }
 .transf-modal .modal-form-section-title { margin: 16px 0 6px; }
 .transf-modal .text-sm { margin: 8px 0; }
+
+.transf-bipar { margin-top: var(--space-2); width: 100%; min-height: 46px; gap: var(--space-2); }
+.transf-total { margin: 0 0 var(--space-2); font-weight: 700; color: var(--color-text-primary); }
+.transf-aceitar { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-weight: 600; }

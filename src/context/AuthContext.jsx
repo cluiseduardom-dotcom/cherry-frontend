@@ -81,6 +81,14 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Nome ou usuário (login) do próprio usuário alterados: reflete no menu sem precisar entrar de novo.
+  function atualizarPerfil(campos) {
+    if (!user) return;
+    const atualizado = { ...user, ...campos };
+    setUser(atualizado);
+    salvarSessao({ token: tokenRef.current, user: atualizado });
+  }
+
   // Foto de perfil trocada/removida pelo próprio usuário: reflete no menu sem recarregar.
   function atualizarFoto(fotoUrl) {
     if (!user) return;
@@ -116,6 +124,7 @@ export function AuthProvider({ children }) {
     logout,
     atualizarToken,
     atualizarFoto,
+    atualizarPerfil,
     temCapacidade,
   };
 

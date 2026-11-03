@@ -3,6 +3,7 @@ import { Copy, ExternalLink, MessageCircle } from 'lucide-react';
 import { consultarCobrancaPix } from '../services/pagamentosGateway';
 import { linkWhatsApp, situacaoLinkCartao, tempoRestante } from '../utils/pixGateway';
 import { formatarMoeda } from '../utils/mascaras';
+import { textoParcelasLink } from '../utils/linkCartao';
 import useAcompanharCobranca from '../hooks/useAcompanharCobranca';
 import './LinkCartaoCobranca.css';
 
@@ -15,8 +16,7 @@ export function LinkCartaoPainel({ url, valor, parcelasMaximas, restante, copiad
         {restante && <small> Válido por {restante}</small>}
       </p>
       <p className="link-cartao-dica">
-        Envie o link ao cliente: ele paga no cartão de crédito e escolhe as parcelas na página do Mercado Pago
-        {parcelasMaximas > 1 ? ` (até ${parcelasMaximas}x, conforme o valor da compra)` : ''}. O juro do parcelamento é pago pelo cliente.
+        Envie o link ao cliente. {textoParcelasLink(parcelasMaximas)}
       </p>
       {url && (
         <div className="link-cartao-acoes">
@@ -26,7 +26,7 @@ export function LinkCartaoPainel({ url, valor, parcelasMaximas, restante, copiad
           <a className="btn btn-secondary btn-sm" href={url} target="_blank" rel="noopener noreferrer">
             <ExternalLink size={14} aria-hidden="true" /> Abrir link
           </a>
-          <a className="btn btn-secondary btn-sm" href={linkWhatsApp(url, formatarMoeda(valor))} target="_blank" rel="noopener noreferrer">
+          <a className="btn btn-secondary btn-sm" href={linkWhatsApp(url, formatarMoeda(valor), parcelasMaximas)} target="_blank" rel="noopener noreferrer">
             <MessageCircle size={14} aria-hidden="true" /> WhatsApp
           </a>
         </div>

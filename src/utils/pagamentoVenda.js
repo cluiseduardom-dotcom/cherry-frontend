@@ -317,5 +317,5 @@ export function pagamentosAposMudancaDoCarrinho(carrinho, pagamentos) {
 // (dados do QR, só para a tela). `cobranca_codigo` segue: é o que liga o Pix à cobrança paga.
 export function pagamentosParaEnvio(pagamentos) {
   // Defesa: 'cartao_link' só existe na tela e vira crédito/débito ao ser confirmado; nunca segue para a API.
-  return pagamentos.filter(p => pagamentoConfirmado(p) && p.forma_pagamento !== 'cartao_link').map(({ status: _status, pix: _pix, link: _link, ...resto }) => resto);
+  return pagamentos.filter(p => pagamentoConfirmado(p) && p.forma_pagamento !== 'cartao_link').map(({ status: _status, pix: _pix, link: _link, juros_cliente: _juros, ...resto }) => resto);
 }

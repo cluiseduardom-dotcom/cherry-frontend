@@ -247,6 +247,11 @@ export default function PagamentoPDV({
                 <small> · {descreverParcelas(paraCentavos(p.valor), p.numero_parcelas)}</small>
               )}
             </span>
+            {p.juros_cliente && (
+              <small className="pdv-pay-item-status">
+                Cliente pagou {formatarMoeda(p.juros_cliente.total)} (juros do parcelamento: {formatarMoeda(p.juros_cliente.juros)})
+              </small>
+            )}
             <small className="pdv-pay-item-status">
               {rotuloStatusPagamento(p)}
               {p.forma_pagamento === 'crediario' && status === STATUS_PAGAMENTO.CONFIRMADO && (

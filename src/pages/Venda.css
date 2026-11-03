@@ -743,3 +743,43 @@
 }
 
 .venda-aviso-busca { margin: calc(var(--space-2) * -1) 0 var(--space-3); color: var(--color-danger); }
+
+/* Faixa do carrinho (só celular): o carrinho fica depois do catálogo; enquanto ele não está na tela e há itens,
+   a faixa fica fixa acima da barra inferior com quantidade, total e o atalho até ele. */
+.venda-faixa-carrinho { display: none; }
+
+@media (max-width: 768px) {
+  .venda-faixa-carrinho {
+    position: fixed;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: calc(var(--bottom-nav-height, 64px) + var(--space-2));
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 52px;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--color-primary);
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+  }
+
+  .venda-faixa-carrinho-icone {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.18); flex: none;
+  }
+
+  .venda-faixa-carrinho-texto { flex: 1; display: flex; flex-direction: column; line-height: 1.2; font-size: var(--font-size-sm); }
+  .venda-faixa-carrinho-texto strong { font-size: var(--font-size-lg, 1.125rem); }
+  .venda-faixa-carrinho-acao { display: inline-flex; align-items: center; gap: 2px; font-weight: 700; font-size: var(--font-size-sm); }
+
+  /* Espaço para a faixa não cobrir os últimos produtos; o carrinho para logo abaixo do cabeçalho fixo. */
+  .venda-page--com-faixa { padding-bottom: calc(var(--space-4) + 64px); }
+  .venda-cart-col { scroll-margin-top: calc(var(--header-height) + var(--space-2)); }
+}

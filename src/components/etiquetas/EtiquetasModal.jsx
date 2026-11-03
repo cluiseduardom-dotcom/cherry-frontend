@@ -5,7 +5,7 @@ import { listarProdutos } from '../../services/produtos';
 import { buscarTodasAsPaginas } from '../../pages/relatorios/relatoriosUtils';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import { canvasParaBlob, gerarPdfFolha, renderizarEtiquetaPng } from '../../utils/etiquetaRender';
-import { PRESET_FOLHA_A4, PRESET_NIMBOT_D110, validarFolha } from '../../utils/etiquetaProduto';
+import { PRESET_FOLHA_A4, PRESET_NIMBOT_D110, precoDoCanalParaEtiqueta, validarFolha } from '../../utils/etiquetaProduto';
 import '../compras/BarcodeScannerModal.css';
 import './EtiquetasModal.css';
 
@@ -56,7 +56,7 @@ export default function EtiquetasModal({ itens, onClose }) {
 
         try {
           const produtos = await buscarTodasAsPaginas((params) => listarProdutos({ ...params, canal: 'loja_fisica' }));
-          precos = new Map(produtos.map((p) => [p.id, p.preco_venda ?? p.price ?? null]));
+          precos = new Map(produtos.map((p) => [p.id, precoDoCanalParaEtiqueta(p)]));
         } catch {
           // Sem preço a etiqueta sai só com nome e código; não impede de imprimir.
         }

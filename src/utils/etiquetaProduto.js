@@ -22,6 +22,18 @@ export const PRESET_FOLHA_A4 = {
 const MM_POR_PT = 25.4 / 72;
 export const mmParaPt = (mm) => mm / MM_POR_PT;
 
+// Preço que vale na loja: o vigente para o canal (preco_canal), igual ao do PDV. Nunca o preco_venda "cru" da
+// tabela produtos, que pode estar vazio ou defasado (foi o que deixou a etiqueta sem preço).
+export function precoDoCanalParaEtiqueta(produto) {
+  const preco = produto?.preco_canal?.preco_venda;
+
+  if (preco === null || preco === undefined || preco === '') return null;
+
+  const n = Number(preco);
+
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
 export function formatarPrecoEtiqueta(preco) {
   const n = Number(preco);
 

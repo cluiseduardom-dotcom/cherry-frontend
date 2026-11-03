@@ -4,17 +4,21 @@ import { loginValido, normalizarLogin } from '../../utils/loginUsuario';
 
 // Usuário (código de login) dentro de "Editar dados": salva sozinho (PATCH /usuarios/:id/login), separado dos
 // dados cadastrais. O backend garante a permissão, o formato e que não se repete na loja.
-export default function LoginUsuarioCampo({ usuarioId, loginAtual, onAlterado }) {
+export default function LoginUsuarioCampo({ usuarioId, loginAtual, sugestao, onAlterado }) {
   const [valor, setValor] = useState(loginAtual ?? '');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const [ok, setOk] = useState('');
 
+  // Trocar de usuário zera tudo; o valor salvo voltando do cadastro só atualiza o campo (mantém o "salvo").
   useEffect(() => {
-    setValor(loginAtual ?? '');
     setErro('');
     setOk('');
-  }, [usuarioId, loginAtual]);
+  }, [usuarioId]);
+
+  useEffect(() => {
+    setValor(loginAtual ?? '');
+  }, [loginAtual]);
 
   const normalizado = normalizarLogin(valor);
   const mudou = normalizado !== (loginAtual ?? '');
@@ -63,6 +67,12 @@ export default function LoginUsuarioCampo({ usuarioId, loginAtual, onAlterado })
       {erro && <span className="campo-erro">{erro}</span>}
       {ok && <span className="modal-field-hint" role="status">{ok}</span>}
       {!erro && !ok && <span className="modal-field-hint">Entra com ele na página da loja. O e-mail continua valendo.</span>}
+      {sugestao && sugestao !== (loginAtual ?? '') && sugestao !== normalizado && (
+        <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} disabled={salvando}
+          onClick={() => { setValor(sugestao); setErro(''); setOk(''); }}>
+          Usar a sugestão pelo nome: {sugestao}
+        </button>
+      )}
     </div>
   );
 }

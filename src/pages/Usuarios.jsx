@@ -374,6 +374,11 @@ export default function Usuarios() {
         onClose={() => setUsuarioParaEdicao(null)}
         onSuccess={handleDadosEditados}
         onFotoAlterada={handleFotoAlterada}
+        onNomeAlterado={nome => {
+          setUsuarioParaEdicao(prev => (prev ? { ...prev, nome } : prev));
+          carregarUsuarios();
+          setTrilhaSignal(s => s + 1);
+        }}
         onLoginAlterado={login => {
           setUsuarioParaEdicao(prev => (prev ? { ...prev, login } : prev));
           carregarUsuarios();

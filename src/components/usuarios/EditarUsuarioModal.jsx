@@ -16,10 +16,16 @@ import { useRolarParaErro } from '../../hooks/useRolarParaErro';
 import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
 import DadosCadastraisCampos from './DadosCadastraisCampos';
 import LoginUsuarioCampo from './LoginUsuarioCampo';
+import NomeUsuarioCampo from './NomeUsuarioCampo';
+import { gerarLoginBase } from '../../utils/loginUsuario';
+import { useAuth } from '../../context/AuthContext';
 import '../ProductModal.css';
 import './CamposFormulario.css';
 
-export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onClose, onSuccess, onFotoAlterada, onLoginAlterado }) {
+export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onClose, onSuccess, onFotoAlterada, onLoginAlterado, onNomeAlterado }) {
+  const { user, atualizarPerfil } = useAuth();
+  // Nome e usuário (login) vêm do cadastro (detalhe), não da sessão: a sessão pode ser anterior a eles.
+  const [identidade, setIdentidade] = useState({ nome: '', login: null });
   const [form, setForm] = useState(DADOS_VAZIOS);
   const [inicial, setInicial] = useState(DADOS_VAZIOS);
   const [erros, setErros] = useState({});
@@ -48,6 +54,7 @@ export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onC
     obterUsuario(usuario.id)
       .then(detalhe => {
         if (cancelado) return;
+        setIdentidade({ nome: detalhe?.nome ?? usuario.nome ?? '', login: detalhe?.login ?? usuario.login ?? null });
         const base = dadosParaFormulario(detalhe?.dados);
         setForm(base);
         setInicial(base);
@@ -135,7 +142,7 @@ export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onC
           <div>
             <h2 className="modal-title" id="editar-usuario-titulo">Editar dados do usuário</h2>
             <p className="modal-header-subtitulo">
-              {usuario.nome} · {formatarCargo(usuario.cargo)} · {usuario.email}
+              {identidade.nome || usuario.nome} · {formatarCargo(usuario.cargo)} · {usuario.email}
             </p>
           </div>
           <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
@@ -154,7 +161,25 @@ export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onC
               </div>
             ) : carregado ? (
               <>
-                <LoginUsuarioCampo usuarioId={usuario.id} loginAtual={usuario.login} onAlterado={onLoginAlterado} />
+                <NomeUsuarioCampo
+                  usuarioId={usuario.id}
+                  nomeAtual={identidade.nome}
+                  onAlterado={nome => {
+                    setIdentidade(prev => ({ ...prev, nome }));
+                    if (usuario.id === user?.id) atualizarPerfil({ nome });
+                    onNomeAlterado?.(nome);
+                  }}
+                />
+                <LoginUsuarioCampo
+                  usuarioId={usuario.id}
+                  loginAtual={identidade.login}
+                  sugestao={gerarLoginBase(identidade.nome)}
+                  onAlterado={login => {
+                    setIdentidade(prev => ({ ...prev, login }));
+                    if (usuario.id === user?.id) atualizarPerfil({ login });
+                    onLoginAlterado?.(login);
+                  }}
+                />
                 <div style={{ marginBottom: 'var(--space-4)' }}>
                   <span className="input-label">Foto de perfil</span>
                   <FotoPerfilEditor
@@ -166,7 +191,7 @@ export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onC
                   />
                 </div>
                 <span className="campo-dica" style={{ display: 'block', marginBottom: 'var(--space-3)' }}>
-                  Nome, e-mail e cargo não são editados aqui. A alteração fica registrada na trilha de auditoria
+                  E-mail e cargo não são editados aqui. A alteração fica registrada na trilha de auditoria
                   (apenas quais campos mudaram, nunca os valores).
                 </span>
                 <DadosCadastraisCampos

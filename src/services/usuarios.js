@@ -96,3 +96,12 @@ export async function alterarLoginUsuario(id, login) {
   });
   return body.data;
 }
+
+// Troca o nome completo. Resposta: { alterado, nome }.
+export async function alterarNomeUsuario(id, nome) {
+  const body = await apiFetch(`/usuarios/${id}/nome`, {
+    method: 'PATCH',
+    body: JSON.stringify({ nome }),
+  });
+  return body.data;
+}

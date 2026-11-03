@@ -33,6 +33,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/conta/perfil': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/avisos': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
+  '/bancos': ['admin'],
   '/contas-pagar': ['admin'],
   '/contas-receber': ['admin'],
   '/ponto-equilibrio': ['admin'],

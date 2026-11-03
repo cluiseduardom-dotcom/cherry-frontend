@@ -77,6 +77,9 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute('/estoque', 'vendedor')).toBe(false);
     expect(canAccessRoute('/configuracoes', 'vendedor')).toBe(false);
     expect(canAccessRoute('/relatorios', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/bancos', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/bancos', 'estoquista')).toBe(false);
+    expect(canAccessRoute('/bancos', 'admin')).toBe(true);
     expect(canAccessRoute('/contas-pagar', 'vendedor')).toBe(false);
     expect(canAccessRoute('/contas-receber', 'vendedor')).toBe(false);
     expect(canAccessRoute('/ponto-equilibrio', 'vendedor')).toBe(false);

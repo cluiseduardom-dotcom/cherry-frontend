@@ -1,0 +1,19 @@
+.bancos-contas { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-5); }
+.bancos-conta { display: flex; flex-direction: column; gap: var(--space-2); text-align: left; cursor: pointer; border: 2px solid transparent; }
+.bancos-conta--ativo { border-color: var(--color-primary); }
+.bancos-conta-topo { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+.bancos-conta-nome { font-weight: 600; }
+.bancos-conta-saldo { font-size: var(--font-size-xl, 1.5rem); font-weight: 700; }
+.bancos-conta-saldo--neg { color: var(--color-danger); }
+.bancos-conta-sub { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.bancos-conta-acoes { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.bancos-aviso { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-4); }
+.bancos-filtros { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); align-items: flex-end; }
+.bancos-filtros .input-wrapper { min-width: 150px; }
+.bancos-field-error { color: var(--color-danger); font-size: var(--font-size-xs); }
+.bancos-entrada { color: var(--color-success); font-weight: 600; }
+.bancos-saida { color: var(--color-danger); font-weight: 600; }
+.bancos-cancelado td { opacity: 0.55; }
+.bancos-cancelado .bancos-desc { text-decoration: line-through; }
+.bancos-futuro { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+@media (max-width: 720px) { .bancos-contas { grid-template-columns: 1fr; } }

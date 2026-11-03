@@ -57,6 +57,7 @@ const NAV_META_BY_PATH = {
   '/comissoes':        { icon: BadgePercent,    label: 'Comissões' },
   '/usuarios':         { icon: UserCog,         label: 'Usuários' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios' },
+  '/bancos':           { icon: Landmark,        label: 'Bancos' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar' },
   '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber' },
   '/ponto-equilibrio': { icon: Target,          label: 'Ponto de Equilíbrio' },

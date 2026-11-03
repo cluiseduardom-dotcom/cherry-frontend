@@ -18,6 +18,10 @@ describe('LinkCartaoPainel', () => {
     expect(html).toContain('Aguardando o cliente pagar no cartão');
     expect(html).toContain('119:30');
     expect(html).toContain('até 12x');
+    expect(html).toContain('conforme o valor da compra');
+    expect(html).toContain('O juro do parcelamento é pago pelo cliente');
+    // Débito não é oferecido no link (Fase 3): o texto não pode prometê-lo.
+    expect(html).not.toContain('débito');
     expect(html).toContain('Copiar link');
     expect(html).toContain('Abrir link');
     expect(html).toContain('WhatsApp');

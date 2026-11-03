@@ -15,7 +15,8 @@ export function LinkCartaoPainel({ url, valor, parcelasMaximas, restante, copiad
         {restante && <small> Válido por {restante}</small>}
       </p>
       <p className="link-cartao-dica">
-        Envie o link ao cliente: ele escolhe crédito{parcelasMaximas > 1 ? ` (até ${parcelasMaximas}x)` : ''} ou débito na página do Mercado Pago.
+        Envie o link ao cliente: ele paga no cartão de crédito e escolhe as parcelas na página do Mercado Pago
+        {parcelasMaximas > 1 ? ` (até ${parcelasMaximas}x, conforme o valor da compra)` : ''}. O juro do parcelamento é pago pelo cliente.
       </p>
       {url && (
         <div className="link-cartao-acoes">

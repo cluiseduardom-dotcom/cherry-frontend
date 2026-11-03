@@ -6,6 +6,7 @@ import {
 import PixQrCobranca from './PixQrCobranca';
 import LinkCartaoCobranca from './LinkCartaoCobranca';
 import { formatarMoeda } from '../utils/mascaras';
+import { parcelasPossiveisLink, textoParcelasLink } from '../utils/linkCartao';
 import {
   gatewayIndisponivel, pagamentoComCobranca, pagamentoComLinkCartao, pagamentoDoGateway, pagamentoLinkCartao,
 } from '../utils/pixGateway';
@@ -73,6 +74,7 @@ export default function PagamentoPDV({
   onRemover,
   criarCobrancaPix, // opcional: com ele, o Pix vira cobrança com QR no Mercado Pago; sem ele, Pix manual
   criarLinkCartao, // opcional: com ele, aparece "Link de cartão" (crédito pelo Mercado Pago; débito só na Fase 3)
+  parcelasMaximasLink, // teto global do link (backend: parcelas_maximas_link); sem ele, o padrão do backend
   onConfirmarLinkCartao, // (index, cobranca): o link foi pago; vira crédito/débito com as parcelas do Mercado Pago
   onGatewayIndisponivel,
   avisoPix = null, // { texto, acao } quando o Pix automático está desligado; aparece junto do Pix manual aguardando
@@ -87,6 +89,7 @@ export default function PagamentoPDV({
   const [erroBruto, setErro] = useState(SEM_ERRO);
   const [criandoPix, setCriandoPix] = useState(false);
   const [criandoLink, setCriandoLink] = useState(false);
+  const [tetoLink, setTetoLink] = useState(null); // teto escolhido para o link; null = o máximo possível
   const passoRef = useRef(null);
 
   // O passo abre abaixo dos cards: em telas baixas/estreitas ele pode ficar fora
@@ -112,6 +115,7 @@ export default function PagamentoPDV({
     setRecebido('');
     setParcelas('1');
     setMesesPrazo('1');
+    setTetoLink(null);
     setErro(SEM_ERRO);
   }
 
@@ -176,7 +180,7 @@ export default function PagamentoPDV({
     setCriandoLink(true);
     setErro(SEM_ERRO);
     try {
-      const cobranca = await criarLinkCartao(v.valor);
+      const cobranca = await criarLinkCartao(v.valor, Math.min(tetoLink ?? maximoLink, maximoLink));
       onAdicionar(pagamentoComLinkCartao({ valor: v.valor, status: STATUS_PAGAMENTO.PENDENTE }, cobranca));
       limparEntrada();
     } catch (err) {
@@ -202,6 +206,9 @@ export default function PagamentoPDV({
   }
 
   const formaDoPasso = FORMAS_PAGAMENTO.find(f => f.valor === passo);
+  // Link de cartão: o que dá para anunciar ao cliente para o valor digitado.
+  const maximoLink = parcelasPossiveisLink(valorCentavos === null ? 0 : valorCentavos / 100, parcelasMaximasLink);
+  const tetoLinkEfetivo = Math.min(tetoLink ?? maximoLink, maximoLink);
   const trocoPasso = calcularTroco(valorCentavos, recebidoCentavos);
 
   // Resumo das parcelas ("3x de R$ 23,33") só quando os dados são válidos.
@@ -380,7 +387,8 @@ export default function PagamentoPDV({
                   type="button"
                   className="pdv-pay-forma pdv-pay-forma--link"
                   disabled={criandoPix || criandoLink}
-                  onClick={() => { setPasso(null); registrarLinkCartao(); }}
+                  aria-pressed={passo === 'link'}
+                  onClick={() => { setErro(SEM_ERRO); setPasso(passo === 'link' ? null : 'link'); }}
                 >
                   <Link2 size={20} aria-hidden="true" />
                   <span>{criandoLink ? 'Gerando link…' : 'Link de cartão'}</span>
@@ -389,6 +397,42 @@ export default function PagamentoPDV({
             </div>
             <CampoErro id="venda-erro-forma" erro={erro} campo="forma" />
           </fieldset>
+
+          {passo === 'link' && criarLinkCartao && (
+            <div className="pdv-pay-passo" ref={passoRef}>
+              <div className="pdv-pay-parcelamento">
+                <p className="pdv-pay-parcelas-resumo">
+                  Máximo de parcelas neste link (o cliente escolhe na página do Mercado Pago)
+                </p>
+                <div role="group" aria-label="Máximo de parcelas do link" className="pdv-pay-parcelas-chips">
+                  {Array.from({ length: maximoLink }, (_, i) => i + 1).map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`pdv-pay-chip ${tetoLinkEfetivo === n ? 'pdv-pay-chip--ativo' : ''}`}
+                      aria-pressed={tetoLinkEfetivo === n}
+                      onClick={() => setTetoLink(n)}
+                    >
+                      {n === 1 ? 'À vista' : `até ${n}x`}
+                    </button>
+                  ))}
+                </div>
+                <p className="pdv-pay-parcelas-resumo" aria-live="polite">
+                  {textoParcelasLink(tetoLinkEfetivo)}
+                  {maximoLink < (parcelasMaximasLink ?? 12) && ' Para este valor o Mercado Pago limita o parcelamento.'}
+                </p>
+              </div>
+              <div className="pdv-pay-passo-acoes">
+                <button type="button" className="btn btn-ghost" onClick={() => { setPasso(null); setErro(SEM_ERRO); }}>
+                  Cancelar
+                </button>
+                <button type="button" className="btn btn-primary pdv-pay-confirmar" disabled={criandoLink} onClick={registrarLinkCartao}>
+                  <Check size={16} />
+                  <span>{criandoLink ? 'Gerando link…' : `Gerar link · ${formatarMoeda(deCentavos(valorCentavos ?? 0))}`}</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {formaDoPasso && (
             <div className="pdv-pay-passo" ref={passoRef}>

@@ -11,7 +11,7 @@ export async function criarCobrancaPix(valor) {
   return body.data;
 }
 
-// Antes de cobrar: { pix: boolean, motivo: null | 'nao_configurado' | 'loja_nao_conectada' }.
+// Antes de cobrar: { pix: boolean, motivo: null | 'nao_configurado' | 'loja_nao_conectada', parcelas_maximas_link? }.
 // Só o estado da integração; não consulta o Mercado Pago. Contrato: backend GET /pagamentos-gateway/disponibilidade.
 export async function consultarDisponibilidadePix() {
   const body = await apiFetch('/pagamentos-gateway/disponibilidade');
@@ -26,10 +26,11 @@ export async function consultarCobrancaPix(codigo) {
 // Link de pagamento de cartão (crédito/débito, até 12x) pelo Mercado Pago. Contrato: backend POST /pagamentos-gateway/cartao.
 // Resposta: { codigo, status, valor, metodo:'cartao_link', link_url, parcelas_maximas, expira_em, expira_em_segundos,
 // expirada, tipo_cartao, parcelas }. `tipo_cartao` e `parcelas` só vêm preenchidos depois de pago (lidos do Mercado Pago).
-export async function criarLinkCartao(valor) {
+// `parcelasMaximas` (opcional) é o teto escolhido para este link; o backend nunca passa do teto global.
+export async function criarLinkCartao(valor, parcelasMaximas) {
   const body = await apiFetch('/pagamentos-gateway/cartao', {
     method: 'POST',
-    body: JSON.stringify({ valor }),
+    body: JSON.stringify(parcelasMaximas ? { valor, parcelas_maximas: parcelasMaximas } : { valor }),
   });
   return body.data;
 }

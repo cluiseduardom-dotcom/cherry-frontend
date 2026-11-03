@@ -108,4 +108,15 @@ describe('linkWhatsApp', () => {
     expect(url.startsWith('https://wa.me/?text=')).toBe(true);
     expect(decodeURIComponent(url.split('text=')[1])).toBe('Link para pagar R$ 120,00 no cartão: https://mp.exemplo/x?a=1&b=2');
   });
+
+  it('com teto de parcelas, avisa que o cliente escolhe no Mercado Pago e que há juro', () => {
+    const texto = decodeURIComponent(linkWhatsApp('https://mp.exemplo/x', 'R$ 40,00', 6).split('text=')[1]);
+    expect(texto).toContain('em até 6x');
+    expect(texto).toContain('juro');
+  });
+
+  it('à vista (1x) não promete parcelas', () => {
+    const texto = decodeURIComponent(linkWhatsApp('https://mp.exemplo/x', 'R$ 4,00', 1).split('text=')[1]);
+    expect(texto).not.toContain('parcelas');
+  });
 });

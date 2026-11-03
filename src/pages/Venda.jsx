@@ -173,6 +173,8 @@ export default function Venda() {
   const [pixGatewayAtivo, setPixGatewayAtivo] = useState(true);
   // Motivo informado pelo backend quando o Pix automático está desligado (null = não informado/ativo).
   const [pixGatewayMotivo, setPixGatewayMotivo] = useState(null);
+  // Teto global de parcelas do link de cartão (backend: parcelas_maximas_link); null = não informado.
+  const [parcelasMaximasLink, setParcelasMaximasLink] = useState(null);
 
   // Pergunta ao backend antes de cobrar. Se a consulta falhar (API antiga, rede), segue como antes:
   // tenta o Pix automático e o 409 ainda derruba para o manual.
@@ -180,7 +182,9 @@ export default function Venda() {
     let cancelled = false;
     consultarDisponibilidadePix()
       .then(d => {
-        if (cancelled || !d || d.pix !== false) return;
+        if (cancelled || !d) return;
+        if (Number.isInteger(d.parcelas_maximas_link)) setParcelasMaximasLink(d.parcelas_maximas_link);
+        if (d.pix !== false) return;
         setPixGatewayAtivo(false);
         setPixGatewayMotivo(d.motivo ?? null);
       })
@@ -907,6 +911,7 @@ export default function Venda() {
                       onRemover={removerPagamento}
                       criarCobrancaPix={pixGatewayAtivo ? criarCobrancaPix : undefined}
                       criarLinkCartao={pixGatewayAtivo ? criarLinkCartao : undefined}
+                      parcelasMaximasLink={parcelasMaximasLink ?? undefined}
                       onConfirmarLinkCartao={confirmarLinkDeCartao}
                       avisoPix={pixGatewayAtivo ? null : avisoPixIndisponivel(pixGatewayMotivo, { podeConectar: canAccessRoute(ROTA_CONEXAO_MERCADO_PAGO, user) })}
                       onGatewayIndisponivel={() => setPixGatewayAtivo(false)}

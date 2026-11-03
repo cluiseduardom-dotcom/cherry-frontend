@@ -18,7 +18,8 @@ describe('LinkCartaoPainel', () => {
     expect(html).toContain('Aguardando o cliente pagar no cartão');
     expect(html).toContain('119:30');
     expect(html).toContain('até 12x');
-    expect(html).toContain('conforme o valor da compra');
+    expect(html).toContain('escolhe as parcelas na página do Mercado Pago');
+    expect(html).toContain('em até 12x');
     expect(html).toContain('O juro do parcelamento é pago pelo cliente');
     // Débito não é oferecido no link (Fase 3): o texto não pode prometê-lo.
     expect(html).not.toContain('débito');
@@ -62,6 +63,32 @@ describe('PagamentoPDV com link de cartão', () => {
   it('com Mercado Pago disponível oferece o botão "Link de cartão"; sem ele, não', () => {
     expect(render([], { criarLinkCartao: noop })).toContain('Link de cartão');
     expect(render([])).not.toContain('Link de cartão');
+  });
+
+  it('tocar em "Link de cartão" abre o passo com o teto limitado pelo valor e pelo teto global', () => {
+    const r = (total, teto) => renderToStaticMarkup(createElement(MemoryRouter, null, createElement(PagamentoPDV, {
+      resumo: calcularResumoPagamento(total, []),
+      pagamentos: [],
+      temCliente: false,
+      onAdicionar: noop,
+      onConfirmarPendente: noop,
+      onRecusarPendente: noop,
+      onRemover: noop,
+      criarLinkCartao: noop,
+      parcelasMaximasLink: teto,
+      passoInicial: 'link',
+    })));
+    const r20 = r(20, 6);
+    expect(r20).toContain('Máximo de parcelas neste link');
+    expect(r20).toContain('até 4x');
+    expect(r20).not.toContain('até 5x');
+    expect(r20).toContain('Gerar link');
+    expect(r20).toContain('Para este valor o Mercado Pago limita o parcelamento');
+    const r40 = r(40, 6);
+    expect(r40).toContain('até 6x');
+    expect(r40).not.toContain('até 7x');
+    expect(r40).not.toContain('Para este valor');
+    expect(r(3, 6)).toContain('À vista');
   });
 
   it('link aguardando mostra o link, não conta como pago e não oferece confirmar à mão', () => {

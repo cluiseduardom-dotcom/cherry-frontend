@@ -134,3 +134,21 @@ describe('folha A4', () => {
     expect(lista.filter((e) => e.codigo === '000044')).toHaveLength(999);
   });
 });
+
+import { precoDoCanalParaEtiqueta } from './etiquetaProduto';
+
+describe('precoDoCanalParaEtiqueta', () => {
+  it.each([
+    [{ preco_canal: { preco_venda: '5.50' }, preco_venda: '1.00' }, 5.5],
+    [{ preco_canal: { preco_venda: 20 } }, 20],
+    [{ preco_canal: { preco_venda: '0' } }, 0],
+    [{ preco_canal: null, preco_venda: '9.90' }, null],
+    [{ preco_canal: { preco_venda: null } }, null],
+    [{ preco_canal: { preco_venda: 'abc' } }, null],
+    [{ preco_canal: { preco_venda: '-1' } }, null],
+    [{}, null],
+    [null, null],
+  ])('%j -> %s (usa o preço do canal, nunca o preco_venda cru)', (produto, esperado) => {
+    expect(precoDoCanalParaEtiqueta(produto)).toBe(esperado);
+  });
+});

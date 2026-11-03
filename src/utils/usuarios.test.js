@@ -239,3 +239,22 @@ describe('utils/usuarios', () => {
     });
   });
 });
+
+import { acaoAdminParaUsuario } from './usuarios';
+
+describe('acaoAdminParaUsuario', () => {
+  const emilly = { id: 58, ativo: true };
+  it.each([
+    ['vendedora ativa, não admin: conceder', emilly, { administrador: false, admin_concedido: false }, 'conceder'],
+    ['com concessão individual: revogar', emilly, { administrador: true, admin_concedido: true }, 'revogar'],
+    ['admin pelo cargo: nada (não se revoga por aqui)', emilly, { administrador: true, admin_concedido: false }, null],
+    ['bloqueada: não concede', { id: 58, ativo: false }, { administrador: false, admin_concedido: false }, null],
+    ['sem informação de privilégio: nada', emilly, undefined, null],
+  ])('%s', (_, usuario, info, esperado) => {
+    expect(acaoAdminParaUsuario(usuario, info, 57)).toBe(esperado);
+  });
+
+  it('nunca sobre si mesmo', () => {
+    expect(acaoAdminParaUsuario({ id: 57, ativo: true }, { administrador: false, admin_concedido: false }, 57)).toBeNull();
+  });
+});

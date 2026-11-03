@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, FileText, Share2, X } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, Share2, X } from 'lucide-react';
 import { garantirCodigosParaEtiqueta } from '../../services/produtosCodigos';
 import { listarProdutos } from '../../services/produtos';
 import { buscarTodasAsPaginas } from '../../pages/relatorios/relatoriosUtils';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import { canvasParaBlob, gerarPdfFolha, renderizarEtiquetaPng } from '../../utils/etiquetaRender';
-import { PRESET_FOLHA_A4, PRESET_NIMBOT_D110, precoDoCanalParaEtiqueta, validarFolha } from '../../utils/etiquetaProduto';
+import { LIMITE_EXCEL_NIMBOT_BYTES, linhasExcelNimbot, PRESET_FOLHA_A4, PRESET_NIMBOT_D110, precoDoCanalParaEtiqueta, validarFolha } from '../../utils/etiquetaProduto';
+import { gerarXlsx } from '../../utils/xlsxSimples';
 import '../compras/BarcodeScannerModal.css';
 import './EtiquetasModal.css';
 
@@ -156,6 +157,24 @@ export default function EtiquetasModal({ itens, onClose }) {
     }
   }
 
+  // Planilha para o app da Nimbot (importa só xls/xlsx, até 500 KB): o app desenha o código de barras a partir
+  // da coluna Codigo, então o código sai do tamanho e do layout do modelo montado lá.
+  function baixarExcelNimbot() {
+    setMensagem('');
+    try {
+      const bytes = gerarXlsx(linhasExcelNimbot(linhas.map((l) => ({ ...l, copias: Number(l.copias) })), { mostrarPreco }));
+
+      if (bytes.length > LIMITE_EXCEL_NIMBOT_BYTES) {
+        setMensagem('A planilha passou de 500 KB, o limite do app da Nimbot. Diminua as cópias e gere em partes.');
+        return;
+      }
+
+      baixarBlob(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'etiquetas-nimbot.xlsx');
+    } catch (err) {
+      setMensagem(err.message);
+    }
+  }
+
   const podeCompartilhar = typeof navigator !== 'undefined' && typeof navigator.canShare === 'function'
     && typeof File !== 'undefined' && navigator.canShare({ files: [new File([''], 'x.png', { type: 'image/png' })] });
   const totalEtiquetas = linhas.reduce((acc, l) => acc + (Number(l.copias) || 0), 0);
@@ -182,7 +201,7 @@ export default function EtiquetasModal({ itens, onClose }) {
               <div className="etiquetas-medidas">
                 <label>Largura (mm)<input className="input-field" inputMode="decimal" value={nimbot.larguraMm} onChange={(e) => setNimbot({ ...nimbot, larguraMm: e.target.value })} /></label>
                 <label>Altura (mm)<input className="input-field" inputMode="decimal" value={nimbot.alturaMm} onChange={(e) => setNimbot({ ...nimbot, alturaMm: e.target.value })} /></label>
-                <p className="text-sm text-secondary etiquetas-dica">Rolo 15×30 mm: largura 30 e altura 15. Baixe a imagem e abra no app da Nimbot; as cópias você escolhe lá.</p>
+                <p className="text-sm text-secondary etiquetas-dica">Rolo 15×30 mm: largura 30 e altura 15. Duas formas: baixe a imagem (PNG) de um produto e abra no app da Nimbot, ou baixe a planilha Excel com todos e importe no app (colunas Nome, Codigo e Preco; uma linha por etiqueta, cópias já incluídas).</p>
               </div>
             ) : (
               <div className="etiquetas-medidas">
@@ -233,6 +252,12 @@ export default function EtiquetasModal({ itens, onClose }) {
             </table>
 
             {mensagem && <div className="compra-alert error">{mensagem}</div>}
+
+            {formato === FORMATO_NIMBOT && (
+              <button type="button" className="btn btn-primary" disabled={totalEtiquetas === 0} onClick={baixarExcelNimbot}>
+                <FileSpreadsheet size={16} /> Baixar Excel para o app Nimbot ({totalEtiquetas} etiquetas)
+              </button>
+            )}
 
             {formato === FORMATO_A4 && (
               <button type="button" className="btn btn-primary" disabled={Boolean(erroFolha) || totalEtiquetas === 0} onClick={baixarPdf}>

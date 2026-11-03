@@ -159,3 +159,24 @@ export function expandirCopias(itens) {
 
   return lista;
 }
+
+// Limite do app da Nimbot para importar Excel.
+export const LIMITE_EXCEL_NIMBOT_BYTES = 500 * 1024;
+
+// Linhas da planilha para o app da Nimbot: 1ª linha = nomes das colunas (o app liga cada elemento da etiqueta a uma
+// coluna); depois, UMA linha por etiqueta (cópias já expandidas). Tudo como texto: o código mantém zeros à esquerda e
+// o preço já vai formatado ("R$ 5,50"). Sem preço (ou com a opção desligada), a coluna Preco não entra.
+export function linhasExcelNimbot(itens, { mostrarPreco = true } = {}) {
+  const etiquetas = expandirCopias(itens);
+  const comPreco = mostrarPreco && etiquetas.some((e) => formatarPrecoEtiqueta(e.preco) !== '');
+  const cabecalho = comPreco ? ['Nome', 'Codigo', 'Preco'] : ['Nome', 'Codigo'];
+
+  return [
+    cabecalho,
+    ...etiquetas.map((e) => {
+      const linha = [String(e.nome ?? '').replace(/\s+/g, ' ').trim(), String(e.codigo)];
+      if (comPreco) linha.push(formatarPrecoEtiqueta(e.preco));
+      return linha;
+    }),
+  ];
+}

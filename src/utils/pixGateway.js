@@ -127,8 +127,16 @@ export function confirmarLinkCartao(pagamentos, indice, cobranca) {
   const parcelas = cobranca.tipo_cartao === 'debito' ? 1 : Number(cobranca.parcelas);
   if (!Number.isInteger(parcelas) || parcelas < 1) return pagamentos;
 
+  // Total que o cliente pagou com os juros do parcelamento (informado pelo Mercado Pago; só aparece na tela,
+  // nunca vai para a API e não altera o valor da venda).
+  const total = Number(cobranca.valor_total_pago);
+  const juros = Number(cobranca.juros_pagos);
+  const juros_cliente = cobranca.valor_total_pago != null && Number.isFinite(total) && Number.isFinite(juros) && juros > 0
+    ? { total, juros }
+    : undefined;
+
   return pagamentos.map((p, i) => (i === indice
-    ? { ...p, forma_pagamento: cobranca.tipo_cartao, numero_parcelas: parcelas, status: 'confirmado', link: undefined }
+    ? { ...p, forma_pagamento: cobranca.tipo_cartao, numero_parcelas: parcelas, status: 'confirmado', link: undefined, juros_cliente }
     : p));
 }
 

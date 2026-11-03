@@ -255,3 +255,7 @@
 }
 
 .pdv-pay-aviso-pix-link { font-weight: 600; color: var(--color-primary); text-decoration: underline; white-space: nowrap; }
+
+.pdv-pay-estimativa { width: 100%; border-collapse: collapse; font-size: var(--text-sm, 0.875rem); }
+.pdv-pay-estimativa th, .pdv-pay-estimativa td { padding: var(--space-1) var(--space-2); text-align: right; border-bottom: 1px solid var(--color-border); }
+.pdv-pay-estimativa th:first-child, .pdv-pay-estimativa td:first-child { text-align: left; }

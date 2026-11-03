@@ -133,9 +133,10 @@ export function confirmarLinkCartao(pagamentos, indice, cobranca) {
 }
 
 // Texto para enviar o link ao cliente (WhatsApp). O link é do Mercado Pago; nada sensível vai junto.
-export function linkWhatsApp(url, valorFormatado, parcelasMaximas) {
+// `exemplo` (opcional, texto): estimativa do parcelamento máximo, ex.: "6x de R$ 7,62 (total ≈ R$ 45,73)".
+export function linkWhatsApp(url, valorFormatado, parcelasMaximas, exemplo) {
   const aviso = parcelasMaximas > 1
-    ? `\nVocê escolhe as parcelas na página do Mercado Pago (em até ${parcelasMaximas}x); o juro do parcelamento aparece lá antes de você pagar.`
+    ? `\nVocê escolhe as parcelas na página do Mercado Pago (em até ${parcelasMaximas}x); o juro do parcelamento aparece lá antes de você pagar.${exemplo ? `\nEstimativa: ${exemplo}.` : ''}`
     : '';
   const texto = `Link para pagar ${valorFormatado} no cartão: ${url}${aviso}`;
   return `https://wa.me/?text=${encodeURIComponent(texto)}`;

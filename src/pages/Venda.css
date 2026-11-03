@@ -37,6 +37,11 @@
   position: relative;
 }
 
+.venda-scan-btn {
+  flex-shrink: 0;
+  padding: 10px 14px;
+}
+
 .venda-filter-btn--ativo {
   color: var(--color-primary);
   background: var(--color-primary-ultra);
@@ -629,6 +634,26 @@
      completo (sem formulário) ele volta a ficar fixo acima da barra inferior. */
   .cart-footer.cart-footer--inline {
     position: static;
+  }
+
+  /* Busca + filtro + leitor fixos logo abaixo do cabeçalho: com centenas de produtos, o leitor não fica no fim
+     do catálogo. O botão tracejado do fim da lista sai (seria repetido). */
+  .venda-search-row {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 20;
+    margin: calc(var(--space-2) * -1) calc(var(--space-4) * -1) 0;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg);
+    box-shadow: 0 6px 8px -8px rgba(0, 0, 0, 0.25);
+  }
+
+  .venda-scan-btn {
+    padding: 10px 16px;
+  }
+
+  .venda-barcode-btn {
+    display: none;
   }
 }
 

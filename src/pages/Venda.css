@@ -607,8 +607,15 @@
 }
 
 @media (max-width: 768px) {
+  /* minmax(0, 1fr): sem isso a coluna cresce até caber o conteúdo mais largo (ex.: total "R$ 3.661,70" em fonte
+     grande) e o iPhone reduz o zoom da página inteira para caber — a tela "vem maior" e precisa de pinça. */
   .venda-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .venda-products-col,
+  .venda-cart-col {
+    min-width: 0;
   }
 
   /* Mobile: o carrinho vem depois da lista e rola com a página; o rodapé

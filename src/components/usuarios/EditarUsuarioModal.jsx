@@ -15,10 +15,11 @@ import { formularioAlterado } from '../../utils/formularioAlterado';
 import { useRolarParaErro } from '../../hooks/useRolarParaErro';
 import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
 import DadosCadastraisCampos from './DadosCadastraisCampos';
+import LoginUsuarioCampo from './LoginUsuarioCampo';
 import '../ProductModal.css';
 import './CamposFormulario.css';
 
-export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onClose, onSuccess, onFotoAlterada }) {
+export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onClose, onSuccess, onFotoAlterada, onLoginAlterado }) {
   const [form, setForm] = useState(DADOS_VAZIOS);
   const [inicial, setInicial] = useState(DADOS_VAZIOS);
   const [erros, setErros] = useState({});
@@ -153,6 +154,7 @@ export default function EditarUsuarioModal({ open, usuario, usuarioLogadoId, onC
               </div>
             ) : carregado ? (
               <>
+                <LoginUsuarioCampo usuarioId={usuario.id} loginAtual={usuario.login} onAlterado={onLoginAlterado} />
                 <div style={{ marginBottom: 'var(--space-4)' }}>
                   <span className="input-label">Foto de perfil</span>
                   <FotoPerfilEditor

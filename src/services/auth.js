@@ -34,10 +34,14 @@ export function formatarUsuario(me, usuarioBase = {}) {
   };
 }
 
-export async function loginRequest(email, senha) {
+// identificador: e-mail ou código de usuário (ex.: EGASIL). O código é único por loja e precisa do
+// `empresaSlug` (página /c/<slug> ou a última loja usada neste navegador).
+export async function loginRequest(identificador, senha, empresaSlug) {
+  const corpo = { identificador: String(identificador).trim(), senha };
+  if (empresaSlug) corpo.empresa_slug = empresaSlug;
   const body = await apiFetch('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, senha }),
+    body: JSON.stringify(corpo),
     skipAuthRedirect: true,
   });
 
@@ -47,6 +51,7 @@ export async function loginRequest(email, senha) {
     id: usuario.id,
     nome: usuario.nome,
     email: usuario.email,
+    login: usuario.login ?? null,
     role: usuario.papel,
     perfil: usuario.papel,
     cargo: usuario.papel,

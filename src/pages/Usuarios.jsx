@@ -78,7 +78,9 @@ export default function Usuarios() {
   }, [carregarUsuarios]);
 
   function handleUsuarioCriado(novoUsuario) {
-    toast.success(`Usuário "${novoUsuario.nome}" cadastrado com sucesso.`);
+    toast.success(novoUsuario.login
+      ? `Usuário "${novoUsuario.nome}" cadastrado. Para entrar: ${novoUsuario.login}`
+      : `Usuário "${novoUsuario.nome}" cadastrado com sucesso.`);
     carregarUsuarios();
     setTrilhaSignal(s => s + 1);
   }
@@ -251,7 +253,10 @@ export default function Usuarios() {
                             <Avatar nome={u.nome} fotoUrl={u.foto_url} className="usuarios-avatar" vazio="U" />
                             <div>
                               <div className="usuarios-user-nome">{u.nome}</div>
-                              <div className="usuarios-user-email">{u.email}</div>
+                              <div className="usuarios-user-email">
+                                {u.login && <strong className="usuarios-user-login">{u.login}</strong>}
+                                {u.login ? ' · ' : ''}{u.email}
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -369,6 +374,11 @@ export default function Usuarios() {
         onClose={() => setUsuarioParaEdicao(null)}
         onSuccess={handleDadosEditados}
         onFotoAlterada={handleFotoAlterada}
+        onLoginAlterado={login => {
+          setUsuarioParaEdicao(prev => (prev ? { ...prev, login } : prev));
+          carregarUsuarios();
+          setTrilhaSignal(s => s + 1);
+        }}
       />
 
       <RedefinirSenhaModal

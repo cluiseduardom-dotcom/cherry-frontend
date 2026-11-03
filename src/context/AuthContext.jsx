@@ -89,11 +89,11 @@ export function AuthProvider({ children }) {
     salvarSessao({ token: tokenRef.current, user: atualizado });
   }
 
-  async function login(email, senha) {
+  async function login(identificador, senha, empresaSlug) {
     setLoading(true);
     setError('');
     try {
-      const result = await loginRequest(email, senha);
+      const result = await loginRequest(identificador, senha, empresaSlug);
       setToken(result.token);
       setUser(result.user);
       salvarSessao({ token: result.token, user: result.user });

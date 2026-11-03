@@ -932,3 +932,5 @@
   min-height: 100vh;
   background: #ffffff;
 }
+
+.login-ajuda-senha { margin: 0 0 var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); }

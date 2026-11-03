@@ -69,10 +69,12 @@ export function toCartProduct(p) {
   };
 }
 
-// Produto lido pelo código de barras (resposta de /produtos/buscar-codigo) → produto da vitrine do PDV, já com o
-// preço do canal. Recusa com mensagem clara o que o PDV também recusaria no clique (inativo, sem preço, sem estoque).
+// Produto lido pelo código de barras → produto da vitrine do PDV, já com o preço do canal. A resposta de
+// /produtos/buscar-codigo é o REGISTRO DO CÓDIGO: `id` é do código e o produto vem em `produto_id`.
+// Recusa com mensagem clara o que o PDV também recusaria no clique (inativo, sem preço, sem estoque).
 export function produtoLidoParaCarrinho(produtoLido, produtos, cart = []) {
-  const produto = produtos.find(p => p.id === produtoLido?.id);
+  const produtoId = Number(produtoLido?.produto_id ?? produtoLido?.id);
+  const produto = produtos.find(p => Number(p.id) === produtoId);
   const nome = produtoLido?.nome ?? 'Produto';
 
   if (!produto) return { erro: `${nome} não está à venda nesta loja (inativo ou fora da vitrine).` };
@@ -406,7 +408,7 @@ export default function Venda() {
 
     const porSku = produtos.find(p => p.sku.toLowerCase() === codigo.toLowerCase());
     try {
-      const alvo = porSku ? { id: porSku.id, nome: porSku.name } : await buscarProdutoPorCodigo(codigo);
+      const alvo = porSku ? { produto_id: porSku.id, nome: porSku.name } : await buscarProdutoPorCodigo(codigo);
       const r = produtoLidoParaCarrinho(alvo, produtos, cart);
       if (r.erro) {
         setAvisoBusca(r.erro);

@@ -12,6 +12,16 @@ describe('produtoLidoParaCarrinho', () => {
     expect(produtoLidoParaCarrinho({ id: 1, nome: 'teste01' }, produtos)).toEqual({ produto: produtos[0] });
   });
 
+  it('usa produto_id da resposta real de /buscar-codigo (o id é do código, não do produto)', () => {
+    // Formato real: SELECT pc.*, p.nome, p.sku, p.ativo AS produto_ativo FROM produtos_codigos pc ...
+    const resposta = { id: 2, produto_id: 1, codigo: '000002', tipo: 'INTERNO', nome: 'teste01', sku: 'COL-BO-MSC-001', produto_ativo: true };
+    expect(produtoLidoParaCarrinho(resposta, produtos)).toEqual({ produto: produtos[0] });
+  });
+
+  it('aceita id numérico em texto', () => {
+    expect(produtoLidoParaCarrinho({ produto_id: '1' }, produtos).produto).toBe(produtos[0]);
+  });
+
   it.each([
     [{ id: 99, nome: 'Inativo' }, [], /não está à venda/],
     [{ id: 2, nome: 'sem preço' }, [], /sem preço/],

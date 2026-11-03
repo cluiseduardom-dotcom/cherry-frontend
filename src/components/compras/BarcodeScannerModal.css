@@ -31,3 +31,26 @@
 .scanner-manual-form { display: flex; gap: var(--space-2); margin-bottom: var(--space-2); }
 .scanner-manual-form .input-field { flex: 1; }
 .scanner-video-wrap[hidden] { display: none; }
+
+/* Trava após cada leitura: imagem congelada, faixa com o resultado e um flash da cor do resultado. */
+.scanner-video-box { position: relative; width: 100%; border-radius: var(--radius-lg); overflow: hidden; }
+.scanner-video-box .scanner-video { display: block; }
+.scanner-video-box--ok { box-shadow: 0 0 0 4px var(--color-success); animation: scanner-flash-ok 0.45s ease-out; }
+.scanner-video-box--erro { box-shadow: 0 0 0 4px var(--color-danger); animation: scanner-flash-erro 0.45s ease-out; }
+@keyframes scanner-flash-ok { from { box-shadow: 0 0 0 4px var(--color-success), inset 0 0 0 999px rgba(30, 150, 90, 0.55); } }
+@keyframes scanner-flash-erro { from { box-shadow: 0 0 0 4px var(--color-danger), inset 0 0 0 999px rgba(180, 30, 60, 0.55); } }
+.scanner-pausa {
+  position: absolute; inset: auto 0 0 0; display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3); color: #fff; font-weight: 700; font-size: var(--font-size-base, 1rem);
+}
+.scanner-video-box--ok .scanner-pausa { background: rgba(20, 120, 70, 0.92); }
+.scanner-video-box--erro .scanner-pausa { background: rgba(160, 25, 50, 0.92); }
+.scanner-pausa-icone {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); font-size: 18px;
+}
+.scanner-pausa-acoes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); width: 100%; }
+.scanner-pausa-acoes .btn { min-height: 48px; }
+@media (prefers-reduced-motion: reduce) {
+  .scanner-video-box--ok, .scanner-video-box--erro { animation: none; }
+}

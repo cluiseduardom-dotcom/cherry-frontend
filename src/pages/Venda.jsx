@@ -396,7 +396,9 @@ export default function Venda() {
     const r = produtoLidoParaCarrinho(produtoLido, produtos, cart);
     if (r.erro) throw new Error(r.erro);
     handleProductClick(r.produto);
-    return `${r.produto.name} adicionado${kitMode ? ' ao kit' : ' ao carrinho'}.`;
+    if (kitMode) return `${r.produto.name} adicionado ao kit.`;
+    const qtd = (cart.find(i => i.type === 'avulso' && i.id === r.produto.id)?.qty ?? 0) + 1;
+    return qtd > 1 ? `${r.produto.name}: agora ${qtd} no carrinho.` : `${r.produto.name} adicionado ao carrinho.`;
   }
 
   // Enter na busca: leitor USB/Bluetooth (digita o código + Enter) ou código digitado à mão. SKU exato resolve na

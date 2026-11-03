@@ -11,11 +11,14 @@ import {
   Pencil,
   RefreshCw,
   Loader2,
+  Crown,
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { listarUsuarios } from '../services/usuarios';
-import { formatarCargo, formatarDataHora } from '../utils/usuarios';
+import { acaoAdminParaUsuario, formatarCargo, formatarDataHora } from '../utils/usuarios';
+import { listarAdminsPorUsuario } from '../services/privilegios';
+import { podeComCapacidade } from '../config/access';
 import { aplicarMascaraTelefone } from '../utils/mascaras';
 import Avatar from '../components/Avatar';
 import CriarUsuarioModal from '../components/usuarios/CriarUsuarioModal';
@@ -23,6 +26,7 @@ import EditarUsuarioModal from '../components/usuarios/EditarUsuarioModal';
 import RedefinirSenhaModal from '../components/usuarios/RedefinirSenhaModal';
 import BloquearUsuarioModal from '../components/usuarios/BloquearUsuarioModal';
 import TrilhaUsuariosAba from '../components/usuarios/TrilhaUsuariosAba';
+import AdminUsuarioModal from '../components/usuarios/AdminUsuarioModal';
 import './Usuarios.css';
 import '../components/TabelaGestao.css';
 
@@ -32,6 +36,10 @@ export default function Usuarios() {
   const usuarioLogadoId = user?.id;
   // Redefinir senha de outro usuário segue só com admin (o backend também exige).
   const ehAdmin = user?.role === 'admin';
+  // Conceder/remover Admin: quem tem a capacidade `conceder_admin` (o Admin tem todas). O backend exige de novo.
+  const podeConcederAdmin = ehAdmin || podeComCapacidade(user, 'conceder_admin');
+  const [adminsPorUsuario, setAdminsPorUsuario] = useState(() => new Map());
+  const [adminAlvo, setAdminAlvo] = useState(null); // { usuario, acao: 'conceder' | 'revogar' }
 
   const [abaAtiva, setAbaAtiva] = useState('usuarios'); // 'usuarios' | 'trilha'
   const [usuarios, setUsuarios] = useState([]);
@@ -51,14 +59,19 @@ export default function Usuarios() {
     setLoading(true);
     setError(null);
     try {
-      const data = await listarUsuarios();
+      const [data, admins] = await Promise.all([
+        listarUsuarios(),
+        // Sem a capacidade, não pergunta; se a consulta falhar, a lista de usuários aparece mesmo assim.
+        podeConcederAdmin ? listarAdminsPorUsuario().catch(() => []) : Promise.resolve([]),
+      ]);
       setUsuarios(Array.isArray(data) ? data : []);
+      setAdminsPorUsuario(new Map((Array.isArray(admins) ? admins : []).map(a => [a.id, a])));
     } catch (err) {
       setError(err?.message || 'Falha ao carregar a lista de usuários.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [podeConcederAdmin]);
 
   useEffect(() => {
     carregarUsuarios();
@@ -246,6 +259,11 @@ export default function Usuarios() {
                           <span className="badge badge-primary">
                             {formatarCargo(u.cargo)}
                           </span>
+                          {u.cargo !== 'admin' && adminsPorUsuario.get(u.id)?.administrador && (
+                            <span className="badge badge-warning" style={{ marginLeft: 6 }} title="Tem o privilégio de Admin">
+                              Admin
+                            </span>
+                          )}
                         </td>
                         <td className="usuarios-col-secundaria" style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
                           {u.telefone ? aplicarMascaraTelefone(u.telefone) : '—'}
@@ -282,6 +300,21 @@ export default function Usuarios() {
                                 <span>Redefinir senha</span>
                               </button>
                             )}
+                            {podeConcederAdmin && (() => {
+                              const acao = acaoAdminParaUsuario(u, adminsPorUsuario.get(u.id), usuarioLogadoId);
+                              if (!acao) return null;
+                              return (
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-ghost"
+                                  onClick={() => setAdminAlvo({ usuario: u, acao })}
+                                  title={acao === 'conceder' ? 'Dar acesso total (Admin)' : 'Remover o privilégio de Admin'}
+                                >
+                                  <Crown size={14} />
+                                  <span>{acao === 'conceder' ? 'Tornar Admin' : 'Remover Admin'}</span>
+                                </button>
+                              );
+                            })()}
                             {podeGerenciar ? (
                               <button
                                 type="button"
@@ -343,6 +376,21 @@ export default function Usuarios() {
         usuario={usuarioParaSenha}
         onClose={() => setUsuarioParaSenha(null)}
         onSuccess={() => setTrilhaSignal(s => s + 1)}
+      />
+
+      <AdminUsuarioModal
+        open={Boolean(adminAlvo)}
+        usuario={adminAlvo?.usuario}
+        acao={adminAlvo?.acao}
+        onClose={() => setAdminAlvo(null)}
+        onSuccess={() => {
+          const { usuario, acao } = adminAlvo;
+          toast.success(acao === 'conceder'
+            ? `${usuario.nome} agora é Admin. Peça para sair e entrar de novo no sistema.`
+            : `${usuario.nome} não é mais Admin.`);
+          carregarUsuarios();
+          setTrilhaSignal(s => s + 1);
+        }}
       />
 
       <BloquearUsuarioModal

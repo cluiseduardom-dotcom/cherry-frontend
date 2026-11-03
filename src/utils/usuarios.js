@@ -251,3 +251,13 @@ export function validarBloqueioUsuario(motivo) {
   }
   return { valido: true, motivo: motivoTrim };
 }
+
+// Ação de Admin oferecida na linha do usuário, a partir de /privilegios/usuarios (info).
+// 'conceder': ativo e ainda não é Admin por nenhuma via. 'revogar': tem concessão individual (a que vem do cargo
+// não se revoga por aqui). Nunca sobre si mesmo. null = nenhuma ação. O backend valida tudo de novo.
+export function acaoAdminParaUsuario(usuario, info, usuarioLogadoId) {
+  if (!usuario || !info || usuario.id === usuarioLogadoId) return null;
+  if (info.admin_concedido) return 'revogar';
+  if (!info.administrador && usuario.ativo) return 'conceder';
+  return null;
+}

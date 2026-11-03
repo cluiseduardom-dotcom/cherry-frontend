@@ -6,7 +6,7 @@ import {
 import PixQrCobranca from './PixQrCobranca';
 import LinkCartaoCobranca from './LinkCartaoCobranca';
 import { formatarMoeda } from '../utils/mascaras';
-import { parcelasPossiveisLink, textoParcelasLink } from '../utils/linkCartao';
+import { estimarParcelamentoLink, parcelasPossiveisLink, textoParcelasLink } from '../utils/linkCartao';
 import {
   gatewayIndisponivel, pagamentoComCobranca, pagamentoComLinkCartao, pagamentoDoGateway, pagamentoLinkCartao,
 } from '../utils/pixGateway';
@@ -417,7 +417,24 @@ export default function PagamentoPDV({
                     </button>
                   ))}
                 </div>
+                {tetoLinkEfetivo > 1 && valorCentavos !== null && (
+                  <table className="pdv-pay-estimativa" aria-label="Estimativa do parcelamento no cartão">
+                    <thead><tr><th scope="col">Parcelas</th><th scope="col">Parcela</th><th scope="col">Total estimado</th></tr></thead>
+                    <tbody>
+                      {Array.from({ length: tetoLinkEfetivo }, (_, i) => estimarParcelamentoLink(valorCentavos / 100, i + 1))
+                        .filter(Boolean)
+                        .map(e => (
+                          <tr key={e.parcelas}>
+                            <td>{e.parcelas === 1 ? 'À vista' : `${e.parcelas}x`}</td>
+                            <td>{formatarMoeda(e.valorParcela)}</td>
+                            <td>{formatarMoeda(e.total)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                )}
                 <p className="pdv-pay-parcelas-resumo" aria-live="polite">
+                  {tetoLinkEfetivo > 1 && 'Valores estimados (juros do Mercado Pago, pagos pelo cliente); a página do Mercado Pago mostra o valor exato. '}
                   {textoParcelasLink(tetoLinkEfetivo)}
                   {maximoLink < (parcelasMaximasLink ?? 12) && ' Para este valor o Mercado Pago limita o parcelamento.'}
                 </p>

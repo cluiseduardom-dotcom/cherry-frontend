@@ -89,6 +89,13 @@ describe('PagamentoPDV com link de cartão', () => {
     expect(r40).not.toContain('até 7x');
     expect(r40).not.toContain('Para este valor');
     expect(r(3, 6)).toContain('À vista');
+    // Estimativa de juros (R$ 40: 2x 21,93 / total 43,86; 6x 7,62 / total 45,73).
+    expect(r40).toContain('Total estimado');
+    expect(r40).toContain('21,93');
+    expect(r40).toContain('45,73');
+    expect(r40).toContain('Valores estimados');
+    expect(r40).not.toContain('46,69');
+    expect(r(3, 6)).not.toContain('Total estimado');
   });
 
   it('link aguardando mostra o link, não conta como pago e não oferece confirmar à mão', () => {

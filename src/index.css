@@ -155,6 +155,9 @@ ul, ol {
 
 .app-main {
   flex: 1;
+  /* Item flex: sem min-width 0 ele cresce até o conteúdo mais largo (abas, tabelas) e, no celular, o navegador
+     reduz o zoom da página inteira para caber. Com 0, quem é largo rola dentro do próprio contêiner. */
+  min-width: 0;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
   background: var(--color-bg);
@@ -470,5 +473,14 @@ ul, ol {
 
   .page-title {
     font-size: var(--font-size-xl);
+  }
+
+  /* iPhone (Safari e qualquer navegador no iOS) dá zoom automático ao focar um campo com letra menor que 16 px e
+     não volta sozinho: a tela fica maior que o aparelho e precisa de pinça. 16 px nos campos evita o zoom.
+     Campos com letra maior (ex.: valor do pagamento no PDV) têm classe própria e continuam como estão. */
+  /* :where() zera a especificidade: só cobre campos sem tamanho próprio, sem passar por cima dos maiores. */
+  .input-field,
+  :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+    font-size: 16px;
   }
 }

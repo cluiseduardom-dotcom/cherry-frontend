@@ -671,6 +671,16 @@ export default function Venda() {
               <SlidersHorizontal size={16} />
               {filtrosAtivos > 0 && <span className="venda-filter-badge" aria-hidden="true">{filtrosAtivos}</span>}
             </button>
+            {/* Leitor sempre ao alcance: no celular a linha de busca fica fixa no topo enquanto o catálogo rola. */}
+            <button
+              type="button"
+              className="btn btn-primary venda-scan-btn"
+              aria-label="Ler código de barras"
+              title="Ler código de barras"
+              onClick={() => setScannerAberto(true)}
+            >
+              <Barcode size={18} />
+            </button>
           </div>
           {avisoBusca && <p className="text-sm venda-aviso-busca" role="alert">{avisoBusca}</p>}
 

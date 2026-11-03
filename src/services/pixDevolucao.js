@@ -13,6 +13,15 @@ export async function listarPixADevolver(paginacao) {
   return body.data;
 }
 
+// Cartão (link) pago sem venda ou de venda cancelada: só listagem; a devolução é feita no painel do Mercado Pago.
+// { items: [{ codigo, valor, criado_em, venda_id, situacao, metodo: 'cartao_link', tipo_cartao, parcelas }], total, valor_total }
+// Exige o backend com `metodo=cartao_link`; um backend antigo ignora o parâmetro e devolve Pix, por isso filtramos.
+export async function listarCartaoSemVenda(paginacao) {
+  const body = await apiFetch(`/pagamentos-gateway/a-devolver?${paginar(paginacao)}&metodo=cartao_link`);
+  const items = (body.data?.items ?? []).filter(i => i.metodo === 'cartao_link');
+  return { ...body.data, items };
+}
+
 // { items: [{ id, cobranca_codigo, valor, status, motivo, erro, solicitado_por_nome, criado_em }], total }
 export async function listarDevolucoesPix(paginacao) {
   const body = await apiFetch(`/pagamentos-gateway/devolucoes?${paginar(paginacao)}`);

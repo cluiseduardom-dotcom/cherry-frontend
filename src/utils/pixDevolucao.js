@@ -43,3 +43,10 @@ export function mensagemDevolucao(status) {
   if (status === 'concluida') return 'Pix devolvido ao pagador.';
   return 'Devolução solicitada ao Mercado Pago. Ela aparece como concluída quando o provedor confirmar.';
 }
+
+// "Crédito 3x" / "Débito" do cartão pago pelo link.
+export function rotuloCartaoPago(item) {
+  if (item?.tipo_cartao === 'debito') return 'Débito';
+  const n = Number(item?.parcelas);
+  return Number.isInteger(n) && n > 1 ? `Crédito ${n}x` : 'Crédito à vista';
+}

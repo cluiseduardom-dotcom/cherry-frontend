@@ -3,6 +3,7 @@ import { AlertCircle, ChevronLeft, ChevronRight, Undo2 } from 'lucide-react';
 import { listarDevolucoesPix, listarPixADevolver } from '../../services/pixDevolucao';
 import { formatarMoeda } from '../../utils/mascaras';
 import { formatarDataHora } from '../../utils/formatarComissao';
+import CartaoSemVendaSecao from './CartaoSemVendaSecao';
 import { rotuloOrigemPix, rotuloStatusDevolucao } from '../../utils/pixDevolucao';
 
 const POR_PAGINA = 20;
@@ -116,6 +117,8 @@ export default function PixDevolverAba({ onDevolver, refreshKey }) {
           </>
         )}
       </div>
+
+      <CartaoSemVendaSecao refreshKey={refreshKey} />
 
       {!loading && historico.items.length > 0 && (
         <div className="card">

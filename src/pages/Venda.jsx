@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import {
   Search, SlidersHorizontal, Barcode, ShoppingCart,
-  Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp
+  Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp, ChevronRight
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
@@ -219,6 +219,10 @@ export default function Venda() {
   const [kitMode, setKitMode]   = useState(false);
   const [kitDraft, setKitDraft] = useState([]);
   const kitKeyCounterRef = useRef(0);
+  // Celular: o carrinho fica depois do catálogo. Enquanto ele está fora da tela e tem itens, uma faixa fixa acima
+  // da barra inferior mostra quantidade e total e leva até ele.
+  const cartColRef = useRef(null);
+  const [carrinhoNaTela, setCarrinhoNaTela] = useState(false);
   const saleIdempotencyKeyRef = useRef(null);
 
   useEffect(() => {
@@ -463,6 +467,20 @@ export default function Venda() {
   const subtotal = Number(cart.reduce((sum, row) => sum + rowTotal(row), 0).toFixed(2));
   const total = Number(Math.max(0, subtotal - Number(desconto || 0) + Number(juros || 0)).toFixed(2));
   const itemCount = cart.reduce((sum, row) => sum + rowQtyCount(row), 0);
+
+  useEffect(() => {
+    const alvo = cartColRef.current;
+    if (!alvo || typeof IntersectionObserver === 'undefined') return undefined;
+    const obs = new IntersectionObserver(([entrada]) => setCarrinhoNaTela(entrada.isIntersecting), { threshold: 0 });
+    obs.observe(alvo);
+    return () => obs.disconnect();
+  }, []);
+
+  function irParaCarrinho() {
+    cartColRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const mostrarFaixaCarrinho = (itemCount > 0 || kitMode) && !carrinhoNaTela;
   // Pagamento calculado em centavos inteiros (ver utils/pagamentoVenda.js).
   const resumoPagamento = calcularResumoPagamento(total, pagamentos);
   // "Pago" é o que já entrou; crediário abate o saldo mas fica em "A receber".
@@ -553,7 +571,7 @@ export default function Venda() {
   }
 
   return (
-    <div className="page-content venda-page">
+    <div className={`page-content venda-page${mostrarFaixaCarrinho ? ' venda-page--com-faixa' : ''}`}>
       <ConfirmDialog
         open={acaoPendente !== null}
         title={acaoPendente?.title}
@@ -573,6 +591,17 @@ export default function Venda() {
           onConfirm={() => blocker.proceed()}
           onCancel={() => blocker.reset()}
         />
+      )}
+
+      {mostrarFaixaCarrinho && (
+        <button type="button" className="venda-faixa-carrinho" onClick={irParaCarrinho}>
+          <span className="venda-faixa-carrinho-icone" aria-hidden="true"><ShoppingCart size={18} /></span>
+          <span className="venda-faixa-carrinho-texto">
+            {kitMode ? 'Montando kit' : `${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`}
+            {!kitMode && <strong>{formatarMoeda(total)}</strong>}
+          </span>
+          <span className="venda-faixa-carrinho-acao">{kitMode ? 'Ver kit' : 'Ver carrinho'} <ChevronRight size={16} aria-hidden="true" /></span>
+        </button>
       )}
 
       {scannerAberto && (
@@ -751,7 +780,7 @@ export default function Venda() {
         </div>
 
         {/* ===== RIGHT COLUMN — Cart ===== */}
-        <div className="venda-cart-col card">
+        <div className="venda-cart-col card" ref={cartColRef}>
           {/* Cart header */}
           <div className="cart-header">
             <div className="cart-header-left">

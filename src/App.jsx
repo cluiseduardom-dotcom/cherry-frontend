@@ -18,8 +18,6 @@ import Consumo from './pages/Consumo';
 import AlterarSenha from './pages/AlterarSenha';
 import MinhaConta from './pages/MinhaConta';
 import DadosEmpresa from './pages/DadosEmpresa';
-import PlataformaTaxas from './pages/PlataformaTaxas';
-import PlataformaEmpresas from './pages/PlataformaEmpresas';
 import Produtos from './pages/Produtos';
 import PrecificacaoProduto from './pages/PrecificacaoProduto';
 import Clientes from './pages/Clientes';
@@ -76,8 +74,6 @@ const ROUTE_COMPONENTS = {
   '/configuracoes/categorias': CategoriasProduto,
   '/configuracoes/sku': ConfiguracaoSku,
   '/configuracoes/empresa': DadosEmpresa,
-  '/plataforma/taxas': PlataformaTaxas,
-  '/plataforma/empresas': PlataformaEmpresas,
 };
 
 const registeredPaths = Object.keys(ALLOWED_ROLES_BY_PATH);

@@ -27,8 +27,6 @@ export function formatarUsuario(me, usuarioBase = {}) {
     tema: usuarioBase?.tema,
     // Senha definida por um admin: o backend só deixa trocar a senha até concluir a troca.
     senha_temporaria: me?.senha_temporaria === true,
-    // Operador da plataforma (Vertumno): a tela de taxas a receber só aparece para ele.
-    plataforma_admin: me?.plataforma_admin === true,
     // Foto de perfil (null = iniciais). Vem de /auth/me; no login, do próprio retorno do login.
     foto_url: me && 'foto_url' in me ? (me.foto_url ?? null) : (usuarioBase?.foto_url ?? null),
   };

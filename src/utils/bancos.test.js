@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  decodificarExtrato, resumoTexto, situacaoLinhaExtrato, textoResultadoMercadoPago, totalAImportar,
   corpoConta, corpoMovimento, filtrosParaConsulta, hojeBrasilia, lerValor, podeCancelar, rotuloOrigem,
   rotuloTipoConta, situacaoMovimento, totaisDasContas, validarConta, validarMovimento,
 } from './bancos';
@@ -97,5 +98,37 @@ describe('filtros', () => {
       .toEqual({ limit: 50, offset: 100 });
     expect(filtrosParaConsulta({ conta: '2', tipo: 'SAIDA', conciliado: false, inicio: '2026-11-01', fim: '2026-11-30', cancelados: true, pagina: 1, porPagina: 50 }))
       .toEqual({ limit: 50, offset: 0, conta_bancaria_id: '2', tipo: 'SAIDA', conciliado: false, data_inicio: '2026-11-01', data_fim: '2026-11-30', incluir_cancelados: true });
+  });
+});
+
+describe('extrato', () => {
+  it('decodifica UTF-8 e cai para Windows-1252 quando há byte inválido', () => {
+    expect(decodificarExtrato(new TextEncoder().encode('Descrição ção'))).toBe('Descrição ção');
+    expect(decodificarExtrato(new Uint8Array([0x44, 0x65, 0x73, 0x63, 0x72, 0x69, 0xe7, 0xe3, 0x6f]))).toBe('Descrição');
+  });
+
+  it('conta o que será gravado: novas + suspeitas marcadas', () => {
+    const linhas = [
+      { situacao: 'nova', referencia_externa: 'a' },
+      { situacao: 'nova', referencia_externa: 'b' },
+      { situacao: 'possivel_duplicado', referencia_externa: 'c' },
+      { situacao: 'possivel_duplicado', referencia_externa: 'd' },
+      { situacao: 'ja_importada', referencia_externa: 'e' },
+      { situacao: 'fora_do_saldo', referencia_externa: 'f' },
+    ];
+    expect(totalAImportar(linhas, new Set())).toBe(2);
+    expect(totalAImportar(linhas, new Set(['c', 'e', 'f']))).toBe(3);
+    expect(totalAImportar(undefined, undefined)).toBe(0);
+  });
+
+  it('rótulos e textos', () => {
+    expect(situacaoLinhaExtrato('possivel_duplicado').rotulo).toBe('Possível duplicado');
+    expect(situacaoLinhaExtrato('x').rotulo).toBe('x');
+    expect(rotuloOrigem('EXTRATO')).toBe('Extrato');
+    expect(resumoTexto({ novas: 2, possiveis_duplicadas: 1, ja_importadas: 0, fora_do_saldo: 3, futuras: 0, erros: 1 }))
+      .toBe('2 nova(s) · 1 possível(is) duplicado(s) · 3 antes do saldo inicial · 1 ilegível(is)');
+    expect(textoResultadoMercadoPago({ entradas: 3, saidas: 1, ja_lancados: 0, erros: [], tem_mais: false })).toBe('3 entrada(s) e 1 saída(s) lançadas.');
+    expect(textoResultadoMercadoPago({ entradas: 0, saidas: 0, ja_lancados: 2, erros: [{}], tem_mais: true }))
+      .toBe('0 entrada(s) e 0 saída(s) lançadas (2 já estavam lançadas; 1 com erro; há mais: sincronize de novo).');
   });
 });

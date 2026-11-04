@@ -20,6 +20,7 @@ const ROTULO_ORIGEM = {
   OPEN_FINANCE: 'Open Finance',
   API_BANCO: 'Automático',
   AJUSTE: 'Ajuste',
+  EXTRATO: 'Extrato',
 };
 
 export function rotuloOrigem(origem) {
@@ -126,4 +127,54 @@ export function filtrosParaConsulta({ conta, tipo, conciliado, inicio, fim, canc
   if (fim) f.data_fim = fim;
   if (cancelados) f.incluir_cancelados = true;
   return f;
+}
+
+// Lê o arquivo do extrato como texto. Bancos brasileiros ainda exportam OFX/CSV em Windows-1252: tenta UTF-8
+// estrito e, se houver byte inválido, cai para Windows-1252 (acentos preservados).
+export function decodificarExtrato(buffer) {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+  } catch {
+    return new TextDecoder('windows-1252').decode(buffer);
+  }
+}
+
+export const TAMANHO_MAXIMO_EXTRATO = 3_000_000;
+
+const SITUACOES = {
+  nova: { rotulo: 'Nova', classe: 'badge-success' },
+  ja_importada: { rotulo: 'Já importada', classe: 'badge-primary' },
+  possivel_duplicado: { rotulo: 'Possível duplicado', classe: 'badge-warning' },
+  fora_do_saldo: { rotulo: 'Antes do saldo inicial', classe: 'badge-danger' },
+  futura: { rotulo: 'Data futura', classe: 'badge-danger' },
+};
+
+export function situacaoLinhaExtrato(situacao) {
+  return SITUACOES[situacao] ?? { rotulo: String(situacao), classe: 'badge-primary' };
+}
+
+// Quantas linhas serão gravadas: as novas + as suspeitas que a pessoa marcou.
+export function totalAImportar(linhas, incluidas) {
+  const marcadas = incluidas instanceof Set ? incluidas : new Set(incluidas ?? []);
+  return (linhas ?? []).filter(l => l.situacao === 'nova' || (l.situacao === 'possivel_duplicado' && marcadas.has(l.referencia_externa))).length;
+}
+
+export function resumoTexto(r) {
+  if (!r) return '';
+  const partes = [`${r.novas} nova(s)`];
+  if (r.possiveis_duplicadas) partes.push(`${r.possiveis_duplicadas} possível(is) duplicado(s)`);
+  if (r.ja_importadas) partes.push(`${r.ja_importadas} já importada(s)`);
+  if (r.fora_do_saldo) partes.push(`${r.fora_do_saldo} antes do saldo inicial`);
+  if (r.futuras) partes.push(`${r.futuras} com data futura`);
+  if (r.erros) partes.push(`${r.erros} ilegível(is)`);
+  return partes.join(' · ');
+}
+
+export function textoResultadoMercadoPago(r) {
+  const base = `${r.entradas} entrada(s) e ${r.saidas} saída(s) lançadas`;
+  const extra = [];
+  if (r.ja_lancados) extra.push(`${r.ja_lancados} já estavam lançadas`);
+  if (r.erros?.length) extra.push(`${r.erros.length} com erro`);
+  if (r.tem_mais) extra.push('há mais: sincronize de novo');
+  return extra.length ? `${base} (${extra.join('; ')}).` : `${base}.`;
 }

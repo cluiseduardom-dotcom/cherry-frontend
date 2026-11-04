@@ -35,6 +35,7 @@ import Mais from './pages/Mais';
 import Avisos from './pages/Avisos';
 import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
+import Bancos from './pages/Bancos';
 import ContasPagar from './pages/ContasPagar';
 import ContasReceber from './pages/ContasReceber';
 import PontoEquilibrio from './pages/PontoEquilibrio';
@@ -66,6 +67,7 @@ const ROUTE_COMPONENTS = {
   '/conta/seguranca': AlterarSenha,
   '/conta/perfil': MinhaConta,
   '/relatorios': Relatorios,
+  '/bancos': Bancos,
   '/contas-pagar': ContasPagar,
   '/contas-receber': ContasReceber,
   '/ponto-equilibrio': PontoEquilibrio,

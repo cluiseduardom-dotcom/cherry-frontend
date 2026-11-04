@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Edit, Ban, Check, Undo2, ChevronLeft, ChevronRight, Landmark, Power } from 'lucide-react';
+import { Plus, Edit, Ban, Check, Undo2, ChevronLeft, ChevronRight, Landmark, Power, Upload, RefreshCw, Lightbulb } from 'lucide-react';
 import {
   alterarStatusContaBancaria, conciliarMovimentoBancario, desfazerConciliacaoBancaria,
-  listarContasBancarias, listarMovimentosBancarios,
+  listarContasBancarias, listarMovimentosBancarios, sincronizarMercadoPago,
 } from '../services/bancos';
 import {
-  filtrosParaConsulta, hojeBrasilia, podeCancelar, rotuloOrigem, rotuloTipoConta, situacaoMovimento, totaisDasContas,
+  filtrosParaConsulta, hojeBrasilia, podeCancelar, rotuloOrigem, rotuloTipoConta, situacaoMovimento, textoResultadoMercadoPago,
+  totaisDasContas,
 } from '../utils/bancos';
 import ContaBancariaModal from '../components/bancos/ContaBancariaModal';
 import MovimentoBancarioModal from '../components/bancos/MovimentoBancarioModal';
 import CancelarMovimentoModal from '../components/bancos/CancelarMovimentoModal';
+import ImportarExtratoModal from '../components/bancos/ImportarExtratoModal';
+import SugestoesModal from '../components/bancos/SugestoesModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
@@ -39,6 +42,8 @@ export default function Bancos() {
   const [modalConta, setModalConta] = useState({ aberto: false, conta: null });
   const [modalMov, setModalMov] = useState(false);
   const [cancelando, setCancelando] = useState(null);
+  const [importando, setImportando] = useState(false);
+  const [sugerindo, setSugerindo] = useState(null);
 
   const carregarContas = useCallback(async () => {
     try {
@@ -73,6 +78,20 @@ export default function Bancos() {
   function mudarFiltro(campo, valor) {
     setFiltros(prev => ({ ...prev, [campo]: valor }));
     setPagina(1);
+  }
+
+  async function sincronizarMp(c) {
+    setTrabalhandoId(`conta-${c.id}`);
+    try {
+      const r = await sincronizarMercadoPago(c.id);
+      const texto = textoResultadoMercadoPago(r);
+      if (r.erros.length) toast.error(`${texto} Primeiro erro: ${r.erros[0].erro}`); else toast.success(texto);
+      recarregarTudo();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setTrabalhandoId(null);
+    }
   }
 
   function recarregarTudo() { carregarContas(); carregarMovs(); }
@@ -129,6 +148,9 @@ export default function Bancos() {
           <button className="btn btn-ghost" onClick={() => setModalConta({ aberto: true, conta: null })}>
             <Plus size={16} /> Nova conta
           </button>
+          <button className="btn btn-ghost" onClick={() => setImportando(true)} disabled={totais.ativas === 0}>
+            <Upload size={16} /> Importar extrato
+          </button>
           <button className="btn btn-primary" onClick={() => setModalMov(true)} disabled={totais.ativas === 0}>
             <Plus size={16} /> Lançamento
           </button>
@@ -184,6 +206,11 @@ export default function Bancos() {
                   <button className="btn btn-ghost btn-sm" onClick={() => mudarFiltro('conta', String(filtros.conta) === String(c.id) ? '' : String(c.id))}>
                     {String(filtros.conta) === String(c.id) ? 'Ver todas' : 'Ver movimentos'}
                   </button>
+                  {c.tipo === 'CONTA_PAGAMENTO' && c.status === 'ATIVA' && (
+                    <button className="btn btn-ghost btn-sm" disabled={ocupado} onClick={() => sincronizarMp(c)} title="Traz os pagamentos e devoluções do Mercado Pago feitos pelo Vertumno">
+                      <RefreshCw size={14} /> {ocupado ? 'Sincronizando...' : 'Sincronizar Mercado Pago'}
+                    </button>
+                  )}
                   <button className="contas-action-btn" aria-label={`Editar ${c.nome}`} title="Editar" onClick={() => setModalConta({ aberto: true, conta: c })}>
                     <Edit size={14} />
                   </button>
@@ -294,6 +321,9 @@ export default function Bancos() {
                                 <Undo2 size={14} />
                               </button>
                             )}
+                            <button className="contas-action-btn" aria-label="Ver sugestões de contas" title="Ver contas a pagar/receber parecidas" onClick={() => setSugerindo(m)}>
+                              <Lightbulb size={14} />
+                            </button>
                             {podeCancelar(m) && (
                               <button className="contas-action-btn contas-action-btn--danger" aria-label="Cancelar movimento" title="Cancelar movimento" disabled={ocupado} onClick={() => setCancelando(m)}>
                                 <Ban size={14} />
@@ -341,6 +371,18 @@ export default function Bancos() {
         onClose={() => setCancelando(null)}
         onCancelado={() => { setCancelando(null); toast.success('Movimento cancelado.'); recarregarTudo(); }}
       />
+      <ImportarExtratoModal
+        open={importando}
+        contas={contas}
+        contaInicialId={filtros.conta}
+        onClose={() => setImportando(false)}
+        onImportado={r => {
+          setImportando(false);
+          toast.success(`${r.importadas} lançamento(s) importado(s).`);
+          recarregarTudo();
+        }}
+      />
+      <SugestoesModal open={Boolean(sugerindo)} movimento={sugerindo} onClose={() => setSugerindo(null)} />
       <ConfirmDialog
         open={Boolean(acaoPendente)}
         title={acaoPendente?.title}

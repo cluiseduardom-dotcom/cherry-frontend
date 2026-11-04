@@ -48,3 +48,25 @@ export async function conciliarMovimentoBancario(movimentoId) {
 export async function desfazerConciliacaoBancaria(conciliacaoId) {
   return (await apiFetch(`/bancos/conciliacoes/${encodeURIComponent(conciliacaoId)}/desfazer`, json('POST', {}))).data;
 }
+
+// ---- Mercado Pago e extrato (backend: docs/BANCOS_API.md) ----
+
+// → { entradas, saidas, ja_lancados, erros: [{referencia, erro}], tem_mais }
+export async function sincronizarMercadoPago(contaBancariaId) {
+  return (await apiFetch('/bancos/mercadopago/sincronizar', json('POST', { conta_bancaria_id: Number(contaBancariaId) }))).data;
+}
+
+// dados: { conta_bancaria_id, conteudo, formato? } → { formato, resumo, linhas, erros }
+export async function previaExtrato(dados) {
+  return (await apiFetch('/bancos/importacoes/previa', json('POST', dados))).data;
+}
+
+// dados: { conta_bancaria_id, conteudo, formato?, incluir_possiveis_duplicados? } → { importadas, resumo }
+export async function importarExtrato(dados) {
+  return (await apiFetch('/bancos/importacoes', json('POST', dados))).data;
+}
+
+// → [{ tipo_titulo, id, descricao, fornecedor, valor, data_vencimento, dias_de_diferenca }]
+export async function sugestoesDoMovimento(movimentoId) {
+  return (await apiFetch(`/bancos/movimentos/${encodeURIComponent(movimentoId)}/sugestoes`)).data;
+}

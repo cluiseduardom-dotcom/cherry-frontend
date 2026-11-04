@@ -42,17 +42,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/configuracoes/categorias': ['admin'],
   '/configuracoes/sku': ['admin'],
   '/configuracoes/empresa': ['admin'],
-  '/plataforma/taxas': ['admin'],
-  '/plataforma/empresas': ['admin'],
 };
-
-// Rotas do operador da plataforma: além do papel admin exigem user.plataforma_admin (vindo do
-// backend). O admin de uma empresa comum NÃO as acessa, nem pela capacidade 'administrador'.
-export const ROTAS_SO_PLATAFORMA = ['/plataforma/taxas', '/plataforma/empresas'];
-
-export function rotaSoPlataforma(path) {
-  return ROTAS_SO_PLATAFORMA.includes(path);
-}
 
 export const REQUIRED_CAPABILITIES_BY_PATH = {
   '/cancelamentos': ['ver_cancelamentos'],
@@ -98,10 +88,6 @@ export function canAccessRoute(path, userOrRole) {
     role = user.role || user.perfil;
   } else if (typeof userOrRole === 'string') {
     role = userOrRole;
-  }
-
-  if (rotaSoPlataforma(path) && user?.plataforma_admin !== true) {
-    return false;
   }
 
   const allowedRoles = ALLOWED_ROLES_BY_PATH[path];

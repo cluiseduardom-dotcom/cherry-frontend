@@ -57,7 +57,6 @@ describe('formatarUsuario', () => {
       role: 'vendedor', // user.role passa a ser o perfil
       tema: 'cherry',
       senha_temporaria: false,
-      plataforma_admin: false,
       foto_url: null,
     });
   });
@@ -69,10 +68,8 @@ describe('formatarUsuario', () => {
     expect(formatarUsuario({ perfil: 'vendedor' }, {}).foto_url).toBeNull();
   });
 
-  it('marca plataforma_admin só quando /auth/me confirma com true', () => {
-    expect(formatarUsuario({ perfil: 'admin', plataforma_admin: true }, {}).plataforma_admin).toBe(true);
-    expect(formatarUsuario({ perfil: 'admin', plataforma_admin: 'true' }, {}).plataforma_admin).toBe(false);
-    expect(formatarUsuario({ perfil: 'admin' }, { plataforma_admin: true }).plataforma_admin).toBe(false);
+  it('não carrega mais plataforma_admin (a operação da plataforma saiu do ERP)', () => {
+    expect(formatarUsuario({ perfil: 'admin', plataforma_admin: true }, {})).not.toHaveProperty('plataforma_admin');
   });
 
   it('marca senha_temporaria quando /auth/me avisa', () => {

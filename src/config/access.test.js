@@ -3,7 +3,6 @@ import {
   ALLOWED_ROLES_BY_PATH,
   REQUIRED_CAPABILITIES_BY_PATH,
   canAccessRoute,
-  rotaSoPlataforma,
   homeRouteForRole,
   podeComCapacidade,
   FIELDS,
@@ -26,38 +25,18 @@ describe('rotas de transferência de estoque', () => {
   });
 });
 
-describe('rotas do operador da plataforma', () => {
-  it('exigem a marca plataforma_admin: admin comum e quem tem a capacidade administrador não entram', () => {
-    expect(canAccessRoute('/plataforma/taxas', 'admin')).toBe(false);
-    expect(canAccessRoute('/plataforma/taxas', { role: 'admin' })).toBe(false);
-    expect(canAccessRoute('/plataforma/taxas', { role: 'admin', plataforma_admin: false })).toBe(false);
-    expect(canAccessRoute('/plataforma/taxas', { role: 'vendedor', capacidades: ['administrador'] })).toBe(false);
-    expect(canAccessRoute('/plataforma/taxas', { role: 'vendedor', plataforma_admin: true })).toBe(false);
-    expect(canAccessRoute('/plataforma/taxas', { role: 'admin', plataforma_admin: 'true' })).toBe(false);
-  });
-
-  it('liberam admin com a marca', () => {
-    expect(canAccessRoute('/plataforma/taxas', { role: 'admin', plataforma_admin: true })).toBe(true);
-    expect(canAccessRoute('/plataforma/empresas', { role: 'admin', plataforma_admin: true })).toBe(true);
-  });
-
-  it('planos e condições (/plataforma/empresas) também exigem a marca', () => {
-    expect(canAccessRoute('/plataforma/empresas', 'admin')).toBe(false);
-    expect(canAccessRoute('/plataforma/empresas', { role: 'admin', plataforma_admin: false })).toBe(false);
-    expect(canAccessRoute('/plataforma/empresas', { role: 'vendedor', plataforma_admin: true })).toBe(false);
-    expect(canAccessRoute('/plataforma/empresas', { role: 'vendedor', capacidades: ['administrador'] })).toBe(false);
-    expect(rotaSoPlataforma('/plataforma/empresas')).toBe(true);
-  });
-
-  it('rotaSoPlataforma reconhece só as rotas de plataforma', () => {
-    expect(rotaSoPlataforma('/plataforma/taxas')).toBe(true);
-    expect(rotaSoPlataforma('/configuracoes/empresa')).toBe(false);
+describe('rotas de plataforma removidas do ERP', () => {
+  it('/plataforma/* não existe mais: nem admin com a marca antiga acessa (a operação vive no Painel GiroNex)', () => {
+    expect(ALLOWED_ROLES_BY_PATH['/plataforma/taxas']).toBeUndefined();
+    expect(ALLOWED_ROLES_BY_PATH['/plataforma/empresas']).toBeUndefined();
+    expect(canAccessRoute('/plataforma/taxas', { role: 'admin', plataforma_admin: true })).toBe(false);
+    expect(canAccessRoute('/plataforma/empresas', { role: 'admin', plataforma_admin: true })).toBe(false);
   });
 });
 
 describe('canAccessRoute', () => {
   it('allows admin on every registered route', () => {
-    for (const path of Object.keys(ALLOWED_ROLES_BY_PATH).filter(p => !rotaSoPlataforma(p))) {
+    for (const path of Object.keys(ALLOWED_ROLES_BY_PATH)) {
       expect(canAccessRoute(path, 'admin')).toBe(true);
       expect(canAccessRoute(path, { role: 'admin' })).toBe(true);
       expect(canAccessRoute(path, { perfil: 'admin' })).toBe(true);

@@ -52,9 +52,16 @@ export default function SugestoesModal({ open, movimento, onClose }) {
               ))}
             </ul>
           )}
-          <p className="text-sm text-secondary">
-            É só uma sugestão. Para dar baixa, abra <Link to={saida ? '/contas-pagar' : '/contas-receber'} onClick={onClose}>{saida ? 'Contas a Pagar' : 'Contas a Receber'}</Link> e marque o título.
-          </p>
+          {itens?.length > 0 && (
+            <p className="text-sm text-secondary">
+              É só uma sugestão. Para dar baixa, abra <Link to={saida ? '/contas-pagar' : '/contas-receber'} onClick={onClose}>{saida ? 'Contas a Pagar' : 'Contas a Receber'}</Link> e marque o título.
+            </p>
+          )}
+          {itens?.length === 0 && (
+            <p className="text-sm text-secondary">
+              Se este lançamento não tem título correspondente (por exemplo, uma venda à vista ou um pagamento sem conta cadastrada), basta marcá-lo como conferido na lista.
+            </p>
+          )}
         </div>
         <div className="modal-footer">
           <button type="button" className="btn btn-primary" onClick={onClose}>Fechar</button>

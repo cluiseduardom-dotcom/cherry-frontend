@@ -17,7 +17,7 @@ export const ESTRUTURA_MENU = [
     tipo: 'grupo',
     id: 'financeiro',
     label: 'Financeiro',
-    itens: ['/bancos', '/contas-pagar', '/contas-receber', '/despesas-fixas', '/ponto-equilibrio', '/comissoes'],
+    itens: ['/bancos', '/contas-pagar', '/contas-receber', '/pix-a-devolver', '/despesas-fixas', '/ponto-equilibrio', '/comissoes'],
   },
   { tipo: 'item', path: '/relatorios' },
   { tipo: 'grupo', id: 'administracao', label: 'Administração', itens: ['/usuarios', '/configuracoes'] },

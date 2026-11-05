@@ -152,6 +152,18 @@ describe('buscarMe', () => {
   });
 });
 
+describe('formatarUsuario — funcionalidades', () => {
+  it('usa a lista de /auth/me; sem ela mantém a do usuário base; ausente fica undefined (não se sabe)', () => {
+    expect(formatarUsuario({ id: 1, perfil: 'admin', funcionalidades: ['bancos'] }, { funcionalidades: ['x'] }).funcionalidades).toEqual(['bancos']);
+    expect(formatarUsuario({ id: 1, perfil: 'admin' }, { funcionalidades: ['x'] }).funcionalidades).toEqual(['x']);
+    expect(formatarUsuario({ id: 1, perfil: 'admin' }, {}).funcionalidades).toBeUndefined();
+  });
+
+  it('lista vazia de /auth/me é respeitada (empresa sem nenhuma funcionalidade)', () => {
+    expect(formatarUsuario({ id: 1, perfil: 'admin', funcionalidades: [] }, {}).funcionalidades).toEqual([]);
+  });
+});
+
 describe('loginRequest', () => {
   beforeEach(() => {
     apiFetchMock.mockReset();

@@ -9,6 +9,9 @@ import {
   ACTIONS,
   podeVerCampo,
   podeExecutarAcao,
+  temFuncionalidade,
+  rotaForaDoPlano,
+  FUNCIONALIDADE_POR_ROTA,
 } from './access';
 
 describe('rotas de transferência de estoque', () => {
@@ -300,5 +303,58 @@ describe('podeExecutarAcao', () => {
 
   it('denies access when role is undefined (unauthenticated)', () => {
     expect(podeExecutarAcao(undefined, ACTIONS.MOVIMENTAR_ESTOQUE)).toBe(false);
+  });
+});
+
+describe('funcionalidades por plano (menus e rotas)', () => {
+  const admin = (funcionalidades) => ({ role: 'admin', perfil: 'admin', capacidades: [], funcionalidades });
+  const vendedor = (funcionalidades) => ({ role: 'vendedor', perfil: 'vendedor', capacidades: [], funcionalidades });
+
+  it('rota de recurso vendido fica fora do menu e do acesso sem a funcionalidade, até para admin', () => {
+    const sem = admin([]);
+    for (const rota of ['/bancos', '/ponto-equilibrio', '/despesas-fixas', '/comissoes', '/transferencias', '/acerto-estoque']) {
+      expect(canAccessRoute(rota, sem)).toBe(false);
+    }
+    expect(canAccessRoute('/minha-maleta', vendedor([]))).toBe(false);
+  });
+
+  it('com a funcionalidade, vale o acesso normal por papel', () => {
+    expect(canAccessRoute('/bancos', admin(['bancos']))).toBe(true);
+    expect(canAccessRoute('/ponto-equilibrio', admin(['analise_financeira']))).toBe(true);
+    expect(canAccessRoute('/comissoes', vendedor(['comissoes']))).toBe(true);
+    expect(canAccessRoute('/minha-maleta', vendedor(['maletas']))).toBe(true);
+    // O plano é uma barreira a mais: sem o papel, continua negado.
+    expect(canAccessRoute('/bancos', vendedor(['bancos']))).toBe(false);
+  });
+
+  it('o núcleo não depende de funcionalidade (estoque, produtos, contas, relatórios, Pix a devolver)', () => {
+    const sem = admin([]);
+    for (const rota of ['/estoque', '/produtos', '/contas-pagar', '/contas-receber', '/relatorios', '/pix-a-devolver', '/venda']) {
+      expect(canAccessRoute(rota, sem)).toBe(true);
+    }
+  });
+
+  it('lista ausente (sessão antiga ou backend anterior) não esconde nada: o backend decide', () => {
+    expect(temFuncionalidade({ role: 'admin' }, 'bancos')).toBe(true);
+    expect(canAccessRoute('/bancos', { role: 'admin' })).toBe(true);
+    expect(temFuncionalidade(null, 'bancos')).toBe(true);
+    expect(temFuncionalidade(admin([]), undefined)).toBe(true);
+  });
+
+  it('administrador efetivo (capacidade) também não ultrapassa o plano', () => {
+    expect(canAccessRoute('/bancos', { role: 'vendedor', capacidades: ['administrador'], funcionalidades: [] })).toBe(false);
+  });
+
+  it('rotaForaDoPlano acompanha o mapa', () => {
+    expect(rotaForaDoPlano('/bancos', admin([]))).toBe(true);
+    expect(rotaForaDoPlano('/bancos', admin(['bancos']))).toBe(false);
+    expect(rotaForaDoPlano('/estoque', admin([]))).toBe(false);
+    expect(FUNCIONALIDADE_POR_ROTA['/pix-a-devolver']).toBeUndefined();
+  });
+
+  it('Pix a devolver: admin ou quem tem gerir_financeiro', () => {
+    expect(canAccessRoute('/pix-a-devolver', admin([]))).toBe(true);
+    expect(canAccessRoute('/pix-a-devolver', { role: 'vendedor', capacidades: ['gerir_financeiro'], funcionalidades: [] })).toBe(true);
+    expect(canAccessRoute('/pix-a-devolver', vendedor([]))).toBe(false);
   });
 });

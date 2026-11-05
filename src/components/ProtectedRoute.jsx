@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { homeRouteForRole, canAccessRoute, podeComCapacidade } from '../config/access';
+import { homeRouteForRole, canAccessRoute, podeComCapacidade, rotaForaDoPlano, MENSAGEM_SEM_FUNCIONALIDADE } from '../config/access';
 
 const ROTA_TROCA_SENHA = '/conta/seguranca';
 
@@ -29,6 +29,18 @@ export default function ProtectedRoute({ children, allowedRoles, path }) {
   // do Layout não tem `path`: sem a checagem de `path` o redirecionamento entraria em laço.
   if (user.senha_temporaria && path && path !== ROTA_TROCA_SENHA) {
     return <Navigate to={ROTA_TROCA_SENHA} replace />;
+  }
+
+  // Fora do plano: explica em vez de redirecionar em silêncio (vale até para admin). O backend também barra (403).
+  if (path && rotaForaDoPlano(path, user)) {
+    return (
+      <div className="page-content">
+        <div className="empty-state">
+          <div className="empty-state-title">Funcionalidade não incluída no seu plano</div>
+          <p className="text-sm text-secondary">{MENSAGEM_SEM_FUNCIONALIDADE}</p>
+        </div>
+      </div>
+    );
   }
 
   if (podeComCapacidade(user, 'administrador')) {

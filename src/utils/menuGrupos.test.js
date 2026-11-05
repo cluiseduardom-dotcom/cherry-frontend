@@ -9,7 +9,7 @@ describe('montarMenu', () => {
     const menu = montarMenu(TODAS, todas);
     expect(menu).toHaveLength(8);
     const financeiro = menu.find(e => e.id === 'financeiro');
-    expect(financeiro.itens).toEqual(['/bancos', '/contas-pagar', '/contas-receber', '/despesas-fixas', '/ponto-equilibrio', '/comissoes']);
+    expect(financeiro.itens).toEqual(['/bancos', '/contas-pagar', '/contas-receber', '/pix-a-devolver', '/despesas-fixas', '/ponto-equilibrio', '/comissoes']);
     expect(menu[0]).toEqual({ tipo: 'item', path: '/' });
     expect(menu[1]).toEqual({ tipo: 'item', path: '/venda' });
   });
@@ -26,7 +26,7 @@ describe('montarMenu', () => {
   });
 
   it('grupo com um único item visível vira item simples', () => {
-    const menu = montarMenu(TODAS, p => !['/bancos', '/contas-pagar', '/contas-receber', '/despesas-fixas', '/ponto-equilibrio'].includes(p));
+    const menu = montarMenu(TODAS, p => !['/bancos', '/contas-pagar', '/contas-receber', '/pix-a-devolver', '/despesas-fixas', '/ponto-equilibrio'].includes(p));
     expect(menu.find(e => e.id === 'financeiro')).toBeUndefined();
     expect(menu).toContainEqual({ tipo: 'item', path: '/comissoes' });
   });

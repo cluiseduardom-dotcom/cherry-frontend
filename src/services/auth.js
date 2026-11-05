@@ -23,6 +23,8 @@ export function formatarUsuario(me, usuarioBase = {}) {
     cargo: me?.cargo ?? usuarioBase?.cargo ?? usuarioBase?.role,
     nivel: me?.nivel !== undefined ? me.nivel : (usuarioBase?.nivel ?? null),
     capacidades: Array.isArray(me?.capacidades) ? me.capacidades : (usuarioBase?.capacidades || []),
+    // Funcionalidades ligadas da empresa (só para esconder menus; o backend barra de fato). Ausente = não se sabe.
+    funcionalidades: Array.isArray(me?.funcionalidades) ? me.funcionalidades : usuarioBase?.funcionalidades,
     role: perfil,
     tema: usuarioBase?.tema,
     // Senha definida por um admin: o backend só deixa trocar a senha até concluir a troca.

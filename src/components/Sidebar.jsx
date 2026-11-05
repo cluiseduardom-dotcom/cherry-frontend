@@ -29,6 +29,7 @@ import {
   Boxes,
   Landmark,
   ShieldCheck,
+  Undo2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -58,6 +59,7 @@ const NAV_META_BY_PATH = {
   '/usuarios':         { icon: UserCog,         label: 'Usuários' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios' },
   '/bancos':           { icon: Landmark,        label: 'Bancos' },
+  '/pix-a-devolver':   { icon: Undo2,           label: 'Pix a devolver' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar' },
   '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber' },
   '/ponto-equilibrio': { icon: Target,          label: 'Ponto de Equilíbrio' },

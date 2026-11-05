@@ -34,6 +34,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/avisos': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
   '/bancos': ['admin'],
+  '/pix-a-devolver': ['admin'],
   '/contas-pagar': ['admin'],
   '/contas-receber': ['admin'],
   '/ponto-equilibrio': ['admin'],
@@ -44,7 +45,35 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/configuracoes/empresa': ['admin'],
 };
 
+// Funcionalidades vendidas por plano (ou ligadas avulso pela GiroNex). Rota sem entrada aqui é do núcleo.
+// Só esconde e explica: o bloqueio de verdade é do backend (403 "Funcionalidade não incluída no seu plano").
+// Pix a devolver NÃO está aqui: é do núcleo (financeiro), não de Comissões.
+export const FUNCIONALIDADE_POR_ROTA = {
+  '/bancos': 'bancos',
+  '/ponto-equilibrio': 'analise_financeira',
+  '/despesas-fixas': 'analise_financeira',
+  '/comissoes': 'comissoes',
+  '/transferencias': 'maletas',
+  '/acerto-estoque': 'maletas',
+  '/minha-maleta': 'maletas',
+};
+
+export const MENSAGEM_SEM_FUNCIONALIDADE = 'Funcionalidade não incluída no seu plano. Fale com a GiroNex.';
+
+// A empresa tem a funcionalidade? Lista ausente (sessão antiga ou backend anterior) = não se sabe: não esconde,
+// o backend responde 403 se for o caso. Admin NÃO ultrapassa o plano.
+export function temFuncionalidade(user, codigo) {
+  if (!codigo) return true;
+  const lista = user && typeof user === 'object' ? user.funcionalidades : undefined;
+  return Array.isArray(lista) ? lista.includes(codigo) : true;
+}
+
+export function rotaForaDoPlano(path, user) {
+  return !temFuncionalidade(user, FUNCIONALIDADE_POR_ROTA[path]);
+}
+
 export const REQUIRED_CAPABILITIES_BY_PATH = {
+  '/pix-a-devolver': ['gerir_financeiro'],
   '/cancelamentos': ['ver_cancelamentos'],
   '/configuracoes/cargos': ['gerir_cargos', 'conceder_admin'],
   '/usuarios': ['gerir_usuarios'],
@@ -92,6 +121,11 @@ export function canAccessRoute(path, userOrRole) {
 
   const allowedRoles = ALLOWED_ROLES_BY_PATH[path];
   const requiredCaps = REQUIRED_CAPABILITIES_BY_PATH[path];
+
+  // Fora do plano: nem admin entra (a barreira é do plano, não do papel).
+  if (user && rotaForaDoPlano(path, user)) {
+    return false;
+  }
 
   // Rota não registrada em nenhuma das tabelas -> fail-closed
   if (!allowedRoles && !requiredCaps) {

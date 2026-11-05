@@ -61,8 +61,9 @@ export function ThemeProvider({ children }) {
     if (!user) return;
     const tema = resolverTema(user.tema);
     const lembrada = carregarMarcaLembrada();
-    // O endereço lembrado só vale se for da mesma marca de quem entrou.
-    lembrarMarca({ tema, slug: lembrada?.tema === tema ? lembrada.slug : null });
+    // O endereço da loja vem do login; sessões antigas (sem ele) mantêm o lembrado se for da mesma marca.
+    const slugLembrado = lembrada?.tema === tema ? lembrada.slug : null;
+    lembrarMarca({ tema, slug: user.empresa_slug ?? slugLembrado });
   }, [user]);
 
   const value = useMemo(() => ({ tema, definirTemaBase, ...TEMAS[tema] }), [tema, definirTemaBase]);

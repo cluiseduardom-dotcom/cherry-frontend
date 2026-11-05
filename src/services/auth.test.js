@@ -168,7 +168,7 @@ describe('loginRequest', () => {
               nome: 'Ana Gerente',
               email: 'ana@cherry.com',
               papel: 'gerente',
-              empresa: { tema: 'cherry' },
+              empresa: { tema: 'cherry', slug: 'cherry' },
             },
           },
         });
@@ -195,6 +195,18 @@ describe('loginRequest', () => {
     expect(res.user.perfil).toBe('vendedor');
     expect(res.user.cargo).toBe('gerente');
     expect(res.user.capacidades).toEqual(['cancelar_venda']);
+    // O endereço da loja vem do login, para o navegador lembrá-lo.
+    expect(res.user.empresa_slug).toBe('cherry');
+  });
+
+  it('sem slug no login (backend antigo), empresa_slug fica null', async () => {
+    apiFetchMock.mockImplementation((path) => Promise.resolve(path === '/auth/login'
+      ? { data: { token: 't', usuario: { id: 5, nome: 'Ana', email: 'a@x.com', papel: 'vendedor', empresa: { tema: 'cherry' } } } }
+      : { data: { id: 5, empresa_id: 1, perfil: 'vendedor' } }));
+
+    const res = await loginRequest('a@x.com', 'senha123');
+
+    expect(res.user.empresa_slug).toBeNull();
   });
 
   it('lança erro descritivo do backend caso /auth/me falhe', async () => {

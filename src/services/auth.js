@@ -56,6 +56,8 @@ export async function loginRequest(identificador, senha, empresaSlug) {
     nivel: null,
     capacidades: [],
     tema: resolverTema(usuario.empresa?.tema),
+    // Endereço público da loja (/c/<slug>): o navegador o lembra para o login por código.
+    empresa_slug: usuario.empresa?.slug ?? null,
     foto_url: usuario.foto_url ?? null,
   };
 

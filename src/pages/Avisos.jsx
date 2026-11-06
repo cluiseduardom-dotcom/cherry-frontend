@@ -56,6 +56,7 @@ export default function Avisos() {
               <div className="avisos-topo">
                 <span className="avisos-tipo">{rotuloDoTipo(aviso.tipo)}</span>
                 {aviso.item === 'insumo' && <span className="avisos-etiqueta">Insumo</span>}
+                {aviso.item === 'maleta' && <span className="avisos-etiqueta">Maleta</span>}
                 {!lido && <span className="avisos-novo">Novo</span>}
               </div>
               <p className="avisos-mensagem">{aviso.mensagem}</p>

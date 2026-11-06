@@ -59,4 +59,20 @@ describe('utils/notificacoes', () => {
     expect(destinoDoAviso({ tipo: 'falta' }, false)).toBe('/produtos');
     expect(destinoDoAviso({ tipo: 'parado' }, true)).toBe('/produtos');
   });
+
+  it('avisos de maleta têm rótulo próprio', () => {
+    expect(rotuloDoTipo('transferencia_pendente')).toBe('Transferência sem aceite');
+    expect(rotuloDoTipo('maleta_sem_conferencia')).toBe('Maleta sem conferência');
+    expect(rotuloDoTipo('maleta_sem_venda')).toBe('Maleta sem vender');
+    expect(rotuloDoTipo('maleta_divergencia')).toBe('Diferença na conferência');
+  });
+
+  it('destinoDoAviso de maleta: equipe vai a transferências/acerto; vendedora à própria maleta', () => {
+    expect(destinoDoAviso({ tipo: 'transferencia_pendente' }, true)).toBe('/transferencias');
+    expect(destinoDoAviso({ tipo: 'maleta_sem_conferencia' }, true)).toBe('/acerto-estoque');
+    expect(destinoDoAviso({ tipo: 'maleta_sem_venda' }, true)).toBe('/acerto-estoque');
+    expect(destinoDoAviso({ tipo: 'maleta_divergencia' }, true)).toBe('/acerto-estoque');
+    expect(destinoDoAviso({ tipo: 'transferencia_pendente' }, false)).toBe('/minha-maleta');
+    expect(destinoDoAviso({ tipo: 'maleta_sem_venda' }, false)).toBe('/minha-maleta');
+  });
 });

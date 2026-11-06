@@ -56,14 +56,25 @@ const ROTULO_TIPO = {
   perto_de_acabar: 'Perto de acabar',
   parado: 'Parado',
   alto_giro: 'Alto giro',
+  transferencia_pendente: 'Transferência sem aceite',
+  maleta_sem_conferencia: 'Maleta sem conferência',
+  maleta_sem_venda: 'Maleta sem vender',
+  maleta_divergencia: 'Diferença na conferência',
 };
 
 export function rotuloDoTipo(tipo) {
   return ROTULO_TIPO[tipo] ?? 'Aviso';
 }
 
+// Avisos de maleta: a equipe (que vê estoque) vai às telas de transferência e acerto; a vendedora, à própria maleta.
+const TIPOS_MALETA = ['transferencia_pendente', 'maleta_sem_conferencia', 'maleta_sem_venda', 'maleta_divergencia'];
+
 // Para onde o aviso leva: telas de estoque para quem gere estoque; catálogo para os demais.
 export function destinoDoAviso(aviso, podeVerEstoque) {
+  if (TIPOS_MALETA.includes(aviso.tipo)) {
+    if (!podeVerEstoque) return '/minha-maleta';
+    return aviso.tipo === 'transferencia_pendente' ? '/transferencias' : '/acerto-estoque';
+  }
   if (['falta', 'abaixo_minimo', 'perto_de_acabar'].includes(aviso.tipo) && podeVerEstoque) {
     return '/estoque';
   }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Printer } from 'lucide-react';
 import {
   obterTransferencia, aceitarTransferencia, recusarTransferencia, cancelarTransferencia,
 } from '../../services/transferenciasEstoque';
@@ -7,6 +7,8 @@ import {
   STATUS_ROTULO, STATUS_BADGE, ROTULO_ACAO, acoesPermitidas, validarMotivo, totalDeUnidades,
 } from '../../utils/transferencias';
 import { formatarDataHora } from '../../utils/formatarData';
+import { podeImprimirRomaneio, gerarPdfRomaneio, nomeArquivoRomaneio } from '../../utils/romaneioTransferencia';
+import { marcaAtiva } from '../../theme/themes';
 import { useConfirmarFechamentoModal } from '../../hooks/useConfirmarFechamentoModal';
 import '../ProductModal.css';
 import './Transferencias.css';
@@ -64,6 +66,14 @@ export default function TransferenciaDetalheModal({ id, user, onClose, onChanged
       setErro(err?.message || 'Não foi possível concluir a ação.');
     } finally {
       setEnviando(false);
+    }
+  }
+
+  function imprimirRomaneio() {
+    try {
+      gerarPdfRomaneio(t, { empresa: marcaAtiva().nomeCompleto }).save(nomeArquivoRomaneio(t));
+    } catch (err) {
+      setErro(err?.message || 'Não foi possível gerar o romaneio.');
     }
   }
 
@@ -142,6 +152,14 @@ export default function TransferenciaDetalheModal({ id, user, onClose, onChanged
             </>
           )}
         </div>
+
+        {t && !acaoComMotivo && podeImprimirRomaneio(t) && (
+          <div className="modal-footer">
+            <button type="button" className="btn btn-ghost" onClick={imprimirRomaneio}>
+              <Printer size={16} /> Imprimir romaneio
+            </button>
+          </div>
+        )}
 
         {t && !acaoComMotivo && (acoes.aceitar || acoes.recusar || acoes.cancelar) && (
           <div className="modal-footer">

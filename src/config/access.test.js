@@ -374,3 +374,21 @@ describe('Dashboard e tela de cálculos por capacidade ver_custos', () => {
     expect(canAccessRoute(rota, { role: 'admin', capacidades: [] })).toBe(true);
   });
 });
+
+describe('Indicadores de insumos', () => {
+  const gerente = { role: 'vendedor', cargo: 'gerente', capacidades: ['ver_custos', 'ver_dashboard'] };
+  const analista = { role: 'vendedor', cargo: 'analista', capacidades: ['ver_dashboard'] };
+
+  it('abre para admin, estoquista e quem tem ver_dashboard/ver_custos; nega ao vendedor comum', () => {
+    expect(canAccessRoute('/indicadores-insumos', 'admin')).toBe(true);
+    expect(canAccessRoute('/indicadores-insumos', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/indicadores-insumos', gerente)).toBe(true);
+    expect(canAccessRoute('/indicadores-insumos', analista)).toBe(true);
+    expect(canAccessRoute('/indicadores-insumos', { role: 'vendedor', capacidades: ['cancelar_venda'] })).toBe(false);
+  });
+
+  it('não abre o resto de Consumo para gerente/analista', () => {
+    expect(canAccessRoute('/consumo', gerente)).toBe(false);
+    expect(canAccessRoute('/insumos', analista)).toBe(false);
+  });
+});

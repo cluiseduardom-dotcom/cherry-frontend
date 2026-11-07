@@ -14,6 +14,7 @@ import { useToast } from '../context/ToastContext';
 import ProductCard from '../components/ProductCard';
 import SaldosPorLocal from '../components/SaldosPorLocal';
 import { corDoProduto as colorForProduto } from '../theme/themes';
+import { doTipo } from '../utils/tipoProduto';
 import './Estoque.css';
 
 const FILTROS_VALIDOS = ['todos', 'baixo', 'esgotado'];
@@ -39,7 +40,10 @@ function StockBar({ value, max = 20 }) {
   );
 }
 
-export default function Estoque() {
+// `tipo` separa o estoque: 'acabado' (Estoque) ou 'insumo' (Estoque de insumos). As regras de entrada
+// e saldo por local são as mesmas; só muda o que a tela lista.
+export default function Estoque({ tipo = 'acabado' }) {
+  const ehInsumo = tipo === 'insumo';
   const { user } = useAuth();
   const podeMovimentar = podeExecutarAcao(user?.role, ACTIONS.MOVIMENTAR_ESTOQUE);
   // Itens para a janela de etiquetas (null = fechada). Vem do botão "Etiquetas" do card ou de uma entrada recém-salva.
@@ -48,6 +52,8 @@ export default function Estoque() {
 
   const [produtos, setProdutos] = useState([]);
   const [alertas, setAlertas] = useState([]);
+  // Ids de todos os itens deste tipo (inclusive inativos): filtram alertas e saldos por local.
+  const [idsDoTipo, setIdsDoTipo] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -98,8 +104,11 @@ export default function Estoque() {
           apiFetch('/produtos/estoque-baixo').then(body => body.data),
         ]);
         if (!cancelled) {
-          setProdutos(produtosData.items.filter(p => p.ativo));
-          setAlertas(alertasData);
+          const doTipoAtual = produtosData.items.filter(p => doTipo(p, tipo));
+          const ids = new Set(doTipoAtual.map(p => p.id));
+          setIdsDoTipo(ids);
+          setProdutos(doTipoAtual.filter(p => p.ativo));
+          setAlertas(alertasData.filter(a => ids.has(a.id)));
         }
       } catch (err) {
         if (!cancelled) setError(err.message);
@@ -110,7 +119,7 @@ export default function Estoque() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [tipo]);
 
   // A lista de locais é complementar: se falhar, a tela segue funcionando na visão geral.
   function carregarLocais() {
@@ -136,7 +145,8 @@ export default function Estoque() {
     return () => { cancelled = true; };
   }, [localId]);
 
-  const saldosFiltrados = filtrarSaldos(saldosLocal, search);
+  const saldosFiltrados = filtrarSaldos(saldosLocal.filter(i => idsDoTipo.has(i.produto_id)), search);
+  const saldosDoTipo = saldosLocal.filter(i => idsDoTipo.has(i.produto_id));
 
   function handleLocalCriado(local) {
     setNovoLocalOpen(false);
@@ -196,8 +206,8 @@ export default function Estoque() {
     <div className="page-content">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Estoque</h1>
-          <p className="page-subtitle">Controle de inventário e disponibilidade</p>
+          <h1 className="page-title">{ehInsumo ? 'Estoque de insumos' : 'Estoque'}</h1>
+          <p className="page-subtitle">{ehInsumo ? 'Embalagens, etiquetas e materiais de uso interno' : 'Controle de inventário e disponibilidade'}</p>
         </div>
         <div className="estoque-header-actions">
           {podeCriarLocal && (
@@ -209,7 +219,7 @@ export default function Estoque() {
           {podeMovimentar && (
             <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
               <Plus size={16} />
-              Entrada de Estoque
+              {ehInsumo ? 'Entrada de insumo' : 'Entrada de Estoque'}
             </button>
           )}
         </div>
@@ -262,7 +272,7 @@ export default function Estoque() {
               <MapPin size={20} />
             </div>
             <div>
-              <div className="estoque-summary-value">{totalDeUnidades(saldosLocal)}</div>
+              <div className="estoque-summary-value">{totalDeUnidades(saldosDoTipo)}</div>
               <div className="estoque-summary-label">Itens em {rotuloDoLocal(localSelecionado)}</div>
             </div>
           </div>
@@ -271,7 +281,7 @@ export default function Estoque() {
               <Package size={20} />
             </div>
             <div>
-              <div className="estoque-summary-value">{saldosLocal.length}</div>
+              <div className="estoque-summary-value">{saldosDoTipo.length}</div>
               <div className="estoque-summary-label">SKUs no local</div>
             </div>
           </div>
@@ -345,7 +355,9 @@ export default function Estoque() {
             <div className="empty-state">
               <div className="empty-state-icon"><Package size={24} /></div>
               <div className="empty-state-title">
-                {saldosLocal.length === 0 ? 'Nenhum produto neste local' : 'Nenhum produto encontrado'}
+                {saldosDoTipo.length === 0
+                  ? (ehInsumo ? 'Nenhum insumo neste local' : 'Nenhum produto neste local')
+                  : (ehInsumo ? 'Nenhum insumo encontrado' : 'Nenhum produto encontrado')}
               </div>
             </div>
           )}
@@ -394,7 +406,7 @@ export default function Estoque() {
                   {status === 'esgotado' && <span className="badge badge-danger">Esgotado</span>}
                   {status === 'baixo'    && <span className="badge badge-warning"><AlertTriangle size={10} />Baixo</span>}
                   {status === 'ok'       && <span className="badge badge-success">Normal</span>}
-                  {podeMovimentar && (
+                  {podeMovimentar && !ehInsumo && (
                     <button
                       type="button"
                       className="btn btn-ghost estoque-etiqueta-btn"
@@ -410,7 +422,7 @@ export default function Estoque() {
           {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><Package size={24} /></div>
-              <div className="empty-state-title">Nenhum produto encontrado</div>
+              <div className="empty-state-title">{ehInsumo ? 'Nenhum insumo encontrado' : 'Nenhum produto encontrado'}</div>
             </div>
           )}
         </div>

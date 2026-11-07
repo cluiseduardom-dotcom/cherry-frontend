@@ -83,3 +83,12 @@ describe('persistência dos grupos abertos', () => {
     expect(() => salvarGruposAbertos({}, { setItem: () => { throw new Error('cheio'); } })).not.toThrow();
   });
 });
+
+describe('insumos no menu', () => {
+  it('Insumos e Estoque de insumos ficam no grupo Estoque para admin e estoquista', () => {
+    const rotas = ['/estoque', '/produtos', '/estoque-insumos', '/insumos', '/consumo'];
+    const menu = montarMenu(rotas, () => true);
+    const grupo = menu.find(m => m.id === 'estoque');
+    expect(grupo.itens).toEqual(expect.arrayContaining(['/estoque-insumos', '/insumos']));
+  });
+});

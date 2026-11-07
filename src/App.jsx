@@ -15,6 +15,8 @@ import Transferencias from './pages/Transferencias';
 import MinhaMaleta from './pages/MinhaMaleta';
 import AcertoEstoque from './pages/AcertoEstoque';
 import Consumo from './pages/Consumo';
+import Insumos from './pages/Insumos';
+import EstoqueInsumos from './pages/EstoqueInsumos';
 import AlterarSenha from './pages/AlterarSenha';
 import MinhaConta from './pages/MinhaConta';
 import DadosEmpresa from './pages/DadosEmpresa';
@@ -49,6 +51,8 @@ const ROUTE_COMPONENTS = {
   '/transferencias': Transferencias,
   '/acerto-estoque': AcertoEstoque,
   '/consumo': Consumo,
+  '/insumos': Insumos,
+  '/estoque-insumos': EstoqueInsumos,
   '/minha-maleta': MinhaMaleta,
   '/produtos': Produtos,
   '/produtos/:id/precos': PrecificacaoProduto,

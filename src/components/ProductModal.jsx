@@ -19,8 +19,8 @@ const EMPTY_FORM = {
   ativo: true,
 };
 
-function formFromProduto(produto) {
-  if (!produto) return EMPTY_FORM;
+function formFromProduto(produto, tipo = 'acabado') {
+  if (!produto) return { ...EMPTY_FORM, tipo };
   return {
     nome: produto.nome ?? '',
     descricao: produto.descricao ?? '',
@@ -69,7 +69,9 @@ export function montarPayload(form, mode) {
   return payload;
 }
 
-export default function ProductModal({ open, mode = 'create', produto, onClose, onSaved, onFotosAlteradas }) {
+// `tipo` define o que o modal cadastra: a tela (Produtos ou Insumos) decide, o usuário não escolhe.
+export default function ProductModal({ open, mode = 'create', produto, tipo = 'acabado', onClose, onSaved, onFotosAlteradas }) {
+  const ehInsumo = tipo === 'insumo';
   const { user } = useAuth();
   const podeVerCusto = podeVerCampo(user, FIELDS.CUSTO);
 
@@ -80,13 +82,13 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
 
   useEffect(() => {
     if (open) {
-      const dados = formFromProduto(produto);
+      const dados = formFromProduto(produto, tipo);
       setForm(dados);
       setInitialForm(dados);
       setError('');
       setSaving(false);
     }
-  }, [open, produto]);
+  }, [open, produto, tipo]);
 
   // Issue #42: nunca fechar silenciosamente (clique fora, ESC, X ou
   // Cancelar) com dados alterados e não salvos.
@@ -133,7 +135,7 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
     <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">{mode === 'create' ? 'Novo Produto' : 'Editar Produto'}</h2>
+          <h2 className="modal-title">{mode === 'create' ? (ehInsumo ? 'Novo Insumo' : 'Novo Produto') : (ehInsumo ? 'Editar Insumo' : 'Editar Produto')}</h2>
           <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
@@ -180,22 +182,6 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                 />
               </div>
 
-              {mode === 'create' && (
-                <div className="input-wrapper">
-                  <label className="input-label" htmlFor="pm-tipo">Tipo</label>
-                  <select
-                    id="pm-tipo"
-                    className="input-field"
-                    value={form.tipo}
-                    onChange={e => updateField('tipo', e.target.value)}
-                  >
-                    <option value="acabado">Produto (vendido ao cliente)</option>
-                    <option value="insumo">Insumo (embalagem, tag, etc.)</option>
-                  </select>
-                  <span className="modal-field-hint">Insumos são baixados automaticamente pela ficha de venda do produto</span>
-                </div>
-              )}
-
               <div className="input-wrapper">
                 <label className="input-label" htmlFor="pm-unidade">Unidade</label>
                 <select
@@ -227,13 +213,17 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
               )}
 
               {mode === 'create' && (
-                <p className="text-sm">O preço de venda é definido depois, em "Precificar por canal".</p>
+                <p className="text-sm">
+                  {ehInsumo
+                    ? 'Insumo não é vendido: seu custo entra no custo da peça pela ficha de venda do produto.'
+                    : 'O preço de venda é definido depois, em "Precificar por canal".'}
+                </p>
               )}
 
               {mode === 'create' ? (
                 <p className="text-sm">
-                  O cadastro não lança estoque: o produto nasce com saldo 0. Depois de salvar, dê a entrada na tela de Estoque
-                  (estoque inicial, compra ou recebimento).
+                  O cadastro não lança estoque: {ehInsumo ? 'o insumo' : 'o produto'} nasce com saldo 0. Depois de salvar, dê a entrada na tela de{' '}
+                  {ehInsumo ? 'Estoque de insumos' : 'Estoque'} (estoque inicial, compra ou recebimento).
                 </p>
               ) : (
                 <div className="input-wrapper">
@@ -278,7 +268,7 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
                 />
               ) : (
                 <span className="modal-field-hint modal-form-span-2">
-                  Salve o produto para adicionar fotos.
+                  Salve {ehInsumo ? 'o insumo' : 'o produto'} para adicionar fotos.
                 </span>
               )}
             </div>

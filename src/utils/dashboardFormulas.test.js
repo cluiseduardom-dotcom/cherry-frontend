@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { calcularCobertura, calcularGiro, classificarCurva, simularCurvaAbc } from './dashboardFormulas';
+import { indicadoresDeTotais, calcularCobertura, calcularGiro, classificarCurva, simularCurvaAbc } from './dashboardFormulas';
 
 describe('dashboardFormulas', () => {
   test('giro = vendido / estoque, 2 casas; nulo com estoque 0', () => {
@@ -26,5 +26,11 @@ describe('dashboardFormulas', () => {
     const r = simularCurvaAbc([50, 30, 10, 6, 4]);
     expect(r.map(x => x.curva)).toEqual(['A', 'A', 'B', 'C', 'C']);
     expect(r.map(x => x.percentual)).toEqual([50, 80, 90, 96, 100]);
+  });
+
+  test('indicadoresDeTotais usa os totais do backend e tolera ausência', () => {
+    expect(indicadoresDeTotais({ giro: 0.2, cobertura: 450.4 })).toEqual({ giroMedio: '0.20', coberturaMedia: 450 });
+    expect(indicadoresDeTotais({ giro: null, cobertura: null })).toEqual({ giroMedio: null, coberturaMedia: null });
+    expect(indicadoresDeTotais(undefined)).toEqual({ giroMedio: null, coberturaMedia: null });
   });
 });

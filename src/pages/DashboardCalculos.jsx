@@ -18,15 +18,15 @@ const INDICADORES = [
   },
   {
     nome: 'Giro médio',
-    formula: 'Soma dos giros dos produtos ÷ quantidade de produtos que têm giro',
-    detalhe: `É a média simples dos giros de cada produto, com 2 casas decimais. Produtos com estoque 0 não têm giro e ficam
-de fora da média.`,
+    formula: 'Soma do vendido no período ÷ soma do estoque atual (todos os produtos ativos)',
+    detalhe: `Giro do conjunto, com 2 casas decimais. Não é a média dos giros de cada produto: somam-se vendas e estoques
+antes de dividir, para um produto pequeno não distorcer o resultado. É o mesmo número do relatório de giro e cobertura.`,
   },
   {
     nome: 'Cobertura média',
-    formula: 'Soma das coberturas dos produtos ÷ quantidade de produtos que têm cobertura',
-    detalhe: `Média simples, arredondada em dias inteiros. Produtos sem nenhuma venda no período não têm cobertura e ficam
-de fora.`,
+    formula: 'Soma do estoque atual ÷ (soma do vendido no período ÷ dias do período)',
+    detalhe: `Cobertura do conjunto, arredondada em dias inteiros. Também soma antes de dividir. Sem nenhuma venda no período
+não há cobertura e o card mostra "—".`,
   },
   {
     nome: 'Produtos esgotados',
@@ -218,8 +218,8 @@ export default function DashboardCalculos() {
         <h2 className="section-title">Pontos de atenção ao conferir</h2>
         <ul className="dash-calc-lista">
           <li>
-            Giro médio e cobertura média são médias simples dos produtos. O relatório agregado de giro e cobertura do
-            sistema soma vendas e estoques do grupo antes de dividir, então os dois números podem diferir.
+            Giro médio e cobertura média somam vendas e estoques de todos os produtos ativos antes de dividir. Já o giro e a
+            cobertura de cada linha da tabela são os do próprio produto.
           </li>
           <li>Insumos ativos entram nos indicadores junto com os produtos acabados.</li>
           <li>Produto sem venda no período fica sem cobertura, mesmo com estoque alto.</li>

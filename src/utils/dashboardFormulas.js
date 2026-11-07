@@ -22,11 +22,12 @@ export function calcularCobertura(vendido, estoque, dias) {
   return arredondar(estoque / (vendido / dias), 1);
 }
 
-// Classe da Curva ABC pelo percentual acumulado (0–100) do produto, já incluindo o próprio faturamento.
-export function classificarCurva(percentualAcumulado, faturamentoTotal) {
+// Classe da Curva ABC pelo acumulado ANTES do produto (0–100): o produto que cruza o limite fica na classe que
+// o limite fecha. Assim o primeiro produto é sempre A.
+export function classificarCurva(percentualAnterior, faturamentoTotal) {
   if (!(faturamentoTotal > 0)) return 'C';
-  if (percentualAcumulado <= LIMITE_CURVA_A) return 'A';
-  if (percentualAcumulado <= LIMITE_CURVA_B) return 'B';
+  if (percentualAnterior < LIMITE_CURVA_A) return 'A';
+  if (percentualAnterior < LIMITE_CURVA_B) return 'B';
   return 'C';
 }
 
@@ -35,9 +36,15 @@ export function simularCurvaAbc(faturamentos) {
   const total = faturamentos.reduce((s, v) => s + v, 0);
   let acumulado = 0;
   return faturamentos.map((faturamento, i) => {
+    const anterior = acumulado;
     acumulado += faturamento;
     const percentual = total > 0 ? arredondar((acumulado / total) * 100, 2) : 0;
-    return { posicao: i + 1, faturamento, percentual, curva: classificarCurva(acumulado / total * 100, total) };
+    return {
+      posicao: i + 1,
+      faturamento,
+      percentual,
+      curva: classificarCurva(total > 0 ? (anterior / total) * 100 : 0, total),
+    };
   });
 }
 

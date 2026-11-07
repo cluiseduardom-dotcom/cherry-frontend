@@ -14,18 +14,21 @@ describe('dashboardFormulas', () => {
     expect(calcularCobertura(0, 5, 90)).toBeNull();
   });
 
-  test('curva: até 80% = A, até 95% = B, resto = C; total zero = C', () => {
-    expect(classificarCurva(80, 100)).toBe('A');
-    expect(classificarCurva(80.01, 100)).toBe('B');
-    expect(classificarCurva(95, 100)).toBe('B');
-    expect(classificarCurva(95.5, 100)).toBe('C');
+  test('curva: pelo acumulado antes do produto; < 80% = A, < 95% = B, resto = C; total zero = C', () => {
+    expect(classificarCurva(0, 100)).toBe('A');
+    expect(classificarCurva(79.99, 100)).toBe('A');
+    expect(classificarCurva(80, 100)).toBe('B');
+    expect(classificarCurva(94.99, 100)).toBe('B');
+    expect(classificarCurva(95, 100)).toBe('C');
     expect(classificarCurva(0, 0)).toBe('C');
   });
 
-  test('simulação: quem faz o acumulado passar de 80% cai na B', () => {
-    const r = simularCurvaAbc([50, 30, 10, 6, 4]);
-    expect(r.map(x => x.curva)).toEqual(['A', 'A', 'B', 'C', 'C']);
+  test('simulação: o produto que cruza 80% fica na A; acumulado exato de 80% fecha a A', () => {
+    const r = simularCurvaAbc([5000, 3000, 1000, 600, 400]);
+    expect(r.map(x => x.curva)).toEqual(['A', 'A', 'B', 'B', 'C']);
     expect(r.map(x => x.percentual)).toEqual([50, 80, 90, 96, 100]);
+    expect(simularCurvaAbc([900, 60, 40]).map(x => x.curva)).toEqual(['A', 'B', 'C']);
+    expect(simularCurvaAbc([100]).map(x => x.curva)).toEqual(['A']);
   });
 
   test('indicadoresDeTotais usa os totais do backend e tolera ausência', () => {

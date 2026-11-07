@@ -12,13 +12,18 @@ import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
 import { formatarMoeda } from '../utils/mascaras';
 import ProductCard from '../components/ProductCard';
+import { doTipo } from '../utils/tipoProduto';
 import './Produtos.css';
 
 export function temSku(produto) {
   return produto?.sku != null;
 }
 
-export default function Produtos() {
+// `tipo` separa o catálogo: 'acabado' (Produtos) ou 'insumo' (Insumos). Insumo não é vendido nem
+// precificado e não passa pela categorização de produto.
+export default function Produtos({ tipo = 'acabado' }) {
+  const ehInsumo = tipo === 'insumo';
+  const rotuloItem = ehInsumo ? 'insumo' : 'produto';
   const { user } = useAuth();
   const navigate = useNavigate();
   const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.GERENCIAR_ESTOQUE);
@@ -47,7 +52,7 @@ export default function Produtos() {
       setError('');
       try {
         const data = await listarProdutos({ canal: 'loja_fisica' });
-        if (!cancelled) setProdutos(data.items.filter(p => p.ativo));
+        if (!cancelled) setProdutos(data.items.filter(p => p.ativo && doTipo(p, tipo)));
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {
@@ -57,7 +62,7 @@ export default function Produtos() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [tipo]);
 
   const filtered = produtos.filter(p => {
     const term = search.toLowerCase();
@@ -66,8 +71,8 @@ export default function Produtos() {
 
   function handleDelete(id) {
     pedirConfirmacao({
-      title: 'Excluir produto',
-      message: 'Excluir este produto?',
+      title: `Excluir ${rotuloItem}`,
+      message: `Excluir este ${rotuloItem}?`,
       confirmLabel: 'Excluir',
       tone: 'danger',
       execute: () => executarDelete(id),
@@ -102,7 +107,9 @@ export default function Produtos() {
       return prev.map(p => (p.id === produtoSalvo.id ? { ...p, ...produtoSalvo } : p));
     });
     setModalOpen(false);
-    toast.success(modalMode === 'create' ? 'Produto criado com sucesso.' : 'Produto atualizado com sucesso.');
+    toast.success(modalMode === 'create'
+      ? (ehInsumo ? 'Insumo criado com sucesso.' : 'Produto criado com sucesso.')
+      : (ehInsumo ? 'Insumo atualizado com sucesso.' : 'Produto atualizado com sucesso.'));
   }
 
   function handleFotosAlteradas(produtoId, imagens) {
@@ -124,13 +131,13 @@ export default function Produtos() {
     <div className="page-content">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Produtos</h1>
-          <p className="page-subtitle">{produtos.length} produtos cadastrados</p>
+          <h1 className="page-title">{ehInsumo ? 'Insumos' : 'Produtos'}</h1>
+          <p className="page-subtitle">{produtos.length} {ehInsumo ? 'insumos cadastrados' : 'produtos cadastrados'}</p>
         </div>
         {podeGerenciar && (
           <button className="btn btn-primary" onClick={openCreateModal}>
             <Plus size={16} />
-            Novo Produto
+            {ehInsumo ? 'Novo Insumo' : 'Novo Produto'}
           </button>
         )}
       </div>
@@ -141,7 +148,7 @@ export default function Produtos() {
           <input
             type="text"
             className="input-field"
-            placeholder="Buscar produto ou SKU..."
+            placeholder={ehInsumo ? 'Buscar insumo ou SKU...' : 'Buscar produto ou SKU...'}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -150,13 +157,13 @@ export default function Produtos() {
 
       {loading && (
         <div className="empty-state">
-          <p className="text-sm text-secondary">Carregando produtos...</p>
+          <p className="text-sm text-secondary">{ehInsumo ? 'Carregando insumos...' : 'Carregando produtos...'}</p>
         </div>
       )}
 
       {!loading && error && (
         <div className="empty-state">
-          <div className="empty-state-title">Não foi possível carregar os produtos</div>
+          <div className="empty-state-title">{ehInsumo ? 'Não foi possível carregar os insumos' : 'Não foi possível carregar os produtos'}</div>
           <p className="text-sm text-secondary">{error}</p>
         </div>
       )}
@@ -173,16 +180,16 @@ export default function Produtos() {
                   id: p.id,
                   name: p.nome,
                   sku: p.sku,
-                  semSku: !temSku(p),
+                  semSku: !ehInsumo && !temSku(p),
                   price: p.preco_canal?.preco_venda ?? null,
                   stock: p.estoque_atual,
                   unidade: p.unidade,
                   imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
                   categorias: p.categorias,
                 }}
-                actions={(podeGerenciar || podeGerenciarPrecos || podeCategorizar) ? (
+                actions={(podeGerenciar || (!ehInsumo && (podeGerenciarPrecos || podeCategorizar))) ? (
                   <div className="produto-actions">
-                    {podeGerenciarPrecos && (
+                    {!ehInsumo && podeGerenciarPrecos && (
                       <button
                         className="produto-action-btn"
                         aria-label="Precificação por canal"
@@ -195,7 +202,7 @@ export default function Produtos() {
                         <DollarSign size={14} />
                       </button>
                     )}
-                    {podeCategorizar && (
+                    {!ehInsumo && podeCategorizar && (
                       <button
                         className="produto-action-btn"
                         aria-label="Categorizar produto"
@@ -208,7 +215,7 @@ export default function Produtos() {
                         <Layers size={14} />
                       </button>
                     )}
-                    {podeGerenciar && p.tipo !== 'insumo' && (
+                    {podeGerenciar && !ehInsumo && (
                       <button
                         className="produto-action-btn"
                         aria-label="Ficha de venda"
@@ -225,8 +232,8 @@ export default function Produtos() {
                       <>
                         <button
                           className="produto-action-btn"
-                          aria-label="Editar produto"
-                          title="Editar produto"
+                          aria-label={`Editar ${rotuloItem}`}
+                          title={`Editar ${rotuloItem}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             openEditModal(p);
@@ -236,8 +243,8 @@ export default function Produtos() {
                         </button>
                         <button
                           className="produto-action-btn produto-action-btn--danger"
-                          aria-label="Excluir produto"
-                          title="Excluir produto"
+                          aria-label={`Excluir ${rotuloItem}`}
+                          title={`Excluir ${rotuloItem}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(p.id);
@@ -256,8 +263,8 @@ export default function Produtos() {
           {filtered.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon"><Tag size={24} /></div>
-              <div className="empty-state-title">Nenhum produto encontrado</div>
-              <p className="text-sm text-secondary">Tente outra busca ou adicione um novo produto</p>
+              <div className="empty-state-title">{ehInsumo ? 'Nenhum insumo encontrado' : 'Nenhum produto encontrado'}</div>
+              <p className="text-sm text-secondary">Tente outra busca ou adicione {ehInsumo ? 'um novo insumo' : 'um novo produto'}</p>
             </div>
           )}
         </>
@@ -273,6 +280,7 @@ export default function Produtos() {
       <ProductModal
         open={modalOpen}
         mode={modalMode}
+        tipo={tipo}
         produto={editingProduto}
         onClose={() => setModalOpen(false)}
         onSaved={handleSaved}

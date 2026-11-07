@@ -152,11 +152,12 @@ export default function DashboardCalculos() {
           </div>
           <div>
             <h3>Curva ABC</h3>
-            <code>acumulado = faturamento acumulado ÷ faturamento total</code>
+            <code>acumulado anterior = faturamento dos produtos acima ÷ faturamento total</code>
             <p>
-              Os produtos são ordenados do maior para o menor faturamento e o acumulado inclui o próprio produto.
-              A: acumulado até {LIMITE_CURVA_A}%. B: acima de {LIMITE_CURVA_A}% até {LIMITE_CURVA_B}%. C: o restante.
-              Se não houve faturamento algum, todos ficam em C.
+              Os produtos são ordenados do maior para o menor faturamento. A classe depende do acumulado ANTES do
+              produto: A se for menor que {LIMITE_CURVA_A}%, B se for menor que {LIMITE_CURVA_B}%, C no restante. Assim, o
+              produto que faz o acumulado cruzar o limite fica na classe que o limite fecha, e o primeiro produto é sempre
+              A. Se não houve faturamento algum, todos ficam em C.
             </p>
           </div>
         </div>
@@ -189,8 +190,9 @@ export default function DashboardCalculos() {
       <section className="card dash-calc-card" aria-label="Exemplo da Curva ABC">
         <h2 className="section-title">Exemplo da Curva ABC</h2>
         <p className="text-sm text-secondary">
-          Cinco produtos, faturamento total de {brl(EXEMPLO_FATURAMENTOS.reduce((s, v) => s + v, 0))}. O produto 2 fecha
-          exatamente em 80% e fica na A. O produto 3 faz o acumulado passar de 80% e por isso é B.
+          Cinco produtos, faturamento total de {brl(EXEMPLO_FATURAMENTOS.reduce((s, v) => s + v, 0))}. Antes do produto 2
+          o acumulado era 50%, então ele é A (mesmo fechando em 80%). Antes do produto 3 já eram 80%, então ele é B. O
+          produto 4 começa em 90% e é B; o produto 5 começa em 96% e é C.
         </p>
         <div className="dash-calc-tabela-wrap">
           <table className="dash-calc-tabela">
@@ -221,10 +223,6 @@ export default function DashboardCalculos() {
             cobertura de cada linha da tabela são os do próprio produto.
           </li>
           <li>Produto sem venda no período fica sem cobertura, mesmo com estoque alto.</li>
-          <li>
-            Na Curva ABC o produto que faz o acumulado passar do limite entra na classe seguinte. Com poucos produtos, o
-            primeiro pode fechar acima de 80% sozinho e cair na B ou na C.
-          </li>
         </ul>
       </section>
     </div>

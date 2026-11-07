@@ -7,8 +7,7 @@ import {
 } from '../utils/dashboardFormulas';
 import './DashboardCalculos.css';
 
-const BASE = `Entram apenas produtos ativos da sua empresa. O sistema guarda produtos e insumos na mesma tabela e estes
-cálculos não separam os dois: os insumos ativos também entram nos números.`;
+const BASE = 'Entram apenas produtos acabados ativos da sua empresa. Insumos (embalagens, etiquetas, materiais) ficam de fora.';
 
 const INDICADORES = [
   {
@@ -18,7 +17,7 @@ const INDICADORES = [
   },
   {
     nome: 'Giro médio',
-    formula: 'Soma do vendido no período ÷ soma do estoque atual (todos os produtos ativos)',
+    formula: 'Soma do vendido no período ÷ soma do estoque atual (todos os produtos acabados ativos)',
     detalhe: `Giro do conjunto, com 2 casas decimais. Não é a média dos giros de cada produto: somam-se vendas e estoques
 antes de dividir, para um produto pequeno não distorcer o resultado. É o mesmo número do relatório de giro e cobertura.`,
   },
@@ -53,7 +52,7 @@ Produto sem cobertura aparece como "sem giro".`,
   {
     nome: 'Situação do estoque',
     texto: `Esgotados: estoque atual = 0. Sem giro: estoque maior que 0 e nenhuma venda no período. Com giro: todos os
-demais. As três fatias somam o total de produtos ativos.`,
+demais. As três fatias somam o total de produtos acabados ativos.`,
   },
   {
     nome: 'Atenção no estoque',
@@ -221,8 +220,11 @@ export default function DashboardCalculos() {
             Giro médio e cobertura média somam vendas e estoques de todos os produtos ativos antes de dividir. Já o giro e a
             cobertura de cada linha da tabela são os do próprio produto.
           </li>
-          <li>Insumos ativos entram nos indicadores junto com os produtos acabados.</li>
           <li>Produto sem venda no período fica sem cobertura, mesmo com estoque alto.</li>
+          <li>
+            Na Curva ABC o produto que faz o acumulado passar do limite entra na classe seguinte. Com poucos produtos, o
+            primeiro pode fechar acima de 80% sozinho e cair na B ou na C.
+          </li>
         </ul>
       </section>
     </div>

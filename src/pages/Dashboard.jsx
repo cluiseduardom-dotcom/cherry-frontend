@@ -218,6 +218,7 @@ export default function Dashboard() {
         <div className="dashboard-hero-text">
           <h1 className="page-title">{primeiroNome ? `Olá, ${primeiroNome}` : 'Dashboard'}</h1>
           <p className="page-subtitle">Dashboard · Visão geral do negócio</p>
+          <Link to="/dashboard/calculos" className="btn btn-ghost btn-sm">Como os cálculos funcionam</Link>
         </div>
         {marca.slogan && (
           <figure className="dashboard-hero-quote">

@@ -37,6 +37,7 @@ import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
 import Bancos from './pages/Bancos';
 import PixADevolver from './pages/PixADevolver';
+import DashboardCalculos from './pages/DashboardCalculos';
 import ContasPagar from './pages/ContasPagar';
 import ContasReceber from './pages/ContasReceber';
 import PontoEquilibrio from './pages/PontoEquilibrio';
@@ -46,6 +47,7 @@ import ConfiguracaoSku from './pages/ConfiguracaoSku';
 
 const ROUTE_COMPONENTS = {
   '/': Dashboard,
+  '/dashboard/calculos': DashboardCalculos,
   '/venda': Venda,
   '/estoque': Estoque,
   '/transferencias': Transferencias,

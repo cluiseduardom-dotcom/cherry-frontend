@@ -11,6 +11,7 @@ export function homeRouteForRole(role) {
 
 export const ALLOWED_ROLES_BY_PATH = {
   '/': ['admin'],
+  '/dashboard/calculos': ['admin'],
   '/venda': ['admin', 'vendedor'],
   '/estoque': ['admin', 'estoquista'],
   '/transferencias': ['admin', 'estoquista'],
@@ -74,7 +75,10 @@ export function rotaForaDoPlano(path, user) {
   return !temFuncionalidade(user, FUNCIONALIDADE_POR_ROTA[path]);
 }
 
+// Dashboard (e a tela de fórmulas) também para quem tem `ver_custos`: o resumo do backend traz margem.
 export const REQUIRED_CAPABILITIES_BY_PATH = {
+  '/': ['ver_custos'],
+  '/dashboard/calculos': ['ver_custos'],
   '/pix-a-devolver': ['gerir_financeiro'],
   '/cancelamentos': ['ver_cancelamentos'],
   '/configuracoes/cargos': ['gerir_cargos', 'conceder_admin'],

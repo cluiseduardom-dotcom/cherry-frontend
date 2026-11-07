@@ -57,6 +57,20 @@ export function filtrarSaldos(items, termo) {
   return (items ?? []).filter(i => i.nome.toLowerCase().includes(t) || (i.sku ?? '').toLowerCase().includes(t));
 }
 
+// Dados do card de um saldo por local. O saldo vem só com nome/SKU/quantidade; foto e categorias
+// vêm da lista de produtos (a mesma da visão geral), para o card ficar igual nas duas visões.
+export function produtoDoCardLocal(saldo, produto, cor) {
+  return {
+    id: saldo.produto_id,
+    name: saldo.nome,
+    sku: saldo.sku,
+    stock: saldo.saldo,
+    color: cor,
+    categorias: produto?.categorias,
+    imageUrl: produto?.imagem_url || produto?.foto_url || produto?.imagem || produto?.foto || null,
+  };
+}
+
 export function totalDeUnidades(items) {
   return (items ?? []).reduce((soma, i) => soma + i.saldo, 0);
 }

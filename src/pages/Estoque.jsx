@@ -9,7 +9,7 @@ import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
 import NovoLocalModal from '../components/NovoLocalModal';
 import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
-import { rotuloDoLocal, filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
+import { rotuloDoLocal, filtrarSaldos, totalDeUnidades, produtoDoCardLocal } from '../utils/locaisEstoque';
 import { useToast } from '../context/ToastContext';
 import ProductCard from '../components/ProductCard';
 import SaldosPorLocal from '../components/SaldosPorLocal';
@@ -345,7 +345,7 @@ export default function Estoque({ tipo = 'acabado' }) {
             {saldosFiltrados.map(i => (
               <ProductCard
                 key={i.produto_id}
-                product={{ id: i.produto_id, name: i.nome, sku: i.sku, stock: i.saldo, color: colorForProduto(i.produto_id) }}
+                product={produtoDoCardLocal(i, produtos.find(p => p.id === i.produto_id), colorForProduto(i.produto_id))}
                 ocultarPreco
                 estoqueRotulo="Saldo no local"
               />

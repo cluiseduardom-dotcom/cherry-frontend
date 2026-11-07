@@ -37,6 +37,7 @@ import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
 import Bancos from './pages/Bancos';
 import PixADevolver from './pages/PixADevolver';
+import IndicadoresInsumosPage from './pages/IndicadoresInsumosPage';
 import DashboardCalculos from './pages/DashboardCalculos';
 import ContasPagar from './pages/ContasPagar';
 import ContasReceber from './pages/ContasReceber';
@@ -55,6 +56,7 @@ const ROUTE_COMPONENTS = {
   '/consumo': Consumo,
   '/insumos': Insumos,
   '/estoque-insumos': EstoqueInsumos,
+  '/indicadores-insumos': IndicadoresInsumosPage,
   '/minha-maleta': MinhaMaleta,
   '/produtos': Produtos,
   '/produtos/:id/precos': PrecificacaoProduto,

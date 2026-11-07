@@ -19,6 +19,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/consumo': ['admin', 'estoquista'],
   '/insumos': ['admin', 'estoquista'],
   '/estoque-insumos': ['admin', 'estoquista'],
+  '/indicadores-insumos': ['admin', 'estoquista'],
   '/minha-maleta': ['vendedor'],
   '/produtos': ['admin', 'vendedor', 'estoquista'],
   '/produtos/:id/precos': ['admin'],
@@ -80,6 +81,8 @@ export function rotaForaDoPlano(path, user) {
 export const REQUIRED_CAPABILITIES_BY_PATH = {
   '/': ['ver_dashboard', 'ver_custos'],
   '/dashboard/calculos': ['ver_dashboard', 'ver_custos'],
+  // Leitura dos indicadores de insumos: também para Gerente, Analista etc. (o resto de Consumo segue admin/estoquista).
+  '/indicadores-insumos': ['ver_dashboard', 'ver_custos'],
   '/pix-a-devolver': ['gerir_financeiro'],
   '/cancelamentos': ['ver_cancelamentos'],
   '/configuracoes/cargos': ['gerir_cargos', 'conceder_admin'],

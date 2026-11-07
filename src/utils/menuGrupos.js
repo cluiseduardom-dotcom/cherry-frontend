@@ -10,7 +10,7 @@ export const ESTRUTURA_MENU = [
     tipo: 'grupo',
     id: 'estoque',
     label: 'Estoque',
-    itens: ['/estoque', '/transferencias', '/acerto-estoque', '/produtos', '/estoque-insumos', '/insumos', '/consumo'],
+    itens: ['/estoque', '/transferencias', '/acerto-estoque', '/produtos', '/estoque-insumos', '/insumos', '/consumo', '/indicadores-insumos'],
   },
   { tipo: 'grupo', id: 'compras', label: 'Compras', itens: ['/compras', '/fornecedores'] },
   {

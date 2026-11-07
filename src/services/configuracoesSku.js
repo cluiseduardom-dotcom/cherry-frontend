@@ -1,12 +1,16 @@
 import { apiFetch } from './api';
 
-export async function listarPadroesSku() {
-  const body = await apiFetch('/configuracoes-sku/padroes');
+function querystringEscopo(escopo) {
+  return escopo && escopo !== 'produto' ? `?escopo=${encodeURIComponent(escopo)}` : '';
+}
+
+export async function listarPadroesSku({ escopo } = {}) {
+  const body = await apiFetch(`/configuracoes-sku/padroes${querystringEscopo(escopo)}`);
   return body.data;
 }
 
-export async function buscarConfiguracaoSku() {
-  const body = await apiFetch('/configuracoes-sku');
+export async function buscarConfiguracaoSku({ escopo } = {}) {
+  const body = await apiFetch(`/configuracoes-sku${querystringEscopo(escopo)}`);
   return body.data;
 }
 

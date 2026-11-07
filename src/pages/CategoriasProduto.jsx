@@ -7,6 +7,7 @@ import { listarPadroesSku } from '../services/configuracoesSku';
 import NivelCategoriaModal from '../components/NivelCategoriaModal';
 import CategoriaProdutoModal from '../components/CategoriaProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import EscopoSeletor from '../components/EscopoSeletor';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
 import './Contas.css';
@@ -26,6 +27,8 @@ export default function CategoriasProduto() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [workingId, setWorkingId] = useState(null);
+  const [escopo, setEscopo] = useState('produto');
+  const ehInsumo = escopo === 'insumo';
   const toast = useToast();
 
   const [nivelModalOpen, setNivelModalOpen] = useState(false);
@@ -39,26 +42,38 @@ export default function CategoriasProduto() {
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   useEffect(() => {
-    load();
-  }, []);
+    let cancelled = false;
 
-  async function load() {
+    async function load() {
+      try {
+        const [niveisData, categoriasData, padroesData] = await Promise.all([
+          listarNiveisCategoria({ escopo }),
+          listarCategorias({ page: 1, pageSize: 100, escopo }),
+          listarPadroesSku({ escopo }),
+        ]);
+        if (cancelled) return;
+        setNiveis(niveisData);
+        setCategorias(categoriasData.items);
+        setPadroesSku(Array.isArray(padroesData) ? padroesData : []);
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, [escopo]);
+
+  // Troca de aba: limpa a lista anterior para não mostrar categorias do outro escopo.
+  function mudarEscopo(novo) {
     setLoading(true);
     setError('');
-    try {
-      const [niveisData, categoriasData, padroesData] = await Promise.all([
-        listarNiveisCategoria(),
-        listarCategorias({ page: 1, pageSize: 100 }),
-        listarPadroesSku(),
-      ]);
-      setNiveis(niveisData);
-      setCategorias(categoriasData.items);
-      setPadroesSku(Array.isArray(padroesData) ? padroesData : []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    setNiveis([]);
+    setCategorias([]);
+    setPadroesSku([]);
+    setEscopo(novo);
   }
 
   function obterRotuloNivel(nivel) {
@@ -171,10 +186,16 @@ export default function CategoriasProduto() {
             <ArrowLeft size={15} />
             Configurações
           </button>
-          <h1 className="page-title">Categorias de produto</h1>
-          <p className="page-subtitle">Níveis, códigos e nomes usados para gerar o SKU automaticamente</p>
+          <h1 className="page-title">{ehInsumo ? 'Categorias de insumos' : 'Categorias de produto'}</h1>
+          <p className="page-subtitle">
+            {ehInsumo
+              ? 'Famílias e tamanhos usados para gerar o SKU dos insumos (embalagens, etiquetas, materiais)'
+              : 'Níveis, códigos e nomes usados para gerar o SKU automaticamente'}
+          </p>
         </div>
       </div>
+
+      <EscopoSeletor value={escopo} onChange={mudarEscopo} disabled={loading} />
 
       {loading && (
         <div className="empty-state">
@@ -263,7 +284,11 @@ export default function CategoriasProduto() {
               <div className="empty-state">
                 <div className="empty-state-icon"><FolderTree size={24} /></div>
                 <div className="empty-state-title">Nenhuma categoria cadastrada</div>
-                <p className="text-sm text-secondary">Produtos sem categoria ficam sem SKU até serem categorizados.</p>
+                <p className="text-sm text-secondary">
+                  {ehInsumo
+                    ? 'Insumos sem categoria ficam sem SKU até serem categorizados.'
+                    : 'Produtos sem categoria ficam sem SKU até serem categorizados.'}
+                </p>
               </div>
             )}
 
@@ -332,6 +357,7 @@ export default function CategoriasProduto() {
         open={nivelModalOpen}
         mode={nivelModalMode}
         nivel={editingNivel}
+        escopo={escopo}
         onClose={() => setNivelModalOpen(false)}
         onSaved={handleNivelSaved}
       />
@@ -340,6 +366,7 @@ export default function CategoriasProduto() {
         open={categoriaModalOpen}
         mode={categoriaModalMode}
         categoria={editingCategoria}
+        escopo={escopo}
         padroesSku={padroesSku}
         onClose={() => setCategoriaModalOpen(false)}
         onSaved={handleCategoriaSaved}

@@ -4,6 +4,7 @@ import {
   rotuloNivel,
   selecaoInicial,
   montarCategoriaIds,
+  escopoDoProduto,
 } from './CategorizarProdutoModal.jsx';
 
 describe('agruparCategoriasPorNivel', () => {
@@ -56,5 +57,17 @@ describe('montarCategoriaIds', () => {
 
   it('ignora níveis sem seleção', () => {
     expect(montarCategoriaIds({ 1: null, 2: null })).toEqual([]);
+  });
+});
+
+describe('escopoDoProduto', () => {
+  it('insumo usa o escopo de insumo', () => {
+    expect(escopoDoProduto({ tipo: 'insumo' })).toBe('insumo');
+  });
+
+  it('produto acabado, sem tipo ou sem produto usam o escopo de produto', () => {
+    expect(escopoDoProduto({ tipo: 'acabado' })).toBe('produto');
+    expect(escopoDoProduto({})).toBe('produto');
+    expect(escopoDoProduto(null)).toBe('produto');
   });
 });

@@ -122,7 +122,8 @@ export default function Produtos({ tipo = 'acabado' }) {
   }
 
   function handleCategorizado(produtoSalvo) {
-    setProdutos(prev => prev.map(p => (p.id === produtoSalvo.id ? produtoSalvo : p)));
+    // Mescla para não perder campos (ex.: tipo) que a resposta da categorização não traga.
+    setProdutos(prev => prev.map(p => (p.id === produtoSalvo.id ? { ...p, ...produtoSalvo } : p)));
     setCategorizarModalOpen(false);
     toast.success('Categorias atualizadas com sucesso.');
   }
@@ -187,7 +188,7 @@ export default function Produtos({ tipo = 'acabado' }) {
                   imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
                   categorias: p.categorias,
                 }}
-                actions={(podeGerenciar || (!ehInsumo && (podeGerenciarPrecos || podeCategorizar))) ? (
+                actions={(podeGerenciar || podeCategorizar || (!ehInsumo && podeGerenciarPrecos)) ? (
                   <div className="produto-actions">
                     {!ehInsumo && podeGerenciarPrecos && (
                       <button
@@ -202,11 +203,11 @@ export default function Produtos({ tipo = 'acabado' }) {
                         <DollarSign size={14} />
                       </button>
                     )}
-                    {!ehInsumo && podeCategorizar && (
+                    {podeCategorizar && (
                       <button
                         className="produto-action-btn"
-                        aria-label="Categorizar produto"
-                        title="Categorizar produto"
+                        aria-label={`Categorizar ${rotuloItem}`}
+                        title={`Categorizar ${rotuloItem}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           openCategorizarModal(p);

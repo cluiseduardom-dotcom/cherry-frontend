@@ -1,7 +1,8 @@
 import { apiFetch } from './api';
 
-export async function listarNiveisCategoria() {
-  const body = await apiFetch('/niveis-categoria');
+export async function listarNiveisCategoria({ escopo } = {}) {
+  const query = escopo && escopo !== 'produto' ? `?escopo=${encodeURIComponent(escopo)}` : '';
+  const body = await apiFetch(`/niveis-categoria${query}`);
   return body.data;
 }
 

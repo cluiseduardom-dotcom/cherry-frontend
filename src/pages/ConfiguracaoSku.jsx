@@ -22,6 +22,7 @@ import { listarCategorias } from '../services/categorias';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
+import EscopoSeletor from '../components/EscopoSeletor';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import './ConfiguracaoSku.css';
 
@@ -249,6 +250,10 @@ export default function ConfiguracaoSku() {
   // dados não salvos, UX-03) para não colidir; são dois diálogos diferentes.
   const { acaoPendente: segmentoParaRemover, pedirConfirmacao: pedirConfirmacaoRemoverSegmento, confirmar: confirmarRemoverSegmento, cancelar: cancelarRemoverSegmento } = useConfirmAction();
 
+  // 'produto' ou 'insumo': cada escopo tem seus próprios padrões, níveis e categorias.
+  const [escopo, setEscopo] = useState('produto');
+  const ehInsumo = escopo === 'insumo';
+
   const [niveis, setNiveis] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -295,19 +300,19 @@ export default function ConfiguracaoSku() {
       setError('');
       try {
         const [padroesData, niveisData, categoriasData] = await Promise.all([
-          listarPadroesSku().catch(async () => {
-            const fallback = await buscarConfiguracaoSku();
+          listarPadroesSku({ escopo }).catch(async () => {
+            const fallback = await buscarConfiguracaoSku({ escopo });
             return fallback ? [fallback] : [];
           }),
-          listarNiveisCategoria(),
-          listarCategorias({ page: 1, pageSize: 100 }).catch(() => ({ items: [] })),
+          listarNiveisCategoria({ escopo }),
+          listarCategorias({ page: 1, pageSize: 100, escopo }).catch(() => ({ items: [] })),
         ]);
 
         if (cancelled) return;
 
         const listaNormalizada = Array.isArray(padroesData) && padroesData.length > 0
           ? padroesData.map(normalizarPadrao)
-          : [normalizarPadrao({ nome: 'Padrão SemiJoias', padrao: true, separador: '-' })];
+          : [normalizarPadrao({ nome: escopo === 'insumo' ? 'Padrão Insumos' : 'Padrão SemiJoias', padrao: true, separador: '-' })];
 
         setPadroes(listaNormalizada);
         setNiveis(Array.isArray(niveisData) ? niveisData : []);
@@ -327,7 +332,19 @@ export default function ConfiguracaoSku() {
 
     carregarDados();
     return () => { cancelled = true; };
-  }, []);
+  }, [escopo]);
+
+  // Troca de aba: limpa o estado do escopo anterior (a troca já passou pela guarda de alterações não salvas).
+  function mudarEscopo(novo) {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    setIsCreatingNew(false);
+    setPadroes([]);
+    setNiveis([]);
+    setCategorias([]);
+    setEscopo(novo);
+  }
 
   const niveisDisponiveis = useMemo(() => {
     const niveisEmUso = new Set(config.segmentos.map(item => Number(item.nivel)));
@@ -479,6 +496,8 @@ export default function ConfiguracaoSku() {
     try {
       const payload = {
         ...(config.id ? { id: config.id } : {}),
+        // 'produto' é o padrão do backend: só envia o escopo quando for outro.
+        ...(ehInsumo ? { escopo } : {}),
         nome: config.nome.trim(),
         padrao: Boolean(config.padrao),
         tipo_sku: config.tipo_sku,
@@ -502,7 +521,7 @@ export default function ConfiguracaoSku() {
       if (Array.isArray(resposta)) {
         novaLista = resposta.map(normalizarPadrao);
       } else {
-        novaLista = await listarPadroesSku().then(res => (Array.isArray(res) ? res.map(normalizarPadrao) : []));
+        novaLista = await listarPadroesSku({ escopo }).then(res => (Array.isArray(res) ? res.map(normalizarPadrao) : []));
       }
 
       setPadroes(novaLista);
@@ -580,9 +599,11 @@ export default function ConfiguracaoSku() {
             <ArrowLeft size={15} />
             Configurações
           </button>
-          <h1 className="page-title">Padrões de SKU</h1>
+          <h1 className="page-title">{ehInsumo ? 'Padrões de SKU dos insumos' : 'Padrões de SKU'}</h1>
           <p className="page-subtitle">
-            Configure múltiplos padrões de SKU para sua empresa e associe formatos diferentes por categoria de produto.
+            {ehInsumo
+              ? 'O SKU do insumo é gerado ao categorizá-lo e depois não muda. A sequência é separada da dos produtos.'
+              : 'Configure múltiplos padrões de SKU para sua empresa e associe formatos diferentes por categoria de produto.'}
           </p>
         </div>
 
@@ -607,6 +628,8 @@ export default function ConfiguracaoSku() {
           </button>
         </div>
       </div>
+
+      <EscopoSeletor value={escopo} onChange={novo => tentarAcao(() => mudarEscopo(novo))} disabled={loading || saving} />
 
       {/* Global Feedback */}
       {error && <div className="configuracao-sku-feedback configuracao-sku-feedback--error">{error}</div>}

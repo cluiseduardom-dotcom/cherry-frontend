@@ -32,6 +32,11 @@ export function selecaoInicial(categoriasDoProduto = []) {
   return selecao;
 }
 
+// Insumo usa categorias/níveis/padrão de SKU próprios (escopo 'insumo').
+export function escopoDoProduto(produto) {
+  return produto?.tipo === 'insumo' ? 'insumo' : 'produto';
+}
+
 export function montarCategoriaIds(selecao) {
   return Object.values(selecao).filter(id => id != null);
 }
@@ -49,13 +54,15 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
     if (!open) return;
     let cancelled = false;
 
+    const escopo = escopoDoProduto(produto);
+
     async function load() {
       setLoading(true);
       setError('');
       try {
         const [categoriasResp, niveisResp] = await Promise.all([
-          listarCategorias({ page: 1, pageSize: 100 }),
-          listarNiveisCategoria(),
+          listarCategorias({ page: 1, pageSize: 100, escopo }),
+          listarNiveisCategoria({ escopo }),
         ]);
         if (cancelled) return;
         setCategorias(categoriasResp.items);
@@ -116,7 +123,7 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
     <div className="modal-overlay" onMouseDown={e => e.target === e.currentTarget && tentarFechar()}>
       <div className="modal-panel card" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Categorizar produto</h2>
+          <h2 className="modal-title">{produto?.tipo === 'insumo' ? 'Categorizar insumo' : 'Categorizar produto'}</h2>
           <button type="button" className="modal-close" onClick={tentarFechar} aria-label="Fechar">
             <X size={18} />
           </button>
@@ -128,7 +135,7 @@ export default function CategorizarProdutoModal({ open, produto, onClose, onSave
 
             {jaTemSku ? (
               <p className="modal-warning">
-                Este produto já tem SKU (<strong>{produto.sku}</strong>). Alterar as categorias não muda o SKU já gerado.
+                {produto?.tipo === 'insumo' ? 'Este insumo' : 'Este produto'} já tem SKU (<strong>{produto.sku}</strong>). Alterar as categorias não muda o SKU já gerado.
               </p>
             ) : (
               <p className="modal-warning">

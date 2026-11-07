@@ -51,6 +51,10 @@ export async function relatorioConsumo(filtros = {}) {
   return (await apiFetch(`/consumos/relatorio${query(filtros)}`)).data;
 }
 
+export async function indicadoresInsumos(dias = 90) {
+  return (await apiFetch(`/consumos/indicadores${query({ dias })}`)).data;
+}
+
 export async function obterFichaVenda(produtoId) {
   return (await apiFetch(`/produtos/${produtoId}/ficha-venda`)).data;
 }

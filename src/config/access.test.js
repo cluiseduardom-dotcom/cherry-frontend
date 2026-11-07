@@ -358,3 +358,15 @@ describe('funcionalidades por plano (menus e rotas)', () => {
     expect(canAccessRoute('/pix-a-devolver', vendedor([]))).toBe(false);
   });
 });
+
+describe('Dashboard e tela de cálculos por capacidade ver_custos', () => {
+  const gerente = { role: 'vendedor', cargo: 'gerente', capacidades: ['ver_custos', 'ver_vendas_de_todos'] };
+  const supervisor = { role: 'vendedor', cargo: 'supervisor', capacidades: ['ver_vendas_de_todos'] };
+
+  it.each(['/', '/dashboard/calculos'])('libera %s para quem tem ver_custos e nega a quem não tem', (rota) => {
+    expect(canAccessRoute(rota, gerente)).toBe(true);
+    expect(canAccessRoute(rota, supervisor)).toBe(false);
+    expect(canAccessRoute(rota, { role: 'vendedor', capacidades: [] })).toBe(false);
+    expect(canAccessRoute(rota, { role: 'admin', capacidades: [] })).toBe(true);
+  });
+});

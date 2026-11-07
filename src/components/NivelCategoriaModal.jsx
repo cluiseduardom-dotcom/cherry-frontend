@@ -26,14 +26,19 @@ function validar(form, mode) {
   return '';
 }
 
-function montarPayload(form, mode) {
+export function montarPayload(form, mode, escopo = 'produto') {
   if (mode === 'create') {
-    return { nivel: Number(form.nivel), nome: form.nome.trim() };
+    // 'produto' é o padrão do backend: só envia o escopo quando for outro.
+    return {
+      nivel: Number(form.nivel),
+      nome: form.nome.trim(),
+      ...(escopo !== 'produto' ? { escopo } : {}),
+    };
   }
   return { nome: form.nome.trim() };
 }
 
-export default function NivelCategoriaModal({ open, mode = 'create', nivel, onClose, onSaved }) {
+export default function NivelCategoriaModal({ open, mode = 'create', nivel, escopo = 'produto', onClose, onSaved }) {
   const [form, setForm] = useState(formVazio);
   const [initialForm, setInitialForm] = useState(formVazio);
   const [error, setError] = useState('');
@@ -78,7 +83,7 @@ export default function NivelCategoriaModal({ open, mode = 'create', nivel, onCl
     setError('');
     setSaving(true);
     try {
-      const payload = montarPayload(form, mode);
+      const payload = montarPayload(form, mode, escopo);
       const salvo = mode === 'create'
         ? await criarNivelCategoria(payload)
         : await atualizarNivelCategoria(nivel.id, payload);

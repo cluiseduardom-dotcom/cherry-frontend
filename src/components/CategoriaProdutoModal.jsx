@@ -34,7 +34,7 @@ export function validar(form, mode) {
   return '';
 }
 
-export function montarPayload(form, mode) {
+export function montarPayload(form, mode, escopo = 'produto') {
   const configuracao_sku_id = form.configuracao_sku_id ? Number(form.configuracao_sku_id) : null;
   if (mode === 'create') {
     return {
@@ -42,6 +42,8 @@ export function montarPayload(form, mode) {
       codigo: form.codigo.trim(),
       nome: form.nome.trim(),
       configuracao_sku_id,
+      // 'produto' é o padrão do backend: só envia o escopo quando for outro.
+      ...(escopo !== 'produto' ? { escopo } : {}),
     };
   }
   return {
@@ -50,7 +52,7 @@ export function montarPayload(form, mode) {
   };
 }
 
-export default function CategoriaProdutoModal({ open, mode = 'create', categoria, padroesSku = [], onClose, onSaved }) {
+export default function CategoriaProdutoModal({ open, mode = 'create', categoria, escopo = 'produto', padroesSku = [], onClose, onSaved }) {
   const [form, setForm] = useState(formVazio);
   const [initialForm, setInitialForm] = useState(formVazio);
   const [error, setError] = useState('');
@@ -95,7 +97,7 @@ export default function CategoriaProdutoModal({ open, mode = 'create', categoria
     setError('');
     setSaving(true);
     try {
-      const payload = montarPayload(form, mode);
+      const payload = montarPayload(form, mode, escopo);
       const salva = mode === 'create'
         ? await criarCategoria(payload)
         : await atualizarCategoria(categoria.id, payload);

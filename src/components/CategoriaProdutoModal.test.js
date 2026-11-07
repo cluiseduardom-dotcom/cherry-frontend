@@ -84,6 +84,29 @@ describe('CategoriaProdutoModal helpers', () => {
     });
   });
 
+  describe('montarPayload — escopo', () => {
+    const form = { nivel: '1', codigo: 'EMB', nome: 'Embalagem', configuracao_sku_id: '' };
+
+    it('não envia escopo para produto (mantém o payload antigo)', () => {
+      expect(montarPayload(form, 'create')).not.toHaveProperty('escopo');
+      expect(montarPayload(form, 'create', 'produto')).not.toHaveProperty('escopo');
+    });
+
+    it('envia escopo insumo na criação', () => {
+      expect(montarPayload(form, 'create', 'insumo')).toEqual({
+        nivel: 1,
+        codigo: 'EMB',
+        nome: 'Embalagem',
+        configuracao_sku_id: null,
+        escopo: 'insumo',
+      });
+    });
+
+    it('não envia escopo na edição', () => {
+      expect(montarPayload(form, 'edit', 'insumo')).toEqual({ nome: 'Embalagem', configuracao_sku_id: null });
+    });
+  });
+
   describe('montarPayload', () => {
     it('converte configuracao_sku_id numérico no modo create quando preenchido', () => {
       const form = {

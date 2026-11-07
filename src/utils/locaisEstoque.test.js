@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  rotuloDoLocal, saldosComEstoque, usuariosSemMaleta, validarNovoLocal, filtrarSaldos, totalDeUnidades, FORM_LOCAL_VAZIO,
+  rotuloDoLocal, saldosComEstoque, usuariosSemMaleta, validarNovoLocal, filtrarSaldos, totalDeUnidades, produtoDoCardLocal, FORM_LOCAL_VAZIO,
 } from './locaisEstoque';
 
 describe('rotuloDoLocal', () => {
@@ -93,5 +93,24 @@ describe('saldosComEstoque', () => {
       { local_id: 5, rotulo: 'Coleção de Outubro (Ana)', saldo: 5 },
     ]);
     expect(saldosComEstoque(undefined)).toEqual([]);
+  });
+});
+
+describe('produtoDoCardLocal', () => {
+  const saldo = { produto_id: 7, nome: 'Anel X', sku: 'ANE-BR-FEM-001', saldo: 3 };
+
+  it('traz foto e categorias do produto para o card do local ficar igual ao da visão geral', () => {
+    const produto = { id: 7, imagem_url: 'https://x/foto.jpg', categorias: [{ nivel: 1, nome: 'Anel' }] };
+    expect(produtoDoCardLocal(saldo, produto, '#fff')).toEqual({
+      id: 7, name: 'Anel X', sku: 'ANE-BR-FEM-001', stock: 3, color: '#fff',
+      categorias: [{ nivel: 1, nome: 'Anel' }], imageUrl: 'https://x/foto.jpg',
+    });
+  });
+
+  it('sem produto correspondente, mantém o card sem foto (não quebra)', () => {
+    const card = produtoDoCardLocal(saldo, undefined, '#fff');
+    expect(card.imageUrl).toBeNull();
+    expect(card.categorias).toBeUndefined();
+    expect(card.stock).toBe(3);
   });
 });

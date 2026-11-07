@@ -40,3 +40,16 @@ export function simularCurvaAbc(faturamentos) {
     return { posicao: i + 1, faturamento, percentual, curva: classificarCurva(acumulado / total * 100, total) };
   });
 }
+
+// Cards "Giro médio" e "Cobertura média": vêm de `totais` do resumo (soma/soma, calculado no backend).
+// Ausente/nulo (backend antigo, sem venda no período) vira null = "—" na tela.
+export function indicadoresDeTotais(totais) {
+  const giro = totais?.giro;
+  const cobertura = totais?.cobertura;
+  const valido = v => v !== null && v !== undefined && Number.isFinite(Number(v));
+
+  return {
+    giroMedio: valido(giro) ? Number(giro).toFixed(2) : null,
+    coberturaMedia: valido(cobertura) ? Math.round(Number(cobertura)) : null,
+  };
+}

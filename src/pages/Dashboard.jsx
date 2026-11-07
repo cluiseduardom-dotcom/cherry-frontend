@@ -11,6 +11,7 @@ import { useTheme } from '../theme/themeContext';
 import { ROLE_LABEL } from '../config/papeis';
 import ParetoCurvaAbc from './ParetoCurvaAbc';
 import { formatarMoeda } from './dashboardCurvaAbc';
+import { indicadoresDeTotais } from '../utils/dashboardFormulas';
 import './Dashboard.css';
 
 const CURVA_BADGE = { A: 'badge-success', B: 'badge-warning', C: 'badge-info' };
@@ -135,15 +136,9 @@ export default function Dashboard() {
 
   const produtosCurvaA = curvaAbc.filter(p => p.curva === 'A').length;
 
-  const girosValidos = giro.map(g => g.giro).filter(v => v !== null && v !== undefined);
-  const giroMedio = girosValidos.length
-    ? (girosValidos.reduce((s, v) => s + Number(v), 0) / girosValidos.length).toFixed(2)
-    : null;
-
-  const coberturasValidas = cobertura.map(c => c.cobertura_dias).filter(v => v !== null && v !== undefined);
-  const coberturaMedia = coberturasValidas.length
-    ? Math.round(coberturasValidas.reduce((s, v) => s + Number(v), 0) / coberturasValidas.length)
-    : null;
+  // Giro e cobertura do conjunto: soma/soma, calculados pelo backend (`totais`), nunca a média dos
+  // valores de cada produto. Backend sem `totais` (versão antiga): mostra "—".
+  const { giroMedio, coberturaMedia } = indicadoresDeTotais(resumo?.totais);
 
   const produtosEsgotados = giro.filter(g => g.estoque_atual === 0).length;
   const produtosSemGiro = giro.filter(g => g.estoque_atual !== 0 && (g.giro === null || g.giro === undefined)).length;

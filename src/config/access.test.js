@@ -363,6 +363,10 @@ describe('Dashboard e tela de cálculos por capacidade ver_custos', () => {
   const gerente = { role: 'vendedor', cargo: 'gerente', capacidades: ['ver_custos', 'ver_vendas_de_todos'] };
   const supervisor = { role: 'vendedor', cargo: 'supervisor', capacidades: ['ver_vendas_de_todos'] };
 
+  it.each(['/', '/dashboard/calculos'])('libera %s também a quem só tem ver_dashboard (analistas)', (rota) => {
+    expect(canAccessRoute(rota, { role: 'vendedor', cargo: 'analista', capacidades: ['ver_dashboard'] })).toBe(true);
+  });
+
   it.each(['/', '/dashboard/calculos'])('libera %s para quem tem ver_custos e nega a quem não tem', (rota) => {
     expect(canAccessRoute(rota, gerente)).toBe(true);
     expect(canAccessRoute(rota, supervisor)).toBe(false);

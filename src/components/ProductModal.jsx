@@ -15,7 +15,6 @@ const EMPTY_FORM = {
   tipo: 'acabado',
   unidade: 'UN',
   custo: '',
-  estoque_atual: '',
   estoque_minimo: '',
   ativo: true,
 };
@@ -28,7 +27,6 @@ function formFromProduto(produto) {
     tipo: produto.tipo ?? 'acabado',
     unidade: produto.unidade ?? 'UN',
     custo: produto.custo ?? '',
-    estoque_atual: produto.estoque_atual ?? '',
     estoque_minimo: produto.estoque_minimo ?? '',
     ativo: produto.ativo ?? true,
   };
@@ -41,13 +39,6 @@ export function validar(form, mode, podeVerCusto) {
     const custo = Number(form.custo);
     if (form.custo === '' || Number.isNaN(custo) || custo <= 0) {
       return 'Custo deve ser maior que zero';
-    }
-  }
-
-  if (mode === 'create' && form.estoque_atual !== '') {
-    const estoqueAtual = Number(form.estoque_atual);
-    if (!Number.isInteger(estoqueAtual) || estoqueAtual < 0) {
-      return 'Estoque atual inválido';
     }
   }
 
@@ -73,7 +64,6 @@ export function montarPayload(form, mode) {
 
   if (mode === 'create') {
     payload.tipo = form.tipo === 'insumo' ? 'insumo' : 'acabado';
-    payload.estoque_atual = form.estoque_atual === '' ? undefined : Number(form.estoque_atual);
   }
 
   return payload;
@@ -241,18 +231,10 @@ export default function ProductModal({ open, mode = 'create', produto, onClose, 
               )}
 
               {mode === 'create' ? (
-                <div className="input-wrapper">
-                  <label className="input-label" htmlFor="pm-estoque-atual">Estoque inicial</label>
-                  <input
-                    id="pm-estoque-atual"
-                    type="number"
-                    min="0"
-                    step="1"
-                    className="input-field"
-                    value={form.estoque_atual}
-                    onChange={e => updateField('estoque_atual', e.target.value)}
-                  />
-                </div>
+                <p className="text-sm">
+                  O cadastro não lança estoque: o produto nasce com saldo 0. Depois de salvar, dê a entrada na tela de Estoque
+                  (estoque inicial, compra ou recebimento).
+                </p>
               ) : (
                 <div className="input-wrapper">
                   <label className="input-label" htmlFor="pm-estoque-atual">Estoque atual</label>

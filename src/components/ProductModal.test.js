@@ -7,7 +7,6 @@ const formBase = {
   tipo: 'acabado',
   unidade: 'UN',
   custo: '20',
-  estoque_atual: '10',
   estoque_minimo: '2',
   ativo: true,
 };
@@ -39,8 +38,9 @@ describe('montarPayload', () => {
     expect('categoria' in payload).toBe(false);
   });
 
-  it('envia estoque_atual só no modo create', () => {
-    expect('estoque_atual' in montarPayload(formBase, 'create')).toBe(true);
+  it('nunca envia estoque_atual: cadastrar não lança estoque, a entrada é um ato à parte', () => {
+    expect('estoque_atual' in montarPayload(formBase, 'create')).toBe(false);
+    expect('estoque_atual' in montarPayload({ ...formBase, estoque_atual: '10' }, 'create')).toBe(false);
     expect('estoque_atual' in montarPayload(formBase, 'edit')).toBe(false);
   });
 });

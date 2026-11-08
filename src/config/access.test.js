@@ -408,3 +408,17 @@ describe('Pedidos da loja (/pedidos-loja)', () => {
     expect(canAccessRoute('/pedidos-loja', { role: 'vendedor', funcionalidades: [] })).toBe(false);
   });
 });
+
+describe('Loja online: escolha das peças (/loja-online)', () => {
+  it('só o admin, e só com a funcionalidade loja_online ligada', () => {
+    expect(ALLOWED_ROLES_BY_PATH['/loja-online']).toEqual(['admin']);
+    expect(FUNCIONALIDADE_POR_ROTA['/loja-online']).toBe('loja_online');
+    expect(canAccessRoute('/loja-online', { role: 'admin', funcionalidades: ['loja_online'] })).toBe(true);
+    expect(canAccessRoute('/loja-online', { role: 'admin', funcionalidades: [] })).toBe(false);
+  });
+
+  it('vendedor e estoquista não acessam (o backend também exige admin)', () => {
+    expect(canAccessRoute('/loja-online', { role: 'vendedor', funcionalidades: ['loja_online'] })).toBe(false);
+    expect(canAccessRoute('/loja-online', { role: 'estoquista', funcionalidades: ['loja_online'] })).toBe(false);
+  });
+});

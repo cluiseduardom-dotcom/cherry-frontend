@@ -29,3 +29,6 @@ dist-ssr
 
 # Superpowers subagent-driven-development scratch workspace
 .superpowers/
+
+# Saída de build dos testes de ponta a ponta (descartável)
+dist-e2e

@@ -392,3 +392,19 @@ describe('Indicadores de insumos', () => {
     expect(canAccessRoute('/insumos', analista)).toBe(false);
   });
 });
+
+describe('Pedidos da loja (/pedidos-loja)', () => {
+  it('só admin e vendedor (traz o contato da cliente); estoquista e faturista não', () => {
+    expect(ALLOWED_ROLES_BY_PATH['/pedidos-loja']).toEqual(['admin', 'vendedor']);
+    expect(canAccessRoute('/pedidos-loja', { role: 'admin', funcionalidades: ['loja_online'] })).toBe(true);
+    expect(canAccessRoute('/pedidos-loja', { role: 'vendedor', funcionalidades: ['loja_online'] })).toBe(true);
+    expect(canAccessRoute('/pedidos-loja', { role: 'estoquista', funcionalidades: ['loja_online'] })).toBe(false);
+    expect(canAccessRoute('/pedidos-loja', { role: 'faturista', funcionalidades: ['loja_online'] })).toBe(false);
+  });
+
+  it('depende da funcionalidade loja_online: sem ela a rota some (o admin não ultrapassa o plano)', () => {
+    expect(FUNCIONALIDADE_POR_ROTA['/pedidos-loja']).toBe('loja_online');
+    expect(canAccessRoute('/pedidos-loja', { role: 'admin', funcionalidades: ['comissoes'] })).toBe(false);
+    expect(canAccessRoute('/pedidos-loja', { role: 'vendedor', funcionalidades: [] })).toBe(false);
+  });
+});

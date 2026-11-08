@@ -30,6 +30,8 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/compras/recebimentos': ['admin', 'estoquista'],
   '/compras/recebimentos/:id': ['admin', 'estoquista'],
   '/historico': ['admin', 'vendedor'],
+  // Pedidos da loja online (contato da cliente): só quem fala com ela. O backend decide de novo.
+  '/pedidos-loja': ['admin', 'vendedor'],
   '/comissoes': ['admin', 'vendedor'],
   '/usuarios': ['admin'],
   '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
@@ -60,6 +62,7 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/transferencias': 'maletas',
   '/acerto-estoque': 'maletas',
   '/minha-maleta': 'maletas',
+  '/pedidos-loja': 'loja_online',
 };
 
 export const MENSAGEM_SEM_FUNCIONALIDADE = 'Funcionalidade não incluída no seu plano. Fale com a GiroNex.';

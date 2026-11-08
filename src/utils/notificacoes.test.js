@@ -76,3 +76,29 @@ describe('utils/notificacoes', () => {
     expect(destinoDoAviso({ tipo: 'maleta_sem_venda' }, false)).toBe('/minha-maleta');
   });
 });
+
+import { destinoDoAviso as destino, rotuloDoTipo as rotulo } from './notificacoes';
+
+describe('avisos da loja online', () => {
+  it('têm rótulo próprio', () => {
+    expect(rotulo('loja_pedido_pago')).toBe('Pedido da loja pago');
+    expect(rotulo('loja_pagamento_sem_venda')).toBe('Pagamento da loja sem venda');
+  });
+
+  it('pedido pago leva à fila de pedidos da loja, para qualquer perfil', () => {
+    expect(destino({ tipo: 'loja_pedido_pago' }, false)).toBe('/pedidos-loja');
+    expect(destino({ tipo: 'loja_pedido_pago' }, true, true)).toBe('/pedidos-loja');
+  });
+
+  it('pagamento sem venda leva à devolução só para quem pode; os demais, à fila de pedidos', () => {
+    expect(destino({ tipo: 'loja_pagamento_sem_venda' }, false, true)).toBe('/pix-a-devolver');
+    expect(destino({ tipo: 'loja_pagamento_sem_venda' }, false, false)).toBe('/pedidos-loja');
+    expect(destino({ tipo: 'loja_pagamento_sem_venda' }, true)).toBe('/pedidos-loja');
+  });
+
+  it('os destinos dos avisos de estoque e maleta não mudaram', () => {
+    expect(destino({ tipo: 'falta' }, true)).toBe('/estoque');
+    expect(destino({ tipo: 'alto_giro' }, true)).toBe('/produtos');
+    expect(destino({ tipo: 'transferencia_pendente' }, true)).toBe('/transferencias');
+  });
+});

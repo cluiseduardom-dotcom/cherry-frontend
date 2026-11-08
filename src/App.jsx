@@ -37,6 +37,7 @@ import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
 import Bancos from './pages/Bancos';
 import PixADevolver from './pages/PixADevolver';
+import PedidosLoja from './pages/PedidosLoja';
 import IndicadoresInsumosPage from './pages/IndicadoresInsumosPage';
 import DashboardCalculos from './pages/DashboardCalculos';
 import ContasPagar from './pages/ContasPagar';
@@ -76,6 +77,7 @@ const ROUTE_COMPONENTS = {
   '/relatorios': Relatorios,
   '/bancos': Bancos,
   '/pix-a-devolver': PixADevolver,
+  '/pedidos-loja': PedidosLoja,
   '/contas-pagar': ContasPagar,
   '/contas-receber': ContasReceber,
   '/ponto-equilibrio': PontoEquilibrio,

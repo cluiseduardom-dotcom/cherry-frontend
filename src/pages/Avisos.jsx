@@ -10,6 +10,7 @@ export default function Avisos() {
   const { user } = useAuth();
   const { itens, lidos, naoLidos, carregando, erro, recarregar, marcarComoLido, marcarTodosComoLidos } = useNotificacoes();
   const podeVerEstoque = canAccessRoute('/estoque', user);
+  const podeVerPixADevolver = canAccessRoute('/pix-a-devolver', user);
 
   return (
     <div className="page-content avisos-page">
@@ -57,13 +58,14 @@ export default function Avisos() {
                 <span className="avisos-tipo">{rotuloDoTipo(aviso.tipo)}</span>
                 {aviso.item === 'insumo' && <span className="avisos-etiqueta">Insumo</span>}
                 {aviso.item === 'maleta' && <span className="avisos-etiqueta">Maleta</span>}
+                {aviso.item === 'pedido' && <span className="avisos-etiqueta">Loja online</span>}
                 {!lido && <span className="avisos-novo">Novo</span>}
               </div>
               <p className="avisos-mensagem">{aviso.mensagem}</p>
               <p className="avisos-acao">{aviso.acao}</p>
               <div className="avisos-rodape">
                 <Link
-                  to={destinoDoAviso(aviso, podeVerEstoque)}
+                  to={destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver)}
                   className="avisos-ir"
                   onClick={() => marcarComoLido(aviso.id)}
                 >

@@ -194,7 +194,7 @@ export default function LojaProdutos() {
                     {carregandoForm && <div role="status"><span className="spinner" /> Carregando textos...</div>}
 
                     {form && (
-                      <form onSubmit={(e) => { e.preventDefault(); salvarTextos(item); }}>
+                      <form noValidate onSubmit={(e) => { e.preventDefault(); salvarTextos(item); }}>
                         <p className="text-sm text-secondary">Deixe em branco o que não souber: a loja não mostra texto inventado.</p>
 
                         <label className="loja-produtos-campo">

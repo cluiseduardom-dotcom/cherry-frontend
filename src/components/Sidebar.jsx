@@ -68,6 +68,7 @@ const NAV_META_BY_PATH = {
   '/bancos':           { icon: Landmark,        label: 'Bancos' },
   '/pix-a-devolver':   { icon: Undo2,           label: 'Pix a devolver' },
   '/pedidos-loja':     { icon: PackageCheck,    label: 'Pedidos da loja' },
+  '/loja-online':      { icon: Store,           label: 'Loja online' },
   '/contas-pagar':     { icon: Wallet,          label: 'Contas a Pagar' },
   '/contas-receber':   { icon: HandCoins,       label: 'Contas a Receber' },
   '/ponto-equilibrio': { icon: Target,          label: 'Ponto de Equilíbrio' },

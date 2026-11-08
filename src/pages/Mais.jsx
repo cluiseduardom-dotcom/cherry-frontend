@@ -26,6 +26,7 @@ import {
   LogOut,
   Undo2,
   PackageCheck,
+  Store,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -52,6 +53,7 @@ const ITEMS = [
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },
   { path: '/contas-receber', label: 'Contas a Receber', sub: 'Acompanhar recebimentos', icon: HandCoins },
   { path: '/pedidos-loja', label: 'Pedidos da loja', sub: 'Pedidos pagos na loja online: combinar a entrega', icon: PackageCheck },
+  { path: '/loja-online', label: 'Loja online', sub: 'Escolher as peças e os textos da loja', icon: Store },
   { path: '/pix-a-devolver', label: 'Pix a devolver', sub: 'Devolver Pix pago ao pagador', icon: Undo2 },
   { path: '/ponto-equilibrio', label: 'Ponto de Equilíbrio', sub: 'Analisar necessidade de faturamento', icon: Target },
   { path: '/despesas-fixas', label: 'Despesas Fixas', sub: 'Gerenciar custos recorrentes', icon: Receipt },

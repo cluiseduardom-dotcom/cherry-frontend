@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { avisosDaPeca, formDaMarcacao, LIMITES, montarCorpo, situacaoDaPeca, validarForm } from './lojaProdutos';
+import { avisosDaPeca, camposDoCadastro, formDaMarcacao, LIMITES, montarCorpo, situacaoDaPeca, validarForm } from './lojaProdutos';
 
 const peca = (extra = {}) => ({ visivel: false, aparece_na_loja: false, preco_online: 100, saldo_central: 3, fotos: 2, ...extra });
 
@@ -69,11 +69,40 @@ describe('validarForm', () => {
 });
 
 describe('formDaMarcacao', () => {
-  it('transforma null em texto vazio e ordem em texto', () => {
-    expect(formDaMarcacao({ titulo: null, descricao: 'd', materiais: null, cuidados: null, ordem: 4 }))
-      .toEqual({ titulo: '', descricao: 'd', materiais: '', cuidados: '', ordem: '4' });
+  const cadastro = { nome: 'Anel nó de amor', descricao: 'Anel regulável dourado.', material: 'Banhado a ouro' };
+
+  it('sem nada salvo, vem preenchido com o cadastro (título, descrição, material)', () => {
+    expect(formDaMarcacao({ titulo: null, descricao: null, materiais: null, cuidados: null, ordem: 0, cadastro }))
+      .toEqual({ titulo: 'Anel nó de amor', descricao: 'Anel regulável dourado.', materiais: 'Banhado a ouro', cuidados: '', ordem: '0' });
   });
-  it('sem marcação: tudo vazio e ordem 0', () => {
+  it('o que já foi salvo para a loja tem prioridade sobre o cadastro', () => {
+    const form = formDaMarcacao({ titulo: 'Título da loja', descricao: null, materiais: 'Prata 925', cuidados: 'Cuidado próprio', ordem: 4, cadastro });
+
+    expect(form).toMatchObject({ titulo: 'Título da loja', descricao: 'Anel regulável dourado.', materiais: 'Prata 925', cuidados: 'Cuidado próprio', ordem: '4' });
+  });
+  it('cuidados nunca vem do cadastro: vazio = texto padrão da loja', () => {
+    expect(formDaMarcacao({ cadastro: { ...cadastro, cuidados: 'x' } }).cuidados).toBe('');
+  });
+  it('cadastro sem descrição ou material: campo fica vazio (nada inventado)', () => {
+    expect(formDaMarcacao({ cadastro: { nome: 'Brinco', descricao: null, material: null } }))
+      .toEqual({ titulo: 'Brinco', descricao: '', materiais: '', cuidados: '', ordem: '0' });
+  });
+  it('sem marcação nem cadastro: tudo vazio e ordem 0', () => {
     expect(formDaMarcacao(undefined)).toEqual({ titulo: '', descricao: '', materiais: '', cuidados: '', ordem: '0' });
+  });
+});
+
+describe('camposDoCadastro', () => {
+  const cadastro = { nome: 'Anel', descricao: 'Desc', material: 'Ouro' };
+
+  it('lista o que veio do cadastro', () => {
+    expect(camposDoCadastro({ cadastro })).toEqual(['título', 'descrição', 'materiais']);
+  });
+  it('não lista o que já estava salvo para a loja', () => {
+    expect(camposDoCadastro({ titulo: 'X', descricao: null, materiais: 'Y', cadastro })).toEqual(['descrição']);
+  });
+  it('sem cadastro: lista vazia', () => {
+    expect(camposDoCadastro({ titulo: null })).toEqual([]);
+    expect(camposDoCadastro(undefined)).toEqual([]);
   });
 });

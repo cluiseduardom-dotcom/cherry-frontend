@@ -366,7 +366,7 @@
 
 .login-page-cherry .login-brand-logo {
   display: block;
-  max-width: 220px;
+  max-width: 280px;
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -541,12 +541,19 @@
 
 .login-page-cherry .login-side-brand-symbol {
   display: block;
+  box-sizing: border-box;
   align-self: center;
-  width: clamp(170px, 14vw, 215px);
+  width: clamp(230px, 19vw, 300px);
   max-width: 90%;
   height: auto;
   margin: 0 auto clamp(18px, 2.5vh, 28px);
+  padding: 14px 18px 12px;
   object-fit: contain;
+  /* Logotipo vinho e dourado sobre o painel escuro: placa creme com filete dourado. */
+  border: 1px solid #C9982A;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #FFFBF4 0, #FAF0E4 100%);
+  box-shadow: 0 0 0 3px rgba(217, 178, 124, 0.16), 0 10px 28px rgba(0, 0, 0, 0.3);
 }
 
 .login-page-cherry .login-side-title {

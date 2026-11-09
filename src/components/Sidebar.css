@@ -379,3 +379,29 @@ html[data-theme="valvazori"] .sidebar-logo-img {
     display: none;
   }
 }
+
+/* Cherry: o logotipo oficial é vinho e dourado sobre fundo transparente, feito para superfície clara.
+   No menu escuro ele vive numa placa creme com filete dourado (sem a dissolução de bordas dos
+   logos escuros dos outros temas). */
+html[data-theme="cherry"] .sidebar-logo--imagem {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--sidebar-divider);
+}
+
+html[data-theme="cherry"] .sidebar-logo-img {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 14px 16px 12px;
+  border: 1px solid #C9982A;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #FFFBF4 0, #FAF0E4 100%);
+  box-shadow: 0 0 0 3px rgba(217, 178, 124, 0.16), 0 6px 18px rgba(0, 0, 0, 0.28);
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+@media (min-width: 769px) and (max-height: 820px) {
+  html[data-theme="cherry"] .sidebar-logo--imagem { padding: var(--space-3) var(--space-4) var(--space-2); }
+  html[data-theme="cherry"] .sidebar-logo-img { width: 100%; padding: 10px 14px 8px; }
+}

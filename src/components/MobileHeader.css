@@ -115,3 +115,11 @@
     display: flex;
   }
 }
+
+/* Cherry: as cerejas do logotipo são vinho e dourado; no cabeçalho escuro ficam numa placa creme. */
+html[data-theme="cherry"] .mobile-header-symbol {
+  background: linear-gradient(180deg, #FFFBF4 0, #FAF0E4 100%);
+  border: 1px solid #C9982A;
+  padding: 2px 0;
+  box-sizing: border-box;
+}

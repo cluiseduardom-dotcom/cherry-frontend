@@ -32,3 +32,10 @@ export async function salvarMarcacaoDaLoja(produtoId, dados) {
   });
   return body.data;
 }
+
+// Copia descrição e material do cadastro para as peças JÁ marcadas na loja que ainda estão sem esse texto.
+// Nunca troca texto já escrito. Resposta: { atualizados }.
+export async function preencherTextosDoCadastro() {
+  const body = await apiFetch('/loja-produtos/preencher-do-cadastro', { method: 'POST' });
+  return body.data;
+}

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as api from './api';
-import { buscarMarcacaoDaLoja, listarProdutosDaLoja, salvarMarcacaoDaLoja } from './lojaProdutos';
+import { buscarMarcacaoDaLoja, listarProdutosDaLoja, preencherTextosDoCadastro, salvarMarcacaoDaLoja } from './lojaProdutos';
 
 vi.mock('./api', () => ({ apiFetch: vi.fn() }));
 
@@ -43,5 +43,12 @@ describe('services/lojaProdutos', () => {
     expect(url).toBe('/produtos/7/loja');
     expect(opcoes.method).toBe('PUT');
     expect(JSON.parse(opcoes.body)).toEqual({ visivel: true, titulo: 'Anel' });
+  });
+
+  it('preenche em lote por POST, sem corpo, e devolve quantas peças foram atualizadas', async () => {
+    api.apiFetch.mockResolvedValueOnce({ data: { atualizados: 3 } });
+
+    expect(await preencherTextosDoCadastro()).toEqual({ atualizados: 3 });
+    expect(api.apiFetch).toHaveBeenCalledWith('/loja-produtos/preencher-do-cadastro', { method: 'POST' });
   });
 });

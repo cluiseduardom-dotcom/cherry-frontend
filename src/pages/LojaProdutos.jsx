@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Store } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import { buscarMarcacaoDaLoja, listarProdutosDaLoja, salvarMarcacaoDaLoja } from '../services/lojaProdutos';
+import { buscarMarcacaoDaLoja, listarProdutosDaLoja, preencherTextosDoCadastro, salvarMarcacaoDaLoja } from '../services/lojaProdutos';
 import { avisosDaPeca, camposDoCadastro, formDaMarcacao, LIMITES, montarCorpo, situacaoDaPeca, validarForm } from '../utils/lojaProdutos';
 import { formatarMoeda } from '../utils/mascaras';
 import './LojaProdutos.css';
@@ -31,6 +31,7 @@ export default function LojaProdutos() {
   const [carregandoForm, setCarregandoForm] = useState(false);
   const [erroForm, setErroForm] = useState('');
   const [doCadastro, setDoCadastro] = useState([]);
+  const [preenchendo, setPreenchendo] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
   // "Carregando" é ligado nos eventos; o efeito só busca e guarda o resultado.
@@ -61,6 +62,27 @@ export default function LojaProdutos() {
       toast?.error?.(e.message || 'Não foi possível alterar a peça.');
     } finally {
       setAlternando(0);
+    }
+  }
+
+  async function preencherEmLote() {
+    const ok = window.confirm(
+      'Copiar a descrição e o material do cadastro para as peças marcadas na loja que ainda estão sem esse texto?\n\n'
+      + 'Nada que já foi escrito é trocado. Confira depois em "Editar textos": se a descrição do cadastro tiver anotações internas, apague antes de vender.',
+    );
+
+    if (!ok) return;
+
+    setPreenchendo(true);
+
+    try {
+      const { atualizados } = await preencherTextosDoCadastro();
+      toast?.success?.(atualizados > 0 ? `${atualizados} ${atualizados === 1 ? 'peça atualizada' : 'peças atualizadas'} com o texto do cadastro.` : 'Nenhuma peça precisava de texto: tudo já está preenchido.');
+      recarregar();
+    } catch (e) {
+      toast?.error?.(e.message || 'Não foi possível preencher os textos.');
+    } finally {
+      setPreenchendo(false);
     }
   }
 
@@ -114,10 +136,15 @@ export default function LojaProdutos() {
           <h1 className="page-title">Loja online</h1>
           <p className="page-subtitle">Escolha quais peças aparecem na loja e ajuste os textos. O preço do canal online e o estoque continuam nas telas de sempre.</p>
         </div>
-        <button type="button" className="btn btn-ghost" onClick={recarregar} disabled={carregando}>
-          <RefreshCw size={16} />
-          Atualizar
-        </button>
+        <div className="loja-produtos-cabecalho-acoes">
+          <button type="button" className="btn btn-ghost" onClick={preencherEmLote} disabled={preenchendo || carregando}>
+            {preenchendo ? 'Preenchendo...' : 'Preencher textos vazios com o cadastro'}
+          </button>
+          <button type="button" className="btn btn-ghost" onClick={recarregar} disabled={carregando}>
+            <RefreshCw size={16} />
+            Atualizar
+          </button>
+        </div>
       </div>
 
       <p className="loja-produtos-aviso">

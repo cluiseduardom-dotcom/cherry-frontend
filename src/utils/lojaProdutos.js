@@ -54,13 +54,31 @@ export function validarForm(form) {
   return '';
 }
 
-/** Valores iniciais do formulário a partir da marcação devolvida pela API. */
+/**
+ * Valores iniciais do formulário. O que a Cherry já salvou para a loja tem prioridade; o que está vazio é
+ * pré-preenchido com o cadastro do produto (nome, descrição e material), que a API devolve em `cadastro`.
+ * Cuidados NÃO vem do cadastro: vazio significa "usar o texto padrão de cuidados da loja".
+ */
 export function formDaMarcacao(marcacao) {
+  const cadastro = marcacao?.cadastro ?? {};
+
   return {
-    titulo: marcacao?.titulo ?? '',
-    descricao: marcacao?.descricao ?? '',
-    materiais: marcacao?.materiais ?? '',
+    titulo: marcacao?.titulo || cadastro.nome || '',
+    descricao: marcacao?.descricao || cadastro.descricao || '',
+    materiais: marcacao?.materiais || cadastro.material || '',
     cuidados: marcacao?.cuidados ?? '',
     ordem: String(marcacao?.ordem ?? 0),
   };
+}
+
+/** Quais campos do formulário vieram do cadastro (e não de algo já salvo para a loja), para avisar a pessoa. */
+export function camposDoCadastro(marcacao) {
+  const cadastro = marcacao?.cadastro ?? {};
+  const campos = [];
+
+  if (!marcacao?.titulo && cadastro.nome) campos.push('título');
+  if (!marcacao?.descricao && cadastro.descricao) campos.push('descrição');
+  if (!marcacao?.materiais && cadastro.material) campos.push('materiais');
+
+  return campos;
 }

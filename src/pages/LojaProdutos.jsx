@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Store } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { buscarMarcacaoDaLoja, listarProdutosDaLoja, salvarMarcacaoDaLoja } from '../services/lojaProdutos';
-import { avisosDaPeca, formDaMarcacao, LIMITES, montarCorpo, situacaoDaPeca, validarForm } from '../utils/lojaProdutos';
+import { avisosDaPeca, camposDoCadastro, formDaMarcacao, LIMITES, montarCorpo, situacaoDaPeca, validarForm } from '../utils/lojaProdutos';
 import { formatarMoeda } from '../utils/mascaras';
 import './LojaProdutos.css';
 
@@ -30,6 +30,7 @@ export default function LojaProdutos() {
   const [form, setForm] = useState(null);
   const [carregandoForm, setCarregandoForm] = useState(false);
   const [erroForm, setErroForm] = useState('');
+  const [doCadastro, setDoCadastro] = useState([]);
   const [salvando, setSalvando] = useState(false);
 
   // "Carregando" é ligado nos eventos; o efeito só busca e guarda o resultado.
@@ -68,11 +69,14 @@ export default function LojaProdutos() {
 
     setEditando(item.produto_id);
     setForm(null);
+    setDoCadastro([]);
     setErroForm('');
     setCarregandoForm(true);
 
     try {
-      setForm(formDaMarcacao(await buscarMarcacaoDaLoja(item.produto_id)));
+      const marcacao = await buscarMarcacaoDaLoja(item.produto_id);
+      setForm(formDaMarcacao(marcacao));
+      setDoCadastro(camposDoCadastro(marcacao));
     } catch (e) {
       setErroForm(e.message || 'Não foi possível carregar os textos da peça.');
     } finally {
@@ -195,6 +199,12 @@ export default function LojaProdutos() {
 
                     {form && (
                       <form noValidate onSubmit={(e) => { e.preventDefault(); salvarTextos(item); }}>
+                        {doCadastro.length > 0 && (
+                          <p className="loja-produtos-aviso" role="status">
+                            Já preenchemos com o que está no cadastro do produto ({doCadastro.join(', ')}). Confira, ajuste se quiser e salve:
+                            só vai para a loja depois de salvar.
+                          </p>
+                        )}
                         <p className="text-sm text-secondary">Deixe em branco o que não souber: a loja não mostra texto inventado.</p>
 
                         <label className="loja-produtos-campo">
@@ -210,7 +220,7 @@ export default function LojaProdutos() {
                           <textarea className="input" rows={2} maxLength={LIMITES.materiais} value={form.materiais} onChange={campo('materiais')} />
                         </label>
                         <label className="loja-produtos-campo">
-                          <span>Cuidados</span>
+                          <span>Cuidados (deixe em branco para usar o texto padrão de cuidados da loja)</span>
                           <textarea className="input" rows={2} maxLength={LIMITES.cuidados} value={form.cuidados} onChange={campo('cuidados')} />
                         </label>
                         <label className="loja-produtos-campo curto">

@@ -3,3 +3,10 @@
 .loja-retratos-dados { flex: 1; min-width: 0; }
 .loja-retratos-autorizacao { margin: var(--space-3) 0 0; font-size: 13px; color: var(--color-text-secondary); }
 @media (max-width: 520px) { .loja-retratos-item { flex-direction: column; } }
+
+.loja-retratos-escolha { margin-bottom: var(--space-4); }
+.loja-retratos-escolha-fotos { display: flex; gap: var(--space-4); flex-wrap: wrap; margin: var(--space-3) 0; }
+.loja-retratos-escolha figure { margin: 0; text-align: center; font-size: 13px; color: var(--color-text-secondary); }
+.loja-retratos-escolha img { display: block; width: 150px; height: 266px; object-fit: contain; border-radius: var(--radius-md); background: var(--color-border-light); }
+/* Xadrez: mostra onde a foto é transparente */
+.loja-retratos-escolha img.loja-retratos-xadrez { background: repeating-conic-gradient(#d9d9d9 0% 25%, #f4f4f4 0% 50%) 50% / 16px 16px; }

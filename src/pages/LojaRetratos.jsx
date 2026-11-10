@@ -4,6 +4,12 @@ import { useToast } from '../context/ToastContext';
 import { atualizarRetrato, enviarRetrato, listarRetratos, removerRetrato } from '../services/lojaRetratos';
 import { avisoDeProporcao, dataBr, LIMITES_RETRATO, pendenciasDoRetrato, situacaoDoRetrato, validarTextos } from '../utils/lojaRetratos';
 import { prepararFotoRetrato } from '../utils/prepararFotoRetrato';
+
+const MENSAGEM_FUNDO = {
+  fundo_complexo: 'O fundo desta foto não é liso, então não consegui tirá-lo sozinha: na Home ela aparece como um retângulo. Para ficar sem fundo, envie uma foto já recortada (PNG ou WebP com transparência).',
+  sem_fundo: 'Não encontrei fundo para tirar nesta foto: na Home ela aparece como um retângulo, se tiver fundo.',
+  excessivo: 'O fundo parece ter a mesma cor da pessoa e não deu para tirá-lo sozinha. Envie uma foto já recortada (PNG ou WebP com transparência).',
+};
 import './LojaProdutos.css';
 import './LojaRetratos.css';
 
@@ -131,6 +137,8 @@ export default function LojaRetratos() {
   const [recarga, setRecarga] = useState(0);
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState('');
+  // Foto cujo fundo liso foi removido: a pessoa confere e escolhe qual versão usar antes de enviar.
+  const [escolha, setEscolha] = useState(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -143,6 +151,31 @@ export default function LojaRetratos() {
     return () => { cancelado = true; };
   }, [recarga]);
 
+  async function subir(arquivo) {
+    setEnviando(true);
+
+    try {
+      const criado = await enviarRetrato(arquivo);
+      setItens((atual) => [...atual, criado]);
+      toast?.success?.('Foto enviada. Agora descreva a foto e confirme a autorização para mostrar na Home.');
+    } catch (err) {
+      toast?.error?.(err.message || 'Não foi possível enviar a foto.');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  function fecharEscolha() {
+    if (escolha) { URL.revokeObjectURL(escolha.urlOriginal); URL.revokeObjectURL(escolha.urlSemFundo); }
+    setEscolha(null);
+  }
+
+  function usar(qual) {
+    const arquivo = qual === 'semFundo' ? escolha.semFundo : escolha.arquivo;
+    fecharEscolha();
+    subir(arquivo);
+  }
+
   async function aoEscolher(e) {
     const arquivo = e.target.files?.[0];
     e.target.value = '';
@@ -153,14 +186,25 @@ export default function LojaRetratos() {
     setAviso('');
 
     try {
-      const { arquivo: pronto, largura, altura } = await prepararFotoRetrato(arquivo);
-      setAviso(avisoDeProporcao(largura, altura));
-      const criado = await enviarRetrato(pronto);
-      setItens((atual) => [...atual, criado]);
-      toast?.success?.('Foto enviada. Agora descreva a foto e confirme a autorização para mostrar na Home.');
+      const pronto = await prepararFotoRetrato(arquivo);
+      const prop = avisoDeProporcao(pronto.largura, pronto.altura);
+
+      if (pronto.semFundo) {
+        // Fundo liso removido: mostra as duas versões para conferir (o recorte automático pode errar se a roupa tem a cor do fundo).
+        setEscolha({
+          ...pronto,
+          urlOriginal: URL.createObjectURL(pronto.arquivo),
+          urlSemFundo: URL.createObjectURL(pronto.semFundo),
+        });
+        setAviso(prop);
+        setEnviando(false);
+        return;
+      }
+
+      setAviso([prop, MENSAGEM_FUNDO[pronto.acao] ?? ''].filter(Boolean).join(' '));
+      await subir(pronto.arquivo);
     } catch (err) {
       toast?.error?.(err.message || 'Não foi possível enviar a foto.');
-    } finally {
       setEnviando(false);
     }
   }
@@ -192,10 +236,33 @@ export default function LojaRetratos() {
         Quem confirmou e a data ficam registrados. Sem nenhuma foto liberada, a Home mostra só o texto.
       </p>
       <p className="loja-produtos-aviso">
-        <strong>Como a foto fica:</strong> vertical (9:16, ex.: 900×1600). No computador ela ocupa o lado direito da tela, cortada quase quadrada: o rosto e o busto devem estar no
-        terço de cima, centralizados. No celular ocupa a tela toda, com o texto por cima. A tela reduz a foto sozinha antes de enviar.
+        <strong>Como a foto fica:</strong> a Home mostra uma faixa com o texto de um lado e a pessoa do outro, colada na base da faixa.
+        A foto deve ser vertical (9:16, ex.: 900×1600), com o rosto e os ombros no terço de cima, centralizados e com um respiro acima da cabeça.
+        <strong>Sem fundo:</strong> a tela tira sozinha o fundo liso (você confere antes de enviar). Fundo com cenário precisa de foto já recortada
+        (PNG ou WebP com transparência); sem recorte a foto aparece como um retângulo.
       </p>
       {aviso && <p className="loja-produtos-aviso" role="status">{aviso}</p>}
+
+      {escolha && (
+        <div className="card card-padding loja-retratos-escolha" role="group" aria-label="Escolher a versão da foto">
+          <p><strong>Tiramos o fundo da foto.</strong> Confira se a pessoa ficou inteira (às vezes o recorte come roupa da mesma cor do fundo) e escolha qual versão usar.</p>
+          <div className="loja-retratos-escolha-fotos">
+            <figure>
+              <img className="loja-retratos-xadrez" src={escolha.urlSemFundo} alt="Foto com o fundo removido" />
+              <figcaption>Sem fundo</figcaption>
+            </figure>
+            <figure>
+              <img src={escolha.urlOriginal} alt="Foto original" />
+              <figcaption>Original</figcaption>
+            </figure>
+          </div>
+          <div className="loja-produtos-acoes">
+            <button type="button" className="btn btn-primary" onClick={() => usar('semFundo')}>Usar sem fundo</button>
+            <button type="button" className="btn btn-ghost" onClick={() => usar('original')}>Enviar a original</button>
+            <button type="button" className="btn btn-ghost" onClick={fecharEscolha}>Cancelar</button>
+          </div>
+        </div>
+      )}
 
       {erro && <div className="loja-produtos-erro" role="alert">{erro}</div>}
       {carregando && <div className="card card-padding" role="status"><span className="spinner" /> Carregando fotos...</div>}

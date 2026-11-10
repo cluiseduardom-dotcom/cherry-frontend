@@ -192,7 +192,7 @@ export default function LojaRetratos() {
         Quem confirmou e a data ficam registrados. Sem nenhuma foto liberada, a Home mostra só o texto.
       </p>
       <p className="loja-produtos-aviso">
-        <strong>Como a foto fica:</strong> vertical (9:16, ex.: 1080×1920). No computador ela ocupa o lado direito da tela, cortada quase quadrada: o rosto e o busto devem estar no
+        <strong>Como a foto fica:</strong> vertical (9:16, ex.: 900×1600). No computador ela ocupa o lado direito da tela, cortada quase quadrada: o rosto e o busto devem estar no
         terço de cima, centralizados. No celular ocupa a tela toda, com o texto por cima. A tela reduz a foto sozinha antes de enviar.
       </p>
       {aviso && <p className="loja-produtos-aviso" role="status">{aviso}</p>}

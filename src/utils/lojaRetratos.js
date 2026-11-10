@@ -4,7 +4,10 @@
 export const LIMITES_RETRATO = { alt: 300, nome: 120 };
 // O backend aceita até 2 MB por foto; a tela reduz a foto antes de enviar.
 export const MAX_BYTES_RETRATO = 2 * 1024 * 1024;
-export const ALTURA_MAXIMA = 1920;
+// A Home mostra a foto em no máximo ~800 px de largura (1600 px de altura cobre telas de alta densidade); mais que isso só
+// deixa a abertura lenta. A tela busca ~350 KB e só passa disso se não houver jeito (o limite do servidor é 2 MB).
+export const ALTURA_MAXIMA = 1600;
+export const ALVO_BYTES_RETRATO = 350 * 1024;
 
 export function situacaoDoRetrato(r) {
   if (r.ativo && r.autorizacao_assinada) return { rotulo: 'Aparece na Home', tom: 'ok' };
@@ -38,7 +41,7 @@ export function tamanhoReduzido(largura, altura, alturaMaxima = ALTURA_MAXIMA) {
 /** Aviso (não bloqueia) quando a foto não é vertical como a Home pede. */
 export function avisoDeProporcao(largura, altura) {
   if (!(largura > 0) || !(altura > 0)) return '';
-  if (altura / largura < 1.3) return 'Esta foto não é bem vertical: na Home ela é cortada. O ideal é vertical, 9:16 (ex.: 1080×1920).';
+  if (altura / largura < 1.3) return 'Esta foto não é bem vertical: na Home ela é cortada. O ideal é vertical, 9:16 (ex.: 900×1600).';
   return '';
 }
 

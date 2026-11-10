@@ -43,10 +43,10 @@ describe('validarTextos', () => {
 
 describe('tamanhoReduzido', () => {
   it('reduz mantendo a proporção até a altura máxima', () => {
-    expect(tamanhoReduzido(3000, 4000, 1920)).toEqual({ largura: 1440, altura: 1920 });
+    expect(tamanhoReduzido(3000, 4000, 1600)).toEqual({ largura: 1200, altura: 1600 });
   });
   it('nunca aumenta', () => {
-    expect(tamanhoReduzido(941, 1672, 1920)).toEqual({ largura: 941, altura: 1672 });
+    expect(tamanhoReduzido(800, 1421, 1600)).toEqual({ largura: 800, altura: 1421 });
   });
   it('medida inválida devolve zero', () => {
     expect(tamanhoReduzido(0, 100)).toEqual({ largura: 0, altura: 0 });
@@ -55,7 +55,7 @@ describe('tamanhoReduzido', () => {
 
 describe('avisoDeProporcao', () => {
   it('foto vertical: sem aviso', () => {
-    expect(avisoDeProporcao(1080, 1920)).toBe('');
+    expect(avisoDeProporcao(900, 1600)).toBe('');
   });
   it('foto quadrada ou horizontal: avisa', () => {
     expect(avisoDeProporcao(1000, 1000)).toMatch(/vertical/);

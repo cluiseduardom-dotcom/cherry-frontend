@@ -422,3 +422,13 @@ describe('Loja online: escolha das peças (/loja-online)', () => {
     expect(canAccessRoute('/loja-online', { role: 'estoquista', funcionalidades: ['loja_online'] })).toBe(false);
   });
 });
+
+describe('Loja online: retratos da Home (/loja-retratos)', () => {
+  it('só admin, e só com a funcionalidade loja_online ligada', () => {
+    expect(ALLOWED_ROLES_BY_PATH['/loja-retratos']).toEqual(['admin']);
+    expect(FUNCIONALIDADE_POR_ROTA['/loja-retratos']).toBe('loja_online');
+    expect(canAccessRoute('/loja-retratos', { role: 'admin', funcionalidades: ['loja_online'] })).toBe(true);
+    expect(canAccessRoute('/loja-retratos', { role: 'admin', funcionalidades: [] })).toBe(false);
+    expect(canAccessRoute('/loja-retratos', { role: 'vendedor', funcionalidades: ['loja_online'] })).toBe(false);
+  });
+});

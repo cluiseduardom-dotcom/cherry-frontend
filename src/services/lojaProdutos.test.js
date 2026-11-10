@@ -45,6 +45,14 @@ describe('services/lojaProdutos', () => {
     expect(JSON.parse(opcoes.body)).toEqual({ visivel: true, titulo: 'Anel' });
   });
 
+  it('escolhe a peça para o carrossel de novidades (campo aceito pelo backend)', async () => {
+    api.apiFetch.mockResolvedValue({ data: { produto_id: 7, carrossel_novidades: true } });
+
+    await salvarMarcacaoDaLoja(7, { carrossel_novidades: true, preco: 1 });
+
+    expect(JSON.parse(api.apiFetch.mock.calls[0][1].body)).toEqual({ carrossel_novidades: true });
+  });
+
   it('preenche em lote por POST, sem corpo, e devolve quantas peças foram atualizadas', async () => {
     api.apiFetch.mockResolvedValueOnce({ data: { atualizados: 3 } });
 

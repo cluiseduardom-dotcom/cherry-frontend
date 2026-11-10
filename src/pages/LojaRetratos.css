@@ -1,0 +1,5 @@
+.loja-retratos-item { display: flex; gap: var(--space-4); align-items: flex-start; }
+.loja-retratos-foto { width: 90px; height: 160px; flex: none; object-fit: cover; object-position: 50% 22%; border-radius: var(--radius-md); background: var(--color-border-light); }
+.loja-retratos-dados { flex: 1; min-width: 0; }
+.loja-retratos-autorizacao { margin: var(--space-3) 0 0; font-size: 13px; color: var(--color-text-secondary); }
+@media (max-width: 520px) { .loja-retratos-item { flex-direction: column; } }

@@ -42,6 +42,18 @@ function Cartao({ retrato, aoMudar, aoRemover }) {
     agir({ alt: alt.trim() || null, nome: nome.trim() || null, ordem: Number(ordem || 0) }, 'Dados salvos.');
   }
 
+  // Ao ligar, envia junto o que está digitado na tela (descrição, nome, ordem): o botão libera com o campo preenchido,
+  // então o servidor precisa receber esse texto na mesma ação, sem exigir "Salvar textos" antes.
+  function alternarAtivo() {
+    if (retrato.ativo) { agir({ ativo: false }, 'Foto saiu da Home.'); return; }
+
+    const problema = validarTextos({ alt, nome, ordem });
+
+    if (problema) { toast?.error?.(problema); return; }
+
+    agir({ alt: alt.trim() || null, nome: nome.trim() || null, ordem: Number(ordem || 0), ativo: true }, 'Foto na Home.');
+  }
+
   function alternarAutorizacao() {
     if (retrato.autorizacao_assinada) {
       if (window.confirm('Tirar a autorização? A foto sai da Home na hora.')) agir({ autorizacao_assinada: false }, 'Autorização retirada: a foto saiu da Home.');
@@ -108,7 +120,7 @@ function Cartao({ retrato, aoMudar, aoRemover }) {
             type="button"
             className={`btn ${retrato.ativo ? 'btn-ghost' : 'btn-primary'}`}
             disabled={ocupado || (!retrato.ativo && pendencias.length > 0)}
-            onClick={() => agir({ ativo: !retrato.ativo }, retrato.ativo ? 'Foto saiu da Home.' : 'Foto na Home.')}
+            onClick={alternarAtivo}
           >
             {retrato.ativo ? 'Tirar da Home' : 'Mostrar na Home'}
           </button>

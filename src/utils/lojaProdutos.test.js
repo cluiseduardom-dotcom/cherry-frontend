@@ -27,6 +27,11 @@ describe('avisosDaPeca', () => {
   it('não marcada e sem preço: pede o preço antes', () => {
     expect(avisosDaPeca(peca({ preco_online: null }))[0]).toMatch(/antes de mostrar/i);
   });
+  it('escolhida para o carrossel mas sem foto ou fora da loja: avisa que não entra', () => {
+    expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: true, carrossel_novidades: true, fotos: 0 })).join(' ')).toMatch(/carrossel.*sem foto/);
+    expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: false, carrossel_novidades: true, preco_online: null })).join(' ')).toMatch(/carrossel.*não aparece na loja/);
+    expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: true, carrossel_novidades: true }))).toEqual([]);
+  });
   it('sem estoque e sem foto: avisos separados, sem bloquear', () => {
     const avisos = avisosDaPeca(peca({ saldo_central: 0, fotos: 0 }));
     expect(avisos).toHaveLength(2);

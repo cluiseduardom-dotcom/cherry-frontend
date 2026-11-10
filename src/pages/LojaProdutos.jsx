@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Store } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { buscarMarcacaoDaLoja, listarProdutosDaLoja, preencherTextosDoCadastro, salvarMarcacaoDaLoja } from '../services/lojaProdutos';
-import { avisosDaPeca, camposDoCadastro, formDaMarcacao, LIMITES, montarCorpo, situacaoDaPeca, validarForm } from '../utils/lojaProdutos';
+import { avisosDaPeca, camposDoCadastro, formDaMarcacao, LIMITES, MAX_CARROSSEL, montarCorpo, situacaoDaPeca, validarForm } from '../utils/lojaProdutos';
 import { formatarMoeda } from '../utils/mascaras';
 import './LojaProdutos.css';
 
@@ -11,6 +11,7 @@ const FILTROS = [
   { id: 'todos', rotulo: 'Todas' },
   { id: 'publicados', rotulo: 'Marcadas para a loja' },
   { id: 'nao_publicados', rotulo: 'Fora da loja' },
+  { id: 'no_carrossel', rotulo: 'No carrossel' },
 ];
 
 // Escolha de quais peças aparecem na loja online e dos textos de cada uma. Só admin, só com a funcionalidade
@@ -60,6 +61,20 @@ export default function LojaProdutos() {
       recarregar();
     } catch (e) {
       toast?.error?.(e.message || 'Não foi possível alterar a peça.');
+    } finally {
+      setAlternando(0);
+    }
+  }
+
+  async function alternarCarrossel(item) {
+    setAlternando(item.produto_id);
+
+    try {
+      await salvarMarcacaoDaLoja(item.produto_id, { carrossel_novidades: !item.carrossel_novidades });
+      toast?.success?.(item.carrossel_novidades ? `"${item.nome}" saiu do carrossel.` : `"${item.nome}" escolhida para o carrossel.`);
+      recarregar();
+    } catch (e) {
+      toast?.error?.(e.message || 'Não foi possível alterar o carrossel.');
     } finally {
       setAlternando(0);
     }
@@ -151,6 +166,12 @@ export default function LojaProdutos() {
         Uma peça só aparece na loja se estiver marcada <strong>e</strong> tiver preço no canal &quot;online&quot;. Sem estoque no Central, aparece como indisponível.
       </p>
 
+      <p className="loja-produtos-aviso">
+        <strong>Carrossel de novidades da página inicial:</strong> escolha até {MAX_CARROSSEL} peças com o botão &quot;Pôr no carrossel&quot; (a foto principal de cada uma é a que aparece).
+        Se nenhuma peça estiver escolhida, o carrossel mostra sozinho as peças que são novidade (entraram no estoque nos últimos 30 dias). Só entra peça que aparece na loja e tem foto.
+        Veja as escolhidas na aba &quot;No carrossel&quot;.
+      </p>
+
       <form className="loja-produtos-filtros" onSubmit={buscar} role="search">
         <div className="loja-produtos-abas" role="group" aria-label="Filtro por situação">
           {FILTROS.map((f) => (
@@ -203,6 +224,7 @@ export default function LojaProdutos() {
                   <div><dt>Estoque (Central)</dt><dd>{item.saldo_central}</dd></div>
                   <div><dt>Fotos</dt><dd>{item.fotos}</dd></div>
                   <div><dt>Ordem</dt><dd>{item.ordem}</dd></div>
+                  <div><dt>Carrossel</dt><dd>{item.carrossel_novidades ? 'Escolhida' : 'Automático'}</dd></div>
                 </dl>
 
                 {avisos.length > 0 && (
@@ -215,6 +237,11 @@ export default function LojaProdutos() {
                   <button type="button" className={`btn ${item.visivel ? 'btn-ghost' : 'btn-primary'}`} disabled={alternando === item.produto_id} onClick={() => alternar(item)}>
                     {alternando === item.produto_id ? 'Salvando...' : item.visivel ? 'Tirar da loja' : 'Mostrar na loja'}
                   </button>
+                  {(item.visivel || item.carrossel_novidades) && (
+                    <button type="button" className="btn btn-ghost" disabled={alternando === item.produto_id} onClick={() => alternarCarrossel(item)}>
+                      {item.carrossel_novidades ? 'Tirar do carrossel' : 'Pôr no carrossel'}
+                    </button>
+                  )}
                   <button type="button" className="btn btn-ghost" aria-expanded={aberto} onClick={() => abrirEdicao(item)}>
                     {aberto ? 'Fechar textos' : 'Editar textos'}
                   </button>

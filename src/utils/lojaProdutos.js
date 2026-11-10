@@ -2,6 +2,9 @@
 // A decisão de verdade é do backend: a loja só mostra a peça marcada que tem preço no canal online
 // (`aparece_na_loja`). Aqui só se traduz isso em linguagem de operação.
 
+// O carrossel de novidades da Home mostra no máximo este número de peças (o backend corta o resto).
+export const MAX_CARROSSEL = 6;
+
 export const LIMITES = { titulo: 160, descricao: 4000, materiais: 2000, cuidados: 2000, ordem: 100000 };
 
 /** Situação da peça na loja, em uma frase e um tom (para cor/ícone). */
@@ -22,6 +25,8 @@ export function avisosDaPeca(item) {
   }
   if (item.saldo_central <= 0) avisos.push('Sem estoque no Central: a peça aparece como indisponível.');
   if (item.fotos === 0) avisos.push('Sem foto: a loja mostra o símbolo da marca no lugar.');
+  if (item.carrossel_novidades && item.fotos === 0) avisos.push('Escolhida para o carrossel, mas sem foto: ela não entra no carrossel até ter foto.');
+  if (item.carrossel_novidades && !item.aparece_na_loja) avisos.push('Escolhida para o carrossel, mas não aparece na loja: ela não entra no carrossel.');
 
   return avisos;
 }

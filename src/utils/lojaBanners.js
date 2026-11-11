@@ -64,7 +64,7 @@ export function montarCorpoBanner(form) {
 export function temConteudo(form, banner) {
   return Boolean(
     form.usa_retrato || String(form.titulo).trim() || String(form.destaque).trim() || String(form.subtitulo).trim()
-    || banner?.imagem_esquerda || banner?.imagem_direita,
+    || banner?.imagem_esquerda || banner?.imagem_direita || banner?.imagem_centro,
   );
 }
 

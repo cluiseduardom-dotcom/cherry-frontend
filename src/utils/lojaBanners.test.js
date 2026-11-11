@@ -39,6 +39,7 @@ describe('temConteudo', () => {
     expect(temConteudo(formDoBanner({}), null)).toBe(false);
     expect(temConteudo({ ...formDoBanner({}), titulo: 'x' }, null)).toBe(true);
     expect(temConteudo(formDoBanner({}), { imagem_direita: 'https://f/1.webp' })).toBe(true);
+    expect(temConteudo(formDoBanner({}), { imagem_centro: 'https://f/2.webp' })).toBe(true);
     expect(temConteudo({ ...formDoBanner({}), usa_retrato: true }, null)).toBe(true);
   });
 });

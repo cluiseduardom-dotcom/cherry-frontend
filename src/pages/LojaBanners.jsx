@@ -10,8 +10,9 @@ import './LojaBanners.css';
 
 const ALTURA_IMAGEM = 1000;
 const LADOS = [
-  { id: 'esquerda', rotulo: 'Imagem da esquerda', ajuda: 'Na primeira faixa, use o retrato do dia (abaixo) e deixe esta vazia.' },
-  { id: 'direita', rotulo: 'Imagem da direita', ajuda: 'Ex.: as joias que a modelo está usando, ou a foto dos itens da promoção.' },
+  { id: 'esquerda', rotulo: 'Imagem da esquerda', ajuda: 'Na primeira faixa, use o retrato do dia (caixa acima) e deixe esta vazia.' },
+  { id: 'direita', rotulo: 'Imagem da direita', ajuda: 'Ex.: as joias que a modelo está usando.' },
+  { id: 'centro', rotulo: 'Imagem central (foto dos itens)', ajuda: 'Para as faixas de promoção: a foto dos itens no meio, com o texto dos lados e o destaque e o botão à direita. Quando existe, as imagens da esquerda e da direita não aparecem.' },
 ];
 
 function Imagem({ banner, lado, aoMudar }) {
@@ -286,7 +287,7 @@ export default function LojaBanners() {
         Os textos de promoção são decididos pela loja: nada é preenchido pelo sistema.
       </p>
       <p className="loja-produtos-aviso">
-        <strong>Sugestão de uso:</strong> faixa 1 com o <em>retrato do dia</em> à esquerda e a foto das joias que a modelo usa na direita; faixas 2 a 4 com a foto dos itens e o texto da promoção ou do recado.
+        <strong>Sugestão de uso:</strong> faixa 1 com o <em>retrato do dia</em> à esquerda (marque a caixa só nesta faixa) e a foto das joias que a modelo usa na <em>imagem da direita</em>; faixas 2 a 4 com a foto dos itens na <em>imagem central</em> e o texto da promoção ou do recado.
         Prefira imagens <strong>sem fundo</strong> (a tela tira sozinha o fundo liso, e você confere antes de enviar), com a peça bem visível.
       </p>
 

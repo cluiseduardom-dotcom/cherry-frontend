@@ -35,6 +35,7 @@ export const ALLOWED_ROLES_BY_PATH = {
   // Escolha das peças e textos da loja online: só admin (o backend exige admin em GET /loja-produtos e PUT /produtos/:id/loja).
   '/loja-online': ['admin'],
   '/loja-retratos': ['admin'],
+  '/loja-institucional': ['admin'],
   '/comissoes': ['admin', 'vendedor'],
   '/usuarios': ['admin'],
   '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
@@ -68,6 +69,7 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/pedidos-loja': 'loja_online',
   '/loja-online': 'loja_online',
   '/loja-retratos': 'loja_online',
+  '/loja-institucional': 'loja_online',
 };
 
 export const MENSAGEM_SEM_FUNCIONALIDADE = 'Funcionalidade não incluída no seu plano. Fale com a GiroNex.';

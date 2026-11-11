@@ -40,6 +40,7 @@ import PixADevolver from './pages/PixADevolver';
 import PedidosLoja from './pages/PedidosLoja';
 import LojaProdutos from './pages/LojaProdutos';
 import LojaRetratos from './pages/LojaRetratos';
+import LojaInstitucional from './pages/LojaInstitucional';
 import IndicadoresInsumosPage from './pages/IndicadoresInsumosPage';
 import DashboardCalculos from './pages/DashboardCalculos';
 import ContasPagar from './pages/ContasPagar';
@@ -82,6 +83,7 @@ const ROUTE_COMPONENTS = {
   '/pedidos-loja': PedidosLoja,
   '/loja-online': LojaProdutos,
   '/loja-retratos': LojaRetratos,
+  '/loja-institucional': LojaInstitucional,
   '/contas-pagar': ContasPagar,
   '/contas-receber': ContasReceber,
   '/ponto-equilibrio': PontoEquilibrio,

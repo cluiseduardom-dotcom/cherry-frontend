@@ -80,6 +80,22 @@ export default function LojaProdutos() {
     }
   }
 
+  async function alternarDestaque(item) {
+    if (!item.destaque_home && !window.confirm(`Definir "${item.nome}" como o destaque da Home?\n\nSó uma peça é o destaque: a que estava antes sai.`)) return;
+
+    setAlternando(item.produto_id);
+
+    try {
+      await salvarMarcacaoDaLoja(item.produto_id, { destaque_home: !item.destaque_home });
+      toast?.success?.(item.destaque_home ? `"${item.nome}" saiu do destaque.` : `"${item.nome}" é o destaque da Home.`);
+      recarregar();
+    } catch (e) {
+      toast?.error?.(e.message || 'Não foi possível alterar o destaque.');
+    } finally {
+      setAlternando(0);
+    }
+  }
+
   async function preencherEmLote() {
     const ok = window.confirm(
       'Copiar a descrição e o material do cadastro para as peças marcadas na loja que ainda estão sem esse texto?\n\n'
@@ -172,6 +188,11 @@ export default function LojaProdutos() {
         Veja as escolhidas na aba &quot;No carrossel&quot;.
       </p>
 
+      <p className="loja-produtos-aviso">
+        <strong>Destaque da Home:</strong> é a peça do momento, a que a loja quer vender com mais força, mostrada em uma área própria da página inicial.
+        Use o botão &quot;Definir como destaque&quot; (só uma peça por vez: ao escolher outra, a anterior sai). Sem peça escolhida, a Home usa sozinha uma peça disponível com foto.
+      </p>
+
       <form className="loja-produtos-filtros" onSubmit={buscar} role="search">
         <div className="loja-produtos-abas" role="group" aria-label="Filtro por situação">
           {FILTROS.map((f) => (
@@ -224,6 +245,7 @@ export default function LojaProdutos() {
                   <div><dt>Estoque (Central)</dt><dd>{item.saldo_central}</dd></div>
                   <div><dt>Fotos</dt><dd>{item.fotos}</dd></div>
                   <div><dt>Ordem</dt><dd>{item.ordem}</dd></div>
+                  <div><dt>Destaque da Home</dt><dd>{item.destaque_home ? 'Sim' : 'Não'}</dd></div>
                   <div><dt>Carrossel</dt><dd>{item.carrossel_novidades ? 'Escolhida' : 'Automático'}</dd></div>
                 </dl>
 
@@ -237,6 +259,11 @@ export default function LojaProdutos() {
                   <button type="button" className={`btn ${item.visivel ? 'btn-ghost' : 'btn-primary'}`} disabled={alternando === item.produto_id} onClick={() => alternar(item)}>
                     {alternando === item.produto_id ? 'Salvando...' : item.visivel ? 'Tirar da loja' : 'Mostrar na loja'}
                   </button>
+                  {(item.visivel || item.destaque_home) && (
+                    <button type="button" className={`btn ${item.destaque_home ? 'btn-primary' : 'btn-ghost'}`} disabled={alternando === item.produto_id} onClick={() => alternarDestaque(item)}>
+                      {item.destaque_home ? 'Tirar do destaque' : 'Definir como destaque'}
+                    </button>
+                  )}
                   {(item.visivel || item.carrossel_novidades) && (
                     <button type="button" className="btn btn-ghost" disabled={alternando === item.produto_id} onClick={() => alternarCarrossel(item)}>
                       {item.carrossel_novidades ? 'Tirar do carrossel' : 'Pôr no carrossel'}

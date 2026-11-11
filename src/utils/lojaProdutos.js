@@ -27,6 +27,8 @@ export function avisosDaPeca(item) {
   if (item.fotos === 0) avisos.push('Sem foto: a loja mostra o símbolo da marca no lugar.');
   if (item.carrossel_novidades && item.fotos === 0) avisos.push('Escolhida para o carrossel, mas sem foto: ela não entra no carrossel até ter foto.');
   if (item.carrossel_novidades && !item.aparece_na_loja) avisos.push('Escolhida para o carrossel, mas não aparece na loja: ela não entra no carrossel.');
+  if (item.destaque_home && item.fotos === 0) avisos.push('É o destaque da Home, mas está sem foto: o destaque só aparece com foto (enquanto isso a Home usa a peça automática).');
+  if (item.destaque_home && !item.aparece_na_loja) avisos.push('É o destaque da Home, mas não aparece na loja (falta preço no canal online): o destaque não aparece.');
 
   return avisos;
 }

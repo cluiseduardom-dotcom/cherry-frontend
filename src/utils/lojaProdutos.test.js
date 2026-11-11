@@ -32,6 +32,11 @@ describe('avisosDaPeca', () => {
     expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: false, carrossel_novidades: true, preco_online: null })).join(' ')).toMatch(/carrossel.*não aparece na loja/);
     expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: true, carrossel_novidades: true }))).toEqual([]);
   });
+  it('destaque da Home sem foto ou fora da loja: avisa que não aparece', () => {
+    expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: true, destaque_home: true, fotos: 0 })).join(' ')).toMatch(/destaque.*sem foto/);
+    expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: false, destaque_home: true, preco_online: null })).join(' ')).toMatch(/destaque.*não aparece/);
+    expect(avisosDaPeca(peca({ visivel: true, aparece_na_loja: true, destaque_home: true }))).toEqual([]);
+  });
   it('sem estoque e sem foto: avisos separados, sem bloquear', () => {
     const avisos = avisosDaPeca(peca({ saldo_central: 0, fotos: 0 }));
     expect(avisos).toHaveLength(2);

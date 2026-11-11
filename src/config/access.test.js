@@ -442,3 +442,13 @@ describe('Loja online: institucional (/loja-institucional)', () => {
     expect(canAccessRoute('/loja-institucional', { role: 'vendedor', funcionalidades: ['loja_online'] })).toBe(false);
   });
 });
+
+describe('Loja online: faixas da Home (/loja-banners)', () => {
+  it('só admin, e só com a funcionalidade loja_online ligada', () => {
+    expect(ALLOWED_ROLES_BY_PATH['/loja-banners']).toEqual(['admin']);
+    expect(FUNCIONALIDADE_POR_ROTA['/loja-banners']).toBe('loja_online');
+    expect(canAccessRoute('/loja-banners', { role: 'admin', funcionalidades: ['loja_online'] })).toBe(true);
+    expect(canAccessRoute('/loja-banners', { role: 'admin', funcionalidades: [] })).toBe(false);
+    expect(canAccessRoute('/loja-banners', { role: 'vendedor', funcionalidades: ['loja_online'] })).toBe(false);
+  });
+});

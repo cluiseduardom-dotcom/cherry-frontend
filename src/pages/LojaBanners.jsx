@@ -10,9 +10,9 @@ import './LojaBanners.css';
 
 const ALTURA_IMAGEM = 1000;
 const LADOS = [
-  { id: 'esquerda', rotulo: 'Imagem da esquerda', ajuda: 'Na primeira faixa, use o retrato do dia (caixa acima) e deixe esta vazia.' },
-  { id: 'direita', rotulo: 'Imagem da direita', ajuda: 'Ex.: as joias que a modelo está usando.' },
-  { id: 'centro', rotulo: 'Imagem central (foto dos itens)', ajuda: 'Para as faixas de promoção: a foto dos itens no meio, com o texto dos lados e o destaque e o botão à direita. Quando existe, as imagens da esquerda e da direita não aparecem.' },
+  { id: 'esquerda', rotulo: 'Imagem da esquerda', ajuda: 'Ex.: as joias que a modelo está usando. Com a caixa da modelo marcada, a imagem aparece à esquerda e a modelo à direita.' },
+  { id: 'direita', rotulo: 'Imagem da direita', ajuda: 'Use só em faixas sem a modelo. Com a caixa da modelo marcada, esta imagem passa a aparecer à esquerda.' },
+  { id: 'centro', rotulo: 'Imagem central (foto dos itens)', ajuda: 'Para as faixas de promoção: só a foto dos itens, no centro, com todo o texto à esquerda. Quando existe, as outras imagens e a modelo não aparecem.' },
 ];
 
 function Imagem({ banner, lado, aoMudar }) {
@@ -189,7 +189,7 @@ function Cartao({ banner, indice, total, aoMudar, aoRemover, aoMover }) {
 
       <label className="loja-banners-retrato">
         <input type="checkbox" checked={form.usa_retrato} onChange={campo('usa_retrato')} />
-        <span>Mostrar o <strong>retrato do dia</strong> à esquerda (a pessoa da tela &quot;Retratos da Home&quot;, só com a autorização confirmada)</span>
+        <span>Mostrar a <strong>modelo (retrato do dia)</strong> à direita, com as joias à esquerda (a pessoa da tela &quot;Retratos da Home&quot;, só com a autorização confirmada). <strong>Marque só na faixa 1.</strong></span>
       </label>
 
       <div className="loja-banners-imagens">
@@ -287,8 +287,8 @@ export default function LojaBanners() {
         Os textos de promoção são decididos pela loja: nada é preenchido pelo sistema.
       </p>
       <p className="loja-produtos-aviso">
-        <strong>Sugestão de uso:</strong> faixa 1 com o <em>retrato do dia</em> à esquerda (marque a caixa só nesta faixa) e a foto das joias que a modelo usa na <em>imagem da direita</em>; faixas 2 a 4 com a foto dos itens na <em>imagem central</em> e o texto da promoção ou do recado.
-        Prefira imagens <strong>sem fundo</strong> (a tela tira sozinha o fundo liso, e você confere antes de enviar), com a peça bem visível.
+        <strong>Sugestão de uso:</strong> faixa 1 com a <em>modelo</em> à direita (marque a caixa só nesta faixa) e a foto das joias que ela usa em uma das imagens (aparece à esquerda); faixas 2 a 4 sem a modelo, com a foto dos itens na <em>imagem central</em> e todo o texto da promoção ou do recado à esquerda.
+        Prefira imagens <strong>sem fundo e sem moldura</strong> (a tela tira sozinha o fundo liso e você confere antes de enviar). Fotos de produto com moldura ou marca d&apos;água têm a borda aparada e as pontas suavizadas no site, mas o ideal é enviar a joia recortada.
       </p>
 
       {erro && <div className="loja-produtos-erro" role="alert">{erro}</div>}

@@ -5,7 +5,7 @@
 export const ESTRUTURA_MENU = [
   { tipo: 'item', path: '/' },
   { tipo: 'item', path: '/venda' },
-  { tipo: 'grupo', id: 'vendas', label: 'Vendas', itens: ['/historico', '/clientes', '/pedidos-loja', '/loja-online', '/loja-retratos', '/loja-institucional', '/minha-maleta'] },
+  { tipo: 'grupo', id: 'vendas', label: 'Vendas', itens: ['/historico', '/clientes', '/pedidos-loja', '/loja-online', '/loja-retratos', '/loja-institucional', '/loja-banners', '/minha-maleta'] },
   {
     tipo: 'grupo',
     id: 'estoque',

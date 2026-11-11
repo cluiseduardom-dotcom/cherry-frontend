@@ -29,6 +29,7 @@ import {
   Store,
   Image as ImageIcon,
   BookOpen,
+  LayoutTemplate,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -58,6 +59,7 @@ const ITEMS = [
   { path: '/loja-online', label: 'Loja online', sub: 'Escolher as peças e os textos da loja', icon: Store },
   { path: '/loja-retratos', label: 'Retratos da Home', sub: 'Fotos da abertura da loja e autorização de uso de imagem', icon: ImageIcon },
   { path: '/loja-institucional', label: 'Institucional da loja', sub: 'História, serviços, atendimento, redes sociais e dados da empresa', icon: BookOpen },
+  { path: '/loja-banners', label: 'Faixas da Home', sub: 'Faixas rotativas com promoções, recados e fotos', icon: LayoutTemplate },
   { path: '/pix-a-devolver', label: 'Pix a devolver', sub: 'Devolver Pix pago ao pagador', icon: Undo2 },
   { path: '/ponto-equilibrio', label: 'Ponto de Equilíbrio', sub: 'Analisar necessidade de faturamento', icon: Target },
   { path: '/despesas-fixas', label: 'Despesas Fixas', sub: 'Gerenciar custos recorrentes', icon: Receipt },

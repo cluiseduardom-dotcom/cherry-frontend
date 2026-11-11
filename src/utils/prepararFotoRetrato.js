@@ -30,13 +30,13 @@ async function codificar(canvas) {
 }
 
 /** Devolve { arquivo, semFundo, acao, largura, altura }. `semFundo` só existe quando o fundo liso foi removido. */
-export async function prepararFotoRetrato(arquivo) {
+export async function prepararFotoRetrato(arquivo, { alturaMaxima: alturaInicial = ALTURA_MAXIMA } = {}) {
   if (!arquivo || !/^image\/(jpeg|png|webp)$/.test(arquivo.type)) {
     throw new Error('Envie uma foto JPEG, PNG ou WebP.');
   }
 
   const img = await carregar(arquivo);
-  let alturaMaxima = ALTURA_MAXIMA;
+  let alturaMaxima = alturaInicial;
 
   for (let tentativa = 0; tentativa < 4; tentativa += 1) {
     const { largura, altura } = tamanhoReduzido(img.naturalWidth, img.naturalHeight, alturaMaxima);

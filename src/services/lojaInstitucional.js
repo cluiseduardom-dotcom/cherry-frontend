@@ -5,7 +5,7 @@ import { apiFetch } from './api';
 //   PUT /loja-institucional   estrito: campo ausente não muda; texto vazio limpa
 export const CAMPOS_INSTITUCIONAL = [
   'historia', 'fundadora_nome', 'servicos', 'atendimento', 'horario_atendimento', 'email_contato', 'whatsapp',
-  'instagram_url', 'facebook_url', 'tiktok_url', 'razao_social', 'cnpj', 'endereco',
+  'instagram_url', 'facebook_url', 'tiktok_url', 'razao_social', 'cnpj', 'endereco', 'avisos',
 ];
 
 export async function buscarInstitucional() {

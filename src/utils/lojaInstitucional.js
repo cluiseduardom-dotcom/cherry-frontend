@@ -3,7 +3,7 @@ import { CAMPOS_INSTITUCIONAL } from '../services/lojaInstitucional';
 
 export const LIMITES_INST = {
   historia: 6000, fundadora_nome: 120, servicos: 1500, atendimento: 1000, horario_atendimento: 200,
-  email_contato: 160, razao_social: 160, endereco: 300,
+  email_contato: 160, razao_social: 160, endereco: 300, avisos: 600,
 };
 
 const REDES = {
@@ -52,6 +52,10 @@ export function cnpjValido(texto) {
 
 /** Mensagem do primeiro problema do formulário, ou '' se estiver ok. */
 export function validarInstitucional(form) {
+  const avisos = String(form.avisos ?? '').split('\n').map((l) => l.trim()).filter(Boolean);
+  if (avisos.length > 5) return 'São no máximo 5 avisos (um por linha).';
+  if (avisos.some((a) => a.length > 100)) return 'Cada aviso deve ter no máximo 100 caracteres.';
+
   for (const [campo, limite] of Object.entries(LIMITES_INST)) {
     if (String(form[campo] ?? '').trim().length > limite) return `Um dos textos passou de ${limite} caracteres (${campo.replace(/_/g, ' ')}).`;
   }

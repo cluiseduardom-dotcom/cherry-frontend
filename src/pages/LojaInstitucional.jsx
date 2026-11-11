@@ -94,6 +94,12 @@ export default function LojaInstitucional() {
           </section>
 
           <section className="card card-padding" style={{ marginTop: 'var(--space-4)' }}>
+            <h2 className="loja-produtos-nome">Faixa de avisos (sob o banner da página inicial)</h2>
+            <p className="text-sm text-secondary">Frete, parcelamento, promoções... o que a loja decidir. Um aviso por linha, até 5, curtos (até 100 caracteres). Sem aviso, a faixa não aparece.</p>
+            {area('avisos', 'Avisos (um por linha)', 5)}
+          </section>
+
+          <section className="card card-padding" style={{ marginTop: 'var(--space-4)' }}>
             <h2 className="loja-produtos-nome">Atendimento</h2>
             {texto('whatsapp', 'WhatsApp (com DDD; aparece na aba Ajuda e no rodapé)', { placeholder: '11 99999-9999', inputMode: 'tel' })}
             {texto('email_contato', 'E-mail de atendimento', { inputMode: 'email' })}

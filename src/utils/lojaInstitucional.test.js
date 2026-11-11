@@ -15,7 +15,7 @@ describe('formDoInstitucional / montarCorpoInstitucional', () => {
   });
   it('o corpo só tem os campos que o backend aceita', () => {
     expect(Object.keys(montarCorpoInstitucional({ empresa_id: 9, preco: 1 })).sort()).toEqual(
-      ['atendimento', 'cnpj', 'email_contato', 'endereco', 'facebook_url', 'fundadora_nome', 'historia', 'horario_atendimento', 'instagram_url', 'razao_social', 'servicos', 'tiktok_url', 'whatsapp'],
+      ['atendimento', 'avisos', 'cnpj', 'email_contato', 'endereco', 'facebook_url', 'fundadora_nome', 'historia', 'horario_atendimento', 'instagram_url', 'razao_social', 'servicos', 'tiktok_url', 'whatsapp'],
     );
   });
 });
@@ -59,6 +59,9 @@ describe('validarInstitucional', () => {
     expect(validarInstitucional({ email_contato: 'sem-arroba' })).toMatch(/E-mail/);
     expect(validarInstitucional({ whatsapp: '123' })).toMatch(/WhatsApp/);
     expect(validarInstitucional({ cnpj: '11222333000182' })).toMatch(/CNPJ/);
+    expect(validarInstitucional({ avisos: 'a\nb\nc\nd\ne\nf' })).toMatch(/5 avisos/);
+    expect(validarInstitucional({ avisos: 'x'.repeat(101) })).toMatch(/100 caracteres/);
+    expect(validarInstitucional({ avisos: 'Frete combinado\n\nPix ou cartão' })).toBe('');
   });
   it('aceita WhatsApp com e sem o 55 e com máscara', () => {
     expect(validarInstitucional({ whatsapp: '(11) 99999-0000' })).toBe('');

@@ -83,6 +83,12 @@ describe('avisos da loja online', () => {
   it('têm rótulo próprio', () => {
     expect(rotulo('loja_pedido_pago')).toBe('Pedido da loja pago');
     expect(rotulo('loja_pagamento_sem_venda')).toBe('Pagamento da loja sem venda');
+    expect(rotulo('loja_pagamento_estornado')).toBe('Pagamento da loja estornado');
+  });
+
+  it('pagamento estornado leva à fila de pedidos da loja', () => {
+    expect(destino({ tipo: 'loja_pagamento_estornado' }, false, true)).toBe('/pedidos-loja');
+    expect(destino({ tipo: 'loja_pagamento_estornado' }, true)).toBe('/pedidos-loja');
   });
 
   it('pedido pago leva à fila de pedidos da loja, para qualquer perfil', () => {

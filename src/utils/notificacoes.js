@@ -62,6 +62,7 @@ const ROTULO_TIPO = {
   maleta_divergencia: 'Diferença na conferência',
   loja_pedido_pago: 'Pedido da loja pago',
   loja_pagamento_sem_venda: 'Pagamento da loja sem venda',
+  loja_pagamento_estornado: 'Pagamento da loja estornado',
 };
 
 export function rotuloDoTipo(tipo) {
@@ -72,7 +73,7 @@ export function rotuloDoTipo(tipo) {
 const TIPOS_MALETA = ['transferencia_pendente', 'maleta_sem_conferencia', 'maleta_sem_venda', 'maleta_divergencia'];
 
 // Para onde o aviso leva: telas de estoque para quem gere estoque; catálogo para os demais.
-const TIPOS_LOJA = ['loja_pedido_pago', 'loja_pagamento_sem_venda'];
+const TIPOS_LOJA = ['loja_pedido_pago', 'loja_pagamento_sem_venda', 'loja_pagamento_estornado'];
 
 export function destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver = false) {
   // Loja online: pedido pago vai à fila de contato; pagamento sem venda vai à devolução (quem pode) ou à fila de pedidos.

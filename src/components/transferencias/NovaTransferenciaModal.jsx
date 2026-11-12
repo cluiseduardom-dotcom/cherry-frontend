@@ -13,6 +13,7 @@ import { formularioAlterado } from '../../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../ConfirmarDescarteDialog';
 import '../ProductModal.css';
 import '../usuarios/CamposFormulario.css';
+import SeletorProduto from '../SeletorProduto';
 import './Transferencias.css';
 
 // Equipe: qualquer rota entre locais. Vendedor: só devolver da própria maleta ao Central
@@ -184,17 +185,15 @@ export default function NovaTransferenciaModal({ open, locais, user, atalho = nu
               <div className="input-wrapper modal-form-span-2">
                 <label className="input-label" htmlFor="nt-produto">Produtos *</label>
                 <div className="transf-add">
-                  <select id="nt-produto" className="input-field" value={produtoEscolhido} disabled={saving || !form.origem || carregandoSaldos}
-                    onChange={e => setProdutoEscolhido(e.target.value)}>
-                    <option value="">
-                      {!form.origem ? 'Escolha a origem primeiro' : carregandoSaldos ? 'Carregando...' : disponiveis.length ? 'Selecione um produto' : 'Sem produtos com saldo'}
-                    </option>
-                    {disponiveis.map(s => (
-                      <option key={s.produto_id} value={s.produto_id}>
-                        {s.nome}{s.sku ? ` (${s.sku})` : ''} — saldo: {s.saldo}
-                      </option>
-                    ))}
-                  </select>
+                  <SeletorProduto
+                    id="nt-produto"
+                    produtos={disponiveis.map(s => ({ id: s.produto_id, nome: s.nome, sku: s.sku, estoque_atual: s.saldo }))}
+                    value={String(produtoEscolhido ?? '')}
+                    onChange={setProdutoEscolhido}
+                    rotuloEstoque="Saldo"
+                    disabled={saving || !form.origem || carregandoSaldos}
+                    placeholder={!form.origem ? 'Escolha a origem primeiro' : carregandoSaldos ? 'Carregando...' : disponiveis.length ? 'Digite o nome ou o código do produto' : 'Sem produtos com saldo'}
+                  />
                   <button type="button" className="btn btn-secondary" onClick={adicionar} disabled={saving || !produtoEscolhido}>
                     <Plus size={16} /> Adicionar
                   </button>

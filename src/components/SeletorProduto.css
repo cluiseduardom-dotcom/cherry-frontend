@@ -12,7 +12,7 @@
 .seletor-produto-limpar:hover { background: var(--color-bg-hover); color: var(--color-text-primary); }
 
 .seletor-produto-lista {
-  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+  position: fixed; z-index: 1000;
   max-height: 280px; overflow-y: auto; margin: 0; padding: 4px; list-style: none;
   background: var(--color-bg-card); border: 1px solid var(--color-border);
   border-radius: var(--radius-md); box-shadow: var(--shadow-modal);

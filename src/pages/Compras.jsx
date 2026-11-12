@@ -15,6 +15,7 @@ import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import { useToast } from '../context/ToastContext';
 import { formatarMoeda as money } from '../utils/mascaras';
+import SeletorProduto from '../components/SeletorProduto';
 import './Compras.css';
 
 const today = () => new Date().toLocaleDateString('en-CA');
@@ -476,10 +477,7 @@ export default function Compras() {
                     <div className="compra-field compra-item-product">
                       <label>Produto *</label>
                       <div className="compra-item-product-row">
-                        <select className="input-field" value={item.produto_id} onChange={e => updateItem(index, 'produto_id', e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {produtos.map(p => <option key={p.id} value={p.id}>{p.sku ? p.sku + ' — ' : ''}{p.nome}</option>)}
-                        </select>
+                        <SeletorProduto produtos={produtos} value={String(item.produto_id ?? '')} onChange={id => updateItem(index, 'produto_id', id)} mostrarEstoque={false} />
                       </div>
                     </div>
                     <div className="compra-field">

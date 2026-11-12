@@ -48,6 +48,17 @@ describe('buscarProdutos', () => {
     expect(ids(buscarProdutos(lista, 'anel'))).toEqual([11, 10]);
   });
 
+  it('a frase digitada inteira vem antes de acertos soltos, e números seguem ordem natural', () => {
+    const lista = [
+      { id: 1, nome: 'Brinco modelo 125', sku: 'B-125' },
+      { id: 2, nome: 'Brinco modelo 25', sku: 'B-25' },
+      { id: 3, nome: 'Brinco modelo 250', sku: 'B-250' },
+      { id: 4, nome: 'Brinco 25 modelo', sku: 'B-X' },
+    ];
+    expect(ids(buscarProdutos(lista, 'modelo 25'))).toEqual([2, 3, 4, 1]);
+    expect(ids(buscarProdutos(lista, 'brinco'))).toEqual([4, 2, 1, 3]);
+  });
+
   it('limita os resultados mas informa quantos combinam', () => {
     const muitos = Array.from({ length: 1000 }, (_, i) => ({ id: i + 1, nome: `Anel ${String(i).padStart(4, '0')}`, sku: `ANE-${i}` }));
     const r = buscarProdutos(muitos, 'anel');

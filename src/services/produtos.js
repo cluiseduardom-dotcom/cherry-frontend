@@ -6,6 +6,23 @@ export async function listarProdutos({ canal = 'loja_fisica', page = 1, pageSize
   return body.data;
 }
 
+// Todos os produtos, juntando as páginas (o servidor entrega no máximo 100 por página). Telas que montam lista,
+// busca ou contagem sobre o catálogo inteiro usam esta; com uma página só, o que passa de 100 sumiria.
+export async function listarTodosProdutos({ canal = 'loja_fisica' } = {}) {
+  let page = 1;
+  let totalPages = 1;
+  let items = [];
+
+  do {
+    const dados = await listarProdutos({ canal, page, pageSize: 100 });
+    items = items.concat(dados.items ?? []);
+    totalPages = dados.totalPages ?? 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  return { items, total: items.length };
+}
+
 export async function buscarProduto(id) {
   const body = await apiFetch(`/produtos/${id}`);
   return body.data;

@@ -96,8 +96,10 @@ const ROTAS_SEM_ITEM_PROPRIO = ['/mais', '/dashboard/calculos', '/compras/recebi
 // para lowStockCount/outCount. Aqui replicamos a mesma regra (não criamos
 // endpoint novo nem mudamos o que conta como "baixo"/"esgotado") só para
 // decompor a contagem única em dois alertas semanticamente distintos.
-export function contarAlertasEstoque(alertas) {
-  const lista = Array.isArray(alertas) ? alertas : [];
+// O aviso leva à tela Estoque, que só mostra produtos (insumos têm tela própria): insumo não entra na contagem,
+// senão o menu mostraria itens que a tela não lista. Alerta sem `tipo` (servidor antigo) conta como produto.
+export function contarAlertasEstoque(alertasBrutos) {
+  const lista = (Array.isArray(alertasBrutos) ? alertasBrutos : []).filter(a => a?.tipo !== 'insumo');
   return {
     baixo: lista.filter(a => Number(a.estoque_atual) > 0).length,
     esgotado: lista.filter(a => Number(a.estoque_atual) === 0).length,

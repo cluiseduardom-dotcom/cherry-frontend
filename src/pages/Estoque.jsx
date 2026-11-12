@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, AlertTriangle, Package, MapPin, Tag } from 'lucide-react';
-import { listarProdutos } from '../services/produtos';
+import { listarTodosProdutos } from '../services/produtos';
 import { apiFetch } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
@@ -100,7 +100,7 @@ export default function Estoque({ tipo = 'acabado' }) {
       setError('');
       try {
         const [produtosData, alertasData] = await Promise.all([
-          listarProdutos({ canal: 'loja_fisica' }),
+          listarTodosProdutos({ canal: 'loja_fisica' }),
           apiFetch('/produtos/estoque-baixo').then(body => body.data),
         ]);
         if (!cancelled) {

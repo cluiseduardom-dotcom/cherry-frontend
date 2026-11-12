@@ -10,9 +10,9 @@ import './LojaBanners.css';
 
 const ALTURA_IMAGEM = 1000;
 const LADOS = [
-  { id: 'esquerda', rotulo: 'Imagem da esquerda', ajuda: 'Ex.: as joias que a modelo está usando. Com a caixa da modelo marcada, a imagem aparece à esquerda e a modelo à direita.' },
-  { id: 'direita', rotulo: 'Imagem da direita', ajuda: 'Use só em faixas sem a modelo. Com a caixa da modelo marcada, esta imagem passa a aparecer à esquerda.' },
-  { id: 'centro', rotulo: 'Imagem central (foto dos itens)', ajuda: 'Para as faixas de promoção: só a foto dos itens, no centro, com todo o texto à esquerda. Quando existe, as outras imagens e a modelo não aparecem.' },
+  { id: 'esquerda', rotulo: 'Imagem 1 (peça)', ajuda: 'Faixa 1 com a modelo: a peça aparece à esquerda e a modelo à direita. Nas outras faixas: peças juntas no centro, com o texto à esquerda.' },
+  { id: 'direita', rotulo: 'Imagem 2 (peça)', ajuda: 'Segunda peça. Nas faixas sem a modelo, aparece ao lado da primeira, no centro. Na faixa 1 com a modelo, só a Imagem 1 é usada.' },
+  { id: 'centro', rotulo: 'Imagem 3 (foto dos itens)', ajuda: 'Opcional: mais uma foto (por exemplo, a foto dos itens da promoção), mostrada junto das outras no centro.' },
 ];
 
 function Imagem({ banner, lado, aoMudar }) {
@@ -187,10 +187,14 @@ function Cartao({ banner, indice, total, aoMudar, aoRemover, aoMover }) {
         </label>
       </div>
 
+      {indice === 0 ? (
       <label className="loja-banners-retrato">
         <input type="checkbox" checked={form.usa_retrato} onChange={campo('usa_retrato')} />
-        <span>Mostrar a <strong>modelo (retrato do dia)</strong> à direita, com as joias à esquerda (a pessoa da tela &quot;Retratos da Home&quot;, só com a autorização confirmada). <strong>Marque só na faixa 1.</strong></span>
+        <span>Mostrar a <strong>modelo (retrato do dia)</strong> à direita, com as joias à esquerda (a pessoa da tela &quot;Retratos da Home&quot;, só com a autorização confirmada). A modelo só aparece na faixa 1.</span>
       </label>
+      ) : (
+        <p className="loja-banners-retrato">Nesta faixa aparecem só as peças, no centro, e o texto à esquerda. A modelo aparece apenas na faixa 1.</p>
+      )}
 
       <div className="loja-banners-imagens">
         {LADOS.map((l) => <Imagem key={l.id} banner={banner} lado={l} aoMudar={aoMudar} />)}

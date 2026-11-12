@@ -24,3 +24,4 @@
 .transf-bipar { margin-top: var(--space-2); width: 100%; min-height: 46px; gap: var(--space-2); }
 .transf-total { margin: 0 0 var(--space-2); font-weight: 700; color: var(--color-text-primary); }
 .transf-aceitar { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-weight: 600; }
+.transf-add .seletor-produto { flex: 1; min-width: 180px; }

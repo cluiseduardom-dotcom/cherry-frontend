@@ -193,3 +193,4 @@
   .compra-item-row { grid-template-columns: 1fr 1fr; }
   .compra-item-product { grid-column:1 / -1; }
 }
+.compra-item-product-row .seletor-produto { flex: 1; min-width: 0; }

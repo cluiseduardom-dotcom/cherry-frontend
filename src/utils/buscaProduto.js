@@ -1,7 +1,8 @@
 // Busca de produto para seletores com digitação (lógica pura, sem React).
 // Regras: ignora maiúsculas, acentos e espaços repetidos; a busca por várias palavras exige TODAS
 // (ex.: "anel zirc" acha "Anel regulável com zircônias"); acha por nome ou por código (SKU / código de barras).
-// Ordem: código exato, código começando com o digitado, nome começando com o digitado, depois o resto por nome.
+// Ordem: código exato, código começando com o digitado, nome começando com o digitado, nome contendo a frase
+// digitada inteira, depois o resto; dentro de cada grupo, por nome com números em ordem natural (2 antes de 10).
 
 export const LIMITE_RESULTADOS = 50;
 
@@ -25,8 +26,9 @@ function pontuar(p, termos, consulta) {
   if (codigos.some((c) => c === consulta)) return 0;
   if (codigos.some((c) => c.startsWith(consulta))) return 1;
   if (nome.startsWith(consulta)) return 2;
+  if (nome.includes(consulta)) return 3;
 
-  return 3;
+  return 4;
 }
 
 /**
@@ -40,11 +42,11 @@ export function buscarProdutos(produtos, consulta, limite = LIMITE_RESULTADOS) {
 
   const combinados = [];
   for (const p of lista) {
-    const pontos = termos.length ? pontuar(p, termos, q) : 3;
+    const pontos = termos.length ? pontuar(p, termos, q) : 4;
     if (pontos !== null) combinados.push({ p, pontos });
   }
 
-  combinados.sort((a, b) => a.pontos - b.pontos || String(a.p.nome).localeCompare(String(b.p.nome), 'pt-BR'));
+  combinados.sort((a, b) => a.pontos - b.pontos || String(a.p.nome).localeCompare(String(b.p.nome), 'pt-BR', { numeric: true }));
 
   return { itens: combinados.slice(0, limite).map((c) => c.p), total: combinados.length };
 }

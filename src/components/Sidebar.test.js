@@ -34,4 +34,14 @@ describe('contarAlertasEstoque', () => {
     ];
     expect(contarAlertasEstoque(alertas)).toEqual({ baixo: 1, esgotado: 0 });
   });
+
+  it('insumos não entram na contagem (a tela Estoque só lista produtos); sem `tipo` conta como produto', () => {
+    const alertas = [
+      { id: 1, estoque_atual: 0, estoque_minimo: 5, tipo: 'acabado' },
+      { id: 2, estoque_atual: 0, estoque_minimo: 5, tipo: 'insumo' },
+      { id: 3, estoque_atual: 1, estoque_minimo: 5, tipo: 'insumo' },
+      { id: 4, estoque_atual: 1, estoque_minimo: 5 },
+    ];
+    expect(contarAlertasEstoque(alertas)).toEqual({ baixo: 1, esgotado: 1 });
+  });
 });

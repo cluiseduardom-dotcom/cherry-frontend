@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Eye, X, Trash2, ShoppingCart, PackageCheck, Ban, ClipboardList } from 'lucide-react';
 import { listarCompras, criarCompra, cancelarCompra } from '../services/compras';
 import { listarFornecedores } from '../services/fornecedores';
-import { listarProdutos } from '../services/produtos';
+import { listarTodosProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
 import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
@@ -144,7 +144,7 @@ export default function Compras() {
           data_ate: filtrosParaCarregar.data_ate || undefined,
         }),
         listarFornecedores({ pageSize: 100 }),
-        listarProdutos({ canal: 'loja_fisica', pageSize: 100 }),
+        listarTodosProdutos({ canal: 'loja_fisica' }),
       ]);
       setCompras(c.items || []);
       setFornecedores(f.items || []);

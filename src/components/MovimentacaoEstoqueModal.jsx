@@ -14,6 +14,7 @@ import {
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
+import SeletorProduto from './SeletorProduto';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -122,19 +123,12 @@ export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose
             <div className="modal-form-grid">
               <div className="input-wrapper modal-form-span-2">
                 <label className="input-label" htmlFor="mm-produto">Produto *</label>
-                <select
+                <SeletorProduto
                   id="mm-produto"
-                  className="input-field"
+                  produtos={produtos}
                   value={form.produtoId}
-                  onChange={e => updateField('produtoId', e.target.value)}
-                >
-                  <option value="">Selecione um produto</option>
-                  {produtos.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.nome} {p.sku ? `(${p.sku})` : ''} — estoque atual: {p.estoque_atual}
-                    </option>
-                  ))}
-                </select>
+                  onChange={id => updateField('produtoId', id)}
+                />
                 {produtoSelecionado && (
                   <span className="modal-field-hint">Estoque atual: {produtoSelecionado.estoque_atual}</span>
                 )}

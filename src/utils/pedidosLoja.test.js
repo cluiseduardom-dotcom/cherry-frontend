@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { esperaCritica, formatarTelefone, linkWhatsApp, resumoDosItens, tempoDesde } from './pedidosLoja';
+import { dadosDoPresente, esperaCritica, formatarTelefone, linkWhatsApp, resumoDosItens, tempoDesde } from './pedidosLoja';
 
 describe('linkWhatsApp', () => {
   it('número brasileiro de 11 e de 10 dígitos ganha o 55', () => {
@@ -59,5 +59,20 @@ describe('resumoDosItens', () => {
   it('uma linha com quantidade e nome; lista inválida vira vazio', () => {
     expect(resumoDosItens([{ nome: 'Brinco', quantidade: 2 }, { nome: 'Colar', quantidade: 1 }])).toBe('2 × Brinco, 1 × Colar');
     expect(resumoDosItens(null)).toBe('');
+  });
+});
+
+describe('dadosDoPresente', () => {
+  it('pedido comum (ou sem o campo) não é presente', () => {
+    expect(dadosDoPresente({})).toBeNull();
+    expect(dadosDoPresente({ presente: false, mensagem_cartao: 'x' })).toBeNull();
+    expect(dadosDoPresente(undefined)).toBeNull();
+  });
+
+  it('presente com e sem mensagem; só `true` de verdade conta', () => {
+    expect(dadosDoPresente({ presente: true, mensagem_cartao: ' Feliz aniversário ' })).toEqual({ cartao: 'Feliz aniversário' });
+    expect(dadosDoPresente({ presente: true, mensagem_cartao: null })).toEqual({ cartao: null });
+    expect(dadosDoPresente({ presente: true, mensagem_cartao: '   ' })).toEqual({ cartao: null });
+    expect(dadosDoPresente({ presente: 'true' })).toBeNull();
   });
 });

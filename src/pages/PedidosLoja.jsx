@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, PackageCheck, RefreshCw } from 'lucide-react
 import { useToast } from '../context/ToastContext';
 import { listarPedidosLoja, marcarEntregaCombinada } from '../services/pedidosLoja';
 import { formatarMoeda } from '../utils/mascaras';
-import { esperaCritica, formatarTelefone, linkWhatsApp, resumoDosItens, tempoDesde } from '../utils/pedidosLoja';
+import { dadosDoPresente, esperaCritica, formatarTelefone, linkWhatsApp, resumoDosItens, tempoDesde } from '../utils/pedidosLoja';
 import './PedidosLoja.css';
 
 const POR_PAGINA = 20;
@@ -117,6 +117,7 @@ export default function PedidosLoja() {
           {dados.itens.map((p) => {
             const whatsapp = linkWhatsApp(p.cliente.telefone, p.codigo_curto);
             const critico = aba === 'a_combinar' && esperaCritica(p.pago_em);
+            const presente = dadosDoPresente(p);
 
             return (
               <li key={p.codigo} className={`pedidos-loja-item card card-padding${critico ? ' critico' : ''}`}>
@@ -135,6 +136,12 @@ export default function PedidosLoja() {
                 </div>
 
                 <p className="pedidos-loja-itens">{resumoDosItens(p.itens)}</p>
+                {presente && (
+                  <div className="pedidos-loja-presente">
+                    <strong>Presente: embalar</strong>
+                    {presente.cartao ? <p className="pedidos-loja-cartao">Cartão: “{presente.cartao}”</p> : <p className="pedidos-loja-cartao">Sem mensagem no cartão.</p>}
+                  </div>
+                )}
                 <p className={`pedidos-loja-quando${critico ? ' critico' : ''}`}>
                   Pago {tempoDesde(p.pago_em)}
                   {p.entrega_combinada_em && ` · entrega combinada ${tempoDesde(p.entrega_combinada_em)}`}

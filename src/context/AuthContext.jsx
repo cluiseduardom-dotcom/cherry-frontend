@@ -3,6 +3,7 @@ import { setAuthBridge } from '../services/api';
 import { buscarMe, formatarUsuario, loginRequest } from '../services/auth';
 import { carregarSessao, limparSessao, salvarSessao } from '../services/authSession';
 import { podeComCapacidade } from '../config/access';
+import { decidirRenovacao, lerTempos, renovarSessao } from '../services/sessaoRenovavel';
 
 const AuthContext = createContext(null);
 
@@ -70,6 +71,48 @@ export function AuthProvider({ children }) {
       cancelado = true;
     };
   }, [logout]);
+
+  // Renovação da sessão: enquanto a pessoa USA o sistema (clique, tecla, toque), o token curto é renovado antes de
+  // vencer. Sem uso, não renova e a sessão vence sozinha. Falha (ex.: servidor sem a renovação) não derruba nada.
+  useEffect(() => {
+    if (!token) return undefined;
+
+    const agoraS = () => Math.floor(Date.now() / 1000);
+    let ultimaAtividade = agoraS();
+    let ultimaFalha = null;
+    let renovando = false;
+
+    const marcarAtividade = () => { ultimaAtividade = agoraS(); };
+    const eventos = ['pointerdown', 'keydown', 'touchstart', 'wheel'];
+    eventos.forEach((e) => window.addEventListener(e, marcarAtividade, { passive: true }));
+
+    const id = setInterval(async () => {
+      if (renovando || !decidirRenovacao({ tempos: lerTempos(tokenRef.current), agora: agoraS(), ultimaAtividade, ultimaFalha })) return;
+
+      renovando = true;
+      try {
+        const novo = await renovarSessao();
+        if (novo && tokenRef.current) {
+          setToken(novo);
+          setUser((atual) => {
+            if (atual) salvarSessao({ token: novo, user: atual });
+            return atual;
+          });
+        }
+      } catch {
+        ultimaFalha = agoraS();
+      } finally {
+        renovando = false;
+      }
+    }, 60 * 1000);
+
+    return () => {
+      clearInterval(id);
+      eventos.forEach((e) => window.removeEventListener(e, marcarAtividade));
+    };
+    // Reinicia só quando entra/sai uma sessão; o token atual é lido pela ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [Boolean(token)]);
 
   // Troca de senha devolve um token novo (o antigo cai por token_version): mantém a sessão atual.
   function atualizarToken(novoToken) {

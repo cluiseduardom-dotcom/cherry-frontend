@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import BlocoHomeVendas from '../components/BlocoHomeVendas';
 import { buscarInstitucional, salvarInstitucional } from '../services/lojaInstitucional';
 import { formatarCnpj, formDoInstitucional, LIMITES_INST, montarCorpoInstitucional, validarInstitucional } from '../utils/lojaInstitucional';
 import './LojaProdutos.css';
@@ -80,6 +81,8 @@ export default function LojaInstitucional() {
         <strong>O site só mostra o que estiver preenchido.</strong> Campo em branco some do site (a página &quot;Quem somos&quot;, os ícones das redes e o botão de WhatsApp só aparecem quando há conteúdo).
         Escreva só o que é verdade e que a empresa pode afirmar.
       </p>
+
+      <BlocoHomeVendas />
 
       {erro && <div className="loja-produtos-erro" role="alert">{erro}</div>}
       {carregando && <div className="card card-padding" role="status"><span className="spinner" /> Carregando...</div>}

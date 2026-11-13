@@ -7,7 +7,7 @@ import {
 import ProductCard from '../components/ProductCard';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
 import { buscarProdutoPorCodigo } from '../services/produtosCodigos';
-import { listarProdutos } from '../services/produtos';
+import { listarTodosProdutos } from '../services/produtos';
 import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
@@ -232,7 +232,7 @@ export default function Venda() {
       setLoading(true);
       setLoadError('');
       try {
-        const data = await listarProdutos({ canal: 'loja_fisica' });
+        const data = await listarTodosProdutos({ canal: 'loja_fisica' });
         if (!cancelled) setProdutos(data.items.filter(p => p.ativo).map(toCartProduct));
       } catch (err) {
         if (!cancelled) setLoadError(err.message);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Tag, DollarSign, Edit, Trash2, Layers, Boxes } from 'lucide-react';
-import { listarProdutos, excluirProduto } from '../services/produtos';
+import { listarTodosProdutos, excluirProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
@@ -51,7 +51,7 @@ export default function Produtos({ tipo = 'acabado' }) {
       setLoading(true);
       setError('');
       try {
-        const data = await listarProdutos({ canal: 'loja_fisica' });
+        const data = await listarTodosProdutos({ canal: 'loja_fisica' });
         if (!cancelled) setProdutos(data.items.filter(p => p.ativo && doTipo(p, tipo)));
       } catch (err) {
         if (!cancelled) setError(err.message);

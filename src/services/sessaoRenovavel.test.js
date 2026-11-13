@@ -10,7 +10,8 @@ describe('lerTempos', () => {
     expect(lerTempos(token({ exp: 123, sa: 100 }))).toEqual({ exp: 123, sa: 100 });
   });
 
-  it('token antigo sem sa: sa null; lixo ou sem exp: null', () => {
+  it('token antigo sem sa usa a emissão (iat) como início; sem nenhum dos dois, sa null; lixo ou sem exp: null', () => {
+    expect(lerTempos(token({ exp: 123, iat: 50 }))).toEqual({ exp: 123, sa: 50 });
     expect(lerTempos(token({ exp: 123 }))).toEqual({ exp: 123, sa: null });
     expect(lerTempos('nao-e-token')).toBeNull();
     expect(lerTempos(token({ id: 1 }))).toBeNull();
@@ -43,6 +44,11 @@ describe('decidirRenovacao', () => {
   it('token já no teto de 8 h da sessão não é renovado (não ganharia tempo)', () => {
     const sa = AGORA - TETO_SESSAO_S + 10 * 60; // faltam 10 min para o teto
     expect(decidirRenovacao({ ...base, tempos: { exp: sa + TETO_SESSAO_S, sa } })).toBe(false);
+  });
+
+  it('token antigo de 8 h (sem sa, início = iat) perto do fim: não renova (não ganharia tempo)', () => {
+    const iat = AGORA - TETO_SESSAO_S + 10 * 60;
+    expect(decidirRenovacao({ ...base, tempos: lerTempos(token({ iat, exp: iat + TETO_SESSAO_S })) })).toBe(false);
   });
 
   it('sem informação do token: não renova', () => {

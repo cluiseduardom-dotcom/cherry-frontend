@@ -16,7 +16,9 @@ export function lerTempos(token) {
     const json = JSON.parse(atob(parte.replace(/-/g, '+').replace(/_/g, '/')));
     if (!Number.isFinite(json.exp)) return null;
 
-    return { exp: json.exp, sa: Number.isFinite(json.sa) ? json.sa : null };
+    // Token antigo, sem `sa`: o servidor usa a emissão (`iat`) como início da sessão; aqui também.
+    const inicio = Number.isFinite(json.sa) ? json.sa : (Number.isFinite(json.iat) ? json.iat : null);
+    return { exp: json.exp, sa: inicio };
   } catch {
     return null;
   }

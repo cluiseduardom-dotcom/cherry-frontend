@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { buscarCompra, cancelarCompra } from '../services/compras';
-import { listarProdutos } from '../services/produtos';
+import { listarTodosProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS, canAccessRoute } from '../config/access';
 import ComprasTimeline from '../components/compras/ComprasTimeline';
@@ -32,7 +32,7 @@ export default function CompraDetalhe() {
     try {
       const [compraData, produtosData] = await Promise.all([
         buscarCompra(id),
-        listarProdutos({ canal: 'loja_fisica', pageSize: 100 }),
+        listarTodosProdutos({ canal: 'loja_fisica' }),
       ]);
       setCompra(compraData);
       setProdutos(produtosData.items || []);

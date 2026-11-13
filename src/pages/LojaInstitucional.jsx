@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import BlocoCondicoesVenda from '../components/BlocoCondicoesVenda';
 import BlocoHomeVendas from '../components/BlocoHomeVendas';
 import { buscarInstitucional, salvarInstitucional } from '../services/lojaInstitucional';
 import { formatarCnpj, formDoInstitucional, LIMITES_INST, montarCorpoInstitucional, validarInstitucional } from '../utils/lojaInstitucional';
@@ -83,6 +84,7 @@ export default function LojaInstitucional() {
       </p>
 
       <BlocoHomeVendas />
+      <BlocoCondicoesVenda />
 
       {erro && <div className="loja-produtos-erro" role="alert">{erro}</div>}
       {carregando && <div className="card card-padding" role="status"><span className="spinner" /> Carregando...</div>}

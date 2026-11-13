@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, AlertTriangle, Package, MapPin, Tag } from 'lucide-react';
 import { listarTodosProdutos } from '../services/produtos';
@@ -7,7 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import MovimentacaoEstoqueModal from '../components/MovimentacaoEstoqueModal';
 import NovoLocalModal from '../components/NovoLocalModal';
-import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
+// O modal de etiquetas traz a biblioteca de PDF (pesada): só é baixado quando alguém abre as etiquetas.
+const EtiquetasModal = lazy(() => import('../components/etiquetas/EtiquetasModal'));
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { rotuloDoLocal, filtrarSaldos, totalDeUnidades, produtoDoCardLocal } from '../utils/locaisEstoque';
 import { useToast } from '../context/ToastContext';
@@ -438,7 +439,7 @@ export default function Estoque({ tipo = 'acabado' }) {
       )}
 
       {podeMovimentar && etiquetaItens && (
-        <EtiquetasModal itens={etiquetaItens} onClose={() => setEtiquetaItens(null)} />
+        <Suspense fallback={null}><EtiquetasModal itens={etiquetaItens} onClose={() => setEtiquetaItens(null)} /></Suspense>
       )}
 
       {podeMovimentar && (

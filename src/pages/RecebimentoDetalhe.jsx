@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ScanLine, Tag, TriangleAlert } from 'lucide-react';
 import { buscarRecebimento, alterarStatusRecebimento, aprovarRecebimento } from '../services/recebimentos';
@@ -6,7 +6,8 @@ import { listarFornecedores } from '../services/fornecedores';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
-import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
+// O modal de etiquetas traz a biblioteca de PDF (pesada): só é baixado quando alguém abre as etiquetas.
+const EtiquetasModal = lazy(() => import('../components/etiquetas/EtiquetasModal'));
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
@@ -249,7 +250,7 @@ export default function RecebimentoDetalhe() {
       )}
 
       {etiquetasAbertas && (
-        <EtiquetasModal itens={itensParaEtiqueta} onClose={() => setEtiquetasAbertas(false)} />
+        <Suspense fallback={null}><EtiquetasModal itens={itensParaEtiqueta} onClose={() => setEtiquetasAbertas(false)} /></Suspense>
       )}
 
       <ConfirmDialog

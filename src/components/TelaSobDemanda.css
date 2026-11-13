@@ -1,0 +1,6 @@
+.tela-sob-demanda {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  min-height: 40vh; padding: 24px; text-align: center;
+  color: var(--color-text-secondary); font-size: var(--font-size-base);
+}
+.tela-sob-demanda--falha { color: var(--color-text-primary); }

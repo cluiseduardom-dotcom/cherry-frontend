@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Eye, X, Trash2, ShoppingCart, PackageCheck, Ban, ClipboardList } from 'lucide-react';
 import { listarCompras, criarCompra, cancelarCompra } from '../services/compras';
@@ -6,7 +6,8 @@ import { listarFornecedores } from '../services/fornecedores';
 import { listarTodosProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
-import EtiquetasModal from '../components/etiquetas/EtiquetasModal';
+// O modal de etiquetas traz a biblioteca de PDF (pesada): só é baixado quando alguém abre as etiquetas.
+const EtiquetasModal = lazy(() => import('../components/etiquetas/EtiquetasModal'));
 import { itensEtiquetaDaCompra } from '../utils/etiquetasDaCompra';
 import { formatarData } from '../utils/formatarData';
 import CancelarCompraModal from '../components/compras/CancelarCompraModal';
@@ -512,7 +513,7 @@ export default function Compras() {
       )}
 
       {etiquetaItens && (
-        <EtiquetasModal itens={etiquetaItens} onClose={() => setEtiquetaItens(null)} />
+        <Suspense fallback={null}><EtiquetasModal itens={etiquetaItens} onClose={() => setEtiquetaItens(null)} /></Suspense>
       )}
 
       {cancelAlvo && (

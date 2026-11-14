@@ -36,6 +36,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/access';
 import { rotuloDoUsuario } from '../config/papeis';
+import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
 import './Mais.css';
 
 const ITEMS = [
@@ -73,7 +74,12 @@ const ITEMS = [
 export default function Mais() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const items = ITEMS.filter(item => canAccessRoute(item.path, user));
+  const vocab = vocabularioDoUsuario(user);
+  const items = ITEMS.filter(item => canAccessRoute(item.path, user)).map(item => {
+    if (item.path === '/minha-maleta') return { ...item, label: vocab.minha };
+    if (item.path === '/transferencias') return { ...item, sub: vocab.maisSubtitulo };
+    return item;
+  });
 
   function handleLogout() {
     logout();

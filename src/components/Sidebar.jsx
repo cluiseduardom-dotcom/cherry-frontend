@@ -45,6 +45,7 @@ import { ALLOWED_ROLES_BY_PATH, canAccessRoute } from '../config/access';
 import { rotuloDoUsuario } from '../config/papeis';
 import { EVENTO_ESTOQUE_ALTERADO, listarEstoqueBaixo } from '../services/estoque';
 import { montarMenu, grupoContemRota, lerGruposAbertos, salvarGruposAbertos } from '../utils/menuGrupos';
+import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
 import Avatar from './Avatar';
 import './Sidebar.css';
 
@@ -195,7 +196,9 @@ export default function Sidebar() {
   function renderItem(path, { filho = false } = {}) {
     const meta = NAV_META_BY_PATH[path];
     if (!meta) return null;
-    const { icon: Icon, label } = meta;
+    const { icon: Icon } = meta;
+    // "Minha maleta" / "Meu estoque": a palavra é da empresa (só vocabulário).
+    const label = path === '/minha-maleta' ? vocabularioDoUsuario(user).minha : meta.label;
     return (
       <div key={path}>
         <NavLink

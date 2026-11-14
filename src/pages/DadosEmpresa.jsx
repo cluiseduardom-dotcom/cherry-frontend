@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import CampoMascarado from '../components/CampoMascarado';
 import MercadoPagoConexao from '../components/MercadoPagoConexao';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { OPCOES_VOCABULARIO } from '../utils/vocabularioEstoque';
 import { obterDadosEmpresa, atualizarDadosEmpresa } from '../services/empresa';
 import { buscarCep } from '../services/cep';
 import { aplicarMascaraCNPJ, aplicarMascaraTelefone, aplicarMascaraCEP, somenteDigitos } from '../utils/mascaras';
@@ -13,6 +15,7 @@ import '../components/usuarios/CamposFormulario.css';
 
 export default function DadosEmpresa() {
   const toast = useToast();
+  const { atualizarPerfil } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPRESA_VAZIA);
   const [inicial, setInicial] = useState(EMPRESA_VAZIA);
@@ -74,6 +77,8 @@ export default function DadosEmpresa() {
       const f = dadosParaFormulario(salvo);
       setForm(f);
       setInicial(f);
+      // A palavra escolhida passa a valer nos menus e telas já nesta sessão.
+      if (salvo?.rotulo_estoque_vendedor) atualizarPerfil({ rotulo_estoque_vendedor: salvo.rotulo_estoque_vendedor });
       toast.success('Dados da empresa atualizados.');
     } catch (err) {
       setApiError(err.message);
@@ -128,6 +133,18 @@ export default function DadosEmpresa() {
             <div className="modal-form-grid">
               {mascarado('telefone', 'Telefone / WhatsApp', aplicarMascaraTelefone, { inputMode: 'tel', maxLength: 15, placeholder: '(00) 00000-0000' })}
               {texto('email_contato', 'E-mail de contato', { type: 'email', maxLength: 254 })}
+            </div>
+          </div>
+
+          <div className="modal-form-section">
+            <h3 className="modal-form-section-title">Estoque que fica com o vendedor</h3>
+            <div className="input-wrapper">
+              <label className="input-label" htmlFor="emp-rotulo_estoque_vendedor">Como a empresa chama esse estoque</label>
+              <select id="emp-rotulo_estoque_vendedor" className="input-field" value={form.rotulo_estoque_vendedor || 'maleta'} disabled={salvando}
+                onChange={ev => atualizar('rotulo_estoque_vendedor', ev.target.value)}>
+                {OPCOES_VOCABULARIO.map(o => <option key={o.chave} value={o.chave}>{o.rotulo} ({o.descricao.toLowerCase()})</option>)}
+              </select>
+              <span className="modal-field-hint">Só muda as palavras nas telas. O funcionamento é o mesmo, e os nomes dos estoques já criados não são alterados.</span>
             </div>
           </div>
 

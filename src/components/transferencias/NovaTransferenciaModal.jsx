@@ -4,6 +4,7 @@ import { aceitarTransferencia, criarTransferencia } from '../../services/transfe
 import BarcodeScannerModal from '../compras/BarcodeScannerModal';
 import { saldosDoLocal } from '../../services/locaisEstoque';
 import { rotuloDoLocal } from '../../utils/locaisEstoque';
+import { vocabularioDoUsuario } from '../../utils/vocabularioEstoque';
 import {
   FORM_TRANSFERENCIA_VAZIO, rotasDisponiveis, validarNovaTransferencia,
   adicionarItem, removerItem, atualizarQuantidade, incluirItemLido, rotasDoAtalho, totalDeUnidades,
@@ -19,10 +20,11 @@ import './Transferencias.css';
 // Equipe: qualquer rota entre locais. Vendedor: só devolver da própria maleta ao Central
 // (origem e destino já vêm preenchidos). O backend valida tudo de novo.
 // atalho (só equipe): 'montar' (Central → maleta) ou 'devolver' (maleta → Central). Itens podem ser bipados.
-const TITULOS = { montar: 'Montar maleta', devolver: 'Receber devolução da maleta' };
 const ehEquipe = user => user?.role === 'admin' || user?.role === 'estoquista';
 
 export default function NovaTransferenciaModal({ open, locais, user, atalho = null, onClose, onSaved }) {
+  const vocab = vocabularioDoUsuario(user);
+  const TITULOS = { montar: vocab.montar, devolver: vocab.receberDevolucao };
   const { origens, destinos } = useMemo(
     () => (atalho && ehEquipe(user) ? rotasDoAtalho(locais, atalho) : rotasDisponiveis(locais, user)),
     [locais, user, atalho],
@@ -245,11 +247,11 @@ export default function NovaTransferenciaModal({ open, locais, user, atalho = nu
 
             <p className="modal-field-hint">
               {podeAceitarNaHora && aceitarNaHora
-                ? 'As peças saem da maleta e entram no Central agora.'
+                ? vocab.saemDa
                 : atalho === 'montar'
-                ? 'As peças saem do Central agora e entram na maleta quando o vendedor aceitar (ele confere o que recebeu).'
+                ? vocab.entramNa
                 : fixa
-                ? 'A mercadoria sai da sua maleta agora e entra no Central quando a equipe aceitar.'
+                ? vocab.saemDaSua
                 : 'A mercadoria sai da origem agora e entra no destino quando for aceita.'}
             </p>
           </div>
@@ -257,7 +259,7 @@ export default function NovaTransferenciaModal({ open, locais, user, atalho = nu
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={saving}>Cancelar</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Enviando...' : atalho === 'montar' ? 'Enviar para a maleta' : podeAceitarNaHora && aceitarNaHora ? 'Registrar devolução' : 'Criar transferência'}
+              {saving ? 'Enviando...' : atalho === 'montar' ? vocab.enviarPara : podeAceitarNaHora && aceitarNaHora ? 'Registrar devolução' : 'Criar transferência'}
             </button>
           </div>
         </form>

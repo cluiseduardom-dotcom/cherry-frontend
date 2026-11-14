@@ -4,10 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useNotificacoes } from '../context/NotificacoesContext';
 import { canAccessRoute } from '../config/access';
 import { destinoDoAviso, rotuloDoTipo } from '../utils/notificacoes';
+import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
 import './Avisos.css';
 
 export default function Avisos() {
   const { user } = useAuth();
+  const vocab = vocabularioDoUsuario(user);
   const { itens, lidos, naoLidos, carregando, erro, recarregar, marcarComoLido, marcarTodosComoLidos } = useNotificacoes();
   const podeVerEstoque = canAccessRoute('/estoque', user);
   const podeVerPixADevolver = canAccessRoute('/pix-a-devolver', user);
@@ -55,9 +57,9 @@ export default function Avisos() {
           return (
             <li key={aviso.id} className={`avisos-item card card-padding avisos-${aviso.prioridade}${lido ? ' avisos-lido' : ''}`}>
               <div className="avisos-topo">
-                <span className="avisos-tipo">{rotuloDoTipo(aviso.tipo)}</span>
+                <span className="avisos-tipo">{rotuloDoTipo(aviso.tipo, vocab)}</span>
                 {aviso.item === 'insumo' && <span className="avisos-etiqueta">Insumo</span>}
-                {aviso.item === 'maleta' && <span className="avisos-etiqueta">Maleta</span>}
+                {aviso.item === 'maleta' && <span className="avisos-etiqueta">{vocab.nome}</span>}
                 {aviso.item === 'pedido' && <span className="avisos-etiqueta">Loja online</span>}
                 {!lido && <span className="avisos-novo">Novo</span>}
               </div>

@@ -4,6 +4,8 @@ import { UFS } from './usuarios';
 export const CAMPOS_EMPRESA = [
   'nome', 'razao_social', 'cnpj', 'telefone', 'email_contato',
   'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'uf',
+  // Como a empresa chama o estoque que fica com o vendedor ('maleta' | 'estoque_vendedor'); só vocabulário.
+  'rotulo_estoque_vendedor',
 ];
 
 export const EMPRESA_VAZIA = Object.freeze(Object.fromEntries(CAMPOS_EMPRESA.map(c => [c, ''])));

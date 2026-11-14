@@ -58,3 +58,12 @@ export function esperaCritica(pagoEm, agora = Date.now()) {
 
   return Number.isFinite(t) && agora - t >= 24 * 3600 * 1000;
 }
+
+/** Dados do presente do pedido para a equipe embalar: null se não for presente; `cartao` é texto puro (null se não escreveu). */
+export function dadosDoPresente(pedido) {
+  if (pedido?.presente !== true) return null;
+
+  const cartao = typeof pedido.mensagem_cartao === 'string' ? pedido.mensagem_cartao.trim() : '';
+
+  return { cartao: cartao || null };
+}

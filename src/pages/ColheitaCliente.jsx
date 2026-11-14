@@ -215,7 +215,10 @@ export default function ColheitaCliente() {
           <p className="text-sm text-secondary">Só para consulta. Para receber uma parcela, use <Link to="/contas-receber">Contas a Receber</Link>.</p>
           <ul className="colheita-extrato">
             {extrato.crediario.parcelas.map((p) => (
-              <li key={p.id}><span>{p.descricao} · vence {dataBr(p.data_vencimento)}</span><strong>{formatarMoeda(p.valor)}</strong></li>
+              <li key={p.id}>
+                <span>{p.descricao} · vence {dataBr(p.data_vencimento)}{p.valor_restante !== undefined && p.valor_restante < p.valor ? ` · já recebido ${formatarMoeda(p.valor - p.valor_restante)} de ${formatarMoeda(p.valor)}` : ''}</span>
+                <strong>{formatarMoeda(p.valor_restante ?? p.valor)}</strong>
+              </li>
             ))}
           </ul>
         </section>

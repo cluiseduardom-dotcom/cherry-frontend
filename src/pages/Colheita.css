@@ -1,0 +1,69 @@
+.colheita-page { max-width: 880px; }
+
+.colheita-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.colheita-numero { display: flex; flex-direction: column; gap: 2px; }
+.colheita-numero strong { font-size: 22px; }
+.colheita-numero small { color: var(--color-text-secondary); font-size: 12px; }
+.colheita-numero.destaque strong { color: var(--color-danger, #b91c1c); }
+.colheita-numero-rotulo { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-secondary); }
+
+.colheita-aviso {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-ultra);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.colheita-erro {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-bg, rgba(220, 38, 38, 0.08));
+  color: var(--color-danger, #b91c1c);
+}
+
+.colheita-filtros { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; margin-bottom: var(--space-4); }
+.colheita-busca { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 240px; }
+.colheita-busca .input { flex: 1; }
+.colheita-so-devedores { display: flex; align-items: center; gap: var(--space-2); font-size: 14px; }
+
+.colheita-lista, .colheita-extrato { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+
+.colheita-cliente { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.colheita-cliente-info { display: flex; flex-direction: column; flex: 1 1 160px; min-width: 0; text-decoration: none; color: inherit; }
+.colheita-cliente-nome { font-weight: 700; overflow-wrap: anywhere; }
+.colheita-cliente-fone { font-size: 13px; color: var(--color-text-secondary); }
+.colheita-cliente-saldo { font-weight: 700; color: var(--color-text-secondary); }
+.colheita-cliente-saldo.deve { color: var(--color-danger, #b91c1c); }
+
+.colheita-voltar { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--color-text-secondary); text-decoration: none; }
+.colheita-saldo { display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--space-3); }
+.colheita-saldo strong { font-size: 30px; }
+.colheita-saldo strong.deve { color: var(--color-danger, #b91c1c); }
+
+.colheita-acoes { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
+.colheita-form { margin-bottom: var(--space-4); }
+.colheita-form-titulo { font-size: 16px; margin: 0 0 var(--space-3); }
+.colheita-campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--space-3); font-size: 14px; }
+.colheita-tudo { margin: calc(var(--space-2) * -1) 0 var(--space-3); }
+.colheita-form-acoes { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+.colheita-crediario { margin-bottom: var(--space-4); }
+.colheita-crediario li { display: flex; justify-content: space-between; gap: var(--space-3); font-size: 14px; }
+
+.colheita-lancamento.estornado { opacity: 0.6; }
+.colheita-lancamento-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.colheita-lancamento-info { font-size: 13px; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.colheita-selo { margin-left: var(--space-2); padding: 1px 8px; border-radius: 999px; font-size: 11px; background: var(--color-border-light); }
+.colheita-valor.aumenta { color: var(--color-danger, #b91c1c); }
+.colheita-valor.reduz { color: var(--color-success, #15803d); }
+.colheita-estornar { margin-top: var(--space-2); }
+.colheita-estorno { margin-top: var(--space-3); }
+
+.colheita-paginacao { display: flex; justify-content: center; align-items: center; gap: var(--space-3); margin-top: var(--space-4); flex-wrap: wrap; }
+
+@media (max-width: 520px) {
+  .colheita-acoes .btn { flex: 1 1 100%; justify-content: center; }
+}

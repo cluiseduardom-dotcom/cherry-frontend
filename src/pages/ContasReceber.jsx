@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle, AlertTriangle, ChevronLeft, ChevronRight, HandCoins, Search } from 'lucide-react';
-import { listarContasReceber, marcarContaReceberComoRecebida } from '../services/contasReceber';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, ChevronLeft, ChevronRight, HandCoins, History, Search } from 'lucide-react';
+import { listarContasReceber, listarRecebimentosContaReceber } from '../services/contasReceber';
 import { listarVendas } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
-import ConfirmDialog from '../components/ConfirmDialog';
-import { useConfirmAction } from '../hooks/useConfirmAction';
+import ReceberContaModal from '../components/ReceberContaModal';
 import { useToast } from '../context/ToastContext';
+import { ehParcial, recebidoDaConta, resumirContas, restanteDaConta, rotuloDaForma } from '../utils/contasReceber';
 import './Contas.css';
 
 const STATUS_FILTERS = [
@@ -42,7 +42,10 @@ export default function ContasReceber() {
   const [contas, setContas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [workingId, setWorkingId] = useState(null);
+  const [contaAReceber, setContaAReceber] = useState(null);
+  const [historicoId, setHistoricoId] = useState(null);
+  const [historico, setHistorico] = useState([]);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
   const toast = useToast();
 
   const [statusFilter, setStatusFilter] = useState('');
@@ -53,8 +56,6 @@ export default function ContasReceber() {
 
   const [resumoContas, setResumoContas] = useState([]);
   const [nomeClientePorVendaId, setNomeClientePorVendaId] = useState(new Map());
-
-  const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
 
   useEffect(() => {
     let cancelled = false;
@@ -125,54 +126,46 @@ export default function ContasReceber() {
     });
   }, [contas, search, nomeClientePorVendaId]);
 
-  const totalPendente = useMemo(
-    () => resumoContas.filter(c => c.status === 'pendente').reduce((soma, c) => soma + Number(c.valor), 0),
+  // Pendente = o que ainda falta (restante das pendentes); recebido = o que já entrou, inclusive em contas parciais.
+  const { pendente: totalPendente, recebido: totalRecebido, cancelado: totalCancelado, taxa: taxaRecebimento } = useMemo(
+    () => resumirContas(resumoContas),
     [resumoContas]
   );
-  const totalRecebido = useMemo(
-    () => resumoContas.filter(c => c.status === 'recebido').reduce((soma, c) => soma + Number(c.valor), 0),
-    [resumoContas]
-  );
-  const totalCancelado = useMemo(
-    () => resumoContas.filter(c => c.status === 'cancelado').reduce((soma, c) => soma + Number(c.valor), 0),
-    [resumoContas]
-  );
-  const taxaRecebimento = useMemo(() => {
-    const totalGeral = resumoContas.reduce((soma, c) => soma + Number(c.valor), 0);
-    return totalGeral > 0 ? (totalRecebido / totalGeral) * 100 : 0;
-  }, [resumoContas, totalRecebido]);
 
   function handleStatusFilterChange(key) {
     setStatusFilter(key);
     setPage(1);
   }
 
-  function handleReceber(conta) {
-    pedirConfirmacao({
-      title: 'Marcar conta como recebida',
-      message: `Marcar a conta "${conta.descricao}" (venda #${conta.venda_id}) como recebida?`,
-      confirmLabel: 'Marcar como recebida',
-      tone: 'warning',
-      execute: () => executarReceber(conta),
-    });
+  // Depois de receber (total ou parcial), a linha é atualizada com o que o servidor devolveu: se o filtro de status deixou de
+  // valer (ex.: filtrando "pendente" e a conta foi recebida por inteiro), ela sai da lista.
+  function aoReceber(contaAtualizada) {
+    if (statusFilter && statusFilter !== contaAtualizada.status) {
+      setContas(prev => prev.filter(c => c.id !== contaAtualizada.id));
+      setTotal(prev => Math.max(0, prev - 1));
+    } else {
+      setContas(prev => prev.map(c => (c.id === contaAtualizada.id ? contaAtualizada : c)));
+    }
+
+    toast.success(contaAtualizada.status === 'recebido' ? 'Conta recebida por inteiro.' : 'Recebimento parcial registrado.');
+    setHistoricoId(null);
+    atualizarResumo();
   }
 
-  async function executarReceber(conta) {
-    setWorkingId(conta.id);
+  async function alternarHistorico(conta) {
+    if (historicoId === conta.id) { setHistoricoId(null); return; }
+
+    setHistoricoId(conta.id);
+    setHistorico([]);
+    setCarregandoHistorico(true);
+
     try {
-      const contaAtualizada = await marcarContaReceberComoRecebida(conta.id);
-      if (statusFilter && statusFilter !== contaAtualizada.status) {
-        setContas(prev => prev.filter(c => c.id !== contaAtualizada.id));
-        setTotal(prev => Math.max(0, prev - 1));
-      } else {
-        setContas(prev => prev.map(c => (c.id === contaAtualizada.id ? contaAtualizada : c)));
-      }
-      toast.success('Conta marcada como recebida.');
-      atualizarResumo();
+      setHistorico(await listarRecebimentosContaReceber(conta.id));
     } catch (err) {
       toast.error(err.message);
+      setHistoricoId(null);
     } finally {
-      setWorkingId(null);
+      setCarregandoHistorico(false);
     }
   }
 
@@ -256,14 +249,21 @@ export default function ContasReceber() {
               </thead>
               <tbody>
                 {filtered.map(conta => (
-                  <tr key={conta.id} className={`contas-row ${conta.atrasado ? 'contas-row--atrasado' : ''}`}>
+                  <Fragment key={conta.id}>
+                  <tr className={`contas-row ${conta.atrasado ? 'contas-row--atrasado' : ''}`}>
                     <td className="contas-descricao">{conta.descricao}</td>
                     <td>{nomeClientePorVendaId.get(conta.venda_id) || '—'}</td>
                     <td><span className="contas-venda-id">#{conta.venda_id}</span></td>
                     <td className="contas-date">{formatDate(conta.data_vencimento)}</td>
-                    <td className="contas-valor">{formatCurrency(conta.valor)}</td>
+                    <td className="contas-valor">
+                      {formatCurrency(conta.valor)}
+                      {ehParcial(conta) && (
+                        <div className="text-sm text-secondary">Recebido {formatCurrency(recebidoDaConta(conta))} · falta {formatCurrency(restanteDaConta(conta))}</div>
+                      )}
+                    </td>
                     <td>
                       <span className={`badge ${STATUS_BADGE_CLASS[conta.status]}`}>{STATUS_LABEL[conta.status]}</span>
+                      {ehParcial(conta) && <span className="badge badge-warning" style={{ marginLeft: 6 }}>Parcial</span>}
                       {conta.atrasado && (
                         <span className="badge badge-danger" style={{ marginLeft: 6 }}>
                           <AlertTriangle size={10} />
@@ -272,21 +272,49 @@ export default function ContasReceber() {
                       )}
                     </td>
                     <td>
-                      {conta.status === 'pendente' && (
-                        <div className="contas-actions">
+                      <div className="contas-actions">
+                        {conta.status === 'pendente' && (
                           <button
                             className="contas-action-btn contas-action-btn--success"
-                            aria-label="Marcar como recebida"
-                            title="Marcar como recebida"
-                            disabled={workingId === conta.id}
-                            onClick={() => handleReceber(conta)}
+                            aria-label={`Receber conta ${conta.descricao}`}
+                            title="Receber (total ou parcial)"
+                            onClick={() => setContaAReceber(conta)}
                           >
-                            <CheckCircle size={14} />
+                            <HandCoins size={14} />
                           </button>
-                        </div>
-                      )}
+                        )}
+                        {recebidoDaConta(conta) > 0 && (
+                          <button
+                            className="contas-action-btn"
+                            aria-label={`Ver recebimentos de ${conta.descricao}`}
+                            title="Ver recebimentos"
+                            aria-expanded={historicoId === conta.id}
+                            onClick={() => alternarHistorico(conta)}
+                          >
+                            <History size={14} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
+                  {historicoId === conta.id && (
+                    <tr className="contas-row-historico">
+                      <td colSpan={7}>
+                        {carregandoHistorico ? <span className="text-sm text-secondary">Carregando recebimentos...</span> : (
+                          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                            {historico.map(r => (
+                              <li key={r.id} className="text-sm">
+                                {formatDate(r.data_recebimento)} · {formatCurrency(r.valor)} · {rotuloDaForma(r.forma_pagamento)}
+                                {r.recebido_por ? ` · ${r.recebido_por}` : ''}{r.observacao ? ` · ${r.observacao}` : ''}
+                              </li>
+                            ))}
+                            {historico.length === 0 && <li className="text-sm text-secondary">Sem recebimentos detalhados (conta antiga).</li>}
+                          </ul>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
@@ -328,15 +356,15 @@ export default function ContasReceber() {
         </div>
       )}
 
-      <ConfirmDialog
-        open={acaoPendente !== null}
-        title={acaoPendente?.title}
-        message={acaoPendente?.message}
-        confirmLabel={acaoPendente?.confirmLabel}
-        tone={acaoPendente?.tone}
-        onConfirm={confirmar}
-        onCancel={cancelar}
-      />
+      {contaAReceber && (
+        <ReceberContaModal
+          key={contaAReceber.id}
+          conta={contaAReceber}
+          nomeCliente={nomeClientePorVendaId.get(contaAReceber.venda_id) || ''}
+          onClose={() => setContaAReceber(null)}
+          onSuccess={aoReceber}
+        />
+      )}
     </div>
   );
 }

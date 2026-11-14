@@ -38,6 +38,9 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/loja-institucional': ['admin'],
   '/loja-banners': ['admin'],
   '/comissoes': ['admin', 'vendedor'],
+  // Colheita (fiado): admin e vendedor, só com a funcionalidade `fiado`. O backend decide de novo (e só o admin estorna).
+  '/colheita': ['admin', 'vendedor'],
+  '/colheita/:id': ['admin', 'vendedor'],
   '/usuarios': ['admin'],
   '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/conta/seguranca': ['admin', 'vendedor', 'estoquista', 'faturista'],
@@ -72,6 +75,8 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/loja-retratos': 'loja_online',
   '/loja-institucional': 'loja_online',
   '/loja-banners': 'loja_online',
+  '/colheita': 'fiado',
+  '/colheita/:id': 'fiado',
 };
 
 export const MENSAGEM_SEM_FUNCIONALIDADE = 'Funcionalidade não incluída no seu plano. Fale com a GiroNex.';

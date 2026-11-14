@@ -48,6 +48,8 @@ const IndicadoresInsumosPage = lazy(() => import('./pages/IndicadoresInsumosPage
 const DashboardCalculos = lazy(() => import('./pages/DashboardCalculos'));
 const ContasPagar = lazy(() => import('./pages/ContasPagar'));
 const ContasReceber = lazy(() => import('./pages/ContasReceber'));
+const Colheita = lazy(() => import('./pages/Colheita'));
+const ColheitaCliente = lazy(() => import('./pages/ColheitaCliente'));
 const PontoEquilibrio = lazy(() => import('./pages/PontoEquilibrio'));
 const DespesasFixas = lazy(() => import('./pages/DespesasFixas'));
 const CategoriasProduto = lazy(() => import('./pages/CategoriasProduto'));
@@ -75,6 +77,8 @@ const ROUTE_COMPONENTS = {
   '/compras/recebimentos/:id': RecebimentoDetalhe,
   '/historico': Historico,
   '/comissoes': Comissoes,
+  '/colheita': Colheita,
+  '/colheita/:id': ColheitaCliente,
   '/usuarios': Usuarios,
   '/mais': Mais,
   '/avisos': Avisos,

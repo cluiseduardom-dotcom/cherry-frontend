@@ -452,3 +452,22 @@ describe('Loja online: faixas da Home (/loja-banners)', () => {
     expect(canAccessRoute('/loja-banners', { role: 'vendedor', funcionalidades: ['loja_online'] })).toBe(false);
   });
 });
+
+describe('Colheita (fiado)', () => {
+  it('admin e vendedor acessam a lista e o cliente; estoquista e faturista não', () => {
+    for (const rota of ['/colheita', '/colheita/:id']) {
+      expect(canAccessRoute(rota, 'admin')).toBe(true);
+      expect(canAccessRoute(rota, 'vendedor')).toBe(true);
+      expect(canAccessRoute(rota, 'estoquista')).toBe(false);
+      expect(canAccessRoute(rota, 'faturista')).toBe(false);
+    }
+  });
+
+  it('é uma funcionalidade por plano: sem `fiado` na lista nem o admin entra; com ela entra; lista ausente não esconde', () => {
+    expect(FUNCIONALIDADE_POR_ROTA['/colheita']).toBe('fiado');
+    expect(FUNCIONALIDADE_POR_ROTA['/colheita/:id']).toBe('fiado');
+    expect(canAccessRoute('/colheita', { role: 'admin', funcionalidades: ['bancos'] })).toBe(false);
+    expect(canAccessRoute('/colheita', { role: 'vendedor', funcionalidades: ['fiado'] })).toBe(true);
+    expect(canAccessRoute('/colheita', { role: 'admin' })).toBe(true);
+  });
+});

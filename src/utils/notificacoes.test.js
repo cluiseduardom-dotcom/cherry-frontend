@@ -108,3 +108,14 @@ describe('avisos da loja online', () => {
     expect(destino({ tipo: 'transferencia_pendente' }, true)).toBe('/transferencias');
   });
 });
+
+describe('rotuloDoTipo com o vocabulário da empresa', () => {
+  const estoque = { avisoSemConferencia: 'Estoque do vendedor sem conferência', avisoSemVender: 'Estoque do vendedor sem vender' };
+
+  it('sem vocabulário: maleta; com ele, as palavras da empresa; os demais tipos não mudam', () => {
+    expect(rotuloDoTipo('maleta_sem_conferencia')).toBe('Maleta sem conferência');
+    expect(rotuloDoTipo('maleta_sem_conferencia', estoque)).toBe('Estoque do vendedor sem conferência');
+    expect(rotuloDoTipo('maleta_sem_venda', estoque)).toBe('Estoque do vendedor sem vender');
+    expect(rotuloDoTipo('falta', estoque)).toBe('Em falta');
+  });
+});

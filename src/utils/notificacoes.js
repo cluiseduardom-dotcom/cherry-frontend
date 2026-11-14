@@ -65,7 +65,11 @@ const ROTULO_TIPO = {
   loja_pagamento_estornado: 'Pagamento da loja estornado',
 };
 
-export function rotuloDoTipo(tipo) {
+// `vocabulario` (opcional): palavras da empresa para o estoque do vendedor; sem ele, "maleta".
+export function rotuloDoTipo(tipo, vocabulario) {
+  if (vocabulario && tipo === 'maleta_sem_conferencia') return vocabulario.avisoSemConferencia;
+  if (vocabulario && tipo === 'maleta_sem_venda') return vocabulario.avisoSemVender;
+
   return ROTULO_TIPO[tipo] ?? 'Aviso';
 }
 

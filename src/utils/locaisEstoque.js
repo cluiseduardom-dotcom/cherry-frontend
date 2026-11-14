@@ -27,14 +27,15 @@ export function usuariosSemMaleta(usuarios, locais) {
 export const FORM_LOCAL_VAZIO = { tipo: 'maleta', usuario_id: '', nome: '', cliente_id: '' };
 
 // Devolve { valido, erros, dados } — dados só com os campos que o endpoint aceita para o tipo.
-export function validarNovoLocal(form) {
+// `vocabulario` (opcional): palavras da empresa para o estoque do vendedor; sem ele, "maleta".
+export function validarNovoLocal(form, vocabulario) {
   const erros = {};
   const nome = (form.nome ?? '').trim();
 
   if (nome.length > NOME_MAX) erros.nome = `Máximo de ${NOME_MAX} caracteres`;
 
   if (form.tipo === 'maleta') {
-    if (!form.usuario_id) erros.usuario_id = 'Selecione o dono da maleta';
+    if (!form.usuario_id) erros.usuario_id = vocabulario?.selecioneDono ?? 'Selecione o dono da maleta';
   } else if (form.tipo === 'consignado') {
     if (!nome) erros.nome = 'Informe o nome do consignatário';
   } else {

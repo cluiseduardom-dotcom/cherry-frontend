@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { listarTransferencias } from '../services/transferenciasEstoque';
 import { filtrarSaldos, totalDeUnidades } from '../utils/locaisEstoque';
+import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
 import TransferenciasTabela from '../components/transferencias/TransferenciasTabela';
 import NovaTransferenciaModal from '../components/transferencias/NovaTransferenciaModal';
 import TransferenciaDetalheModal from '../components/transferencias/TransferenciaDetalheModal';
@@ -15,6 +16,7 @@ import './Estoque.css';
 // e a devolução ao Central. Só enxerga a própria maleta (o backend garante).
 export default function MinhaMaleta() {
   const { user } = useAuth();
+  const vocab = vocabularioDoUsuario(user);
   const toast = useToast();
 
   const [locais, setLocais] = useState([]);
@@ -50,7 +52,7 @@ export default function MinhaMaleta() {
       setSaldos(saldosDados.items);
       setTransferencias(transfDados.items);
     } catch (err) {
-      setErro(err?.message || 'Não foi possível carregar a sua maleta.');
+      setErro(err?.message || vocab.naoCarregou);
     } finally {
       setLoading(false);
     }
@@ -71,8 +73,8 @@ export default function MinhaMaleta() {
     <div className="page-content">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Minha maleta</h1>
-          <p className="page-subtitle">{maleta ? maleta.nome : 'Estoque que fica com você'}</p>
+          <h1 className="page-title">{vocab.minha}</h1>
+          <p className="page-subtitle">{maleta ? maleta.nome : vocab.paginaSubtitulo}</p>
         </div>
         {maleta && (
           <div className="estoque-header-actions">
@@ -88,7 +90,7 @@ export default function MinhaMaleta() {
 
       {!loading && erro && (
         <div className="empty-state">
-          <div className="empty-state-title">Não foi possível carregar a sua maleta</div>
+          <div className="empty-state-title">{vocab.naoCarregou.replace(/\.$/, '')}</div>
           <p className="text-sm text-secondary">{erro}</p>
         </div>
       )}
@@ -96,8 +98,8 @@ export default function MinhaMaleta() {
       {!loading && !erro && !maleta && (
         <div className="empty-state">
           <div className="empty-state-icon"><MapPin size={24} /></div>
-          <div className="empty-state-title">Você ainda não tem uma maleta</div>
-          <p className="text-sm text-secondary">Peça ao administrador para criar uma para você. Enquanto isso, suas vendas saem do estoque Central.</p>
+          <div className="empty-state-title">{vocab.naoTemUma}</div>
+          <p className="text-sm text-secondary">Peça ao administrador para {vocab.criarUmaParaVoce}. Enquanto isso, suas vendas saem do estoque Central.</p>
         </div>
       )}
 
@@ -108,7 +110,7 @@ export default function MinhaMaleta() {
               <div className="estoque-summary-icon" style={{ background: 'var(--color-primary-ultra)', color: 'var(--color-primary)' }}><MapPin size={20} /></div>
               <div>
                 <div className="estoque-summary-value">{totalDeUnidades(saldos)}</div>
-                <div className="estoque-summary-label">Itens na maleta</div>
+                <div className="estoque-summary-label">{vocab.itensNa}</div>
               </div>
             </div>
             <div className="estoque-summary-card card card-padding">
@@ -127,7 +129,7 @@ export default function MinhaMaleta() {
             </>
           )}
 
-          <h2 className="page-subtitle transf-secao">Produtos na maleta</h2>
+          <h2 className="page-subtitle transf-secao">{vocab.produtosNa}</h2>
           <div className="estoque-filters">
             <div className="input-icon-wrapper" style={{ flex: 1, maxWidth: 360 }}>
               <Search size={16} className="input-icon" />
@@ -151,7 +153,7 @@ export default function MinhaMaleta() {
             ) : (
               <div className="empty-state">
                 <div className="empty-state-icon"><Package size={24} /></div>
-                <div className="empty-state-title">{saldos.length === 0 ? 'Sua maleta está vazia' : 'Nenhum produto encontrado'}</div>
+                <div className="empty-state-title">{saldos.length === 0 ? vocab.estaVazia : 'Nenhum produto encontrado'}</div>
               </div>
             )}
           </div>
@@ -163,7 +165,7 @@ export default function MinhaMaleta() {
             </>
           )}
 
-          <h2 className="page-subtitle transf-secao">Acerto da maleta</h2>
+          <h2 className="page-subtitle transf-secao">{vocab.acertoDa}</h2>
           {/* Só leitura: a conferência (contagem) é feita pela equipe. Recarrega ao mudar a maleta. */}
           <AcertoDoLocal key={`${maleta.id}-${transferencias.length}`} local={maleta} />
         </>

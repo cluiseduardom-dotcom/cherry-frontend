@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { listarTransferencias } from '../services/transferenciasEstoque';
 import { listarLocais } from '../services/locaisEstoque';
 import { FILTROS_DE_STATUS } from '../utils/transferencias';
+import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
 import TransferenciasTabela from '../components/transferencias/TransferenciasTabela';
 import NovaTransferenciaModal from '../components/transferencias/NovaTransferenciaModal';
 import TransferenciaDetalheModal from '../components/transferencias/TransferenciaDetalheModal';
@@ -16,6 +17,7 @@ const POR_PAGINA = 20;
 // pessoa pode ver e fazer; a tela só esconde o que daria 403.
 export default function Transferencias() {
   const { user } = useAuth();
+  const vocab = vocabularioDoUsuario(user);
   const toast = useToast();
 
   const [status, setStatus] = useState('');
@@ -63,7 +65,7 @@ export default function Transferencias() {
     setNovaOpen(false);
     if (t.aviso) toast.warning(`Transferência #${t.id} criada, mas ficou aguardando aceite: ${t.aviso}`);
     else if (t.status === 'concluida') toast.success(`Devolução #${t.id} registrada: as peças já estão no destino.`);
-    else if (atalho === 'montar') toast.success(`Maleta: transferência #${t.id} enviada. Entra na maleta quando o vendedor aceitar.`);
+    else if (atalho === 'montar') toast.success(vocab.toastEnviada(t.id));
     else toast.success(`Transferência #${t.id} criada. Aguardando aceite.`);
     carregar();
   }
@@ -73,18 +75,18 @@ export default function Transferencias() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Transferências</h1>
-          <p className="page-subtitle">Movimentação de estoque entre Central, maletas e consignados</p>
+          <p className="page-subtitle">{vocab.transferenciasSubtitulo}</p>
         </div>
         <div className="estoque-header-actions">
           {equipe && (
             <>
               <button className="btn btn-primary" onClick={() => abrir('montar')} disabled={!temMaleta}
-                title={temMaleta ? 'Central → maleta do vendedor, bipando as peças' : 'Crie a maleta do vendedor em Estoque → Novo local'}>
+                title={temMaleta ? vocab.montarTitulo : vocab.criePrimeiro}>
                 <Briefcase size={16} />
-                Montar maleta
+                {vocab.montar}
               </button>
               <button className="btn btn-secondary" onClick={() => abrir('devolver')} disabled={!temMaleta}
-                title={temMaleta ? 'Maleta do vendedor → Central, bipando as peças que voltaram' : 'Crie a maleta do vendedor em Estoque → Novo local'}>
+                title={temMaleta ? vocab.devolverTitulo : vocab.criePrimeiro}>
                 <Undo2 size={16} />
                 Receber devolução
               </button>
@@ -142,7 +144,7 @@ export default function Transferencias() {
       )}
 
       {equipe && !temMaleta && locais.length > 0 && (
-        <p className="text-sm text-secondary">Para montar maletas, crie primeiro a maleta de cada vendedor em Estoque → Novo local.</p>
+        <p className="text-sm text-secondary">{vocab.paraMontarCrie}</p>
       )}
 
       <NovaTransferenciaModal open={novaOpen} locais={locais} user={user} atalho={atalho} onClose={() => setNovaOpen(false)} onSaved={handleCriada} />

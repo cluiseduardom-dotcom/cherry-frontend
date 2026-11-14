@@ -114,3 +114,12 @@ describe('produtoDoCardLocal', () => {
     expect(card.stock).toBe(3);
   });
 });
+
+describe('validarNovoLocal com o vocabulário da empresa', () => {
+  const vazio = { ...FORM_LOCAL_VAZIO, tipo: 'maleta', usuario_id: '' };
+
+  it('sem vocabulário a mensagem é a de sempre; com ele, concorda com a palavra da empresa', () => {
+    expect(validarNovoLocal(vazio).erros.usuario_id).toBe('Selecione o dono da maleta');
+    expect(validarNovoLocal(vazio, { selecioneDono: 'Selecione o dono do estoque do vendedor' }).erros.usuario_id).toBe('Selecione o dono do estoque do vendedor');
+  });
+});

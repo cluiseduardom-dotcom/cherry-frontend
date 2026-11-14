@@ -26,3 +26,20 @@ describe('montarPayloadEmpresa', () => {
 describe('dadosParaFormulario', () => {
   it('troca null por string vazia', () => expect(dadosParaFormulario({ nome: 'X', cnpj: null }).cnpj).toBe(''));
 });
+
+describe('rótulo do estoque do vendedor', () => {
+  it('vem do backend no formulário e só vai no payload quando muda', () => {
+    const inicial = dadosParaFormulario({ nome: 'Cherry', rotulo_estoque_vendedor: 'maleta' });
+
+    expect(inicial.rotulo_estoque_vendedor).toBe('maleta');
+    expect(montarPayloadEmpresa({ ...inicial }, inicial)).toEqual({});
+    expect(montarPayloadEmpresa({ ...inicial, rotulo_estoque_vendedor: 'estoque_vendedor' }, inicial)).toEqual({ rotulo_estoque_vendedor: 'estoque_vendedor' });
+  });
+
+  it('servidor antigo (sem o campo): formulário vazio e nada é enviado', () => {
+    const inicial = dadosParaFormulario({ nome: 'Cherry' });
+
+    expect(inicial.rotulo_estoque_vendedor).toBe('');
+    expect(montarPayloadEmpresa({ ...inicial }, inicial)).toEqual({});
+  });
+});

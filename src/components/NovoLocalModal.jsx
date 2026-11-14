@@ -4,6 +4,8 @@ import { criarLocal } from '../services/locaisEstoque';
 import { listarUsuarios } from '../services/usuarios';
 import { listarClientes } from '../services/clientes';
 import { FORM_LOCAL_VAZIO, validarNovoLocal, usuariosSemMaleta } from '../utils/locaisEstoque';
+import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
+import { useAuth } from '../context/AuthContext';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
@@ -11,6 +13,8 @@ import './ProductModal.css';
 import './usuarios/CamposFormulario.css';
 
 export default function NovoLocalModal({ open, locais, onClose, onSaved }) {
+  const { user } = useAuth();
+  const vocab = vocabularioDoUsuario(user);
   const [form, setForm] = useState(FORM_LOCAL_VAZIO);
   const [erros, setErros] = useState({});
   const [apiError, setApiError] = useState('');
@@ -68,7 +72,7 @@ export default function NovoLocalModal({ open, locais, onClose, onSaved }) {
     e.preventDefault();
     if (saving) return;
 
-    const validacao = validarNovoLocal(form);
+    const validacao = validarNovoLocal(form, vocab);
     if (!validacao.valido) {
       setErros(validacao.erros);
       return;
@@ -109,14 +113,14 @@ export default function NovoLocalModal({ open, locais, onClose, onSaved }) {
                   onChange={e => atualizar('tipo', e.target.value)}
                   disabled={saving}
                 >
-                  <option value="maleta">Maleta (estoque que fica com um vendedor)</option>
+                  <option value="maleta">{vocab.opcaoNovoLocal}</option>
                   <option value="consignado">Consignado (mercadoria deixada com um parceiro)</option>
                 </select>
               </div>
 
               {form.tipo === 'maleta' && (
                 <div className="input-wrapper modal-form-span-2">
-                  <label className="input-label" htmlFor="nl-usuario">Dono da maleta *</label>
+                  <label className="input-label" htmlFor="nl-usuario">{vocab.donoDe} *</label>
                   <select
                     id="nl-usuario"
                     className={`input-field${erros.usuario_id ? ' input-field--erro' : ''}`}
@@ -129,20 +133,20 @@ export default function NovoLocalModal({ open, locais, onClose, onSaved }) {
                   </select>
                   {erros.usuario_id && <span className="campo-erro">{erros.usuario_id}</span>}
                   {!carregando && candidatos.length === 0 && (
-                    <span className="modal-field-hint">Todos os usuários ativos já têm uma maleta.</span>
+                    <span className="modal-field-hint">{vocab.todosTem}</span>
                   )}
                 </div>
               )}
 
               <div className="input-wrapper modal-form-span-2">
                 <label className="input-label" htmlFor="nl-nome">
-                  {form.tipo === 'consignado' ? 'Nome do consignatário *' : 'Nome da maleta (opcional)'}
+                  {form.tipo === 'consignado' ? 'Nome do consignatário *' : `${vocab.nomeOpcional}`}
                 </label>
                 <input
                   id="nl-nome"
                   type="text"
                   className={`input-field${erros.nome ? ' input-field--erro' : ''}`}
-                  placeholder={form.tipo === 'consignado' ? 'Ex.: Loja da Maria' : 'Padrão: Maleta de + nome do usuário'}
+                  placeholder={form.tipo === 'consignado' ? 'Ex.: Loja da Maria' : vocab.padraoDoNome}
                   value={form.nome}
                   onChange={e => atualizar('nome', e.target.value)}
                   maxLength={100}

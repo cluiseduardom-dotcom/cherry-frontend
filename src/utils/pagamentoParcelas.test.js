@@ -133,43 +133,65 @@ describe('vencimentos (mesma regra do backend)', () => {
   });
 });
 
-import { AVISO_ULTIMO_VENCIMENTO_MESES, MAX_MESES_PRAZO, mesesAteOUltimoVencimento, problemaDoPrazo } from './pagamentoVenda.js';
+import { MAX_HORIZONTE_CREDIARIO_MESES, MAX_MESES_PRAZO, problemaDoHorizonte, problemaDoPrazo } from './pagamentoVenda.js';
 
-describe('crediário: meses entre as parcelas tem limite (o servidor aceita de 1 a 24)', () => {
-  const base = { textoValor: '75,00', saldoCentavos: 7500, forma: 'crediario', temCliente: true, parcelas: '12' };
+describe('crediário: último vencimento em no máximo 6 meses (decisão do PO)', () => {
+  const base = { textoValor: '75,00', saldoCentavos: 7500, forma: 'crediario', temCliente: true };
 
-  it('266 meses (o caso do print: último vencimento em 2292) é recusado; 24 passa; 25 não', () => {
-    expect(MAX_MESES_PRAZO).toBe(24);
-    expect(montarPagamento({ ...base, mesesPrazo: '266' }).campo).toBe('meses');
-    expect(montarPagamento({ ...base, mesesPrazo: '25' }).campo).toBe('meses');
-    expect(montarPagamento({ ...base, mesesPrazo: '24' }).pagamento.meses_prazo).toBe(24);
-    expect(montarPagamento({ ...base, mesesPrazo: '1' }).pagamento.meses_prazo).toBe(1);
-    expect(montarPagamento({ ...base, mesesPrazo: '1.5' }).campo).toBe('meses');
-    expect(montarPagamento({ ...base, mesesPrazo: '' }).campo).toBe('meses');
+  it('limites: 6 meses entre as parcelas e 6 meses até o último vencimento', () => {
+    expect(MAX_MESES_PRAZO).toBe(6);
+    expect(MAX_HORIZONTE_CREDIARIO_MESES).toBe(6);
   });
 
-  it('a mensagem explica o que o número significa', () => {
-    expect(montarPagamento({ ...base, mesesPrazo: '266' }).erro).toBe('Informe de 1 a 24 meses entre as parcelas (1 = uma parcela por mês).');
+  it('266 meses (o caso do print) e 7 meses são recusados no campo de meses', () => {
+    for (const meses of ['266', '7', '0', '1.5', '']) {
+      expect(montarPagamento({ ...base, parcelas: '1', mesesPrazo: meses }).campo).toBe('meses');
+    }
+    expect(montarPagamento({ ...base, parcelas: '1', mesesPrazo: '266' }).erro).toBe('Informe de 1 a 6 meses entre as parcelas (1 = uma parcela por mês).');
   });
 
-  it('problema mostrado na hora: vazio não é erro; fora da faixa ou fracionado é', () => {
+  it.each([
+    ['6x de 1 mês', '6', '1'],
+    ['3x de 2 meses', '3', '2'],
+    ['2x de 3 meses', '2', '3'],
+    ['1x em 6 meses', '1', '6'],
+    ['1x no padrão', '1', '1'],
+  ])('cabe no teto: %s', (_, parcelas, meses) => {
+    const r = montarPagamento({ ...base, parcelas, mesesPrazo: meses });
+
+    expect(r.pagamento).toMatchObject({ forma_pagamento: 'crediario', numero_parcelas: Number(parcelas), meses_prazo: Number(meses) });
+  });
+
+  it.each([
+    ['12x de 1 mês (último em 12 meses)', '12', '1', 'o máximo é 6 parcelas'],
+    ['7x de 1 mês', '7', '1', 'o máximo é 6 parcelas'],
+    ['4x de 2 meses (último em 8 meses)', '4', '2', 'o máximo é 3 parcelas'],
+    ['3x de 3 meses', '3', '3', 'o máximo é 2 parcelas'],
+    ['2x de 4 meses', '2', '4', 'o máximo é 1 parcela'],
+  ])('não cabe: %s, com a explicação', (_, parcelas, meses, trecho) => {
+    const r = montarPagamento({ ...base, parcelas, mesesPrazo: meses });
+
+    expect(r.campo).toBe('parcelas');
+    expect(r.erro).toContain('o último vencimento pode ser em até 6 meses');
+    expect(r.erro).toContain(trecho);
+  });
+
+  it('cartão de crédito não tem esse teto (12x continua valendo)', () => {
+    expect(montarPagamento({ ...base, forma: 'credito', parcelas: '12' }).pagamento.numero_parcelas).toBe(12);
+  });
+
+  it('mensagens na hora: prazo fora da faixa e horizonte; vazio ou inválido não gera mensagem de horizonte', () => {
     expect(problemaDoPrazo('')).toBeNull();
-    expect(problemaDoPrazo('1')).toBeNull();
-    expect(problemaDoPrazo('24')).toBeNull();
-    expect(problemaDoPrazo('266')).toBe('O máximo é 24 meses entre as parcelas.');
-    expect(problemaDoPrazo('0')).toMatch(/inteiro/);
+    expect(problemaDoPrazo('6')).toBeNull();
+    expect(problemaDoPrazo('266')).toBe('O máximo é 6 meses entre as parcelas.');
     expect(problemaDoPrazo('2,5')).toMatch(/inteiro/);
+    expect(problemaDoHorizonte(6, 1)).toBeNull();
+    expect(problemaDoHorizonte(12, 1)).toContain('o máximo é 6 parcelas');
+    expect(problemaDoHorizonte('x', 1)).toBeNull();
+    expect(problemaDoHorizonte(3, 266)).toBeNull();
   });
 
-  it('último vencimento = parcelas × meses; aviso só acima de 24 meses', () => {
-    expect(mesesAteOUltimoVencimento(12, 1)).toBe(12);
-    expect(mesesAteOUltimoVencimento(12, 3)).toBe(36);
-    expect(AVISO_ULTIMO_VENCIMENTO_MESES).toBe(24);
-  });
-
-  it('vencimentos com o prazo padrão (1) ficam em meses, não em décadas', () => {
-    const v = vencimentosCrediario(12, 1, new Date(2026, 10, 14));
-
-    expect(v).toEqual({ primeiro: '14/12/2026', ultimo: '14/11/2027' });
+  it('vencimentos com o padrão (1) ficam em meses, não em décadas', () => {
+    expect(vencimentosCrediario(6, 1, new Date(2026, 10, 14))).toEqual({ primeiro: '14/12/2026', ultimo: '14/05/2027' });
   });
 });

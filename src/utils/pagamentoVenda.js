@@ -41,11 +41,11 @@ export const FORMAS_PAGAMENTO = [
 // Parcelamento: atalhos mostrados no passo e teto aceito (o campo numérico
 // continua aceitando qualquer inteiro de 1 até MAX_PARCELAS).
 export const MAX_PARCELAS = 12;
-// Crediário: "meses entre as parcelas". A parcela N vence daqui a (N × este número) meses; o servidor aceita de 1 a 24
-// (src/constants/limites.js do backend). Acima disso o vencimento viraria décadas (ex.: 266 meses = 22 anos).
-export const MAX_MESES_PRAZO = 24;
-// Avisa (sem bloquear) quando o último vencimento passa deste tanto de meses.
-export const AVISO_ULTIMO_VENCIMENTO_MESES = 24;
+// Crediário (decisão do PO, 15/11/2026): o ÚLTIMO vencimento fica a no máximo 6 meses da venda. A parcela N vence daqui a
+// (N × "meses entre as parcelas") meses; logo, parcelas × meses <= 6 (6x de 1 mês, 3x de 2, 2x de 3 e 1x em 6 cabem; 12x de 1 não).
+// Espelha o backend (src/constants/limites.js). Não vale para cartão de crédito.
+export const MAX_MESES_PRAZO = 6;
+export const MAX_HORIZONTE_CREDIARIO_MESES = 6;
 export const OPCOES_PARCELAS = [1, 2, 3, 6, 10, 12];
 
 export function rotuloForma(valor) {
@@ -297,6 +297,11 @@ export function montarPagamento({
     return { campo: 'meses', erro: `Informe de 1 a ${MAX_MESES_PRAZO} meses entre as parcelas (1 = uma parcela por mês).` };
   }
 
+  if (forma === 'crediario') {
+    const horizonte = problemaDoHorizonte(nParcelas, nMeses);
+    if (horizonte) return { campo: 'parcelas', erro: horizonte };
+  }
+
   return {
     pagamento: {
       forma_pagamento: forma,
@@ -338,3 +343,19 @@ export function problemaDoPrazo(mesesPrazo) {
 
 /** Meses até o último vencimento do crediário (parcela N vence em N × meses). */
 export const mesesAteOUltimoVencimento = (numeroParcelas, mesesPrazo) => Number(numeroParcelas) * Number(mesesPrazo);
+
+/**
+ * Crediário: o último vencimento não pode passar de 6 meses. Devolve a explicação (com o máximo de parcelas para aquele intervalo)
+ * ou null. Só avalia números inteiros válidos: parcelas ou meses inválidos têm a própria mensagem.
+ */
+export function problemaDoHorizonte(numeroParcelas, mesesPrazo) {
+  const n = Number(numeroParcelas);
+  const m = Number(mesesPrazo);
+
+  if (!Number.isInteger(n) || n < 1 || !Number.isInteger(m) || m < 1 || m > MAX_MESES_PRAZO) return null;
+  if (n * m <= MAX_HORIZONTE_CREDIARIO_MESES) return null;
+
+  const maximo = Math.floor(MAX_HORIZONTE_CREDIARIO_MESES / m);
+
+  return `No crediário o último vencimento pode ser em até ${MAX_HORIZONTE_CREDIARIO_MESES} meses: com ${m} ${m === 1 ? 'mês' : 'meses'} entre as parcelas, o máximo é ${maximo} ${maximo === 1 ? 'parcela' : 'parcelas'}.`;
+}

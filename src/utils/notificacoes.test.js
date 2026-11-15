@@ -119,3 +119,27 @@ describe('rotuloDoTipo com o vocabulário da empresa', () => {
     expect(rotuloDoTipo('falta', estoque)).toBe('Em falta');
   });
 });
+
+describe('aviso de cobrança da plataforma', () => {
+  const aviso = { id: 'cobranca_plataforma:suspenso:2026-11-21', tipo: 'cobranca_plataforma', item: 'cobranca' };
+
+  it('tem rótulo próprio', () => {
+    expect(rotuloDoTipo('cobranca_plataforma')).toBe('Cobrança da plataforma');
+  });
+
+  it('não tem tela de destino (a pendência se resolve falando com a GiroNex): nenhum perfil recebe link', () => {
+    expect(destinoDoAviso(aviso, true, true)).toBeNull();
+    expect(destinoDoAviso(aviso, false, false)).toBeNull();
+  });
+
+  it('os destinos dos demais avisos não mudaram', () => {
+    expect(destinoDoAviso({ tipo: 'falta' }, true)).toBe('/estoque');
+    expect(destinoDoAviso({ tipo: 'parado' }, true)).toBe('/produtos');
+    expect(destinoDoAviso({ tipo: 'loja_pedido_pago' }, false)).toBe('/pedidos-loja');
+  });
+
+  it('marcar como lido e a contagem funcionam como nos outros avisos', () => {
+    const lidos = marcarLido([], aviso.id);
+    expect(contarNaoLidos([aviso, { id: 'falta:1' }], lidos)).toBe(1);
+  });
+});

@@ -63,6 +63,7 @@ const ROTULO_TIPO = {
   loja_pedido_pago: 'Pedido da loja pago',
   loja_pagamento_sem_venda: 'Pagamento da loja sem venda',
   loja_pagamento_estornado: 'Pagamento da loja estornado',
+  cobranca_plataforma: 'Cobrança da plataforma',
 };
 
 // `vocabulario` (opcional): palavras da empresa para o estoque do vendedor; sem ele, "maleta".
@@ -79,7 +80,11 @@ const TIPOS_MALETA = ['transferencia_pendente', 'maleta_sem_conferencia', 'malet
 // Para onde o aviso leva: telas de estoque para quem gere estoque; catálogo para os demais.
 const TIPOS_LOJA = ['loja_pedido_pago', 'loja_pagamento_sem_venda', 'loja_pagamento_estornado'];
 
+// Aviso sem tela de destino (a pendência se resolve falando com a GiroNex): devolve null e a lista não mostra "Ver".
+const TIPOS_SEM_DESTINO = ['cobranca_plataforma'];
+
 export function destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver = false) {
+  if (TIPOS_SEM_DESTINO.includes(aviso.tipo)) return null;
   // Loja online: pedido pago vai à fila de contato; pagamento sem venda vai à devolução (quem pode) ou à fila de pedidos.
   if (TIPOS_LOJA.includes(aviso.tipo)) {
     return aviso.tipo === 'loja_pagamento_sem_venda' && podeVerPixADevolver ? '/pix-a-devolver' : '/pedidos-loja';

@@ -41,6 +41,11 @@ export const FORMAS_PAGAMENTO = [
 // Parcelamento: atalhos mostrados no passo e teto aceito (o campo numérico
 // continua aceitando qualquer inteiro de 1 até MAX_PARCELAS).
 export const MAX_PARCELAS = 12;
+// Crediário: "meses entre as parcelas". A parcela N vence daqui a (N × este número) meses; o servidor aceita de 1 a 24
+// (src/constants/limites.js do backend). Acima disso o vencimento viraria décadas (ex.: 266 meses = 22 anos).
+export const MAX_MESES_PRAZO = 24;
+// Avisa (sem bloquear) quando o último vencimento passa deste tanto de meses.
+export const AVISO_ULTIMO_VENCIMENTO_MESES = 24;
 export const OPCOES_PARCELAS = [1, 2, 3, 6, 10, 12];
 
 export function rotuloForma(valor) {
@@ -288,8 +293,8 @@ export function montarPagamento({
     }
   }
 
-  if (forma === 'crediario' && (!Number.isInteger(nMeses) || nMeses < 1)) {
-    return { campo: 'meses', erro: 'Informe o prazo em meses para o crediário.' };
+  if (forma === 'crediario' && (!Number.isInteger(nMeses) || nMeses < 1 || nMeses > MAX_MESES_PRAZO)) {
+    return { campo: 'meses', erro: `Informe de 1 a ${MAX_MESES_PRAZO} meses entre as parcelas (1 = uma parcela por mês).` };
   }
 
   return {
@@ -319,3 +324,17 @@ export function pagamentosParaEnvio(pagamentos) {
   // Defesa: 'cartao_link' só existe na tela e vira crédito/débito ao ser confirmado; nunca segue para a API.
   return pagamentos.filter(p => pagamentoConfirmado(p) && p.forma_pagamento !== 'cartao_link').map(({ status: _status, pix: _pix, link: _link, juros_cliente: _juros, ...resto }) => resto);
 }
+
+/** Problema do campo "meses entre as parcelas" (mostrado na hora, antes de confirmar), ou null. Vazio não é erro ainda. */
+export function problemaDoPrazo(mesesPrazo) {
+  const texto = String(mesesPrazo ?? '').trim();
+  if (texto === '') return null;
+  const n = Number(texto);
+  if (!Number.isInteger(n) || n < 1) return 'Use um número inteiro de meses (1 = uma parcela por mês).';
+  if (n > MAX_MESES_PRAZO) return `O máximo é ${MAX_MESES_PRAZO} meses entre as parcelas.`;
+
+  return null;
+}
+
+/** Meses até o último vencimento do crediário (parcela N vence em N × meses). */
+export const mesesAteOUltimoVencimento = (numeroParcelas, mesesPrazo) => Number(numeroParcelas) * Number(mesesPrazo);

@@ -132,3 +132,44 @@ describe('vencimentos (mesma regra do backend)', () => {
     expect(vencimentosCrediario(3, 2, new Date(2026, 9, 8))).toEqual({ primeiro: '08/12/2026', ultimo: '08/04/2027' });
   });
 });
+
+import { AVISO_ULTIMO_VENCIMENTO_MESES, MAX_MESES_PRAZO, mesesAteOUltimoVencimento, problemaDoPrazo } from './pagamentoVenda.js';
+
+describe('crediário: meses entre as parcelas tem limite (o servidor aceita de 1 a 24)', () => {
+  const base = { textoValor: '75,00', saldoCentavos: 7500, forma: 'crediario', temCliente: true, parcelas: '12' };
+
+  it('266 meses (o caso do print: último vencimento em 2292) é recusado; 24 passa; 25 não', () => {
+    expect(MAX_MESES_PRAZO).toBe(24);
+    expect(montarPagamento({ ...base, mesesPrazo: '266' }).campo).toBe('meses');
+    expect(montarPagamento({ ...base, mesesPrazo: '25' }).campo).toBe('meses');
+    expect(montarPagamento({ ...base, mesesPrazo: '24' }).pagamento.meses_prazo).toBe(24);
+    expect(montarPagamento({ ...base, mesesPrazo: '1' }).pagamento.meses_prazo).toBe(1);
+    expect(montarPagamento({ ...base, mesesPrazo: '1.5' }).campo).toBe('meses');
+    expect(montarPagamento({ ...base, mesesPrazo: '' }).campo).toBe('meses');
+  });
+
+  it('a mensagem explica o que o número significa', () => {
+    expect(montarPagamento({ ...base, mesesPrazo: '266' }).erro).toBe('Informe de 1 a 24 meses entre as parcelas (1 = uma parcela por mês).');
+  });
+
+  it('problema mostrado na hora: vazio não é erro; fora da faixa ou fracionado é', () => {
+    expect(problemaDoPrazo('')).toBeNull();
+    expect(problemaDoPrazo('1')).toBeNull();
+    expect(problemaDoPrazo('24')).toBeNull();
+    expect(problemaDoPrazo('266')).toBe('O máximo é 24 meses entre as parcelas.');
+    expect(problemaDoPrazo('0')).toMatch(/inteiro/);
+    expect(problemaDoPrazo('2,5')).toMatch(/inteiro/);
+  });
+
+  it('último vencimento = parcelas × meses; aviso só acima de 24 meses', () => {
+    expect(mesesAteOUltimoVencimento(12, 1)).toBe(12);
+    expect(mesesAteOUltimoVencimento(12, 3)).toBe(36);
+    expect(AVISO_ULTIMO_VENCIMENTO_MESES).toBe(24);
+  });
+
+  it('vencimentos com o prazo padrão (1) ficam em meses, não em décadas', () => {
+    const v = vencimentosCrediario(12, 1, new Date(2026, 10, 14));
+
+    expect(v).toEqual({ primeiro: '14/12/2026', ultimo: '14/11/2027' });
+  });
+});

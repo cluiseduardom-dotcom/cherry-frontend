@@ -12,14 +12,18 @@ import {
 } from '../utils/pixGateway';
 import {
   FORMAS_PAGAMENTO,
+  AVISO_ULTIMO_VENCIMENTO_MESES,
+  MAX_MESES_PRAZO,
   MAX_PARCELAS,
   OPCOES_PARCELAS,
   STATUS_PAGAMENTO,
   calcularTroco,
   deCentavos,
   descreverParcelas,
+  mesesAteOUltimoVencimento,
   montarPagamento,
   paraCentavos,
+  problemaDoPrazo,
   rotuloForma,
   rotuloStatusPagamento,
   sanitizarValorDigitado,
@@ -80,12 +84,13 @@ export default function PagamentoPDV({
   avisoPix = null, // { texto, acao } quando o Pix automático está desligado; aparece junto do Pix manual aguardando
   passoInicial = null, // só para testes de renderização: abre o passo de uma forma
   parcelasIniciais = '1',
+  mesesIniciais = '1', // (teste) prazo inicial do crediário
 }) {
   const [edicao, setEdicao] = useState(null); // { texto, base } — valor editado à mão
   const [passo, setPasso] = useState(passoInicial); // forma que pede um detalhe antes de registrar
   const [recebido, setRecebido] = useState('');
   const [parcelas, setParcelas] = useState(parcelasIniciais);
-  const [mesesPrazo, setMesesPrazo] = useState('1');
+  const [mesesPrazo, setMesesPrazo] = useState(mesesIniciais);
   const [erroBruto, setErro] = useState(SEM_ERRO);
   const [criandoPix, setCriandoPix] = useState(false);
   const [criandoLink, setCriandoLink] = useState(false);
@@ -216,7 +221,9 @@ export default function PagamentoPDV({
   const parcelasValidas = Number.isInteger(nParcelasPasso) && nParcelasPasso >= 1 && nParcelasPasso <= MAX_PARCELAS
     && valorCentavos !== null && valorCentavos >= nParcelasPasso;
   const nMesesPasso = Number(mesesPrazo);
-  const mesesValidos = Number.isInteger(nMesesPasso) && nMesesPasso >= 1;
+  const mesesValidos = Number.isInteger(nMesesPasso) && nMesesPasso >= 1 && nMesesPasso <= MAX_MESES_PRAZO;
+  // Mostrado na hora, abaixo do campo (valor absurdo nunca vira um "último vencimento" em 2292).
+  const problemaPrazo = problemaDoPrazo(mesesPrazo);
 
   const estadoRestante = excedente ? 'excesso' : completo ? 'ok' : 'falta';
 
@@ -520,16 +527,18 @@ export default function PagamentoPDV({
                     </div>
                     {formaDoPasso.detalhe === 'crediario' && (
                       <div className="input-wrapper">
-                        <label className="input-label" htmlFor="venda-meses-prazo">Prazo (meses)</label>
+                        <label className="input-label" htmlFor="venda-meses-prazo">Meses entre as parcelas (1 = uma por mês)</label>
                         <input
                           id="venda-meses-prazo"
                           className="input-field"
                           type="number"
                           min="1"
+                          max={MAX_MESES_PRAZO}
                           step="1"
+                          inputMode="numeric"
                           value={mesesPrazo}
-                          aria-invalid={erro.campo === 'meses' || undefined}
-                          aria-describedby={erro.campo === 'meses' ? 'venda-erro-meses' : undefined}
+                          aria-invalid={erro.campo === 'meses' || Boolean(problemaPrazo) || undefined}
+                          aria-describedby={erro.campo === 'meses' ? 'venda-erro-meses' : problemaPrazo ? 'venda-aviso-meses' : undefined}
                           onChange={e => { setMesesPrazo(e.target.value); setErro(SEM_ERRO); }}
                         />
                       </div>
@@ -537,12 +546,21 @@ export default function PagamentoPDV({
                   </div>
                   <CampoErro id="venda-erro-parcelas" erro={erro} campo="parcelas" />
                   <CampoErro id="venda-erro-meses" erro={erro} campo="meses" />
+                  {formaDoPasso.detalhe === 'crediario' && problemaPrazo && erro.campo !== 'meses' && (
+                    <p id="venda-aviso-meses" className="pdv-pay-error" role="alert"><span aria-hidden="true">⚠</span> {problemaPrazo}</p>
+                  )}
                   {parcelasValidas && (
                     <p className="pdv-pay-parcelas-resumo" aria-live="polite">
                       <strong>{descreverParcelas(valorCentavos, nParcelasPasso)}</strong>
                       {formaDoPasso.detalhe === 'crediario' && mesesValidos && (() => {
                         const v = vencimentosCrediario(nParcelasPasso, nMesesPasso);
-                        return <small>A receber · 1º venc. {v.primeiro}{nParcelasPasso > 1 && ` · último ${v.ultimo}`}</small>;
+                        const longo = mesesAteOUltimoVencimento(nParcelasPasso, nMesesPasso) > AVISO_ULTIMO_VENCIMENTO_MESES;
+                        return (
+                          <>
+                            <small>A receber · 1º venc. {v.primeiro}{nParcelasPasso > 1 && ` · último ${v.ultimo}`}</small>
+                            {longo && <small role="status"> · Atenção: o último vencimento fica a mais de {AVISO_ULTIMO_VENCIMENTO_MESES / 12} anos.</small>}
+                          </>
+                        );
                       })()}
                     </p>
                   )}

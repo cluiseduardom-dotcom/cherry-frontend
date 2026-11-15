@@ -88,3 +88,37 @@ describe('PagamentoPDV — nada de taxa da plataforma na tela do cliente/operado
     }
   });
 });
+
+describe('PagamentoPDV — crediário: meses entre as parcelas', () => {
+  it('o rótulo explica o que o número significa e o campo tem teto de 24', () => {
+    const html = render(100, [], { passoInicial: 'crediario', parcelasIniciais: '2' });
+
+    expect(html).toContain('Meses entre as parcelas (1 = uma por mês)');
+    expect(html).toMatch(/id="venda-meses-prazo"[^>]*max="24"/);
+    expect(html).not.toContain('Prazo (meses)');
+  });
+
+  it('266 meses (o caso do print) mostra o erro na hora e não calcula vencimento em 2292', () => {
+    const html = render(75, [], { passoInicial: 'crediario', parcelasIniciais: '12', mesesIniciais: '266' });
+
+    expect(html).toContain('O máximo é 24 meses entre as parcelas.');
+    expect(html).toContain('aria-invalid="true"');
+    expect(html).not.toContain('A receber · 1º venc.');
+    expect(html).not.toContain('2292');
+  });
+
+  it('prazo válido mostra os vencimentos; sem aviso quando o último fica dentro de 2 anos', () => {
+    const html = render(75, [], { passoInicial: 'crediario', parcelasIniciais: '12', mesesIniciais: '1' });
+
+    expect(html).toContain('A receber · 1º venc.');
+    expect(html).not.toContain('Atenção: o último vencimento');
+    expect(html).not.toContain('O máximo é 24 meses');
+  });
+
+  it('12 parcelas de 3 em 3 meses (último em 3 anos) é permitido, mas avisa', () => {
+    const html = render(75, [], { passoInicial: 'crediario', parcelasIniciais: '12', mesesIniciais: '3' });
+
+    expect(html).toContain('A receber · 1º venc.');
+    expect(html).toContain('Atenção: o último vencimento fica a mais de 2 anos.');
+  });
+});

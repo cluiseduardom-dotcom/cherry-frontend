@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Copy, QrCode } from 'lucide-react';
+import { Copy, MessageCircle, QrCode } from 'lucide-react';
 import { consultarCobrancaPix } from '../services/pagamentosGateway';
-import { tempoRestante } from '../utils/pixGateway';
+import { formatarMoeda } from '../utils/mascaras';
+import { linkWhatsAppPix, tempoRestante } from '../utils/pixGateway';
 import useAcompanharCobranca from '../hooks/useAcompanharCobranca';
 import './PixQrCobranca.css';
 
 // Parte visual, sem efeitos: recebe tudo por props (testável sem DOM).
-export function PixQrPainel({ qrCode, qrCodeBase64, restante, copiado, onCopiar }) {
+export function PixQrPainel({ qrCode, qrCodeBase64, restante, copiado, onCopiar, whatsappHref }) {
   return (
     <div className="pix-qr" role="group" aria-label="Pix com QR code">
       {qrCodeBase64 ? (
@@ -24,6 +25,11 @@ export function PixQrPainel({ qrCode, qrCodeBase64, restante, copiado, onCopiar 
             <Copy size={14} aria-hidden="true" /> {copiado ? 'Código copiado' : 'Copiar código Pix'}
           </button>
         )}
+        {whatsappHref && (
+          <a className="btn btn-secondary btn-sm" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            <MessageCircle size={14} aria-hidden="true" /> Enviar pelo WhatsApp
+          </a>
+        )}
       </div>
     </div>
   );
@@ -31,7 +37,8 @@ export function PixQrPainel({ qrCode, qrCodeBase64, restante, copiado, onCopiar 
 
 // Mostra o QR da cobrança e acompanha o pagamento: ao pagar, confirma sozinho; ao expirar/cancelar,
 // marca como recusado. Erros de rede na consulta são ignorados (a próxima rodada tenta de novo).
-export default function PixQrCobranca({ pagamento, consultar = consultarCobrancaPix, onPago, onEncerrada, intervaloMs = 4000 }) {
+// `clienteTelefone` (opcional): telefone do cliente da venda; o botão "Enviar pelo WhatsApp" abre a conversa com ele.
+export default function PixQrCobranca({ pagamento, consultar = consultarCobrancaPix, onPago, onEncerrada, intervaloMs = 4000, clienteTelefone }) {
   const [agora, setAgora] = useState(() => Date.now());
   const [copiado, setCopiado] = useState(false);
 
@@ -65,6 +72,7 @@ export default function PixQrCobranca({ pagamento, consultar = consultarCobranca
       restante={tempoRestante(pagamento.pix?.expira_em, agora, pagamento.pix?.expira_em_segundos, pagamento.pix?.recebido_em)}
       copiado={copiado}
       onCopiar={copiar}
+      whatsappHref={linkWhatsAppPix(pagamento.pix?.qr_code, formatarMoeda(pagamento.valor), clienteTelefone)}
     />
   );
 }

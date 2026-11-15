@@ -12,7 +12,8 @@ import './ProductModal.css';
 // Idempotency-Key: o clique repetido ou o "tentar de novo" nunca lança o dinheiro em dobro, e a chave muda quando o usuário
 // altera um campo (outro conteúdo = outra chave). Conta antiga (sem parcela) só admite recebimento por inteiro.
 // O pai só monta este modal quando há uma conta escolhida (e usa `key={conta.id}`): cada abertura começa limpa, com chave nova.
-export default function ReceberContaModal({ conta, nomeCliente, onClose, onSuccess }) {
+// `onReceberPix` (opcional): atalho para receber esta conta por Pix (o pai troca este modal pelo do Pix). Não vale para conta antiga.
+export default function ReceberContaModal({ conta, nomeCliente, onClose, onSuccess, onReceberPix }) {
   const [valor, setValor] = useState('');
   const [forma, setForma] = useState('dinheiro');
   const [observacao, setObservacao] = useState('');
@@ -111,6 +112,9 @@ export default function ReceberContaModal({ conta, nomeCliente, onClose, onSucce
           </div>
 
           <div className="modal-footer">
+            {onReceberPix && !inteiro && restante > 0 && (
+              <button type="button" className="btn btn-secondary" onClick={() => onReceberPix(conta)} disabled={salvando} style={{ marginRight: 'auto' }}>Receber por Pix</button>
+            )}
             <button type="button" className="btn btn-ghost" onClick={onClose} disabled={salvando}>Cancelar</button>
             <button type="submit" className="btn btn-primary" disabled={salvando}>{salvando ? 'Registrando...' : 'Registrar recebimento'}</button>
           </div>

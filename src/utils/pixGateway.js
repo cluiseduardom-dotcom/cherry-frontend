@@ -150,6 +150,27 @@ export function linkWhatsApp(url, valorFormatado, parcelasMaximas, exemplo) {
   return `https://wa.me/?text=${encodeURIComponent(texto)}`;
 }
 
+// Telefone do cliente para o wa.me: só dígitos, com o 55. 10 ou 11 dígitos = brasileiro sem o código do país; 12 ou 13
+// começando em 55 já vem completo; qualquer outra coisa não vira número (o WhatsApp abre para escolher o contato).
+export function telefoneParaWhatsApp(telefone) {
+  const digitos = String(telefone ?? '').replace(/\D/g, '').replace(/^0+/, '');
+
+  if (digitos.length === 10 || digitos.length === 11) return `55${digitos}`;
+  if ((digitos.length === 12 || digitos.length === 13) && digitos.startsWith('55')) return digitos;
+
+  return null;
+}
+
+// Mensagem para o cliente pagar o Pix do Mercado Pago pelo próprio celular ("copia e cola"). O código é o da cobrança; nada
+// sensível vai junto. Com telefone, abre a conversa direto com o cliente; sem, o WhatsApp deixa escolher o contato.
+export function linkWhatsAppPix(codigoPix, valorFormatado, telefone) {
+  if (!codigoPix) return null;
+
+  const texto = `Pix de ${valorFormatado}. Para pagar, copie o código abaixo e cole no app do seu banco, na opção Pix "copia e cola":\n\n${codigoPix}`;
+
+  return `https://wa.me/${telefoneParaWhatsApp(telefone) ?? ''}?text=${encodeURIComponent(texto)}`;
+}
+
 // Proteção do PDV: o Pix do Mercado Pago é dinheiro real que já pode ter saído da conta do cliente.
 // Se o operador descartar a venda (limpar, esvaziar o carrinho, remover o Pix ou sair da tela) com
 // ele pago ou ainda aguardando o QR, o dinheiro fica na cobrança sem venda — e só volta ao cliente por

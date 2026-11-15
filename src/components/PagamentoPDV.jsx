@@ -71,6 +71,7 @@ export default function PagamentoPDV({
   resumo,
   pagamentos,
   temCliente,
+  clienteTelefone, // telefone do cliente da venda (opcional): o Pix pode ser enviado a ele pelo WhatsApp
   onAdicionar,
   onConfirmarPendente,
   onRecusarPendente,
@@ -291,6 +292,7 @@ export default function PagamentoPDV({
         {status === STATUS_PAGAMENTO.PENDENTE && pagamentoDoGateway(p) && !pagamentoLinkCartao(p) && (
           <PixQrCobranca
             pagamento={p}
+            clienteTelefone={clienteTelefone}
             onPago={() => onConfirmarPendente(index)}
             onEncerrada={() => onRecusarPendente(index)}
           />

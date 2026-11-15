@@ -11,6 +11,17 @@ export async function criarCobrancaPix(valor) {
   return body.data;
 }
 
+// Pix para RECEBER fiado ou parcela (em vez de pagar uma venda): `destino` = { tipo:'fiado', cliente_id } | { tipo:'conta_receber', conta_id }.
+// O servidor confere acesso, escopo e valor (não passa do que falta) antes de gerar o QR e, quando pago, lança o recebimento sozinho.
+// A resposta traz também `destino: { tipo, aplicado, erro }`.
+export async function criarCobrancaPixParaReceber(valor, destino) {
+  const body = await apiFetch('/pagamentos-gateway/pix', {
+    method: 'POST',
+    body: JSON.stringify({ valor, destino }),
+  });
+  return body.data;
+}
+
 // Antes de cobrar: { pix: boolean, motivo: null | 'nao_configurado' | 'loja_nao_conectada', parcelas_maximas_link? }.
 // Só o estado da integração; não consulta o Mercado Pago. Contrato: backend GET /pagamentos-gateway/disponibilidade.
 export async function consultarDisponibilidadePix() {

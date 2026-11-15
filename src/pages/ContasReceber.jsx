@@ -6,6 +6,8 @@ import { listarClientes } from '../services/clientes';
 import { formatarMoeda as formatCurrency } from '../utils/mascaras';
 import { formatarData as formatDate } from '../utils/formatarData';
 import ReceberContaModal from '../components/ReceberContaModal';
+import ReceberPixModal from '../components/ReceberPixModal';
+import { destinoConta } from '../utils/pixReceber';
 import { useToast } from '../context/ToastContext';
 import { ehParcial, recebidoDaConta, resumirContas, restanteDaConta, rotuloDaForma } from '../utils/contasReceber';
 import './Contas.css';
@@ -43,6 +45,8 @@ export default function ContasReceber() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [contaAReceber, setContaAReceber] = useState(null);
+  const [contaPix, setContaPix] = useState(null);
+  const [recarga, setRecarga] = useState(0);
   const [historicoId, setHistoricoId] = useState(null);
   const [historico, setHistorico] = useState([]);
   const [carregandoHistorico, setCarregandoHistorico] = useState(false);
@@ -79,7 +83,7 @@ export default function ContasReceber() {
 
     load();
     return () => { cancelled = true; };
-  }, [page, statusFilter]);
+  }, [page, statusFilter, recarga]);
 
   // Contas a receber só guardam venda_id — resolve o nome do cliente
   // localmente juntando vendas + clientes, mesmo padrão de Historico.jsx.
@@ -149,6 +153,14 @@ export default function ContasReceber() {
 
     toast.success(contaAtualizada.status === 'recebido' ? 'Conta recebida por inteiro.' : 'Recebimento parcial registrado.');
     setHistoricoId(null);
+    atualizarResumo();
+  }
+
+  // Pix pago e lançado pelo servidor: recarrega a lista e o resumo (o recebimento já está gravado).
+  function aoReceberPorPix() {
+    toast.success('Pix recebido e lançado na conta.');
+    setHistoricoId(null);
+    setRecarga((n) => n + 1);
     atualizarResumo();
   }
 
@@ -363,6 +375,19 @@ export default function ContasReceber() {
           nomeCliente={nomeClientePorVendaId.get(contaAReceber.venda_id) || ''}
           onClose={() => setContaAReceber(null)}
           onSuccess={aoReceber}
+          onReceberPix={(conta) => { setContaAReceber(null); setContaPix(conta); }}
+        />
+      )}
+
+      {contaPix && (
+        <ReceberPixModal
+          key={contaPix.id}
+          titulo="Receber por Pix"
+          subtitulo={`${contaPix.descricao}${nomeClientePorVendaId.get(contaPix.venda_id) ? ` · ${nomeClientePorVendaId.get(contaPix.venda_id)}` : ''}`}
+          destino={destinoConta(contaPix.id)}
+          maximo={restanteDaConta(contaPix)}
+          onClose={() => setContaPix(null)}
+          onConcluido={aoReceberPorPix}
         />
       )}
     </div>

@@ -197,6 +197,8 @@ export default function Venda() {
   const [pixGatewayAtivo, setPixGatewayAtivo] = useState(true);
   // Motivo informado pelo backend quando o Pix automático está desligado (null = não informado/ativo).
   const [pixGatewayMotivo, setPixGatewayMotivo] = useState(null);
+  // false = o backend informou que o Pix lançado à mão está bloqueado para a empresa (o PDV esconde o Pix manual).
+  const [pixManualLiberado, setPixManualLiberado] = useState(true);
   // Teto global de parcelas do link de cartão (backend: parcelas_maximas_link); null = não informado.
   const [parcelasMaximasLink, setParcelasMaximasLink] = useState(null);
 
@@ -208,6 +210,7 @@ export default function Venda() {
       .then(d => {
         if (cancelled || !d) return;
         if (Number.isInteger(d.parcelas_maximas_link)) setParcelasMaximasLink(d.parcelas_maximas_link);
+        if (d.pix_manual === false) setPixManualLiberado(false);
         if (d.pix !== false) return;
         setPixGatewayAtivo(false);
         setPixGatewayMotivo(d.motivo ?? null);
@@ -1026,6 +1029,7 @@ export default function Venda() {
                       criarLinkCartao={pixGatewayAtivo ? criarLinkCartao : undefined}
                       parcelasMaximasLink={parcelasMaximasLink ?? undefined}
                       onConfirmarLinkCartao={confirmarLinkDeCartao}
+                      pixManualLiberado={pixManualLiberado}
                       avisoPix={pixGatewayAtivo ? null : avisoPixIndisponivel(pixGatewayMotivo, { podeConectar: canAccessRoute(ROTA_CONEXAO_MERCADO_PAGO, user) })}
                       onGatewayIndisponivel={() => setPixGatewayAtivo(false)}
                     />

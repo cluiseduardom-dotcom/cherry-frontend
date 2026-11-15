@@ -193,3 +193,27 @@ describe('PagamentoPDV: aviso de Pix automático indisponível', () => {
     expect(render(50, [pixManual], { avisoPix: null })).not.toContain('pdv-pay-aviso-pix');
   });
 });
+
+describe('PagamentoPDV — Pix manual bloqueado pela plataforma', () => {
+  const botaoPix = html => /pdv-pay-forma--pix/.test(html);
+
+  it('por padrão (liberado) o botão Pix aparece', () => {
+    expect(botaoPix(render(50))).toBe(true);
+  });
+
+  it('bloqueado e sem Pix pelo Mercado Pago: o Pix some; as outras formas continuam', () => {
+    const html = render(50, [], { pixManualLiberado: false });
+    expect(botaoPix(html)).toBe(false);
+    expect(html).toContain('pdv-pay-forma--dinheiro');
+    expect(html).toContain('pdv-pay-forma--debito');
+    expect(html).toContain('pdv-pay-forma--credito');
+  });
+
+  it('bloqueado mas com Pix pelo Mercado Pago ativo: o Pix continua (só o manual é bloqueado)', () => {
+    expect(botaoPix(render(50, [], { pixManualLiberado: false, criarCobrancaPix: noop }))).toBe(true);
+  });
+
+  it('o aviso/texto nunca cita taxa ou motivo', () => {
+    expect(render(50, [], { pixManualLiberado: false })).not.toMatch(/taxa|inadimpl|suspens/i);
+  });
+});

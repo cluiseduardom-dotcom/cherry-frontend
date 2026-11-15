@@ -12,7 +12,6 @@ import {
 } from '../utils/pixGateway';
 import {
   FORMAS_PAGAMENTO,
-  AVISO_ULTIMO_VENCIMENTO_MESES,
   MAX_MESES_PRAZO,
   MAX_PARCELAS,
   OPCOES_PARCELAS,
@@ -20,9 +19,9 @@ import {
   calcularTroco,
   deCentavos,
   descreverParcelas,
-  mesesAteOUltimoVencimento,
   montarPagamento,
   paraCentavos,
+  problemaDoHorizonte,
   problemaDoPrazo,
   rotuloForma,
   rotuloStatusPagamento,
@@ -221,9 +220,11 @@ export default function PagamentoPDV({
   const parcelasValidas = Number.isInteger(nParcelasPasso) && nParcelasPasso >= 1 && nParcelasPasso <= MAX_PARCELAS
     && valorCentavos !== null && valorCentavos >= nParcelasPasso;
   const nMesesPasso = Number(mesesPrazo);
-  const mesesValidos = Number.isInteger(nMesesPasso) && nMesesPasso >= 1 && nMesesPasso <= MAX_MESES_PRAZO;
+  const mesesValidos = Number.isInteger(nMesesPasso) && nMesesPasso >= 1 && nMesesPasso <= MAX_MESES_PRAZO && !problemaDoHorizonte(nParcelasPasso, nMesesPasso);
   // Mostrado na hora, abaixo do campo (valor absurdo nunca vira um "último vencimento" em 2292).
   const problemaPrazo = problemaDoPrazo(mesesPrazo);
+  // Último vencimento a no máximo 6 meses (regra do PO): ex.: 12x de 1 mês não cabe. Mostrado na hora.
+  const problemaHorizonte = formaDoPasso?.detalhe === 'crediario' ? problemaDoHorizonte(parcelas, mesesPrazo) : null;
 
   const estadoRestante = excedente ? 'excesso' : completo ? 'ok' : 'falta';
 
@@ -549,18 +550,15 @@ export default function PagamentoPDV({
                   {formaDoPasso.detalhe === 'crediario' && problemaPrazo && erro.campo !== 'meses' && (
                     <p id="venda-aviso-meses" className="pdv-pay-error" role="alert"><span aria-hidden="true">⚠</span> {problemaPrazo}</p>
                   )}
+                  {formaDoPasso.detalhe === 'crediario' && !problemaPrazo && problemaHorizonte && erro.campo !== 'parcelas' && (
+                    <p id="venda-aviso-horizonte" className="pdv-pay-error" role="alert"><span aria-hidden="true">⚠</span> {problemaHorizonte}</p>
+                  )}
                   {parcelasValidas && (
                     <p className="pdv-pay-parcelas-resumo" aria-live="polite">
                       <strong>{descreverParcelas(valorCentavos, nParcelasPasso)}</strong>
                       {formaDoPasso.detalhe === 'crediario' && mesesValidos && (() => {
                         const v = vencimentosCrediario(nParcelasPasso, nMesesPasso);
-                        const longo = mesesAteOUltimoVencimento(nParcelasPasso, nMesesPasso) > AVISO_ULTIMO_VENCIMENTO_MESES;
-                        return (
-                          <>
-                            <small>A receber · 1º venc. {v.primeiro}{nParcelasPasso > 1 && ` · último ${v.ultimo}`}</small>
-                            {longo && <small role="status"> · Atenção: o último vencimento fica a mais de {AVISO_ULTIMO_VENCIMENTO_MESES / 12} anos.</small>}
-                          </>
-                        );
+                        return <small>A receber · 1º venc. {v.primeiro}{nParcelasPasso > 1 && ` · último ${v.ultimo}`}</small>;
                       })()}
                     </p>
                   )}

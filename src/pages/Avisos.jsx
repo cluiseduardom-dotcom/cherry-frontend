@@ -61,19 +61,22 @@ export default function Avisos() {
                 {aviso.item === 'insumo' && <span className="avisos-etiqueta">Insumo</span>}
                 {aviso.item === 'maleta' && <span className="avisos-etiqueta">{vocab.nome}</span>}
                 {aviso.item === 'pedido' && <span className="avisos-etiqueta">Loja online</span>}
+                {aviso.item === 'cobranca' && <span className="avisos-etiqueta">GiroNex</span>}
                 {!lido && <span className="avisos-novo">Novo</span>}
               </div>
               <p className="avisos-mensagem">{aviso.mensagem}</p>
               <p className="avisos-acao">{aviso.acao}</p>
               <div className="avisos-rodape">
-                <Link
-                  to={destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver)}
-                  className="avisos-ir"
-                  onClick={() => marcarComoLido(aviso.id)}
-                >
-                  Ver
-                  <ArrowRight size={14} />
-                </Link>
+                {destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver) && (
+                  <Link
+                    to={destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver)}
+                    className="avisos-ir"
+                    onClick={() => marcarComoLido(aviso.id)}
+                  >
+                    Ver
+                    <ArrowRight size={14} />
+                  </Link>
+                )}
                 {!lido && (
                   <button type="button" className="btn btn-ghost avisos-lido-btn" onClick={() => marcarComoLido(aviso.id)}>
                     Marcar como lido

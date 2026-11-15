@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, MessageCircle, QrCode } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import {
   cobrancaFiado, estornarLancamentoFiado, extratoFiado, lancarCompraFiado, lancarPagamentoFiado,
 } from '../services/fiado';
+import ReceberPixModal from '../components/ReceberPixModal';
+import { destinoFiado } from '../utils/pixReceber';
 import { formatarMoeda } from '../utils/mascaras';
 import {
   FORMAS_PAGAMENTO, LIMITE_DESCRICAO, LIMITE_MOTIVO, dataBr, efeitoDoLancamento, lerValor, novaChave,
@@ -40,6 +42,7 @@ export default function ColheitaCliente() {
   const [problema, setProblema] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [estornando, setEstornando] = useState(null);
+  const [recebendoPix, setRecebendoPix] = useState(false);
   const [motivo, setMotivo] = useState('');
   const chave = useRef(novaChave());
 
@@ -166,8 +169,21 @@ export default function ColheitaCliente() {
       <div className="colheita-acoes">
         <button type="button" className={`btn ${acao === 'compra' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => abrir('compra')}>Lançar dívida</button>
         <button type="button" className={`btn ${acao === 'pagamento' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => abrir('pagamento')} disabled={saldo <= 0}>Receber pagamento</button>
+        <button type="button" className="btn btn-ghost" onClick={() => setRecebendoPix(true)} disabled={saldo <= 0}><QrCode size={16} /> Receber por Pix</button>
         <button type="button" className="btn btn-ghost" onClick={cobrar} disabled={saldo <= 0}><MessageCircle size={16} /> Cobrar no WhatsApp</button>
       </div>
+
+      {recebendoPix && (
+        <ReceberPixModal
+          titulo="Receber por Pix"
+          subtitulo={`Colheita · ${extrato.cliente.nome}`}
+          destino={destinoFiado(id)}
+          maximo={saldo}
+          telefone={extrato.cliente.telefone}
+          onClose={() => setRecebendoPix(false)}
+          onConcluido={() => { toast?.success?.('Pix recebido e lançado na Colheita.'); setPagina(1); recarregar(); }}
+        />
+      )}
 
       {acao && (
         <form noValidate className="card card-padding colheita-form" onSubmit={enviar}>

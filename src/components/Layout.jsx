@@ -34,8 +34,9 @@ export default function Layout() {
   return (
     <NotificacoesProvider key={user?.id ?? 'anonimo'}>
       <div className="app-layout">
+        <a className="pular-conteudo" href="#conteudo-principal">Pular para o conteúdo</a>
         <Sidebar />
-        <main className="app-main">
+        <main className="app-main" id="conteudo-principal" tabIndex={-1}>
           <MobileHeader title={title} />
           <Outlet />
         </main>

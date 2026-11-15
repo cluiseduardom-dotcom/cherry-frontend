@@ -1017,6 +1017,7 @@ export default function Venda() {
                       resumo={resumoPagamento}
                       pagamentos={pagamentos}
                       temCliente={Boolean(clienteId)}
+                      clienteTelefone={clientes.find(c => String(c.id) === String(clienteId))?.telefone}
                       onAdicionar={adicionarPagamento}
                       onConfirmarPendente={confirmarPagamento}
                       onRecusarPendente={recusarPagamento}

@@ -136,3 +136,31 @@ describe('confirmacaoPerdaPix', () => {
     expect(aguardando.message).toContain('sair do PDV');
   });
 });
+
+import { linkWhatsAppPix, telefoneParaWhatsApp } from './pixGateway';
+
+describe('Pix pelo WhatsApp', () => {
+  it('telefone brasileiro vira número internacional; o que não é telefone não vira', () => {
+    expect(telefoneParaWhatsApp('(11) 91234-5678')).toBe('5511912345678');
+    expect(telefoneParaWhatsApp('11 3234-5678')).toBe('551132345678');
+    expect(telefoneParaWhatsApp('+55 11 91234-5678')).toBe('5511912345678');
+    expect(telefoneParaWhatsApp('011912345678')).toBe('5511912345678');
+    for (const ruim of [null, undefined, '', '123', '1191234567890123']) expect(telefoneParaWhatsApp(ruim)).toBeNull();
+  });
+
+  it('com telefone abre a conversa com o cliente; sem, o WhatsApp deixa escolher o contato', () => {
+    const codigo = '00020126580014br.gov.bcb.pix0136abc';
+    const comFone = linkWhatsAppPix(codigo, 'R$ 75,00', '(11) 91234-5678');
+    const semFone = linkWhatsAppPix(codigo, 'R$ 75,00', null);
+
+    expect(comFone.startsWith('https://wa.me/5511912345678?text=')).toBe(true);
+    expect(semFone.startsWith('https://wa.me/?text=')).toBe(true);
+    expect(decodeURIComponent(comFone.split('?text=')[1])).toBe(`Pix de R$ 75,00. Para pagar, copie o código abaixo e cole no app do seu banco, na opção Pix "copia e cola":\n\n${codigo}`);
+    expect(comFone).not.toMatch(/\s/);
+  });
+
+  it('sem código do Pix não há link', () => {
+    expect(linkWhatsAppPix('', 'R$ 75,00', '11912345678')).toBeNull();
+    expect(linkWhatsAppPix(undefined, 'R$ 75,00', '11912345678')).toBeNull();
+  });
+});

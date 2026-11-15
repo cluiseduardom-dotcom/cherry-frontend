@@ -35,6 +35,8 @@ import './PagamentoPDV.css';
 
 const SEM_ERRO = { campo: '', mensagem: '' };
 
+const MENSAGEM_PIX_INDISPONIVEL = 'O Pix está indisponível para esta empresa. Use outra forma de pagamento ou fale com o administrador do sistema.';
+
 const ICONE_FORMA = {
   pix: QrCode,
   debito: Wallet,
@@ -81,6 +83,7 @@ export default function PagamentoPDV({
   parcelasMaximasLink, // teto global do link (backend: parcelas_maximas_link); sem ele, o padrão do backend
   onConfirmarLinkCartao, // (index, cobranca): o link foi pago; vira crédito/débito com as parcelas do Mercado Pago
   onGatewayIndisponivel,
+  pixManualLiberado = true, // false = a empresa está com o Pix lançado à mão bloqueado: sem Mercado Pago, o Pix some do PDV
   avisoPix = null, // { texto, acao } quando o Pix automático está desligado; aparece junto do Pix manual aguardando
   passoInicial = null, // só para testes de renderização: abre o passo de uma forma
   parcelasIniciais = '1',
@@ -162,7 +165,11 @@ export default function PagamentoPDV({
       onAdicionar(pagamentoComCobranca(r.pagamento, cobranca));
       limparEntrada();
     } catch (err) {
-      if (gatewayIndisponivel(err)) {
+      if (gatewayIndisponivel(err) && !pixManualLiberado) {
+        // Sem Mercado Pago e com o Pix manual bloqueado, não há como lançar Pix: não cai no manual (o backend recusaria).
+        onGatewayIndisponivel?.();
+        setErro({ campo: 'forma', mensagem: MENSAGEM_PIX_INDISPONIVEL });
+      } else if (gatewayIndisponivel(err)) {
         onGatewayIndisponivel?.();
         onAdicionar(r.pagamento);
         limparEntrada();
@@ -210,6 +217,9 @@ export default function PagamentoPDV({
     registrar(f.valor);
   }
 
+  // Pix manual bloqueado e sem Pix pelo Mercado Pago: a opção Pix some (o backend recusaria a venda). Com o Mercado Pago
+  // ativo o Pix continua, porque só o lançado à mão é bloqueado.
+  const formasVisiveis = !pixManualLiberado && !criarCobrancaPix ? FORMAS_PAGAMENTO.filter(f => f.valor !== 'pix') : FORMAS_PAGAMENTO;
   const formaDoPasso = FORMAS_PAGAMENTO.find(f => f.valor === passo);
   // Link de cartão: o que dá para anunciar ao cliente para o valor digitado.
   const maximoLink = parcelasPossiveisLink(valorCentavos === null ? 0 : valorCentavos / 100, parcelasMaximasLink);
@@ -381,7 +391,7 @@ export default function PagamentoPDV({
           <fieldset className="pdv-pay-formas">
             <legend className="input-label">Como o cliente vai pagar?</legend>
             <div className="pdv-pay-formas-grid">
-              {FORMAS_PAGAMENTO.map(f => {
+              {formasVisiveis.map(f => {
                 const Icone = ICONE_FORMA[f.valor];
                 return (
                   <button

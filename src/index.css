@@ -3,7 +3,15 @@
    Global CSS Variables & Base Styles
    ========================================================= */
 
-/* --- Google Font fallback (loaded via index.html) --- */
+/* --- Inter servida pelo próprio sistema (licença SIL OFL 1.1; ver src/assets/fonts/LICENCA-INTER.txt): sem pedido ao Google --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/inter-latin-wght-normal.woff2') format('woff2');
+}
+
 :root {
   /* === TOKENS COMUNS A TODOS OS TEMAS ===
      Cores de marca, fundos, texto e bordas ficam em src/theme/themes.css. */
@@ -380,6 +388,30 @@ ul, ol {
   box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.10);
 }
 
+/* Indicador de foco que se vê (WCAG 2.4.7 / 2.4.11): contorno sólido ao navegar pelo teclado. */
+.input-field:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Link "Pular para o conteúdo" (WCAG 2.4.1): só aparece quando recebe o foco do teclado. */
+.pular-conteudo {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 10000;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.pular-conteudo:focus {
+  top: 8px;
+}
+
 .input-field::placeholder {
   color: var(--color-text-muted);
 }
@@ -483,4 +515,8 @@ ul, ol {
   :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
     font-size: 16px;
   }
+}
+
+.app-main:focus {
+  outline: none; /* alvo do "Pular para o conteúdo": não é um controle */
 }

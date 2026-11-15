@@ -247,7 +247,7 @@ export default function BarcodeScannerModal({ onDetect, onClose, continuo = fals
       <div className="compra-modal scanner-modal">
         <div className="compra-modal-header">
           <h2>{titulo}</h2>
-          <button type="button" className="produto-action-btn" onClick={solicitarFechamento}><X size={16} /></button>
+          <button type="button" className="produto-action-btn" onClick={solicitarFechamento} aria-label="Fechar"><X size={16} /></button>
         </div>
 
         {erro && <div className="compra-alert error">{erro}</div>}

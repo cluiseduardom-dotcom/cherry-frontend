@@ -47,14 +47,14 @@ html[data-theme="vertumno"] {
   /* Texto */
   --color-text-primary:   #14213A;
   --color-text-secondary: #3F4D63;
-  --color-text-muted:     #6B7A90;
+  --color-text-muted:     #5A6980; /* 5,57:1 sobre branco (antes #6B7A90 = 4,36:1) */
   --color-text-subtle:    #5B6B82;
   --color-text-price:     #0B2545;
 
   /* Bordas */
   --color-border:       #D9E0EA;
   --color-border-light: #E3E8EF;
-  --color-border-input: #D9E0EA;
+  --color-border-input: #8793A6; /* 3,11:1: borda de campo precisa de 3:1 (antes #D9E0EA = 1,33:1) */
 
   /* Papéis */
   --color-role-admin:    #0B2545;
@@ -126,14 +126,14 @@ html[data-theme="cherry"] {
   /* Texto */
   --color-text-primary:   #272729;
   --color-text-secondary: #555557;
-  --color-text-muted:     #8A8A8A;
+  --color-text-muted:     #6B6B6B; /* 5,33:1 sobre branco (antes #8A8A8A = 3,45:1) */
   --color-text-subtle:    #6F5F66;
   --color-text-price:     #A70636;
 
   /* Bordas */
   --color-border:       #E5D7DB;
   --color-border-light: #F0E5E8;
-  --color-border-input: #E5D7DB;
+  --color-border-input: #8F7C84; /* 3,9:1: borda de campo precisa de 3:1 */
 
   /* Papéis */
   --color-role-admin:    #A70636;
@@ -207,14 +207,14 @@ html[data-theme="valvazori"] {
   /* Texto */
   --color-text-primary:   #14213A;
   --color-text-secondary: #3F4D63;
-  --color-text-muted:     #6B7A90;
+  --color-text-muted:     #5A6980; /* 5,57:1 sobre branco (antes #6B7A90 = 4,36:1) */
   --color-text-subtle:    #5B6B82;
   --color-text-price:     #102961;
 
   /* Bordas */
   --color-border:       #D9DFEA;
   --color-border-light: #E3E8F0;
-  --color-border-input: #D9DFEA;
+  --color-border-input: #8793A6; /* 3,11:1: borda de campo precisa de 3:1 */
 
   /* Papéis */
   --color-role-admin:    #102961;

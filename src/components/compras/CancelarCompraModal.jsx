@@ -40,7 +40,7 @@ export default function CancelarCompraModal({ compra, onConfirm, onClose }) {
       <div className="compra-modal cancelar-compra-modal">
         <div className="compra-modal-header">
           <h2>Cancelar compra #{compra.id}</h2>
-          <button type="button" className="produto-action-btn" onClick={solicitarFechamento} disabled={cancelando}><X size={16} /></button>
+          <button type="button" className="produto-action-btn" onClick={solicitarFechamento} disabled={cancelando} aria-label="Fechar"><X size={16} /></button>
         </div>
 
         {erro && <div className="compra-alert error">{erro}</div>}

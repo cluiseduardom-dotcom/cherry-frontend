@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Eye, EyeOff, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -150,6 +150,7 @@ export default function Login() {
             {loading ? <span className="login-spinner" /> : <>Entrar <ArrowRight size={18} /></>}
           </button>
         </form>
+        <p className="login-legal"><Link to="/privacidade">Política de privacidade</Link></p>
       </div>
 
       <div className="login-side">

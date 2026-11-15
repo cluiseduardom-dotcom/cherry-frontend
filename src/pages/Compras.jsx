@@ -393,7 +393,7 @@ export default function Compras() {
             <div className="compra-modal compra-modal--intent">
               <div className="compra-modal-header">
                 <h2>Nova compra</h2>
-                <button type="button" className="produto-action-btn" onClick={closeCreate}><X size={16} /></button>
+                <button type="button" className="produto-action-btn" onClick={closeCreate} aria-label="Fechar"><X size={16} /></button>
               </div>
               <p className="text-sm text-secondary" style={{ marginTop: -8, marginBottom: 18 }}>Como você deseja comprar?</p>
               <div className="compra-intent-grid">
@@ -417,7 +417,7 @@ export default function Compras() {
             <form className="compra-modal" onSubmit={handleSubmit}>
               <div className="compra-modal-header">
                 <h2>Nova compra direta</h2>
-                <button type="button" className="produto-action-btn" onClick={closeCreate}><X size={16} /></button>
+                <button type="button" className="produto-action-btn" onClick={closeCreate} aria-label="Fechar"><X size={16} /></button>
               </div>
 
               {formError && <div className="compra-alert error">{formError}</div>}

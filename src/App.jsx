@@ -55,6 +55,8 @@ const DespesasFixas = lazy(() => import('./pages/DespesasFixas'));
 const CategoriasProduto = lazy(() => import('./pages/CategoriasProduto'));
 const ConfiguracaoSku = lazy(() => import('./pages/ConfiguracaoSku'));
 
+const PoliticaPrivacidade = lazy(() => import('./pages/PoliticaPrivacidade'));
+
 const ROUTE_COMPONENTS = {
   '/': Dashboard,
   '/dashboard/calculos': DashboardCalculos,
@@ -125,6 +127,8 @@ const router = createBrowserRouter([
   { path: '/c/:slug', element: <LoginMarca /> },
   // Pública (cliente final volta do Mercado Pago): sem login, sem API.
   { path: '/pagamento-recebido', element: <PagamentoRecebido /> },
+  // Pública: política de privacidade do sistema (sem login, sem API).
+  { path: '/privacidade', element: <TelaSobDemanda><PoliticaPrivacidade /></TelaSobDemanda> },
   {
     element: <ProtectedRoute><Layout /></ProtectedRoute>,
     children: registeredPaths.map(path => {

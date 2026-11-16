@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
 import { ROLE_LABEL } from '../config/papeis';
 import ParetoCurvaAbc from './ParetoCurvaAbc';
+import GraficoResultado from '../components/GraficoResultado';
 import { formatarMoeda } from './dashboardCurvaAbc';
 import { indicadoresDeTotais } from '../utils/dashboardFormulas';
 import './Dashboard.css';
@@ -99,7 +100,9 @@ function Donut({ data, total, totalLabel, ariaLabel }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, temCapacidade } = useAuth();
+  // Lucro revela custo: só quem já vê custos e as vendas de todos (o backend também exige).
+  const podeVerResultado = temCapacidade('ver_custos') && temCapacidade('ver_vendas_de_todos');
   const { marca } = useTheme();
   const [resumo, setResumo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -296,6 +299,8 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+
+          {podeVerResultado && <GraficoResultado />}
 
           {/* Pareto + distribuição + atenção */}
           <div className="dash-row dash-row--charts">

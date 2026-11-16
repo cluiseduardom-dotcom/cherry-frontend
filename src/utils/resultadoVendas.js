@@ -86,3 +86,24 @@ export function rotuloMes(chave) {
   const [ano, mes] = String(chave).split('-').map(Number);
   return MESES[mes - 1] ? `${MESES[mes - 1]}/${ano}` : String(chave);
 }
+
+// Os últimos `n` meses terminando no mês de `hoje` (inclusive), com a série mês a mês pedida ao backend.
+export function periodoUltimosMeses(hoje, n) {
+  const [ano, mes] = hoje.split('-').map(Number);
+  const inicio = mesesAtras(ano, mes, n - 1);
+
+  return { data_de: primeiroDia(inicio.ano, inicio.mes), data_ate: hoje, agrupar: 'mes' };
+}
+
+// Série do backend -> pontos do gráfico (faturamento, lucro bruto e lucro líquido por mês).
+export function montarSerieGrafico(serie) {
+  return (serie ?? []).map(s => ({
+    mes: s.mes,
+    rotulo: rotuloMes(s.mes),
+    receita: Number(s.receita ?? 0),
+    lucro_bruto: Number(s.lucro_bruto ?? 0),
+    lucro_liquido: Number(s.lucro_liquido ?? 0),
+    margem_bruta_pct: s.margem_bruta_pct ?? null,
+    margem_liquida_pct: s.margem_liquida_pct ?? null,
+  }));
+}

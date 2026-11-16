@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatarPct, somarResultados, periodosPredefinidos, rotuloMes } from './resultadoVendas';
+import { formatarPct, somarResultados, periodosPredefinidos, rotuloMes, periodoUltimosMeses, montarSerieGrafico } from './resultadoVendas';
 
 const resultado = (receita, custo, comissao = 0, impostos = 0) => ({
   receita, custo, comissao, impostos,
@@ -74,5 +74,28 @@ describe('rotuloMes', () => {
     expect(rotuloMes('2026-03')).toBe('mar/2026');
     expect(rotuloMes('2026-12')).toBe('dez/2026');
     expect(rotuloMes('xx')).toBe('xx');
+  });
+});
+
+describe('periodoUltimosMeses', () => {
+  it('termina em hoje e começa no dia 1 do mês n-1 atrás, pedindo série mensal', () => {
+    expect(periodoUltimosMeses('2026-11-16', 3)).toEqual({ data_de: '2026-09-01', data_ate: '2026-11-16', agrupar: 'mes' });
+    expect(periodoUltimosMeses('2026-02-10', 6)).toEqual({ data_de: '2025-09-01', data_ate: '2026-02-10', agrupar: 'mes' });
+    expect(periodoUltimosMeses('2026-11-16', 12).data_de).toBe('2025-12-01');
+  });
+});
+
+describe('montarSerieGrafico', () => {
+  it('converte a série do backend em pontos com rótulo do mês', () => {
+    const pontos = montarSerieGrafico([
+      { mes: '2026-10', receita: 1000, lucro_bruto: 600, lucro_liquido: 450, margem_bruta_pct: 60, margem_liquida_pct: 45 },
+      { mes: '2026-11', receita: 0, lucro_bruto: 0, lucro_liquido: 0, margem_bruta_pct: null, margem_liquida_pct: null },
+    ]);
+    expect(pontos[0]).toMatchObject({ rotulo: 'out/2026', receita: 1000, lucro_bruto: 600, lucro_liquido: 450 });
+    expect(pontos[1].margem_bruta_pct).toBeNull();
+  });
+
+  it('sem série devolve lista vazia', () => {
+    expect(montarSerieGrafico(undefined)).toEqual([]);
   });
 });

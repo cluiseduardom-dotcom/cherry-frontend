@@ -42,7 +42,8 @@
 
 .sidebar-logo-img {
   display: block;
-  width: 100%;
+  width: 82%;
+  margin: 0 auto;
   height: auto;
   /* Bordas laterais dissolvidas para a imagem se fundir ao degradê do menu. A base não é
      dissolvida: o nome da marca fica na última faixa da imagem e precisa aparecer inteiro. */
@@ -338,6 +339,15 @@
   white-space: normal;
   line-height: 1.25;
   border-radius: 12px;
+}
+
+/* VERTUMNO (padrão): halo de luz bem sutil atrás do símbolo; some nas bordas e não tem emenda
+   com o degradê do menu. Cherry e Valvazori têm tratamento próprio. */
+html:not([data-theme="cherry"]):not([data-theme="valvazori"]) .sidebar-logo--imagem {
+  padding: var(--space-2) 0 var(--space-3);
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 40%, rgba(96, 150, 232, 0.17) 0, rgba(96, 150, 232, 0) 100%),
+    radial-gradient(ellipse 40% 32% at 50% 36%, rgba(232, 184, 96, 0.08) 0, rgba(232, 184, 96, 0) 100%);
 }
 
 /* Valvazori: o logo do cliente é transparente e azul-marinho sobre o menu branco; sem a dissolução

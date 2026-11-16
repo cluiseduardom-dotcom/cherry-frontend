@@ -44,15 +44,10 @@
   display: block;
   width: 100%;
   height: auto;
-  /* Bordas dissolvidas (base e laterais) para a imagem se fundir ao degradê do menu */
-  -webkit-mask-image:
-    linear-gradient(to bottom, #000 80%, transparent 100%),
-    linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, #000 80%, transparent 100%),
-    linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
-  mask-composite: intersect;
+  /* Bordas laterais dissolvidas para a imagem se fundir ao degradê do menu. A base não é
+     dissolvida: o nome da marca fica na última faixa da imagem e precisa aparecer inteiro. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
 }
 
 .sidebar-logo-icon {

@@ -44,6 +44,14 @@ export async function listarVendas({ page = 1, pageSize = 100, status, canal, da
   return body.data;
 }
 
+// Lucro do período (só quem tem ver_custos e vê as vendas de todos). `agrupar`: 'dia' ou 'mes' (opcional).
+export async function obterResultadoPeriodo({ data_de, data_ate, agrupar } = {}) {
+  const params = new URLSearchParams({ data_de, data_ate });
+  if (agrupar) params.set('agrupar', agrupar);
+  const body = await apiFetch(`/vendas/resultado?${params.toString()}`);
+  return body.data;
+}
+
 export async function obterPreviaCancelamento(id) {
   const body = await apiFetch(`/vendas/${id}/cancelamento/previa`);
   return body.data;

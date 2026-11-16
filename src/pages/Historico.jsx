@@ -6,6 +6,9 @@ import { useAuth } from '../context/AuthContext';
 import { ACTIONS, podeExecutarAcao } from '../config/access';
 import Avatar from '../components/Avatar';
 import CancelarVendaModal from '../components/CancelarVendaModal';
+import ResultadoVendaModal from '../components/ResultadoVendaModal';
+import ResultadoPeriodo from '../components/ResultadoPeriodo';
+import { formatarMoeda, formatarPct, somarResultados } from '../utils/resultadoVendas';
 import { useToast } from '../context/ToastContext';
 import { detalheDosPagamentos, resumoFormasDePagamento } from '../utils/formaPagamentoVenda';
 import './Historico.css';
@@ -46,7 +49,7 @@ function inicioMesISO() {
 }
 
 export default function Historico() {
-  const { user } = useAuth();
+  const { user, temCapacidade } = useAuth();
   const podeCancelar = podeExecutarAcao(user, ACTIONS.CANCELAR_VENDA);
 
   const [vendas, setVendas] = useState([]);
@@ -54,6 +57,7 @@ export default function Historico() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [vendaParaCancelar, setVendaParaCancelar] = useState(null);
+  const [vendaResultado, setVendaResultado] = useState(null);
   const [search, setSearch] = useState('');
   const [periodoFiltro, setPeriodoFiltro] = useState('todos');
   const [statusFiltro, setStatusFiltro] = useState('todos');
@@ -110,6 +114,11 @@ export default function Historico() {
   const totalRevenue = concluidas.reduce((sum, v) => sum + Number(v.total), 0);
   const ticketMedio = concluidas.length > 0 ? totalRevenue / concluidas.length : 0;
 
+  // Lucro: o backend só manda `resultado` para quem tem `ver_custos`; sem ele, nada de lucro na tela.
+  const resumoLucro = somarResultados(filtered);
+  // O resultado do período soma a empresa toda: exige também ver as vendas de todos.
+  const podeVerPeriodo = temCapacidade('ver_custos') && temCapacidade('ver_vendas_de_todos');
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -150,6 +159,35 @@ export default function Historico() {
           </div>
         </div>
       </div>
+
+      {resumoLucro && (
+        <div className="historico-summary">
+          <div className="card card-padding historico-stat">
+            <div className="historico-stat-label">Lucro bruto</div>
+            <div className={`historico-stat-value ${resumoLucro.lucro_bruto < 0 ? 'historico-stat-value--danger' : ''}`}>
+              {formatarMoeda(resumoLucro.lucro_bruto)}
+            </div>
+            <div className="text-xs text-secondary">{formatarPct(resumoLucro.margem_bruta_pct)} da receita</div>
+          </div>
+          <div className="card card-padding historico-stat">
+            <div className="historico-stat-label">Lucro líquido</div>
+            <div className={`historico-stat-value ${resumoLucro.lucro_liquido < 0 ? 'historico-stat-value--danger' : ''}`}>
+              {formatarMoeda(resumoLucro.lucro_liquido)}
+            </div>
+            <div className="text-xs text-secondary">{formatarPct(resumoLucro.margem_liquida_pct)} da receita · após comissão e imposto</div>
+          </div>
+          <div className="card card-padding historico-stat">
+            <div className="historico-stat-label">Custo dos produtos</div>
+            <div className="historico-stat-value">{formatarMoeda(resumoLucro.custo)}</div>
+          </div>
+          <div className="card card-padding historico-stat">
+            <div className="historico-stat-label">Receita (sem juros)</div>
+            <div className="historico-stat-value">{formatarMoeda(resumoLucro.receita)}</div>
+          </div>
+        </div>
+      )}
+
+      {podeVerPeriodo && <ResultadoPeriodo />}
 
       {/* Search */}
       <div className="historico-toolbar">
@@ -228,6 +266,7 @@ export default function Historico() {
                   <th>Vendedor</th>
                   <th>Canal</th>
                   <th>Total</th>
+                  {resumoLucro && <th>Lucro</th>}
                   <th>Pagamento</th>
                   <th>Status</th>
                   {podeCancelar && <th></th>}
@@ -270,6 +309,18 @@ export default function Historico() {
                       <td className="historico-total">
                         {Number(venda.total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>
+                      {resumoLucro && (
+                        <td>
+                          {venda.resultado ? (
+                            <button type="button" className="historico-resultado-btn" onClick={() => setVendaResultado(venda)} title="Ver como o lucro foi calculado">
+                              {formatarMoeda(venda.resultado.lucro_bruto)}
+                              <small>{formatarPct(venda.resultado.margem_bruta_pct)} bruto · líq. {formatarPct(venda.resultado.margem_liquida_pct)}</small>
+                            </button>
+                          ) : (
+                            <span className="text-sm text-secondary">—</span>
+                          )}
+                        </td>
+                      )}
                       <td
                         className="historico-items"
                         title={detalheDosPagamentos(venda, v => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })) || undefined}
@@ -308,6 +359,8 @@ export default function Historico() {
           )}
         </div>
       )}
+
+      <ResultadoVendaModal venda={vendaResultado} onClose={() => setVendaResultado(null)} />
 
       {vendaParaCancelar && (
         <CancelarVendaModal

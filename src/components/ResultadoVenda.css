@@ -1,0 +1,50 @@
+/* Resultado (lucro) de vendas: modal da venda e cartão do período. Só tokens do tema. */
+.resultado-linhas { margin: 0; display: grid; }
+
+.resultado-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-sm);
+}
+
+.resultado-linha dt { color: var(--color-text-secondary); }
+.resultado-linha dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+.resultado-linha--menos dd { color: var(--color-text-secondary); font-weight: 500; }
+
+.resultado-linha--destaque { border-bottom: 0; background: var(--color-secondary-ultra); padding: var(--space-3); border-radius: var(--radius-md); margin: var(--space-1) 0; }
+.resultado-linha--destaque dt { color: var(--color-primary); font-weight: 700; }
+.resultado-linha--destaque dd { color: var(--color-primary); font-weight: 800; }
+
+.resultado-pct { margin-left: var(--space-2); font-size: var(--font-size-xs); font-weight: 700; color: var(--color-secondary); }
+.resultado-negativo { color: var(--color-danger) !important; }
+.resultado-nota { margin: var(--space-3) 0 0; font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+/* Cartão "Resultado do período" */
+.resultado-periodo { margin-bottom: var(--space-5); }
+.resultado-periodo-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+.resultado-periodo-titulo { margin: 0; font-size: var(--font-size-md); font-weight: 700; color: var(--color-primary); }
+.resultado-periodo-opcoes { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.resultado-periodo-datas { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: var(--space-4); font-size: var(--font-size-sm); }
+
+.resultado-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-3); }
+.resultado-card { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); border-left: 4px solid var(--color-primary); background: var(--color-secondary-ultra); }
+.resultado-card-label { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .4px; }
+.resultado-card-valor { font-size: var(--font-size-xl, 1.25rem); font-weight: 800; color: var(--color-primary); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.resultado-card-pct { font-size: var(--font-size-sm); font-weight: 700; color: var(--color-secondary); }
+.resultado-card--destaque { border-left-color: var(--color-accent); }
+
+.resultado-aviso { margin: var(--space-3) 0 0; font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.resultado-erro { color: var(--color-danger); font-size: var(--font-size-sm); }
+
+.resultado-serie-wrap { overflow-x: auto; margin-top: var(--space-4); }
+.resultado-serie { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.resultado-serie th { text-align: right; padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; border-bottom: 1px solid var(--color-border-light); }
+.resultado-serie td { text-align: right; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-light); font-variant-numeric: tabular-nums; }
+.resultado-serie th:first-child, .resultado-serie td:first-child { text-align: left; }
+
+.historico-resultado-btn { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; color: var(--color-primary); }
+.historico-resultado-btn:hover { text-decoration: underline; }
+.historico-resultado-btn small { display: block; color: var(--color-text-muted); font-size: var(--font-size-xs); }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { registrarMovimentacaoEstoque } from '../services/estoque';
@@ -27,8 +27,19 @@ const EMPTY_FORM = {
 
 // `user` define o que pode ser oferecido (entrada sem compra e estoque inicial dependem de permissão).
 // O backend valida de novo: a tela só evita oferecer o que seria recusado.
-export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose, onSaved }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+// Pré-preenchimento (usado pelo assistente de cadastro): `produtoInicial` (id; trava o produto), `tipoInicial`,
+// `motivoInicial`. `oferecerEtiquetas={false}` esconde a opção de imprimir etiquetas.
+export default function MovimentacaoEstoqueModal({
+  open, produtos, user, onClose, onSaved,
+  produtoInicial = null, tipoInicial = null, motivoInicial = null, oferecerEtiquetas = true,
+}) {
+  const formInicial = useMemo(() => ({
+    ...EMPTY_FORM,
+    produtoId: produtoInicial != null ? String(produtoInicial) : '',
+    tipo: tipoInicial ?? EMPTY_FORM.tipo,
+    motivoCodigo: motivoInicial ?? '',
+  }), [produtoInicial, tipoInicial, motivoInicial]);
+  const [form, setForm] = useState(formInicial);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   // Só vale para entrada: depois de salvar, abre a impressão de etiquetas com a quantidade desta entrada.
@@ -36,16 +47,16 @@ export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose
 
   useEffect(() => {
     if (open) {
-      setForm(EMPTY_FORM);
+      setForm(formInicial);
       setImprimirEtiquetas(true);
       setError('');
       setSaving(false);
     }
-  }, [open]);
+  }, [open, formInicial]);
 
   // Issue #42: nunca fechar silenciosamente (clique fora, ESC, X ou
   // Cancelar) com dados preenchidos e não salvos.
-  const isDirty = formularioAlterado(form, EMPTY_FORM);
+  const isDirty = formularioAlterado(form, formInicial);
   const { confirmando, solicitarFechamento, confirmarDescarte, continuarEditando } =
     useConfirmarFechamentoModal({ open, isDirty, onClose });
 
@@ -91,7 +102,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose
       const payload = montarPayloadMovimentacao(form);
       const movimentacao = await registrarMovimentacaoEstoque(Number(form.produtoId), payload);
       onSaved(movimentacao, {
-        imprimirEtiquetas: form.tipo === 'entrada' && imprimirEtiquetas,
+        imprimirEtiquetas: oferecerEtiquetas && form.tipo === 'entrada' && imprimirEtiquetas,
         quantidade: payload.quantidade,
       });
     } catch (err) {
@@ -127,6 +138,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose
                   id="mm-produto"
                   produtos={produtos}
                   value={form.produtoId}
+                  disabled={produtoInicial != null}
                   onChange={id => updateField('produtoId', id)}
                 />
                 {produtoSelecionado && (
@@ -163,7 +175,7 @@ export default function MovimentacaoEstoqueModal({ open, produtos, user, onClose
                 />
               </div>
 
-              {form.tipo === 'entrada' && (
+              {oferecerEtiquetas && form.tipo === 'entrada' && (
                 <label className="modal-form-span-2 mm-imprimir-etiquetas">
                   <input type="checkbox" checked={imprimirEtiquetas} onChange={e => setImprimirEtiquetas(e.target.checked)} />
                   {' '}Imprimir etiquetas desta entrada depois de salvar

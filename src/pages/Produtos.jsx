@@ -7,6 +7,7 @@ import { ACTIONS, podeExecutarAcao } from '../config/access';
 import ProductModal from '../components/ProductModal';
 import FichaVendaModal from '../components/FichaVendaModal';
 import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
+import AssistenteCadastroProduto from '../components/AssistenteCadastroProduto';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
@@ -40,6 +41,8 @@ export default function Produtos({ tipo = 'acabado' }) {
   const [fichaProduto, setFichaProduto] = useState(null);
   const [categorizarModalOpen, setCategorizarModalOpen] = useState(false);
   const [categorizandoProduto, setCategorizandoProduto] = useState(null);
+  // Produto recém-criado: abre o assistente com os passos que faltam (fotos, categoria, preço, estoque inicial).
+  const [assistenteProduto, setAssistenteProduto] = useState(null);
 
   const { acaoPendente, pedirConfirmacao, confirmar, cancelar } = useConfirmAction();
   const toast = useToast();
@@ -107,6 +110,7 @@ export default function Produtos({ tipo = 'acabado' }) {
       return prev.map(p => (p.id === produtoSalvo.id ? { ...p, ...produtoSalvo } : p));
     });
     setModalOpen(false);
+    if (modalMode === 'create' && !ehInsumo) setAssistenteProduto({ tipo, ...produtoSalvo });
     toast.success(modalMode === 'create'
       ? (ehInsumo ? 'Insumo criado com sucesso.' : 'Produto criado com sucesso.')
       : (ehInsumo ? 'Insumo atualizado com sucesso.' : 'Produto atualizado com sucesso.'));
@@ -119,6 +123,10 @@ export default function Produtos({ tipo = 'acabado' }) {
   function openCategorizarModal(produto) {
     setCategorizandoProduto(produto);
     setCategorizarModalOpen(true);
+  }
+
+  function handleProdutoAtualizadoPeloAssistente(produtoSalvo) {
+    setProdutos(prev => prev.map(p => (p.id === produtoSalvo.id ? { ...p, ...produtoSalvo } : p)));
   }
 
   function handleCategorizado(produtoSalvo) {
@@ -294,6 +302,17 @@ export default function Produtos({ tipo = 'acabado' }) {
         onClose={() => setCategorizarModalOpen(false)}
         onSaved={handleCategorizado}
       />
+
+      {assistenteProduto && (
+        <AssistenteCadastroProduto
+          key={assistenteProduto.id}
+          produto={assistenteProduto}
+          user={user}
+          onClose={() => setAssistenteProduto(null)}
+          onProdutoAtualizado={handleProdutoAtualizadoPeloAssistente}
+          onFotosAlteradas={handleFotosAlteradas}
+        />
+      )}
 
       <ConfirmDialog
         open={acaoPendente !== null}

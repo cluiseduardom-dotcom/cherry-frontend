@@ -39,4 +39,25 @@ describe('MovimentacaoEstoqueModal', () => {
   it('sem usuário nada que exija permissão é oferecido', () => {
     expect(tiposDoSelect(render(undefined))).toEqual(['saida', 'ajuste']);
   });
+  it('pré-preenchido para estoque inicial: produto travado, entrada, motivo escolhido e sem opção de etiquetas', () => {
+    const admin = { role: 'admin', capacidades: [] };
+    const html = renderToStaticMarkup(
+      createElement(MemoryRouter, null, createElement(MovimentacaoEstoqueModal, {
+        open: true,
+        produtos: [{ id: 7, nome: 'Anel', sku: 'AN-1', estoque_atual: 0 }],
+        user: admin,
+        onClose: noop,
+        onSaved: noop,
+        produtoInicial: 7,
+        tipoInicial: 'entrada',
+        motivoInicial: 'estoque_inicial',
+        oferecerEtiquetas: false,
+      })),
+    );
+
+    expect(html).toMatch(/<option value="entrada" selected/);
+    expect(html).toMatch(/<option value="estoque_inicial" selected/);
+    expect(html).not.toContain('Imprimir etiquetas');
+    expect(html).toContain('Anel');
+  });
 });

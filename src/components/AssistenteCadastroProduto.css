@@ -1,0 +1,20 @@
+.assistente-panel { max-width: 640px; width: 100%; }
+.assistente-subtitulo { margin: var(--space-1) 0 0; font-size: var(--text-sm, 0.875rem); color: var(--text-secondary); }
+.assistente-passos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.assistente-passo { border: 1px solid var(--border, rgba(128,128,128,.25)); border-radius: var(--radius-md, 8px); overflow: hidden; }
+.assistente-passo-cabecalho {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%;
+  padding: var(--space-3); background: transparent; border: 0; color: inherit; text-align: left; cursor: pointer;
+}
+.assistente-passo-cabecalho:hover { background: rgba(128,128,128,.08); }
+.assistente-passo-marca {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; border: 1px solid var(--border, rgba(128,128,128,.4));
+}
+.assistente-passo--feito .assistente-passo-marca { background: var(--success, #2e9e6b); border-color: var(--success, #2e9e6b); color: #fff; }
+.assistente-passo-texto { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.assistente-passo-titulo { font-weight: 600; }
+.assistente-passo-ajuda { font-size: 12px; color: var(--text-secondary); }
+.assistente-passo-acao { font-size: 13px; color: var(--primary, currentColor); font-weight: 600; }
+.assistente-passo-conteudo { padding: var(--space-3); border-top: 1px solid var(--border, rgba(128,128,128,.25)); }

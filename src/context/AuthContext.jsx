@@ -114,6 +114,39 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [Boolean(token)]);
 
+  // A situação de cobrança muda com o tempo (o teste acaba à meia-noite, o pagamento vence): com a aba aberta há horas, a faixa
+  // de aviso ficaria velha. Ao voltar para a aba, no máximo a cada 15 min, relê só `cobranca` de /auth/me. Falha é silenciosa
+  // (a próxima volta tenta de novo); 401 (ex.: empresa desligada) segue o fluxo normal de sessão expirada do apiFetch.
+  const logado = Boolean(token);
+
+  useEffect(() => {
+    if (!logado) return undefined;
+
+    const INTERVALO_MS = 15 * 60 * 1000;
+    let ultima = Date.now();
+
+    async function revalidar() {
+      if (document.visibilityState !== 'visible' || Date.now() - ultima < INTERVALO_MS || !tokenRef.current) return;
+      ultima = Date.now();
+      try {
+        const me = await buscarMe(tokenRef.current);
+        if (!me || !tokenRef.current) return;
+        const cobranca = me.cobranca ?? null;
+        setUser((atual) => {
+          if (!atual || JSON.stringify(atual.cobranca ?? null) === JSON.stringify(cobranca)) return atual;
+          const atualizado = { ...atual, cobranca };
+          salvarSessao({ token: tokenRef.current, user: atualizado });
+          return atualizado;
+        });
+      } catch {
+        // silencioso
+      }
+    }
+
+    document.addEventListener('visibilitychange', revalidar);
+    return () => document.removeEventListener('visibilitychange', revalidar);
+  }, [logado]);
+
   // Troca de senha devolve um token novo (o antigo cai por token_version): mantém a sessão atual.
   function atualizarToken(novoToken) {
     setToken(novoToken);

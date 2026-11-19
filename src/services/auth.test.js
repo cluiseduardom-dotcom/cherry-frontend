@@ -58,7 +58,16 @@ describe('formatarUsuario', () => {
       tema: 'cherry',
       senha_temporaria: false,
       foto_url: null,
+      cobranca: null,
     });
+  });
+
+  it('cobranca: /auth/me manda (inclusive null = sem regra); sem o campo, mantém a da sessão', () => {
+    const teste = { situacao: 'em_teste', ate: '2026-12-18' };
+    expect(formatarUsuario({ perfil: 'admin', cobranca: teste }, {}).cobranca).toEqual(teste);
+    expect(formatarUsuario({ perfil: 'admin', cobranca: null }, { cobranca: teste }).cobranca).toBeNull();
+    expect(formatarUsuario({ perfil: 'admin' }, { cobranca: teste }).cobranca).toEqual(teste);
+    expect(formatarUsuario({ perfil: 'admin' }, {}).cobranca).toBeNull();
   });
 
   it('foto_url: /auth/me manda (inclusive null = sem foto); sem o campo, mantém a da sessão', () => {

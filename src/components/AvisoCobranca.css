@@ -1,0 +1,37 @@
+/* Faixa de aviso de cobrança (teste grátis / pagamento / somente leitura). */
+
+.aviso-cobranca {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.aviso-cobranca-icone {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.aviso-cobranca-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.aviso-cobranca--aviso {
+  background: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-text-primary);
+}
+
+.aviso-cobranca--erro {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-text-primary);
+}

@@ -29,6 +29,8 @@ export function formatarUsuario(me, usuarioBase = {}) {
     rotulo_estoque_vendedor: me?.rotulo_estoque_vendedor ?? usuarioBase?.rotulo_estoque_vendedor,
     role: perfil,
     tema: usuarioBase?.tema,
+    // Teste grátis / pagamento: { situacao, ate } | null (null = sem regra de cobrança). Só para avisar; o backend barra de fato.
+    cobranca: me && 'cobranca' in me ? (me.cobranca ?? null) : (usuarioBase?.cobranca ?? null),
     // Senha definida por um admin: o backend só deixa trocar a senha até concluir a troca.
     senha_temporaria: me?.senha_temporaria === true,
     // Foto de perfil (null = iniciais). Vem de /auth/me; no login, do próprio retorno do login.

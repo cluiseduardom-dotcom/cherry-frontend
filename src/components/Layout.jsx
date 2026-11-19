@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import MobileHeader from './MobileHeader';
+import AvisoCobranca from './AvisoCobranca';
 import { useTheme } from '../theme/themeContext';
 import { useAuth } from '../context/AuthContext';
 import { NotificacoesProvider } from '../context/NotificacoesContext';
@@ -38,6 +39,7 @@ export default function Layout() {
         <Sidebar />
         <main className="app-main" id="conteudo-principal" tabIndex={-1}>
           <MobileHeader title={title} />
+          <AvisoCobranca cobranca={user?.cobranca} />
           <Outlet />
         </main>
         <BottomNav />

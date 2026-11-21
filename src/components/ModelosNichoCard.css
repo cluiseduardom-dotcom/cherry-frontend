@@ -1,0 +1,10 @@
+.modelos-nicho { margin-bottom: var(--space-4); }
+.modelos-nicho-lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-3); margin: var(--space-3) 0; }
+.modelos-nicho-opcao { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: var(--space-3); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); background: transparent; cursor: pointer; }
+.modelos-nicho-opcao--ativa { border-color: var(--color-primary); background: var(--color-primary-ultra); }
+.modelos-nicho-nome { font-weight: 600; }
+.modelos-nicho-desc { font-size: 0.8125rem; color: var(--color-text-secondary); }
+.modelos-nicho-sku { font-size: 0.8125rem; }
+.modelos-nicho-previa { display: flex; flex-direction: column; gap: var(--space-2); font-size: 0.875rem; margin-bottom: var(--space-3); }
+.modelos-nicho-chip { margin: 2px 4px 2px 0; display: inline-block; }
+.modelos-nicho-acoes { display: flex; justify-content: flex-end; }

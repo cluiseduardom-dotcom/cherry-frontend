@@ -8,6 +8,8 @@ import NivelCategoriaModal from '../components/NivelCategoriaModal';
 import CategoriaProdutoModal from '../components/CategoriaProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EscopoSeletor from '../components/EscopoSeletor';
+import ModelosNichoCard from '../components/ModelosNichoCard';
+import { podeOferecerModelos } from '../utils/modelosNicho';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
 import './Contas.css';
@@ -28,6 +30,7 @@ export default function CategoriasProduto() {
   const [error, setError] = useState('');
   const [workingId, setWorkingId] = useState(null);
   const [escopo, setEscopo] = useState('produto');
+  const [versao, setVersao] = useState(0); // muda para recarregar a tela depois de aplicar um modelo
   const ehInsumo = escopo === 'insumo';
   const toast = useToast();
 
@@ -64,7 +67,7 @@ export default function CategoriasProduto() {
 
     load();
     return () => { cancelled = true; };
-  }, [escopo]);
+  }, [escopo, versao]);
 
   // Troca de aba: limpa a lista anterior para não mostrar categorias do outro escopo.
   function mudarEscopo(novo) {
@@ -208,6 +211,10 @@ export default function CategoriasProduto() {
           <div className="empty-state-title">Não foi possível carregar categorias</div>
           <p className="text-sm text-secondary">{error}</p>
         </div>
+      )}
+
+      {!loading && !error && podeOferecerModelos({ ehInsumo, totalCategorias: categorias.length }) && (
+        <ModelosNichoCard onAplicado={() => { setLoading(true); setVersao(v => v + 1); }} />
       )}
 
       {!loading && !error && (

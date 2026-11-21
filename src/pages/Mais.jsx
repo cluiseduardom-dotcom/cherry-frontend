@@ -31,6 +31,7 @@ import {
   BookOpen,
   LayoutTemplate,
   Wheat,
+  Factory,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -46,6 +47,7 @@ const ITEMS = [
   { path: '/estoque-insumos', label: 'Estoque de insumos', sub: 'Saldo e entrada de embalagens e materiais', icon: PackagePlus },
   { path: '/indicadores-insumos', label: 'Indicadores de insumos', sub: 'Consumo, cobertura e reposição', icon: BarChart3 },
   { path: '/insumos', label: 'Insumos', sub: 'Cadastro de embalagens e materiais de uso interno', icon: PackageOpen },
+  { path: '/producao', label: 'Produção', sub: 'Ordens de produção, fichas técnicas e consumo de insumos', icon: Factory },
   { path: '/consumo', label: 'Consumo de insumos', sub: 'Baixas avulsas, por venda, substituição e relatório', icon: PackageMinus },
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },

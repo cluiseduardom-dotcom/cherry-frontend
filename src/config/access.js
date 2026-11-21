@@ -15,6 +15,8 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/venda': ['admin', 'vendedor'],
   '/estoque': ['admin', 'estoquista'],
   '/transferencias': ['admin', 'estoquista'],
+  // Produção (PCP): admin e estoquista, só com a funcionalidade `pcp`. O backend decide de novo.
+  '/producao': ['admin', 'estoquista'],
   '/acerto-estoque': ['admin', 'estoquista'],
   '/consumo': ['admin', 'estoquista'],
   '/insumos': ['admin', 'estoquista'],
@@ -68,6 +70,7 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/despesas-fixas': 'analise_financeira',
   '/comissoes': 'comissoes',
   '/transferencias': 'maletas',
+  '/producao': 'pcp',
   '/acerto-estoque': 'maletas',
   '/minha-maleta': 'maletas',
   '/pedidos-loja': 'loja_online',

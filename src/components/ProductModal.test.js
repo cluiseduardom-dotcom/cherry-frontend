@@ -54,3 +54,17 @@ describe('tipo do produto', () => {
     expect(montarPayload({ ...formBase, tipo: 'insumo' }, 'edit').tipo).toBeUndefined();
   });
 });
+
+describe('montarPayload — vender por kg/litro', () => {
+  it('G ou ML marcado envia o preço por 1000; sem marcar, ou outra unidade, ou insumo, envia 1', () => {
+    expect(montarPayload({ ...formBase, unidade: 'G', por_peso: true, custo: '30' }, 'create').preco_base_quantidade).toBe(1000);
+    expect(montarPayload({ ...formBase, unidade: 'ML', por_peso: true, custo: '8' }, 'edit').preco_base_quantidade).toBe(1000);
+    expect(montarPayload({ ...formBase, unidade: 'G', por_peso: false, custo: '30' }, 'create').preco_base_quantidade).toBe(1);
+    expect(montarPayload({ ...formBase, unidade: 'UN', por_peso: true }, 'create').preco_base_quantidade).toBe(1);
+    expect(montarPayload({ ...formBase, unidade: 'G', tipo: 'insumo', por_peso: true, custo: '30' }, 'create').preco_base_quantidade).toBe(1);
+  });
+
+  it('o custo continua indo por unidade-base (R$ 30/kg = R$ 0,03/g)', () => {
+    expect(montarPayload({ ...formBase, unidade: 'G', por_peso: true, custo: '30' }, 'create').custo).toBe(0.03);
+  });
+});

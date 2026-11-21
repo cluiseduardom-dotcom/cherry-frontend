@@ -38,3 +38,11 @@ export function validarQuantidadeDigitada(valorBase, estoque, rotuloEstoque = ''
   if (Number.isFinite(estoque) && valorBase > estoque) return { valor: NaN, erro: `Só há ${rotuloEstoque || estoque} em estoque.` };
   return { valor: valorBase, erro: '' };
 }
+
+// Custo e preço na mesma base para a tela de preço: o custo é guardado por g/ml (R$ 0,03) e o preço vale para a base
+// (R$ 45 o kg). Devolve o custo na base do preço e o sufixo ("/kg"); produto por unidade fica como está.
+export function custoNaBaseDoPreco(custo, unidade, base) {
+  const n = Number(custo);
+  const b = Number(base) > 1 && ehUnidadeBase(unidade) ? Number(base) : 1;
+  return { valor: Math.round(n * b * 1e4) / 1e4, sufixo: b > 1 ? sufixoDoPreco(unidade, b) : '' };
+}

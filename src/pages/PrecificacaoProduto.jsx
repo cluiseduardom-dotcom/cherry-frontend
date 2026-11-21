@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import PrecosPorCanal from '../components/PrecosPorCanal';
 import { buscarProduto } from '../services/produtos';
 import { formatCurrency } from './relatorios/relatoriosUtils';
+import { custoNaBaseDoPreco } from '../utils/vendaPeso';
 import './PrecificacaoProduto.css';
 
 export { canalLabel, formatPercent, montarPayloadPreco, validarValorPreco } from '../utils/precoCanal';
@@ -26,7 +27,7 @@ export default function PrecificacaoProduto() {
       try {
         const produto = await buscarProduto(id);
         if (cancelled) return;
-        setProdutoInfo({ nome: produto.nome, sku: produto.sku, custo: produto.custo });
+        setProdutoInfo({ nome: produto.nome, sku: produto.sku, custo: produto.custo, unidade: produto.unidade, base: produto.preco_base_quantidade });
       } catch {
         // Falha aqui não impede a tela de preços de funcionar — só o
         // cabeçalho fica sem nome/SKU.
@@ -36,6 +37,8 @@ export default function PrecificacaoProduto() {
     carregarProduto();
     return () => { cancelled = true; };
   }, [id, produtoInfo]);
+
+  const custoBase = custoNaBaseDoPreco(produtoInfo?.custo, produtoInfo?.unidade, produtoInfo?.base);
 
   return (
     <div className="page-content">
@@ -48,8 +51,11 @@ export default function PrecificacaoProduto() {
         <div>
           <h1 className="page-title">{produtoInfo?.nome ?? `Produto #${id}`}</h1>
           <p className="page-subtitle">
-            SKU: {produtoInfo?.sku ?? '—'} · Custo: {produtoInfo?.custo != null ? formatCurrency(produtoInfo.custo) : '—'}
+            SKU: {produtoInfo?.sku ?? '—'} · Custo: {produtoInfo?.custo != null ? `${formatCurrency(custoBase.valor)}${custoBase.sufixo}` : '—'}
           </p>
+          {custoBase.sufixo && (
+            <p className="page-subtitle">Este produto é vendido por {custoBase.sufixo === '/kg' ? 'kg' : custoBase.sufixo === '/L' ? 'litro' : 'quantidade'}: o preço de cada canal vale para essa base, e o custo acima já está na mesma base.</p>
+          )}
         </div>
       </div>
 

@@ -71,8 +71,7 @@ export default function Recebimentos() {
           <div className="empty-state-icon"><PackageSearch size={24} /></div>
           <div className="empty-state-title">Nenhum recebimento encontrado</div>
           <p className="text-sm text-secondary">
-            Recebimentos são criados a partir de um pedido de compra. A interface para criar pedidos de compra ainda
-            não existe — esta tela lista os recebimentos já existentes no backend.
+            Recebimentos nascem de um pedido de compra: abra o pedido e use "Receber".
           </p>
         </div>
       ) : (

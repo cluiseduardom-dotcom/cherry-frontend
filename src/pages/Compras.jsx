@@ -5,7 +5,7 @@ import { listarCompras, criarCompra, cancelarCompra } from '../services/compras'
 import { listarFornecedores } from '../services/fornecedores';
 import { listarTodosProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
-import { podeExecutarAcao, ACTIONS } from '../config/access';
+import { podeExecutarAcao, ACTIONS, temFuncionalidade } from '../config/access';
 // O modal de etiquetas traz a biblioteca de PDF (pesada): só é baixado quando alguém abre as etiquetas.
 const EtiquetasModal = lazy(() => import('../components/etiquetas/EtiquetasModal'));
 import { itensEtiquetaDaCompra } from '../utils/etiquetasDaCompra';
@@ -94,6 +94,8 @@ export default function Compras() {
   // reflete essa mesma política, então reaproveitamos em vez de restringir
   // além do que o backend permite.
   const podeGerenciar = podeExecutarAcao(user?.role, ACTIONS.MOVIMENTAR_ESTOQUE);
+  // Pedido de compra (compra planejada) só existe com a funcionalidade `compras_avancado`, ligada pela GiroNex.
+  const temComprasAvancado = temFuncionalidade(user, 'compras_avancado');
 
   const [compras, setCompras] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
@@ -338,6 +340,11 @@ export default function Compras() {
         {/* Recebimentos não é um filtro sobre `compras` — é outro conjunto
             de dados (pedidos de compra/recebimentos, sem relação com
             Compra Direta), por isso navega em vez de filtrar a tabela. */}
+        {temComprasAvancado && (
+          <button type="button" className="compras-tab" onClick={() => navigate('/compras/pedidos')}>
+            Pedidos
+          </button>
+        )}
         <button type="button" className="compras-tab" onClick={() => navigate('/compras/recebimentos')}>
           Recebimentos
         </button>
@@ -402,12 +409,20 @@ export default function Compras() {
                   <strong>Compra direta</strong>
                   <span>Preciso comprar agora. Fornecedor, produtos e custos entram no estoque na hora.</span>
                 </button>
-                <button type="button" className="compra-intent-card compra-intent-card--disabled" disabled title="O recebimento já é suportado pelo backend, mas ainda não há como criar um pedido de compra pela interface">
-                  <ClipboardList size={22} />
-                  <strong>Compra planejada</strong>
-                  <span className="compra-intent-badge">Em breve</span>
-                  <span>Necessidade → Cotação → Pedido → Recebimento, com aprovação em etapas.</span>
-                </button>
+                {temComprasAvancado ? (
+                  <button type="button" className="compra-intent-card" onClick={() => navigate('/compras/pedidos')}>
+                    <ClipboardList size={22} />
+                    <strong>Pedido de compra</strong>
+                    <span>Peço ao fornecedor agora e recebo depois, inteiro ou aos poucos. O estoque e a conta a pagar entram no recebimento.</span>
+                  </button>
+                ) : (
+                  <button type="button" className="compra-intent-card compra-intent-card--disabled" disabled title="Não incluído no seu plano. Fale com a GiroNex.">
+                    <ClipboardList size={22} />
+                    <strong>Pedido de compra</strong>
+                    <span className="compra-intent-badge">Fale com a GiroNex</span>
+                    <span>Peça ao fornecedor e receba depois, com conferência.</span>
+                  </button>
+                )}
               </div>
               <div className="compra-modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={closeCreate}>Cancelar</button>

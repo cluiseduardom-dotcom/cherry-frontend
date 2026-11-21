@@ -15,6 +15,7 @@ const EMPTY_FORM = {
   descricao: '',
   tipo: 'acabado',
   unidade: 'UN',
+  por_peso: false,
   custo: '',
   estoque_minimo: '',
   ativo: true,
@@ -27,6 +28,7 @@ function formFromProduto(produto, tipo = 'acabado') {
     descricao: produto.descricao ?? '',
     tipo: produto.tipo ?? 'acabado',
     unidade: produto.unidade ?? 'UN',
+    por_peso: Number(produto.preco_base_quantidade) > 1,
     custo: custoParaExibicao(produto.custo ?? '', produto.unidade ?? 'UN'),
     estoque_minimo: produto.estoque_minimo ?? '',
     ativo: produto.ativo ?? true,
@@ -58,6 +60,8 @@ export function montarPayload(form, mode) {
     nome: form.nome.trim(),
     descricao: form.descricao.trim(),
     unidade: form.unidade,
+    // Vender por kg/litro: o preço de venda passa a valer para 1000 g/ml (só G e ML). Qualquer outra situação volta a 1.
+    preco_base_quantidade: ehUnidadeBase(form.unidade) && form.tipo !== 'insumo' && form.por_peso ? 1000 : 1,
     custo: custoParaEnvio(form.custo, form.unidade),
     estoque_minimo: form.estoque_minimo === '' ? undefined : Number(form.estoque_minimo),
     ativo: form.ativo,
@@ -193,6 +197,12 @@ export default function ProductModal({ open, mode = 'create', produto, tipo = 'a
                 >
                   {UNIDADES_PRODUTO.map(u => <option key={u.valor} value={u.valor}>{u.rotulo}</option>)}
                 </select>
+                {ehUnidadeBase(form.unidade) && form.tipo !== 'insumo' && (
+                  <label className="modal-field-hint" style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 6 }}>
+                    <input type="checkbox" checked={form.por_peso} onChange={e => updateField('por_peso', e.target.checked)} />
+                    Vender por {form.unidade === 'G' ? 'kg' : 'litro'} (o preço de venda será por {form.unidade === 'G' ? 'kg' : 'litro'}; no PDV digita-se o peso)
+                  </label>
+                )}
               </div>
 
               {podeVerCusto && (

@@ -7,6 +7,7 @@ import {
   STATUS_ORDEM, acoesDaOrdem, formatarPrazo, montarConclusao, resumirPendencias, rotuloStatus,
   temCustoNaOrdem, validarConclusao, validarMotivo,
 } from '../utils/producao';
+import { formatarQuantidade } from '../utils/unidades';
 import './ProductModal.css';
 
 const moeda = valor => Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -93,7 +94,7 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
                 <p className="text-sm">A produção foi registrada. Quando a entrada do insumo for lançada, use "Regularizar insumos" para dar a baixa.</p>
                 <ul className="producao-insumos">
                   {pendencias.pendencias.map(p => (
-                    <li key={p.insumo_produto_id}>{p.nome}: faltam baixar {p.quantidade_pendente} de {p.quantidade_prevista}</li>
+                    <li key={p.insumo_produto_id}>{p.nome}: faltam baixar {formatarQuantidade(p.quantidade_pendente, p.unidade)} de {formatarQuantidade(p.quantidade_prevista, p.unidade)}</li>
                   ))}
                 </ul>
               </div>
@@ -108,7 +109,7 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
                   const falta = i.disponivel < i.necessario_planejado;
                   return (
                     <li key={i.insumo_produto_id} className={falta ? 'producao-insumos--falta' : ''}>
-                      {i.nome}: precisa de {i.necessario_planejado}, há {i.disponivel}{falta ? ` (faltam ${i.necessario_planejado - i.disponivel})` : ''}
+                      {i.nome}: precisa de {formatarQuantidade(i.necessario_planejado, i.unidade)}, há {formatarQuantidade(i.disponivel, i.unidade)}{falta ? ` (faltam ${formatarQuantidade(i.necessario_planejado - i.disponivel, i.unidade)})` : ''}
                     </li>
                   );
                 })}

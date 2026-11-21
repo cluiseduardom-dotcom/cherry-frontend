@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Plus, Check, Package } from 'lucide-react';
 import FotosViewer from './FotosViewer';
 import { formatarMoeda } from '../utils/mascaras';
+import { ehUnidadeBase, formatarQuantidade } from '../utils/unidades';
+import { sufixoDoPreco } from '../utils/vendaPeso';
 import './ProductCard.css';
 
 /**
@@ -162,7 +164,7 @@ export default function ProductCard({
         )}
         {(rotuloEstoque || estoqueRotulo !== 'Estoque') && !ocultarEstoque && stock !== undefined && (
           <span className="product-card-stock-text">
-            {estoqueRotulo}: <strong>{stock} {unidade}</strong>
+            {estoqueRotulo}: <strong>{ehUnidadeBase(unidade) ? formatarQuantidade(stock, unidade) : `${stock} ${unidade}`}</strong>
           </span>
         )}
 
@@ -172,7 +174,7 @@ export default function ProductCard({
           <div className="product-card-footer">
             {!ocultarPreco && (
               <span className={`product-card-price ${isNoPrice ? 'product-card-price--empty' : ''}`}>
-                {isNoPrice ? '—' : formatarMoeda(price)}
+                {isNoPrice ? '—' : `${product.precoVaria ? 'a partir de ' : ''}${formatarMoeda(price)}${sufixoDoPreco(unidade, product.base ?? product.preco_base_quantidade)}`}
               </span>
             )}
             {!actions && onAddToCart && (

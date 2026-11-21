@@ -79,7 +79,7 @@ export default function Producao() {
 
       <div className="card card-padding producao-ficha-card">
         <h2 className="section-title"><FlaskConical size={16} aria-hidden="true" /> Fichas técnicas</h2>
-        <p className="text-sm text-secondary">A ficha técnica diz quanto de cada insumo uma unidade do produto consome. Sem ela, não há como criar a ordem.</p>
+        <p className="text-sm text-secondary">A ficha técnica (receita) diz quanto de cada insumo é gasto e quantas unidades do produto ela rende. Sem ela, não há como criar a ordem.</p>
         <div className="rel-filtros">
           <div className="input-wrapper">
             <label className="input-label" htmlFor="pf-produto">Produto</label>

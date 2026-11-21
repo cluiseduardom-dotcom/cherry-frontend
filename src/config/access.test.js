@@ -471,3 +471,15 @@ describe('Colheita (fiado)', () => {
     expect(canAccessRoute('/colheita', { role: 'admin' })).toBe(true);
   });
 });
+
+describe('rota de Fiscal (preparo)', () => {
+  it('admin e estoquista acessam; vendedor e faturista não; depende da funcionalidade fiscal_cadastro', () => {
+    expect(canAccessRoute('/fiscal', 'admin')).toBe(true);
+    expect(canAccessRoute('/fiscal', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/fiscal', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/fiscal', 'faturista')).toBe(false);
+    expect(FUNCIONALIDADE_POR_ROTA['/fiscal']).toBe('fiscal_cadastro');
+    expect(rotaForaDoPlano('/fiscal', { funcionalidades: ['fiscal'] })).toBe(true); // `fiscal` (emissão) é outro módulo
+    expect(rotaForaDoPlano('/fiscal', { funcionalidades: ['fiscal_cadastro'] })).toBe(false);
+  });
+});

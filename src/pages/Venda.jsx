@@ -7,6 +7,8 @@ import {
 import ProductCard from '../components/ProductCard';
 import EscolherVariacaoModal from '../components/EscolherVariacaoModal';
 import { agruparPorGrade } from '../utils/gradePdv';
+import QuantidadePeso from '../components/QuantidadePeso';
+import { totalDaLinha, ehPorPeso, quantidadeInicial, somarQuantidade, PASSO_PESO } from '../utils/vendaPeso';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
 import { buscarProdutoPorCodigo } from '../services/produtosCodigos';
 import { listarTodosProdutos } from '../services/produtos';
@@ -68,6 +70,8 @@ export function toCartProduct(p) {
     // Variação de grade (tamanho, cor...): a vitrine agrupa as variações num cartão; cada variação segue sendo um produto normal.
     grade_id: p.grade_id ?? null,
     variacao: p.variacao ?? null,
+    // O preço vale para `base` unidades-base (R$ 45 o kg = base 1000, quantidade em g). 1 = por unidade, como sempre.
+    base: p.preco_base_quantidade ?? 1,
     tipo: p.tipo,
     color: colorForProduto(p.id),
     imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
@@ -158,14 +162,14 @@ export function reduceEstoqueAposVenda(produtos, itensVenda) {
 
 function rowTotal(row) {
   return row.type === 'kit'
-    ? row.components.reduce((sum, c) => sum + c.price * c.qty, 0)
-    : row.price * row.qty;
+    ? row.components.reduce((sum, c) => sum + totalDaLinha(c.price, c.qty, c.base), 0)
+    : totalDaLinha(row.price, row.qty, row.base);
 }
 
 function rowQtyCount(row) {
   return row.type === 'kit'
     ? row.components.reduce((sum, c) => sum + c.qty, 0)
-    : row.qty;
+    : ehPorPeso(row) ? 1 : row.qty; // 350 g é uma linha, não 350 itens
 }
 
 export default function Venda() {
@@ -370,9 +374,9 @@ export default function Venda() {
       const existing = prev.find(i => i.type === 'avulso' && i.id === product.id);
       if (existing) {
         if (existing.qty >= product.stock) return prev;
-        return prev.map(i => i.type === 'avulso' && i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+        return prev.map(i => i.type === 'avulso' && i.id === product.id ? { ...i, qty: somarQuantidade(i, 1) } : i);
       }
-      return [...prev, { type: 'avulso', ...product, qty: 1 }];
+      return [...prev, { type: 'avulso', ...product, qty: quantidadeInicial(product) }];
     });
   }
 
@@ -387,8 +391,13 @@ export default function Venda() {
 
   function changeQty(id, delta) {
     setCart(prev => prev
-      .map(i => i.type === 'avulso' && i.id === id ? { ...i, qty: Math.min(i.stock, Math.max(1, i.qty + delta)) } : i)
+      .map(i => i.type === 'avulso' && i.id === id ? { ...i, qty: somarQuantidade(i, delta) } : i)
     );
+  }
+
+  // Quantidade digitada (já em g/ml) de um item por peso.
+  function setQty(id, qty) {
+    setCart(prev => prev.map(i => i.type === 'avulso' && i.id === id ? { ...i, qty } : i));
   }
 
   function clearCart() {
@@ -398,6 +407,10 @@ export default function Venda() {
 
   /* --- Modo kit --- */
   function handleProductClick(product) {
+    if (kitMode && ehPorPeso(product)) {
+      setAvisoBusca('Produto vendido por kg ou litro não entra em kit.');
+      return;
+    }
     if (kitMode) {
       setKitDraft(prev => addToKitDraft(prev, product));
     } else {
@@ -497,7 +510,7 @@ export default function Venda() {
   const totalPagamentos = deCentavos(resumoPagamento.pagoCentavos - resumoPagamento.aReceberCentavos);
   const saldoPagamento = deCentavos(resumoPagamento.saldoCentavos);
 
-  const kitDraftTotal    = kitDraft.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const kitDraftTotal    = kitDraft.reduce((sum, i) => sum + totalDaLinha(i.price, i.qty, i.base), 0);
   const kitDraftQtyCount = kitDraft.reduce((sum, i) => sum + i.qty, 0);
 
   /* --- Pagamentos (UI e regras de entrada em PagamentoPDV + utils/pagamentoVenda) --- */
@@ -862,7 +875,7 @@ export default function Venda() {
                         </button>
                       </div>
                       <div className="cart-item-price">
-                        {formatarMoeda(item.price * item.qty)}
+                        {formatarMoeda(totalDaLinha(item.price, item.qty, item.base))}
                       </div>
                       <button
                         className="cart-item-remove"
@@ -946,7 +959,7 @@ export default function Venda() {
                               <span className="cart-kit-component-name">{c.name}</span>
                               <span className="cart-kit-component-qty">x{c.qty}</span>
                               <span className="cart-kit-component-price">
-                                {formatarMoeda(c.price * c.qty)}
+                                {formatarMoeda(totalDaLinha(c.price, c.qty, c.base))}
                               </span>
                             </div>
                           ))}
@@ -967,6 +980,14 @@ export default function Venda() {
                         <div className="cart-item-name">{row.name}</div>
                         <div className="cart-item-sku">{row.sku}</div>
                       </div>
+                      {ehPorPeso(row) ? (
+                        <QuantidadePeso
+                          item={row}
+                          onMenos={() => (row.qty <= PASSO_PESO ? removeFromCart(row.id) : changeQty(row.id, -1))}
+                          onMais={() => changeQty(row.id, 1)}
+                          onDigitar={(qtd) => setQty(row.id, qtd)}
+                        />
+                      ) : (
                       <div className="cart-item-controls">
                         <button
                           className="cart-qty-btn"
@@ -985,8 +1006,9 @@ export default function Venda() {
                           <Plus size={11} strokeWidth={3} />
                         </button>
                       </div>
+                      )}
                       <div className="cart-item-price">
-                        {formatarMoeda(row.price * row.qty)}
+                        {formatarMoeda(totalDaLinha(row.price, row.qty, row.base))}
                       </div>
                       <button
                         className="cart-item-remove"

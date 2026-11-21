@@ -17,6 +17,8 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/transferencias': ['admin', 'estoquista'],
   // Grades de produtos (variações): admin cria; estoquista consulta. Só com a funcionalidade `grade`; o backend decide de novo.
   '/grades': ['admin', 'estoquista'],
+  // Produção (PCP): admin e estoquista, só com a funcionalidade `pcp`. O backend decide de novo.
+  '/producao': ['admin', 'estoquista'],
   '/acerto-estoque': ['admin', 'estoquista'],
   '/consumo': ['admin', 'estoquista'],
   '/insumos': ['admin', 'estoquista'],
@@ -48,6 +50,9 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/conta/seguranca': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/conta/perfil': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/avisos': ['admin', 'vendedor', 'estoquista', 'faturista'],
+  // Tutoriais: texto estático, sem API; todos os papéis.
+  '/tutoriais': ['admin', 'vendedor', 'estoquista', 'faturista'],
+  '/tutoriais/:id': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
   '/bancos': ['admin'],
   '/pix-a-devolver': ['admin'],
@@ -71,6 +76,7 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/comissoes': 'comissoes',
   '/transferencias': 'maletas',
   '/grades': 'grade',
+  '/producao': 'pcp',
   '/acerto-estoque': 'maletas',
   '/minha-maleta': 'maletas',
   '/pedidos-loja': 'loja_online',

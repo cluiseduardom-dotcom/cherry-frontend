@@ -18,6 +18,7 @@ const MinhaMaleta = lazy(() => import('./pages/MinhaMaleta'));
 const AcertoEstoque = lazy(() => import('./pages/AcertoEstoque'));
 const Consumo = lazy(() => import('./pages/Consumo'));
 const Grades = lazy(() => import('./pages/Grades'));
+const Producao = lazy(() => import('./pages/Producao'));
 const Insumos = lazy(() => import('./pages/Insumos'));
 const EstoqueInsumos = lazy(() => import('./pages/EstoqueInsumos'));
 const AlterarSenha = lazy(() => import('./pages/AlterarSenha'));
@@ -55,6 +56,7 @@ const PontoEquilibrio = lazy(() => import('./pages/PontoEquilibrio'));
 const DespesasFixas = lazy(() => import('./pages/DespesasFixas'));
 const CategoriasProduto = lazy(() => import('./pages/CategoriasProduto'));
 const ConfiguracaoSku = lazy(() => import('./pages/ConfiguracaoSku'));
+const Tutoriais = lazy(() => import('./pages/Tutoriais'));
 
 const PoliticaPrivacidade = lazy(() => import('./pages/PoliticaPrivacidade'));
 
@@ -67,6 +69,7 @@ const ROUTE_COMPONENTS = {
   '/acerto-estoque': AcertoEstoque,
   '/consumo': Consumo,
   '/grades': Grades,
+  '/producao': Producao,
   '/insumos': Insumos,
   '/estoque-insumos': EstoqueInsumos,
   '/indicadores-insumos': IndicadoresInsumosPage,
@@ -86,6 +89,8 @@ const ROUTE_COMPONENTS = {
   '/usuarios': Usuarios,
   '/mais': Mais,
   '/avisos': Avisos,
+  '/tutoriais': Tutoriais,
+  '/tutoriais/:id': Tutoriais,
   '/conta/seguranca': AlterarSenha,
   '/conta/perfil': MinhaConta,
   '/relatorios': Relatorios,

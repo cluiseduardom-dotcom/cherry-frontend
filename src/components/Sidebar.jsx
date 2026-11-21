@@ -39,6 +39,8 @@ import {
   PackageCheck,
   BarChart3,
   Layers,
+  Factory,
+  GraduationCap,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -63,6 +65,7 @@ const NAV_META_BY_PATH = {
   '/indicadores-insumos': { icon: BarChart3,   label: 'Indicadores de insumos' },
   '/consumo':          { icon: PackageMinus,   label: 'Consumo de insumos' },
   '/grades':           { icon: Layers,         label: 'Grades de produtos' },
+  '/producao':         { icon: Factory,        label: 'Produção' },
   '/minha-maleta':     { icon: Briefcase,       label: 'Minha maleta' },
   '/produtos':         { icon: Tag,             label: 'Produtos' },
   '/clientes':         { icon: Users,           label: 'Clientes' },
@@ -73,6 +76,7 @@ const NAV_META_BY_PATH = {
   '/colheita':         { icon: Wheat,           label: 'Colheita' },
   '/usuarios':         { icon: UserCog,         label: 'Usuários' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios' },
+  '/tutoriais':        { icon: GraduationCap,   label: 'Tutoriais' },
   '/bancos':           { icon: Landmark,        label: 'Bancos' },
   '/pix-a-devolver':   { icon: Undo2,           label: 'Pix a devolver' },
   '/pedidos-loja':     { icon: PackageCheck,    label: 'Pedidos da loja' },

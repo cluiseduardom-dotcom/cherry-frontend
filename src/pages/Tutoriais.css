@@ -1,0 +1,134 @@
+.tutoriais-page {
+  max-width: 860px;
+}
+
+.tutoriais-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.tutoriais-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.tutoriais-card:hover {
+  transform: translateY(-1px);
+}
+
+.tutoriais-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+}
+
+.tutoriais-card-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tutoriais-card-title {
+  font-weight: 600;
+}
+
+.tutoriais-card-sub {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.tutoriais-card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.tutoriais-card-lido {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: var(--space-2);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tutoriais-card-arrow {
+  color: var(--color-text-secondary);
+}
+
+.tutoriais-passos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tutoriais-passo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.tutoriais-passo-numero {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background: var(--color-primary-ultra);
+  color: var(--color-primary);
+}
+
+.tutoriais-passo-corpo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.tutoriais-passo-titulo {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.tutoriais-passo-texto,
+.tutoriais-passo-dica {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tutoriais-passo-dica {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.tutoriais-rodape {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .tutoriais-grid {
+    grid-template-columns: 1fr;
+  }
+}

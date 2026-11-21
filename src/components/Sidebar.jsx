@@ -39,6 +39,7 @@ import {
   PackageCheck,
   BarChart3,
   Layers,
+  GraduationCap,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/themeContext';
@@ -73,6 +74,7 @@ const NAV_META_BY_PATH = {
   '/colheita':         { icon: Wheat,           label: 'Colheita' },
   '/usuarios':         { icon: UserCog,         label: 'Usuários' },
   '/relatorios':       { icon: BarChart2,       label: 'Relatórios' },
+  '/tutoriais':        { icon: GraduationCap,   label: 'Tutoriais' },
   '/bancos':           { icon: Landmark,        label: 'Bancos' },
   '/pix-a-devolver':   { icon: Undo2,           label: 'Pix a devolver' },
   '/pedidos-loja':     { icon: PackageCheck,    label: 'Pedidos da loja' },

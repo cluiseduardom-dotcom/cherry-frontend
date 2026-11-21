@@ -5,9 +5,10 @@ const TODAS = ESTRUTURA_MENU.flatMap(e => (e.tipo === 'item' ? [e.path] : e.iten
 const todas = () => true;
 
 describe('montarMenu', () => {
-  it('admin vê os 8 blocos, com os grupos esperados', () => {
+  it('admin vê os 9 blocos, com os grupos esperados', () => {
     const menu = montarMenu(TODAS, todas);
-    expect(menu).toHaveLength(8);
+    expect(menu).toHaveLength(9);
+    expect(menu[menu.length - 1]).toEqual({ tipo: 'item', path: '/tutoriais' });
     const financeiro = menu.find(e => e.id === 'financeiro');
     expect(financeiro.itens).toEqual(['/bancos', '/contas-pagar', '/contas-receber', '/pix-a-devolver', '/despesas-fixas', '/ponto-equilibrio', '/comissoes']);
     expect(menu[0]).toEqual({ tipo: 'item', path: '/' });

@@ -32,6 +32,7 @@ import {
   LayoutTemplate,
   Wheat,
   Layers,
+  GraduationCap,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -58,6 +59,7 @@ const ITEMS = [
   { path: '/comissoes', label: 'Comissões', sub: 'Minhas comissões, equipe e repasses', icon: BadgePercent },
   { path: '/usuarios', label: 'Usuários', sub: 'Gerenciar equipe e acessos', icon: UserCog },
   { path: '/relatorios', label: 'Relatórios', sub: 'Análise de dados', icon: BarChart2 },
+  { path: '/tutoriais', label: 'Tutoriais', sub: 'Passo a passo dos processos do sistema', icon: GraduationCap },
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },
   { path: '/contas-receber', label: 'Contas a Receber', sub: 'Acompanhar recebimentos', icon: HandCoins },
   { path: '/pedidos-loja', label: 'Pedidos da loja', sub: 'Pedidos pagos na loja online: combinar a entrega', icon: PackageCheck },

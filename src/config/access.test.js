@@ -471,3 +471,18 @@ describe('Colheita (fiado)', () => {
     expect(canAccessRoute('/colheita', { role: 'admin' })).toBe(true);
   });
 });
+
+describe('rota de Produção (PCP)', () => {
+  it('admin e estoquista acessam; vendedor e faturista não', () => {
+    expect(canAccessRoute('/producao', 'admin')).toBe(true);
+    expect(canAccessRoute('/producao', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/producao', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/producao', 'faturista')).toBe(false);
+  });
+
+  it('depende da funcionalidade pcp: empresa sem ela fica fora do plano (o backend barra de verdade)', () => {
+    expect(FUNCIONALIDADE_POR_ROTA['/producao']).toBe('pcp');
+    expect(rotaForaDoPlano('/producao', { funcionalidades: ['comissoes'] })).toBe(true);
+    expect(rotaForaDoPlano('/producao', { funcionalidades: ['pcp'] })).toBe(false);
+  });
+});

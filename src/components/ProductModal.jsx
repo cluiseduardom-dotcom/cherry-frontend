@@ -7,6 +7,7 @@ import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModa
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
 import ProdutoFotos from './ProdutoFotos';
+import { UNIDADES_PRODUTO, custoParaEnvio, custoParaExibicao, ehUnidadeBase, rotuloDoCusto } from '../utils/unidades';
 import './ProductModal.css';
 
 const EMPTY_FORM = {
@@ -26,7 +27,7 @@ function formFromProduto(produto, tipo = 'acabado') {
     descricao: produto.descricao ?? '',
     tipo: produto.tipo ?? 'acabado',
     unidade: produto.unidade ?? 'UN',
-    custo: produto.custo ?? '',
+    custo: custoParaExibicao(produto.custo ?? '', produto.unidade ?? 'UN'),
     estoque_minimo: produto.estoque_minimo ?? '',
     ativo: produto.ativo ?? true,
   };
@@ -57,7 +58,7 @@ export function montarPayload(form, mode) {
     nome: form.nome.trim(),
     descricao: form.descricao.trim(),
     unidade: form.unidade,
-    custo: Number(form.custo),
+    custo: custoParaEnvio(form.custo, form.unidade),
     estoque_minimo: form.estoque_minimo === '' ? undefined : Number(form.estoque_minimo),
     ativo: form.ativo,
   };
@@ -190,25 +191,27 @@ export default function ProductModal({ open, mode = 'create', produto, tipo = 'a
                   value={form.unidade}
                   onChange={e => updateField('unidade', e.target.value)}
                 >
-                  <option value="UN">UN</option>
-                  <option value="PAR">PAR</option>
-                  <option value="CX">CX</option>
-                  <option value="PCT">PCT</option>
+                  {UNIDADES_PRODUTO.map(u => <option key={u.valor} value={u.valor}>{u.rotulo}</option>)}
                 </select>
               </div>
 
               {podeVerCusto && (
                 <div className="input-wrapper">
-                  <label className="input-label" htmlFor="pm-custo">Custo *</label>
+                  <label className="input-label" htmlFor="pm-custo">{rotuloDoCusto(form.unidade)} *</label>
                   <input
                     id="pm-custo"
                     type="number"
                     min="0"
-                    step="0.01"
+                    step="any"
                     className="input-field"
                     value={form.custo}
                     onChange={e => updateField('custo', e.target.value)}
                   />
+                  {ehUnidadeBase(form.unidade) && (
+                    <span className="modal-field-hint">
+                      O estoque fica em {form.unidade === 'G' ? 'gramas' : 'mililitros'}; o sistema guarda o custo por {form.unidade === 'G' ? 'grama' : 'ml'} (R$ {String(custoParaEnvio(form.custo || 0, form.unidade)).replace('.', ',')}).
+                    </span>
+                  )}
                 </div>
               )}
 

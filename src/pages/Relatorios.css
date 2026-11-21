@@ -347,3 +347,31 @@
   .rel-tabs { gap: var(--space-1); width: 0; min-width: 100%; overflow-x: auto; }
   .rel-tab { padding-inline: var(--space-3); flex: 0 0 auto; white-space: nowrap; margin-bottom: 0; }
 }
+
+/* ---- Relatórios de gestão (análise de vendas, desempenho, produtos, inventário, crédito) ---- */
+.rel-atalhos { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
+.rel-atalho--ativo { background: var(--color-primary-ultra); color: var(--color-primary); }
+.rel-nota { margin: var(--space-2) 0 var(--space-4); }
+.rel-vazio { padding: var(--space-3) var(--space-4); }
+.rel-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-bottom: var(--space-4); }
+.rel-variacao { font-size: var(--font-size-sm); font-weight: 600; }
+.rel-variacao--positivo { color: var(--color-success, #15803d); }
+.rel-variacao--negativo { color: var(--color-danger, #b91c1c); }
+.rel-variacao--neutro { color: var(--color-text-muted); }
+.rel-barras { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.rel-barras-topo { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--font-size-sm); }
+.rel-barras-valor { font-weight: 600; }
+.rel-barras-trilha { height: 8px; border-radius: 4px; background: var(--color-border-light); overflow: hidden; margin: 4px 0; }
+.rel-barras-preenchimento { height: 100%; background: var(--color-primary); border-radius: 4px; }
+.rel-barras-detalhe { font-size: 0.8125rem; color: var(--color-text-secondary); }
+.rel-checkbox { display: inline-flex; align-items: center; gap: var(--space-2); align-self: flex-end; padding-bottom: var(--space-2); font-size: var(--font-size-sm); }
+.rel-badge-inativo { margin-left: var(--space-2); }
+.rel-paginacao { display: flex; justify-content: center; align-items: center; gap: var(--space-3); padding: var(--space-3); }
+
+@media (max-width: 860px) {
+  .rel-grid-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Com 8 abas, a barra rola dentro de si mesma (sem alargar a página) e o rótulo não quebra. */
+.rel-tabs { width: 0; min-width: 100%; overflow-x: auto; }
+.rel-tab { flex: 0 0 auto; white-space: nowrap; }

@@ -11,6 +11,7 @@ import { useTheme } from '../theme/themeContext';
 import { ROLE_LABEL } from '../config/papeis';
 import ParetoCurvaAbc from './ParetoCurvaAbc';
 import GraficoResultado from '../components/GraficoResultado';
+import PrimeirosPassos from '../components/PrimeirosPassos';
 import { formatarMoeda } from './dashboardCurvaAbc';
 import { indicadoresDeTotais } from '../utils/dashboardFormulas';
 import './Dashboard.css';
@@ -240,6 +241,8 @@ export default function Dashboard() {
           </Link>
         </div>
       </header>
+
+      {user?.role === 'admin' && <PrimeirosPassos />}
 
       {loading && (
         <div role="status" aria-busy="true" aria-label="Carregando dashboard">

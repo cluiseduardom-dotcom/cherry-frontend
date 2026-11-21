@@ -32,6 +32,8 @@ import {
   LayoutTemplate,
   Wheat,
   FileCheck,
+  Factory,
+  GraduationCap,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -48,6 +50,7 @@ const ITEMS = [
   { path: '/indicadores-insumos', label: 'Indicadores de insumos', sub: 'Consumo, cobertura e reposição', icon: BarChart3 },
   { path: '/insumos', label: 'Insumos', sub: 'Cadastro de embalagens e materiais de uso interno', icon: PackageOpen },
   { path: '/fiscal', label: 'Fiscal', sub: 'NCM, origem e dados da empresa para a emissão de nota', icon: FileCheck },
+  { path: '/producao', label: 'Produção', sub: 'Ordens de produção, fichas técnicas e consumo de insumos', icon: Factory },
   { path: '/consumo', label: 'Consumo de insumos', sub: 'Baixas avulsas, por venda, substituição e relatório', icon: PackageMinus },
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },
@@ -58,6 +61,7 @@ const ITEMS = [
   { path: '/comissoes', label: 'Comissões', sub: 'Minhas comissões, equipe e repasses', icon: BadgePercent },
   { path: '/usuarios', label: 'Usuários', sub: 'Gerenciar equipe e acessos', icon: UserCog },
   { path: '/relatorios', label: 'Relatórios', sub: 'Análise de dados', icon: BarChart2 },
+  { path: '/tutoriais', label: 'Tutoriais', sub: 'Passo a passo dos processos do sistema', icon: GraduationCap },
   { path: '/contas-pagar', label: 'Contas a Pagar', sub: 'Acompanhar compromissos', icon: Wallet },
   { path: '/contas-receber', label: 'Contas a Receber', sub: 'Acompanhar recebimentos', icon: HandCoins },
   { path: '/pedidos-loja', label: 'Pedidos da loja', sub: 'Pedidos pagos na loja online: combinar a entrega', icon: PackageCheck },

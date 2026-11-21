@@ -10,7 +10,7 @@ export const ESTRUTURA_MENU = [
     tipo: 'grupo',
     id: 'estoque',
     label: 'Estoque',
-    itens: ['/estoque', '/transferencias', '/acerto-estoque', '/produtos', '/estoque-insumos', '/insumos', '/consumo', '/indicadores-insumos'],
+    itens: ['/estoque', '/transferencias', '/acerto-estoque', '/produtos', '/estoque-insumos', '/insumos', '/consumo', '/producao', '/indicadores-insumos'],
   },
   { tipo: 'grupo', id: 'compras', label: 'Compras', itens: ['/compras', '/fornecedores'] },
   {
@@ -21,6 +21,7 @@ export const ESTRUTURA_MENU = [
   },
   { tipo: 'item', path: '/relatorios' },
   { tipo: 'grupo', id: 'administracao', label: 'Administração', itens: ['/usuarios', '/fiscal', '/configuracoes'] },
+  { tipo: 'item', path: '/tutoriais' },
 ];
 
 // Monta o menu do usuário. `rotasDisponiveis` = rotas que existem como item de menu; `podeVer(path)`

@@ -65,3 +65,18 @@ describe('quantidade no carrinho', () => {
     expect(validarQuantidadeDigitada(NaN, 4650).erro).toContain('maior que zero');
   });
 });
+
+import { custoNaBaseDoPreco } from './vendaPeso';
+
+describe('custoNaBaseDoPreco (tela de preço)', () => {
+  it('R$ 0,03 o grama vira R$ 30 o kg; R$ 0,004 o ml vira R$ 4 o L', () => {
+    expect(custoNaBaseDoPreco(0.03, 'G', 1000)).toEqual({ valor: 30, sufixo: '/kg' });
+    expect(custoNaBaseDoPreco('0.004000', 'ML', 1000)).toEqual({ valor: 4, sufixo: '/L' });
+  });
+
+  it('produto por unidade (ou G sem preço por kg) não muda', () => {
+    expect(custoNaBaseDoPreco(40, 'UN', 1)).toEqual({ valor: 40, sufixo: '' });
+    expect(custoNaBaseDoPreco(0.03, 'G', 1)).toEqual({ valor: 0.03, sufixo: '' });
+    expect(custoNaBaseDoPreco(5, 'UN', 1000)).toEqual({ valor: 5, sufixo: '' });
+  });
+});

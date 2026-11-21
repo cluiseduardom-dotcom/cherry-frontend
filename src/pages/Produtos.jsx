@@ -205,7 +205,7 @@ export default function Produtos({ tipo = 'acabado' }) {
                         title="Precificação por canal"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/produtos/${p.id}/precos`, { state: { nome: p.nome, sku: p.sku, custo: p.custo } });
+                          navigate(`/produtos/${p.id}/precos`, { state: { nome: p.nome, sku: p.sku, custo: p.custo, unidade: p.unidade, base: p.preco_base_quantidade } });
                         }}
                       >
                         <DollarSign size={14} />

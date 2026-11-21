@@ -1,0 +1,21 @@
+.fiscal-resumo { margin-bottom: var(--space-4); }
+.fiscal-resumo--ok { background: var(--color-primary-ultra); }
+.fiscal-grupo { margin-bottom: var(--space-4); }
+.fiscal-itens { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.fiscal-item { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-3); align-items: center; }
+.fiscal-item-marca { display: inline-flex; color: var(--color-text-muted); }
+.fiscal-item--ok .fiscal-item-marca { color: var(--color-primary); }
+.fiscal-item-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fiscal-item-detalhe { font-size: 0.8125rem; color: var(--color-text-secondary); }
+.fiscal-item-opcional { margin-left: var(--space-2); }
+.fiscal-avisos { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-3); }
+.fiscal-cadastro-link { margin-top: var(--space-2); }
+.fiscal-form { display: flex; flex-direction: column; gap: var(--space-3); max-width: 720px; }
+.fiscal-form-linha { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); }
+.fiscal-form-botoes { display: flex; justify-content: flex-end; }
+.fiscal-dl { display: grid; gap: var(--space-2); margin: 0; }
+.fiscal-dl dt { font-size: 0.8125rem; color: var(--color-text-secondary); }
+.fiscal-dl dd { margin: 0; font-weight: 600; }
+.fiscal-lote { margin-bottom: var(--space-4); }
+.fiscal-campo { min-width: 140px; }
+.fiscal-campo--curto { min-width: 80px; max-width: 110px; }

@@ -15,6 +15,8 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/venda': ['admin', 'vendedor'],
   '/estoque': ['admin', 'estoquista'],
   '/transferencias': ['admin', 'estoquista'],
+  // Fiscal (preparo, só cadastro): admin vê tudo; estoquista só o NCM/origem dos produtos. Só com a funcionalidade `fiscal_cadastro`.
+  '/fiscal': ['admin', 'estoquista'],
   // Grades de produtos (variações): admin cria; estoquista consulta. Só com a funcionalidade `grade`; o backend decide de novo.
   '/grades': ['admin', 'estoquista'],
   // Produção (PCP): admin e estoquista, só com a funcionalidade `pcp`. O backend decide de novo.
@@ -75,6 +77,7 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/despesas-fixas': 'analise_financeira',
   '/comissoes': 'comissoes',
   '/transferencias': 'maletas',
+  '/fiscal': 'fiscal_cadastro',
   '/grades': 'grade',
   '/producao': 'pcp',
   '/acerto-estoque': 'maletas',

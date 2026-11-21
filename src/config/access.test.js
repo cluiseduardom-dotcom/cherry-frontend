@@ -483,3 +483,19 @@ describe('rota de Fiscal (preparo)', () => {
     expect(rotaForaDoPlano('/fiscal', { funcionalidades: ['fiscal_cadastro'] })).toBe(false);
   });
 });
+
+describe('rotas de Pedido de compra (compras avançado)', () => {
+  it('admin e estoquista acessam; vendedor não; dependem da funcionalidade compras_avancado', () => {
+    for (const rota of ['/compras/pedidos', '/compras/pedidos/:id']) {
+      expect(canAccessRoute(rota, 'admin')).toBe(true);
+      expect(canAccessRoute(rota, 'estoquista')).toBe(true);
+      expect(canAccessRoute(rota, 'vendedor')).toBe(false);
+      expect(FUNCIONALIDADE_POR_ROTA[rota]).toBe('compras_avancado');
+      expect(rotaForaDoPlano(rota, { funcionalidades: [] })).toBe(true);
+      expect(rotaForaDoPlano(rota, { funcionalidades: ['compras_avancado'] })).toBe(false);
+    }
+    // Compras diretas e recebimentos seguem abertos
+    expect(rotaForaDoPlano('/compras', { funcionalidades: [] })).toBe(false);
+    expect(rotaForaDoPlano('/compras/recebimentos', { funcionalidades: [] })).toBe(false);
+  });
+});

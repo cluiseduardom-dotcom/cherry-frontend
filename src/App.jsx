@@ -29,6 +29,8 @@ const Clientes = lazy(() => import('./pages/Clientes'));
 const Fornecedores = lazy(() => import('./pages/Fornecedores'));
 const Compras = lazy(() => import('./pages/Compras'));
 const CompraDetalhe = lazy(() => import('./pages/CompraDetalhe'));
+const PedidosCompra = lazy(() => import('./pages/PedidosCompra'));
+const PedidoCompraDetalhe = lazy(() => import('./pages/PedidoCompraDetalhe'));
 const Recebimentos = lazy(() => import('./pages/Recebimentos'));
 const RecebimentoDetalhe = lazy(() => import('./pages/RecebimentoDetalhe'));
 const Historico = lazy(() => import('./pages/Historico'));
@@ -77,6 +79,8 @@ const ROUTE_COMPONENTS = {
   '/fornecedores': Fornecedores,
   '/compras': Compras,
   '/compras/:id': CompraDetalhe,
+  '/compras/pedidos': PedidosCompra,
+  '/compras/pedidos/:id': PedidoCompraDetalhe,
   '/compras/recebimentos': Recebimentos,
   '/compras/recebimentos/:id': RecebimentoDetalhe,
   '/historico': Historico,

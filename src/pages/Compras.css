@@ -122,6 +122,8 @@
 .compra-items { margin-top: var(--space-2); }
 .compra-items-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: var(--space-3); }
 .compra-item-row { display:grid; grid-template-columns: minmax(180px,2fr) 90px 120px 120px 42px; gap: var(--space-3); align-items:end; margin-bottom: var(--space-3); }
+.compra-item-row--pedido { grid-template-columns: minmax(180px,2fr) 80px 110px 100px 110px 42px; }
+.compra-item-row--receber { grid-template-columns: minmax(180px,2fr) 110px 120px; }
 .compra-item-product-row { display:flex; gap:6px; }
 .compra-item-product-row .input-field { flex:1; }
 .compra-total { display:flex; justify-content:flex-end; font-size:18px; font-weight:800; margin-top:14px; }
@@ -190,7 +192,7 @@
 @media (max-width: 700px) {
   .compra-form-grid { grid-template-columns: 1fr; }
   .compra-field.full { grid-column:auto; }
-  .compra-item-row { grid-template-columns: 1fr 1fr; }
+  .compra-item-row, .compra-item-row--pedido, .compra-item-row--receber { grid-template-columns: 1fr 1fr; }
   .compra-item-product { grid-column:1 / -1; }
 }
 .compra-item-product-row .seletor-produto { flex: 1; min-width: 0; }

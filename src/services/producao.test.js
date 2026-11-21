@@ -61,7 +61,12 @@ describe('serviço de produção (PCP)', () => {
     await salvarFichaTecnica(3, [{ insumo_produto_id: 1, quantidade_necessaria: 2 }]);
     expect(apiFetchMock).toHaveBeenLastCalledWith('/produtos/3/ficha-tecnica', {
       method: 'POST',
-      body: JSON.stringify({ itens: [{ insumo_produto_id: 1, quantidade_necessaria: 2 }] }),
+      body: JSON.stringify({ rendimento: 1, itens: [{ insumo_produto_id: 1, quantidade_necessaria: 2 }] }),
+    });
+    await salvarFichaTecnica(3, [{ insumo_produto_id: 1, quantidade_necessaria: 500 }], 12);
+    expect(apiFetchMock).toHaveBeenLastCalledWith('/produtos/3/ficha-tecnica', {
+      method: 'POST',
+      body: JSON.stringify({ rendimento: 12, itens: [{ insumo_produto_id: 1, quantidade_necessaria: 500 }] }),
     });
   });
 

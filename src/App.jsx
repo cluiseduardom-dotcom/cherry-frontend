@@ -18,6 +18,7 @@ const MinhaMaleta = lazy(() => import('./pages/MinhaMaleta'));
 const AcertoEstoque = lazy(() => import('./pages/AcertoEstoque'));
 const Consumo = lazy(() => import('./pages/Consumo'));
 const Fiscal = lazy(() => import('./pages/Fiscal'));
+const Grades = lazy(() => import('./pages/Grades'));
 const Producao = lazy(() => import('./pages/Producao'));
 const Insumos = lazy(() => import('./pages/Insumos'));
 const EstoqueInsumos = lazy(() => import('./pages/EstoqueInsumos'));
@@ -69,6 +70,7 @@ const ROUTE_COMPONENTS = {
   '/acerto-estoque': AcertoEstoque,
   '/consumo': Consumo,
   '/fiscal': Fiscal,
+  '/grades': Grades,
   '/producao': Producao,
   '/insumos': Insumos,
   '/estoque-insumos': EstoqueInsumos,

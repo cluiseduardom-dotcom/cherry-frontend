@@ -39,6 +39,7 @@ import {
   PackageCheck,
   BarChart3,
   FileCheck,
+  Layers,
   Factory,
   GraduationCap,
 } from 'lucide-react';
@@ -65,6 +66,7 @@ const NAV_META_BY_PATH = {
   '/indicadores-insumos': { icon: BarChart3,   label: 'Indicadores de insumos' },
   '/consumo':          { icon: PackageMinus,   label: 'Consumo de insumos' },
   '/fiscal':           { icon: FileCheck,      label: 'Fiscal' },
+  '/grades':           { icon: Layers,         label: 'Grades de produtos' },
   '/producao':         { icon: Factory,        label: 'Produção' },
   '/minha-maleta':     { icon: Briefcase,       label: 'Minha maleta' },
   '/produtos':         { icon: Tag,             label: 'Produtos' },

@@ -32,6 +32,7 @@ import {
   LayoutTemplate,
   Wheat,
   FileCheck,
+  Factory,
   GraduationCap,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -49,6 +50,7 @@ const ITEMS = [
   { path: '/indicadores-insumos', label: 'Indicadores de insumos', sub: 'Consumo, cobertura e reposição', icon: BarChart3 },
   { path: '/insumos', label: 'Insumos', sub: 'Cadastro de embalagens e materiais de uso interno', icon: PackageOpen },
   { path: '/fiscal', label: 'Fiscal', sub: 'NCM, origem e dados da empresa para a emissão de nota', icon: FileCheck },
+  { path: '/producao', label: 'Produção', sub: 'Ordens de produção, fichas técnicas e consumo de insumos', icon: Factory },
   { path: '/consumo', label: 'Consumo de insumos', sub: 'Baixas avulsas, por venda, substituição e relatório', icon: PackageMinus },
   { path: '/produtos', label: 'Produtos', sub: 'Gerenciar catálogo', icon: Tag },
   { path: '/clientes', label: 'Clientes', sub: 'Base de clientes', icon: Users },

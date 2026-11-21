@@ -5,6 +5,8 @@ import {
   Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp, ChevronRight
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import EscolherVariacaoModal from '../components/EscolherVariacaoModal';
+import { agruparPorGrade } from '../utils/gradePdv';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
 import { buscarProdutoPorCodigo } from '../services/produtosCodigos';
 import { listarTodosProdutos } from '../services/produtos';
@@ -63,6 +65,9 @@ export function toCartProduct(p) {
     price: precoCanal == null ? null : Number(precoCanal),
     stock: p.estoque_atual,
     unidade: p.unidade,
+    // Variação de grade (tamanho, cor...): a vitrine agrupa as variações num cartão; cada variação segue sendo um produto normal.
+    grade_id: p.grade_id ?? null,
+    variacao: p.variacao ?? null,
     tipo: p.tipo,
     color: colorForProduto(p.id),
     imageUrl: p.imagem_url || p.foto_url || p.imagem || p.foto || null,
@@ -354,6 +359,8 @@ export default function Venda() {
   }, [produtosVitrine, search, activeCategory, filtros]);
 
   const filtrosAtivos = contarFiltrosAtivos(filtros);
+  const itensVitrine = useMemo(() => agruparPorGrade(filtered), [filtered]);
+  const [gradeAberta, setGradeAberta] = useState(null);
 
   /* --- Cart operations (itens avulsos) --- */
   function addToCart(product) {
@@ -762,8 +769,8 @@ export default function Venda() {
           {!loading && !loadError && (
             filtered.length > 0 ? (
               <div className="venda-product-list product-grid" role="list">
-                {filtered.map(p => (
-                  <ProductCard key={p.id} product={p} onAddToCart={handleProductClick} rotuloEstoque estoqueRotulo={rotuloEstoque} />
+                {itensVitrine.map(p => (
+                  <ProductCard key={p.id} product={p} onAddToCart={p.ehGrade ? setGradeAberta : handleProductClick} rotuloEstoque estoqueRotulo={rotuloEstoque} />
                 ))}
               </div>
             ) : (
@@ -1104,6 +1111,13 @@ export default function Venda() {
           )}
         </div>
       </div>
+      {gradeAberta && (
+        <EscolherVariacaoModal
+          grade={gradeAberta}
+          onClose={() => setGradeAberta(null)}
+          onEscolher={(variacao) => { handleProductClick(variacao); setGradeAberta(null); }}
+        />
+      )}
     </div>
   );
 }

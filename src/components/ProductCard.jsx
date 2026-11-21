@@ -172,7 +172,7 @@ export default function ProductCard({
           <div className="product-card-footer">
             {!ocultarPreco && (
               <span className={`product-card-price ${isNoPrice ? 'product-card-price--empty' : ''}`}>
-                {isNoPrice ? '—' : formatarMoeda(price)}
+                {isNoPrice ? '—' : `${product.precoVaria ? 'a partir de ' : ''}${formatarMoeda(price)}`}
               </span>
             )}
             {!actions && onAddToCart && (

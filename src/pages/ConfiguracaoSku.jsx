@@ -23,6 +23,7 @@ import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from '../components/ConfirmarDescarteDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EscopoSeletor from '../components/EscopoSeletor';
+import AjudaContextual from '../components/AjudaContextual';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import './ConfiguracaoSku.css';
 
@@ -629,6 +630,13 @@ export default function ConfiguracaoSku() {
         </div>
       </div>
 
+      {!ehInsumo && (
+        <AjudaContextual
+          titulo="O SKU é gerado sozinho"
+          texto="Aqui você define só o formato (separador, tamanho da sequência e quais níveis entram). A prévia mostra como o SKU vai ficar."
+          tutorialId="sku"
+        />
+      )}
       <EscopoSeletor value={escopo} onChange={novo => tentarAcao(() => mudarEscopo(novo))} disabled={loading || saving} />
 
       {/* Global Feedback */}

@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, X } from 'lucide-react';
 import { listarTodosProdutos } from '../services/produtos';
 import { criarOrdem, obterNecessidade } from '../services/producao';
 import { produtosProduziveis, resumirNecessidade, validarNovaOrdem } from '../utils/producao';
+import { formatarQuantidade } from '../utils/unidades';
 import './ProductModal.css';
 
 const FORM_VAZIO = { produto_id: '', quantidade_planejada: '1', prazo: '', observacao: '' };
@@ -136,7 +137,7 @@ export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbr
                   <ul className="producao-insumos">
                     {previaAtual.dados.insumos.map(i => (
                       <li key={i.insumo_produto_id} className={i.suficiente ? '' : 'producao-insumos--falta'}>
-                        {i.nome}: precisa de {i.necessario}, há {i.disponivel}{i.faltante > 0 ? ` (faltam ${i.faltante})` : ''}
+                        {i.nome}: precisa de {formatarQuantidade(i.necessario, i.unidade)}, há {formatarQuantidade(i.disponivel, i.unidade)}{i.faltante > 0 ? ` (faltam ${formatarQuantidade(i.faltante, i.unidade)})` : ''}
                       </li>
                     ))}
                   </ul>

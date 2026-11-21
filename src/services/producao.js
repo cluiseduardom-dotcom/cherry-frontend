@@ -55,6 +55,6 @@ export async function obterFichaTecnica(produtoId) {
   return (await apiFetch(`/produtos/${produtoId}/ficha-tecnica`)).data;
 }
 
-export async function salvarFichaTecnica(produtoId, itens) {
-  return (await apiFetch(`/produtos/${produtoId}/ficha-tecnica`, json('POST', { itens }))).data;
+export async function salvarFichaTecnica(produtoId, itens, rendimento = 1) {
+  return (await apiFetch(`/produtos/${produtoId}/ficha-tecnica`, json('POST', { rendimento, itens }))).data;
 }

@@ -471,3 +471,15 @@ describe('Colheita (fiado)', () => {
     expect(canAccessRoute('/colheita', { role: 'admin' })).toBe(true);
   });
 });
+
+describe('rota de Grades de produtos', () => {
+  it('admin e estoquista acessam; vendedor e faturista não; depende da funcionalidade grade', () => {
+    expect(canAccessRoute('/grades', 'admin')).toBe(true);
+    expect(canAccessRoute('/grades', 'estoquista')).toBe(true);
+    expect(canAccessRoute('/grades', 'vendedor')).toBe(false);
+    expect(canAccessRoute('/grades', 'faturista')).toBe(false);
+    expect(FUNCIONALIDADE_POR_ROTA['/grades']).toBe('grade');
+    expect(rotaForaDoPlano('/grades', { funcionalidades: ['pcp'] })).toBe(true);
+    expect(rotaForaDoPlano('/grades', { funcionalidades: ['grade'] })).toBe(false);
+  });
+});

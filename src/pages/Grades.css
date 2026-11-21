@@ -1,0 +1,12 @@
+/* Grades de produtos: lista e blocos usados pelos modais (NovaGradeModal, GradeDetalheModal). */
+.grade-lista { display: flex; flex-direction: column; gap: var(--space-3); }
+.grade-item { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); align-items: center; text-align: left; width: 100%; cursor: pointer; }
+.grade-item-titulo { font-weight: 600; }
+.grade-item-sub { font-size: 0.875rem; color: var(--color-text-secondary); }
+.grade-item-badges { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
+.grade-paginacao { display: flex; justify-content: center; align-items: center; gap: var(--space-3); padding: var(--space-3); }
+.grade-aviso { display: grid; grid-template-columns: auto 1fr; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); margin-top: var(--space-3); }
+.grade-aviso--aviso { background: #fff6e0; }
+.grade-form-inline { margin-top: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); }
+.grade-form-botoes { display: flex; justify-content: flex-end; gap: var(--space-2); }
+@media (max-width: 720px) { .grade-item { grid-template-columns: minmax(0, 1fr); } .grade-item-badges { justify-content: flex-start; } }

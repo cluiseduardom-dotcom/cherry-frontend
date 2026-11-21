@@ -17,6 +17,7 @@ const Transferencias = lazy(() => import('./pages/Transferencias'));
 const MinhaMaleta = lazy(() => import('./pages/MinhaMaleta'));
 const AcertoEstoque = lazy(() => import('./pages/AcertoEstoque'));
 const Consumo = lazy(() => import('./pages/Consumo'));
+const Grades = lazy(() => import('./pages/Grades'));
 const Insumos = lazy(() => import('./pages/Insumos'));
 const EstoqueInsumos = lazy(() => import('./pages/EstoqueInsumos'));
 const AlterarSenha = lazy(() => import('./pages/AlterarSenha'));
@@ -65,6 +66,7 @@ const ROUTE_COMPONENTS = {
   '/transferencias': Transferencias,
   '/acerto-estoque': AcertoEstoque,
   '/consumo': Consumo,
+  '/grades': Grades,
   '/insumos': Insumos,
   '/estoque-insumos': EstoqueInsumos,
   '/indicadores-insumos': IndicadoresInsumosPage,

@@ -123,7 +123,7 @@ export default function LojaInstitucional() {
           <section className="card card-padding" style={{ marginTop: 'var(--space-4)' }}>
             <h2 className="loja-produtos-nome">Dados da empresa (rodapé)</h2>
             {texto('razao_social', 'Razão social')}
-            {texto('cnpj', 'CNPJ', { placeholder: '00.000.000/0000-00', inputMode: 'numeric' })}
+            {texto('cnpj', 'CNPJ', { placeholder: '00.000.000/0000-00', inputMode: 'text', autoCapitalize: 'characters' })}
             {texto('endereco', 'Endereço')}
           </section>
 

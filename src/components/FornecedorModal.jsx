@@ -4,7 +4,7 @@ import { atualizarFornecedor, criarFornecedor } from '../services/fornecedores';
 import { useConfirmarFechamentoModal } from '../hooks/useConfirmarFechamentoModal';
 import { formularioAlterado } from '../utils/formularioAlterado';
 import ConfirmarDescarteDialog from './ConfirmarDescarteDialog';
-import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, cpfCnpjValido, somenteDigitos } from '../utils/mascaras';
+import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, cpfCnpjValido, somenteDigitos, normalizarDocumento } from '../utils/mascaras';
 import CampoMascarado from './CampoMascarado';
 import '../pages/Fornecedores.css';
 
@@ -37,7 +37,7 @@ export function montarPayload(form) {
     contato: form.contato.trim() || undefined,
     telefone: form.telefone.trim() ? somenteDigitos(form.telefone) : undefined,
     email: form.email.trim() || undefined,
-    cnpj_cpf: form.cnpj_cpf.trim() ? somenteDigitos(form.cnpj_cpf) : undefined,
+    cnpj_cpf: form.cnpj_cpf.trim() ? normalizarDocumento(form.cnpj_cpf) : undefined,
     observacoes: form.observacoes.trim() || undefined,
   };
 }

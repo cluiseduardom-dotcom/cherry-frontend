@@ -4,7 +4,7 @@ import { listarClientes, listarRankingClientes } from '../services/clientes';
 import ClienteModal from '../components/ClienteModal';
 import ClienteHistoricoModal from '../components/ClienteHistoricoModal';
 import { useToast } from '../context/ToastContext';
-import { aplicarMascaraTelefone, formatarMoeda, somenteDigitos } from '../utils/mascaras';
+import { aplicarMascaraTelefone, formatarMoeda, somenteDigitos, normalizarDocumento } from '../utils/mascaras';
 import './Clientes.css';
 
 function mesclarComRanking(clientes, ranking) {
@@ -47,7 +47,7 @@ export function filtrarClientesPorBusca(clientes, termo) {
     const email = (c.email || '').toLowerCase();
     if (nome.includes(query) || email.includes(query)) return true;
     if (!termoDigitos) return false;
-    return somenteDigitos(c.telefone).includes(termoDigitos) || somenteDigitos(c.cpf_cnpj).includes(termoDigitos);
+    return somenteDigitos(c.telefone).includes(termoDigitos) || normalizarDocumento(c.cpf_cnpj).includes(normalizarDocumento(query));
   });
 }
 

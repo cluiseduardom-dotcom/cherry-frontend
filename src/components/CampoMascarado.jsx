@@ -1,8 +1,9 @@
 import { useRef } from 'react';
+import { contarSignificativos, posicaoAposMascara } from '../utils/cursorMascara';
 
 // Input controlado que aplica uma função de máscara a cada digitação
 // preservando a posição do cursor (Issue #41: "cursor não deve saltar de
-// forma inesperada"). A estratégia é contar quantos dígitos existem antes
+// forma inesperada"). A estratégia é contar quantos caracteres significativos (números e letras: o CNPJ alfanumérico tem as duas coisas) existem antes
 // do cursor no valor digitado e reposicionar o cursor depois da mesma
 // quantidade de dígitos no valor já mascarado — funciona tanto para
 // digitação no meio da string quanto para colar um valor já formatado,
@@ -19,7 +20,7 @@ export default function CampoMascarado({ mascara, value, onChange, className = '
   function handleChange(e) {
     const elemento = e.target;
     const posicaoCursor = elemento.selectionStart ?? elemento.value.length;
-    const digitosAntesDoCursor = (elemento.value.slice(0, posicaoCursor).match(/\d/g) || []).length;
+    const significativosAntesDoCursor = contarSignificativos(elemento.value.slice(0, posicaoCursor));
 
     const valorMascarado = mascara(elemento.value);
     onChange(valorMascarado);
@@ -27,20 +28,7 @@ export default function CampoMascarado({ mascara, value, onChange, className = '
     requestAnimationFrame(() => {
       if (!inputRef.current) return;
 
-      let contados = 0;
-      let novaPosicao = valorMascarado.length;
-
-      if (digitosAntesDoCursor === 0) {
-        novaPosicao = 0;
-      } else {
-        for (let i = 0; i < valorMascarado.length; i++) {
-          if (/\d/.test(valorMascarado[i])) contados++;
-          if (contados === digitosAntesDoCursor) {
-            novaPosicao = i + 1;
-            break;
-          }
-        }
-      }
+      const novaPosicao = posicaoAposMascara(valorMascarado, significativosAntesDoCursor);
 
       inputRef.current.setSelectionRange(novaPosicao, novaPosicao);
     });

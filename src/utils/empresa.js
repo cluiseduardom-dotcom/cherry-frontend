@@ -1,4 +1,4 @@
-import { cnpjValido, somenteDigitos } from './mascaras';
+import { cnpjValido, somenteDigitos, normalizarDocumento } from './mascaras';
 import { UFS } from './usuarios';
 
 export const CAMPOS_EMPRESA = [
@@ -26,11 +26,12 @@ export function validarEmpresa(form) {
   return erros;
 }
 
-// Só o que mudou em relação ao carregado; documentos/telefone/CEP seguem como dígitos.
+// Só o que mudou em relação ao carregado; CNPJ segue sem pontuação (letras e números, em maiúsculas); telefone e CEP, como dígitos.
 export function montarPayloadEmpresa(form, inicial) {
   const norm = (campo, valor) => {
     const v = String(valor ?? '').trim();
-    return ['cnpj', 'telefone', 'cep'].includes(campo) ? somenteDigitos(v) : v;
+    if (campo === 'cnpj') return normalizarDocumento(v); // o CNPJ pode ter letras (alfanumérico)
+    return ['telefone', 'cep'].includes(campo) ? somenteDigitos(v) : v;
   };
   const payload = {};
   for (const campo of CAMPOS_EMPRESA) {

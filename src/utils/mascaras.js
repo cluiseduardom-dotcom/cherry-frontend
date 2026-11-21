@@ -18,23 +18,31 @@ export function aplicarMascaraCPF(valor) {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
-// 00.000.000/0000-00
-export function aplicarMascaraCNPJ(valor) {
-  return somenteDigitos(valor)
-    .slice(0, 14)
-    .replace(/(\d{2})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+// Documento (CPF ou CNPJ) como vai para a API: só letras e números, em maiúsculas. Desde julho de 2026 o CNPJ pode ser
+// ALFANUMÉRICO (12 posições 0-9/A-Z + 2 dígitos verificadores), então `somenteDigitos` não serve mais para ele.
+export function normalizarDocumento(valor) {
+  return String(valor ?? '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
 }
 
-// Alterna CPF/CNPJ pela quantidade de dígitos já digitados: até 11 dígitos
-// aplica a máscara de CPF; a partir do 12º dígito, passa a formatar como
-// CNPJ (permitindo completar até 14). Usado em campos que aceitam pessoa
-// física ou jurídica no mesmo input.
+// 00.000.000/0000-00 (com letras nas 12 primeiras posições, se for o caso: 12.ABC.345/01DE-35)
+export function aplicarMascaraCNPJ(valor) {
+  return normalizarDocumento(valor)
+    .slice(0, 14)
+    .replace(/([0-9A-Z]{2})([0-9A-Z])/, '$1.$2')
+    .replace(/([0-9A-Z]{3})([0-9A-Z])/, '$1.$2')
+    .replace(/([0-9A-Z]{3})([0-9A-Z])/, '$1/$2')
+    .replace(/([0-9A-Z]{4})([0-9A-Z]{1,2})$/, '$1-$2');
+}
+
+// Alterna CPF/CNPJ conforme o que já foi digitado: CPF é só números e tem 11; vira CNPJ a partir do 12º caractere ou assim
+// que aparece uma letra (CNPJ alfanumérico). Usado em campos que aceitam pessoa física ou jurídica no mesmo input.
+export function pareceCnpj(valor) {
+  const d = normalizarDocumento(valor);
+  return d.length > 11 || /[A-Z]/.test(d);
+}
+
 export function aplicarMascaraCpfCnpj(valor) {
-  const digitos = somenteDigitos(valor);
-  return digitos.length > 11 ? aplicarMascaraCNPJ(digitos) : aplicarMascaraCPF(digitos);
+  return pareceCnpj(valor) ? aplicarMascaraCNPJ(valor) : aplicarMascaraCPF(valor);
 }
 
 // (00) 00000-0000 para celular (11 dígitos) ou (00) 0000-0000 para fixo
@@ -89,18 +97,18 @@ export function cpfValido(valor) {
   return calcularDigito(9) === Number(d[9]) && calcularDigito(10) === Number(d[10]);
 }
 
-// Validação de CNPJ por dígito verificador (algoritmo módulo 11 padrão da
-// Receita Federal).
+// Validação de CNPJ (numérico ou alfanumérico) por dígito verificador: módulo 11, com cada caractere valendo o código ASCII
+// menos 48 (0-9 = 0-9; A = 17 ... Z = 42), o que mantém o mesmo dígito dos CNPJ numéricos. As 2 últimas posições são números.
 export function cnpjValido(valor) {
-  const d = somenteDigitos(valor);
-  if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
+  const d = normalizarDocumento(valor);
+  if (!/^[0-9A-Z]{12}\d{2}$/.test(d) || /^(.)\1{13}$/.test(d)) return false;
 
   const PESOS_12 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   const PESOS_13 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
   const calcularDigito = (tamanho, pesos) => {
     let soma = 0;
-    for (let i = 0; i < tamanho; i++) soma += Number(d[i]) * pesos[i];
+    for (let i = 0; i < tamanho; i++) soma += (d.charCodeAt(i) - 48) * pesos[i];
     const resto = soma % 11;
     return resto < 2 ? 0 : 11 - resto;
   };
@@ -108,9 +116,7 @@ export function cnpjValido(valor) {
   return calcularDigito(12, PESOS_12) === Number(d[12]) && calcularDigito(13, PESOS_13) === Number(d[13]);
 }
 
-// Valida CPF (≤11 dígitos) ou CNPJ (14 dígitos) conforme a quantidade de
-// dígitos informada — companheiro de aplicarMascaraCpfCnpj.
+// Valida CPF ou CNPJ (numérico ou alfanumérico) pelo mesmo critério de aplicarMascaraCpfCnpj (`pareceCnpj`).
 export function cpfCnpjValido(valor) {
-  const d = somenteDigitos(valor);
-  return d.length > 11 ? cnpjValido(d) : cpfValido(d);
+  return pareceCnpj(valor) ? cnpjValido(valor) : cpfValido(valor);
 }

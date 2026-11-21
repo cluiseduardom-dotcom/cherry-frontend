@@ -1,5 +1,6 @@
 // Regras do formulário "Institucional da loja" (sem React). O backend valida de novo; aqui só se avisa antes de enviar.
 import { CAMPOS_INSTITUCIONAL } from '../services/lojaInstitucional';
+import { normalizarDocumento, cnpjValido } from './mascaras';
 
 export const LIMITES_INST = {
   historia: 6000, fundadora_nome: 120, servicos: 1500, atendimento: 1000, horario_atendimento: 200,
@@ -35,20 +36,8 @@ export function linkDaRedeValido(campo, valor) {
   }
 }
 
-export function cnpjValido(texto) {
-  const d = String(texto ?? '').replace(/\D/g, '');
-  if (!/^\d{14}$/.test(d) || /^(\d)\1+$/.test(d)) return false;
-
-  const dv = (base) => {
-    let soma = 0;
-    let peso = base.length - 7;
-    for (const n of base) { soma += Number(n) * peso; peso = peso === 2 ? 9 : peso - 1; }
-    const r = soma % 11;
-    return r < 2 ? 0 : 11 - r;
-  };
-
-  return dv(d.slice(0, 12)) === Number(d[12]) && dv(d.slice(0, 13)) === Number(d[13]);
-}
+// Validação central (numérico ou alfanumérico), reexportada para quem já importava daqui.
+export { cnpjValido } from './mascaras';
 
 /** Mensagem do primeiro problema do formulário, ou '' se estiver ok. */
 export function validarInstitucional(form) {
@@ -75,8 +64,8 @@ export function validarInstitucional(form) {
   return '';
 }
 
-/** Formata os dígitos do CNPJ como 00.000.000/0000-00 (se não tiver 14 dígitos, devolve como veio). */
+/** Formata o CNPJ (numérico ou alfanumérico) como 00.000.000/0000-00 (se não tiver 14 posições, devolve como veio). */
 export function formatarCnpj(valor) {
-  const d = String(valor ?? '').replace(/\D/g, '');
-  return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : String(valor ?? '');
+  const d = normalizarDocumento(valor);
+  return d.length === 14 ? d.replace(/^(.{2})(.{3})(.{3})(.{4})(.{2})$/, '$1.$2.$3/$4-$5') : String(valor ?? '');
 }

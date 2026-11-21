@@ -7,6 +7,7 @@ import { listarPadroesSku } from '../services/configuracoesSku';
 import NivelCategoriaModal from '../components/NivelCategoriaModal';
 import CategoriaProdutoModal from '../components/CategoriaProdutoModal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import AjudaContextual from '../components/AjudaContextual';
 import EscopoSeletor from '../components/EscopoSeletor';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
@@ -195,6 +196,13 @@ export default function CategoriasProduto() {
         </div>
       </div>
 
+      {!ehInsumo && (
+        <AjudaContextual
+          titulo="Categorias formam o SKU"
+          texto="Cada nível vira uma parte do SKU e cada categoria tem um código curto. Só o nome pode ser editado depois, então pense nos códigos antes de cadastrar."
+          tutorialId="sku"
+        />
+      )}
       <EscopoSeletor value={escopo} onChange={mudarEscopo} disabled={loading} />
 
       {loading && (

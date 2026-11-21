@@ -46,6 +46,9 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/conta/seguranca': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/conta/perfil': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/avisos': ['admin', 'vendedor', 'estoquista', 'faturista'],
+  // Tutoriais: texto estático, sem API; todos os papéis.
+  '/tutoriais': ['admin', 'vendedor', 'estoquista', 'faturista'],
+  '/tutoriais/:id': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/relatorios': ['admin'],
   '/bancos': ['admin'],
   '/pix-a-devolver': ['admin'],

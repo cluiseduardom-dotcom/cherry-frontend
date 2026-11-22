@@ -158,3 +158,11 @@ describe('aviso de insumo pendente na produção', () => {
     expect(destinoDoAviso({ tipo: 'insumo_pendente' }, true)).toBe('/produtos');
   });
 });
+
+describe('aviso de ordem de produção atrasada', () => {
+  it('tem rótulo próprio e leva a Produção só para quem pode abrir a tela', () => {
+    expect(rotuloDoTipo('ordem_producao_atrasada')).toBe('Ordem de produção atrasada');
+    expect(destinoDoAviso({ tipo: 'ordem_producao_atrasada' }, true, false, true)).toBe('/producao');
+    expect(destinoDoAviso({ tipo: 'ordem_producao_atrasada' }, true, false, false)).toBeNull();
+  });
+});

@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Clock, GraduationCap } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { TUTORIAIS } from '../data/tutoriais';
 import {
   buscarTutorial,
   caminhoDoTutorial,
   lerTutoriaisLidos,
   marcarTutorialLido,
   passosParaUsuario,
+  tutorialVisivel,
+  tutoriaisParaUsuario,
 } from '../utils/tutoriais';
 import './Tutoriais.css';
 
-function ListaTutoriais({ lidos }) {
+function ListaTutoriais({ lidos, user }) {
   return (
     <>
       <div className="page-header">
@@ -23,7 +24,7 @@ function ListaTutoriais({ lidos }) {
       </div>
 
       <div className="tutoriais-grid">
-        {TUTORIAIS.map(tutorial => {
+        {tutoriaisParaUsuario(user).map(tutorial => {
           const lido = lidos.includes(tutorial.id);
           return (
             <Link key={tutorial.id} to={caminhoDoTutorial(tutorial.id)} className="tutoriais-card card card-padding">
@@ -99,7 +100,9 @@ export default function Tutoriais() {
   const { user } = useAuth();
   const [lidos, setLidos] = useState(() => lerTutoriaisLidos());
 
-  const tutorial = id ? buscarTutorial(id) : null;
+  // Tutorial de módulo que o usuário não pode abrir (papel ou plano) se comporta como inexistente.
+  const achado = id ? buscarTutorial(id) : null;
+  const tutorial = tutorialVisivel(achado, user) ? achado : null;
 
   function concluir() {
     setLidos(marcarTutorialLido(tutorial.id));
@@ -121,7 +124,7 @@ export default function Tutoriais() {
       ) : tutorial ? (
         <DetalheTutorial tutorial={tutorial} user={user} onConcluir={concluir} />
       ) : (
-        <ListaTutoriais lidos={lidos} />
+        <ListaTutoriais lidos={lidos} user={user} />
       )}
     </div>
   );

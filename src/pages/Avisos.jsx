@@ -13,6 +13,7 @@ export default function Avisos() {
   const { itens, lidos, naoLidos, carregando, erro, recarregar, marcarComoLido, marcarTodosComoLidos } = useNotificacoes();
   const podeVerEstoque = canAccessRoute('/estoque', user);
   const podeVerPixADevolver = canAccessRoute('/pix-a-devolver', user);
+  const podeVerProducao = canAccessRoute('/producao', user);
 
   return (
     <div className="page-content avisos-page">
@@ -58,7 +59,7 @@ export default function Avisos() {
             <li key={aviso.id} className={`avisos-item card card-padding avisos-${aviso.prioridade}${lido ? ' avisos-lido' : ''}`}>
               <div className="avisos-topo">
                 <span className="avisos-tipo">{rotuloDoTipo(aviso.tipo, vocab)}</span>
-                {aviso.item === 'insumo' && <span className="avisos-etiqueta">Insumo</span>}
+                {(aviso.item === 'insumo' || aviso.tipo === 'insumo_pendente_producao') && <span className="avisos-etiqueta">Insumo</span>}
                 {aviso.item === 'maleta' && <span className="avisos-etiqueta">{vocab.nome}</span>}
                 {aviso.item === 'pedido' && <span className="avisos-etiqueta">Loja online</span>}
                 {aviso.item === 'cobranca' && <span className="avisos-etiqueta">GiroNex</span>}
@@ -67,9 +68,9 @@ export default function Avisos() {
               <p className="avisos-mensagem">{aviso.mensagem}</p>
               <p className="avisos-acao">{aviso.acao}</p>
               <div className="avisos-rodape">
-                {destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver) && (
+                {destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver, podeVerProducao) && (
                   <Link
-                    to={destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver)}
+                    to={destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver, podeVerProducao)}
                     className="avisos-ir"
                     onClick={() => marcarComoLido(aviso.id)}
                   >

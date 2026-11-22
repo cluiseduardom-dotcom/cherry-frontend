@@ -143,3 +143,18 @@ describe('aviso de cobrança da plataforma', () => {
     expect(contarNaoLidos([aviso, { id: 'falta:1' }], lidos)).toBe(1);
   });
 });
+
+describe('aviso de insumo pendente na produção', () => {
+  it('tem rótulo próprio (e o de insumo que faltou em venda deixa de cair em "Aviso")', () => {
+    expect(rotuloDoTipo('insumo_pendente_producao')).toBe('Insumo pendente na produção');
+    expect(rotuloDoTipo('insumo_pendente')).toBe('Insumo faltou em venda');
+  });
+
+  it('leva a Produção para quem pode abrir a tela; sem acesso, não mostra "Ver"', () => {
+    expect(destinoDoAviso({ tipo: 'insumo_pendente_producao' }, true, false, true)).toBe('/producao');
+    expect(destinoDoAviso({ tipo: 'insumo_pendente_producao' }, true, false, false)).toBeNull();
+    // os outros destinos não mudam
+    expect(destinoDoAviso({ tipo: 'falta' }, true)).toBe('/estoque');
+    expect(destinoDoAviso({ tipo: 'insumo_pendente' }, true)).toBe('/produtos');
+  });
+});

@@ -10,6 +10,7 @@ import {
   aplicarMascaraCEP,
   cpfCnpjValido,
   somenteDigitos,
+  normalizarDocumento,
 } from '../utils/mascaras';
 import CampoMascarado from './CampoMascarado';
 import './ProductModal.css';
@@ -78,7 +79,7 @@ export function montarPayload(form, mode) {
     nome: form.nome.trim(),
     telefone: form.telefone.trim() ? somenteDigitos(form.telefone) : undefined,
     email: form.email.trim() || undefined,
-    cpf_cnpj: form.cpf_cnpj.trim() ? somenteDigitos(form.cpf_cnpj) : undefined,
+    cpf_cnpj: form.cpf_cnpj.trim() ? normalizarDocumento(form.cpf_cnpj) : undefined,
     cep: form.cep.trim() ? somenteDigitos(form.cep) : undefined,
     endereco: form.endereco.trim() || undefined,
     numero: form.numero.trim() || undefined,

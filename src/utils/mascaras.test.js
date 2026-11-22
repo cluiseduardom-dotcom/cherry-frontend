@@ -175,3 +175,42 @@ describe('cpfCnpjValido', () => {
     expect(cpfCnpjValido('12345678000190')).toBe(false);
   });
 });
+
+describe('CNPJ alfanumérico (desde julho de 2026)', () => {
+  it('normalizarDocumento: só letras e números, em maiúsculas', async () => {
+    const { normalizarDocumento } = await import('./mascaras');
+    expect(normalizarDocumento('12.abc.345/01de-35')).toBe('12ABC34501DE35');
+    expect(normalizarDocumento('123.456.789-01')).toBe('12345678901');
+    expect(normalizarDocumento(null)).toBe('');
+  });
+
+  it('máscara de CNPJ com letras, sem mudar a dos numéricos', () => {
+    expect(aplicarMascaraCNPJ('12ABC34501DE35')).toBe('12.ABC.345/01DE-35');
+    expect(aplicarMascaraCNPJ('12abc34501de35')).toBe('12.ABC.345/01DE-35');
+    expect(aplicarMascaraCNPJ('11222333000181')).toBe('11.222.333/0001-81');
+    expect(aplicarMascaraCNPJ('12ABC345')).toBe('12.ABC.345');
+  });
+
+  it('campo CPF/CNPJ vira CNPJ quando aparece letra ou passa de 11 caracteres', () => {
+    expect(aplicarMascaraCpfCnpj('12345678901')).toBe('123.456.789-01');
+    expect(aplicarMascaraCpfCnpj('12AB')).toBe('12.AB');
+    expect(aplicarMascaraCpfCnpj('12ABC34501DE35')).toBe('12.ABC.345/01DE-35');
+  });
+
+  it('cnpjValido confere o dígito do CNPJ alfanumérico (exemplo oficial 12ABC34501DE35) e dos numéricos', () => {
+    expect(cnpjValido('12ABC34501DE35')).toBe(true);
+    expect(cnpjValido('12.abc.345/01de-35')).toBe(true);
+    expect(cnpjValido('12ABC34501DE36')).toBe(false);
+    expect(cnpjValido('12ABC34501DEA5')).toBe(false); // letra nos dígitos verificadores
+    expect(cnpjValido('11222333000181')).toBe(true);
+    expect(cnpjValido('11222333000182')).toBe(false);
+    expect(cnpjValido('AAAAAAAAAAAAAA')).toBe(false);
+  });
+
+  it('cpfCnpjValido usa CPF para só números até 11 e CNPJ com letra ou acima de 11', () => {
+    expect(cpfCnpjValido('529.982.247-25')).toBe(true);
+    expect(cpfCnpjValido('12ABC34501DE35')).toBe(true);
+    expect(cpfCnpjValido('12ABC34501DE36')).toBe(false);
+    expect(cpfCnpjValido('11222333000181')).toBe(true);
+  });
+});

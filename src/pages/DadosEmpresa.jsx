@@ -124,7 +124,7 @@ export default function DadosEmpresa() {
             <div className="modal-form-grid">
               {texto('nome', 'Nome fantasia *', { maxLength: 255 })}
               {texto('razao_social', 'Razão social', { maxLength: 255 })}
-              {mascarado('cnpj', 'CNPJ', aplicarMascaraCNPJ, { inputMode: 'numeric', maxLength: 18, placeholder: '00.000.000/0000-00' })}
+              {mascarado('cnpj', 'CNPJ', aplicarMascaraCNPJ, { inputMode: 'text', autoCapitalize: 'characters', maxLength: 18, placeholder: '00.000.000/0000-00' })}
             </div>
           </div>
 

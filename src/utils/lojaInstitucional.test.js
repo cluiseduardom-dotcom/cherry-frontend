@@ -68,3 +68,12 @@ describe('validarInstitucional', () => {
     expect(validarInstitucional({ whatsapp: '5511999990000' })).toBe('');
   });
 });
+
+describe('CNPJ alfanumérico na loja institucional', () => {
+  it('valida e formata o CNPJ com letras', () => {
+    expect(cnpjValido('12.ABC.345/01DE-35')).toBe(true);
+    expect(cnpjValido('12ABC34501DE36')).toBe(false);
+    expect(formatarCnpj('12ABC34501DE35')).toBe('12.ABC.345/01DE-35');
+    expect(validarInstitucional({ cnpj: '12.ABC.345/01DE-35' })).toBe('');
+  });
+});

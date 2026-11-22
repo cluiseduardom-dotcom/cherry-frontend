@@ -43,3 +43,14 @@ describe('rótulo do estoque do vendedor', () => {
     expect(montarPayloadEmpresa({ ...inicial }, inicial)).toEqual({});
   });
 });
+
+describe('CNPJ alfanumérico na empresa', () => {
+  const inicial = dadosParaFormulario({ nome: 'Cherry', cnpj: '11222333000181' });
+  it('aceita e envia sem pontuação, com as letras em maiúsculas', () => {
+    expect(validarEmpresa({ nome: 'Cherry', cnpj: '12.abc.345/01de-35' })).toEqual({});
+    expect(montarPayloadEmpresa({ ...inicial, cnpj: '12.abc.345/01de-35' }, inicial)).toEqual({ cnpj: '12ABC34501DE35' });
+  });
+  it('recusa dígito verificador errado', () => {
+    expect(validarEmpresa({ nome: 'Cherry', cnpj: '12ABC34501DE36' }).cnpj).toBe('CNPJ inválido');
+  });
+});

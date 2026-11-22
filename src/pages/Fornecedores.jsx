@@ -5,7 +5,7 @@ import FornecedorModal from '../components/FornecedorModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { useToast } from '../context/ToastContext';
-import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, somenteDigitos } from '../utils/mascaras';
+import { aplicarMascaraCpfCnpj, aplicarMascaraTelefone, somenteDigitos, normalizarDocumento } from '../utils/mascaras';
 import './Fornecedores.css';
 
 function initials(nome) {
@@ -56,7 +56,7 @@ export default function Fornecedores() {
       String(f.nome ?? '').toLowerCase().includes(term) ||
       String(f.contato ?? '').toLowerCase().includes(term) ||
       String(f.cnpj_cpf ?? '').toLowerCase().includes(term) ||
-      (termoDigitos && somenteDigitos(f.cnpj_cpf).includes(termoDigitos))
+      (termoDigitos && normalizarDocumento(f.cnpj_cpf).includes(normalizarDocumento(term)))
     );
   }, [fornecedores, search]);
 

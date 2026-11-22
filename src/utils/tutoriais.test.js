@@ -169,7 +169,7 @@ describe('tutoriais dos módulos', () => {
   const ids = TUTORIAIS.map(t => t.id);
 
   it('existem os tutoriais dos módulos novos', () => {
-    for (const id of ['modelo-nicho', 'receita-insumos', 'producao', 'venda-por-peso', 'grade', 'pedido-compra', 'fiscal-preparo']) {
+    for (const id of ['modelo-nicho', 'receita-insumos', 'producao', 'venda-por-peso', 'grade', 'pedido-compra', 'cotacao', 'fiscal-preparo']) {
       expect(ids, id).toContain(id);
     }
   });
@@ -187,13 +187,13 @@ describe('tutoriais dos módulos', () => {
 
     const visiveis = user => tutoriaisParaUsuario(user).map(t => t.id);
 
-    expect(visiveis(adminComTudo)).toEqual(expect.arrayContaining(['producao', 'receita-insumos', 'grade', 'pedido-compra', 'fiscal-preparo', 'modelo-nicho', 'venda-por-peso']));
+    expect(visiveis(adminComTudo)).toEqual(expect.arrayContaining(['producao', 'receita-insumos', 'grade', 'pedido-compra', 'cotacao', 'fiscal-preparo', 'modelo-nicho', 'venda-por-peso']));
     expect(visiveis(adminSemModulos)).not.toEqual(expect.arrayContaining(['producao']));
-    for (const id of ['producao', 'receita-insumos', 'grade', 'pedido-compra', 'fiscal-preparo']) expect(visiveis(adminSemModulos)).not.toContain(id);
+    for (const id of ['producao', 'receita-insumos', 'grade', 'pedido-compra', 'cotacao', 'fiscal-preparo']) expect(visiveis(adminSemModulos)).not.toContain(id);
     expect(visiveis(adminSemModulos)).toEqual(expect.arrayContaining(['sku', 'cadastrar-produto', 'entrada-estoque', 'primeira-venda', 'venda-por-peso', 'modelo-nicho']));
     // vendedor: sem telas administrativas; vê só o que a rota principal permite
     expect(visiveis(vendedor)).toEqual(expect.arrayContaining(['sku', 'primeira-venda', 'venda-por-peso']));
-    for (const id of ['producao', 'grade', 'pedido-compra', 'fiscal-preparo', 'modelo-nicho']) expect(visiveis(vendedor)).not.toContain(id);
+    for (const id of ['producao', 'grade', 'pedido-compra', 'cotacao', 'fiscal-preparo', 'modelo-nicho']) expect(visiveis(vendedor)).not.toContain(id);
   });
 
   it('tutorialVisivel: sem rotaPrincipal é geral; tutorial nulo é invisível', () => {

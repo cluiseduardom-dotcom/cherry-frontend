@@ -362,6 +362,45 @@ export const TUTORIAIS = [
     ],
   },
   {
+    id: 'cotacao',
+    titulo: 'Como comparar preços de fornecedores (cotação)',
+    resumo: 'Peça preço a vários fornecedores, compare item a item e gere o pedido do que ficou melhor.',
+    minutos: 4,
+    rotaPrincipal: '/compras/cotacoes',
+    passos: [
+      {
+        titulo: 'Crie a cotação',
+        texto:
+          'Em Compras, abra a aba Cotações e use "Nova cotação": escolha os produtos e as quantidades que precisa e marque os fornecedores de quem quer preço. ' +
+          'Se quiser, informe até quando eles devem responder. A cotação já nasce aberta, com número automático.',
+        rota: '/compras/cotacoes',
+        rotuloRota: 'Abrir cotações',
+      },
+      {
+        titulo: 'Registre a proposta de cada fornecedor',
+        texto:
+          'Quando o fornecedor responder (por telefone, WhatsApp ou e-mail), use "Registrar proposta" na coluna dele: informe o preço, o desconto e a quantidade que ele oferece de cada item, o prazo de entrega e a condição de pagamento. ' +
+          'Deixe em branco o item que ele não tem. Se ele não vai cotar, use "Recusou".',
+        dica: 'Dá para corrigir depois: "Editar proposta" troca a proposta anterior inteira.',
+      },
+      {
+        titulo: 'Compare e escolha',
+        texto:
+          'A tabela mostra, para cada item, o valor total de cada fornecedor. O menor preço por unidade (já com o desconto) aparece destacado como "Melhor preço" e já vem marcado, mas a escolha é sua: ' +
+          'marque outro fornecedor se o prazo ou a condição de pagamento compensarem. Itens sem marca não entram nos pedidos.',
+      },
+      {
+        titulo: 'Gere os pedidos de compra',
+        texto:
+          'Confira o resumo "O que será pedido" e use "Gerar pedido(s) de compra". O sistema cria um pedido em rascunho para cada fornecedor escolhido, com os preços da proposta, e encerra a cotação. ' +
+          'Abra cada pedido para revisar, enviar ao fornecedor e, quando a mercadoria chegar, receber: veja o tutorial "Como pedir ao fornecedor e receber a mercadoria".',
+        rota: '/compras/pedidos',
+        rotuloRota: 'Abrir pedidos de compra',
+        dica: 'Cotação com pedidos gerados não pode ser alterada nem gerada de novo.',
+      },
+    ],
+  },
+  {
     id: 'fiscal-preparo',
     titulo: 'Como deixar o cadastro pronto para a nota fiscal',
     resumo: 'Complete os dados da empresa e o NCM e a origem dos produtos. O sistema ainda não emite nota: só prepara o cadastro.',

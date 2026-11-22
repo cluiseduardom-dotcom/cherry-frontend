@@ -341,9 +341,14 @@ export default function Compras() {
             de dados (pedidos de compra/recebimentos, sem relação com
             Compra Direta), por isso navega em vez de filtrar a tabela. */}
         {temComprasAvancado && (
-          <button type="button" className="compras-tab" onClick={() => navigate('/compras/pedidos')}>
-            Pedidos
-          </button>
+          <>
+            <button type="button" className="compras-tab" onClick={() => navigate('/compras/cotacoes')}>
+              Cotações
+            </button>
+            <button type="button" className="compras-tab" onClick={() => navigate('/compras/pedidos')}>
+              Pedidos
+            </button>
+          </>
         )}
         <button type="button" className="compras-tab" onClick={() => navigate('/compras/recebimentos')}>
           Recebimentos

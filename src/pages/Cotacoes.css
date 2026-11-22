@@ -1,0 +1,17 @@
+.cotacao-fornecedores-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.cotacao-fornecedor-opcao { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--color-border, #ddd); border-radius: 8px; cursor: pointer; }
+.cotacao-proposta-linha { grid-template-columns: minmax(160px, 2fr) 110px 100px 100px; }
+.cotacao-matriz { width: 100%; border-collapse: collapse; }
+.cotacao-matriz th, .cotacao-matriz td { padding: 10px 12px; border-bottom: 1px solid var(--color-border-light, #eee); text-align: left; vertical-align: top; }
+.cotacao-matriz th.numeric, .cotacao-matriz td.numeric { text-align: right; }
+.cotacao-celula { display: flex; flex-direction: column; gap: 2px; min-width: 130px; }
+.cotacao-celula label { display: flex; gap: 6px; align-items: center; cursor: pointer; font-weight: 600; }
+.cotacao-celula small { opacity: .7; }
+.cotacao-celula--melhor { background: rgba(22, 163, 74, .08); border-radius: 8px; padding: 6px 8px; }
+.cotacao-celula--vazia { opacity: .5; padding: 6px 8px; }
+.cotacao-selo-melhor { font-size: 11px; color: #15803d; font-weight: 700; }
+.cotacao-resumo { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.cotacao-resumo-item { padding: 10px 14px; border: 1px solid var(--color-border, #ddd); border-radius: 10px; }
+.cotacao-forn-cab { display: flex; flex-direction: column; gap: 6px; min-width: 150px; }
+.cotacao-forn-cab .btn { padding: 4px 8px; font-size: 12px; }
+@media (max-width: 700px) { .cotacao-proposta-linha { grid-template-columns: 1fr 1fr; } }

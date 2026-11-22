@@ -248,3 +248,96 @@ html[data-theme="valvazori"] {
   --section-accent: transparent;
   --nav-active-accent: transparent;
 }
+
+/* Emilly Candy Designer — tema de DEMONSTRAÇÃO (confeitaria): verde-menta e rosa em tons pastel, menu lateral claro.
+   Verde-menta e rosa da referência enviada pela cliente de teste, mais amarelo clarinho e lilás claro nos acentos; contrastes conferidos (texto ≥ 4,5:1; borda de campo ≥ 3:1). */
+html[data-theme="emilly"] {
+  /* Marca */
+  --color-primary:        #1B7F6F;
+  --color-primary-dark:   #14655A;
+  --color-primary-light:  #5FC4B2;
+  --color-primary-ultra:  #DDF4EF;
+  --color-primary-rgb:    27, 127, 111;
+
+  --color-secondary:       #C2447A;
+  --color-secondary-ultra: #FDE4EE;
+  --color-secondary-rgb:   194, 68, 122;
+
+  --color-accent:             #B73A71;
+  --color-accent-soft:        #FFF6CC; /* amarelo clarinho */
+  --color-accent-soft-hover:  #FFEDA3;
+
+  /* Rampa da marca */
+  --brand-50:  #F2FBF9;
+  --brand-100: #DDF4EF;
+  --brand-200: #BCE8DF;
+  --brand-300: #8FD6C8;
+  --brand-400: #5FC4B2;
+  --brand-500: #1B7F6F;
+  --brand-600: #14655A;
+  --brand-700: #0F4F46;
+  --brand-800: #0B3B34;
+  --brand-900: #072A25;
+
+  /* Fundos */
+  --color-bg:         #F3FBF9;
+  --color-bg-surface: #FBFFFE;
+  --color-bg-sidebar: #DFF5F0;
+  --color-bg-hover:   #DDF4EF;
+
+  /* Texto */
+  --color-text-primary:   #26403C;
+  --color-text-secondary: #4A645F;
+  --color-text-muted:     #5F7772;
+  --color-text-subtle:    #567069;
+  --color-text-price:     #14655A;
+
+  /* Bordas */
+  --color-border:       #CFE6E1;
+  --color-border-light: #E1F0EC;
+  --color-border-input: #7C9A94;
+
+  /* Papéis */
+  --color-role-admin:    #14655A;
+  --color-role-admin-bg: #EEE6FB; /* lilás claro */
+
+  /* Dashboard: faixa de boas-vindas e gráficos */
+  --color-hero-from:  #14655A;
+  --color-hero-to:    #1B7F6F;
+  --color-hero-muted: #D5F1EB;
+  --chart-a: #1B7F6F;
+  --chart-b: #C2447A;
+  --chart-c: #BBA4E6; /* lilás */
+
+  /* Menu lateral claro em verde-menta pastel */
+  --sidebar-bg: linear-gradient(180deg, #E8F8F4 0, #DFF5F0 160px, #D3EFE8 100%);
+  --sidebar-border: #C4E5DD;
+  --sidebar-divider: #C4E5DD;
+  --sidebar-text: #2C4A45;
+  --sidebar-text-strong: #14403A;
+  --sidebar-text-muted: #51706A;
+  --sidebar-hover-bg: #C9EDE5;
+  --sidebar-hover-text: #14403A;
+  --sidebar-active-bg: linear-gradient(180deg, #C2447A, #A93868);
+  --sidebar-active-text: #FFFFFF;
+  --sidebar-active-border: #E07AA3;
+  --sidebar-active-shadow: 0 4px 14px rgba(194, 68, 122, 0.28);
+  --brand-symbol-bg: #E8F8F4;
+
+  /* Pequenos acentos de marca: lilás nas seções e amarelo no item ativo do menu */
+  --section-accent: #CDB8F0; /* lilás claro */
+  --nav-active-accent: #FFE98A; /* amarelo clarinho */
+}
+
+/* Emilly: o texto de autoria da faixa do Dashboard usa o acento (rosa-escuro, bom sobre branco) e fica sem contraste sobre o verde-escuro. */
+html[data-theme="emilly"] .dashboard-hero-quote figcaption { color: #FFF0A6; }
+
+/* Emilly: a tela de login do VERTUMNO tem cores próprias fixas no Login.css; aqui só para este tema. */
+html[data-theme="emilly"] .login-page-vertumno > .login-side {
+  background: linear-gradient(135deg, #14655A 0%, #1B7F6F 55%, #2E9C8C 100%) !important;
+}
+html[data-theme="emilly"] .login-page-vertumno .login-submit { background: linear-gradient(110deg, #C2447A, #A93868); box-shadow: 0 7px 18px rgba(194, 68, 122, 0.25); }
+html[data-theme="emilly"] .login-page-vertumno .login-submit:hover:not(:disabled) { background: #A93868; }
+html[data-theme="emilly"] .login-page-vertumno .input-field { background: #EAF8F4; border-color: #BCE8DF; }
+html[data-theme="emilly"] .login-page-vertumno .login-forgot { color: #1B7F6F; }
+html[data-theme="emilly"] .login-page-vertumno .login-side-feature-dot { background: linear-gradient(135deg, #FBCBDA 0%, #F29BBB 50%, #C2447A 100%); color: #FFFFFF; box-shadow: 0 0 0 3px rgba(251, 203, 218, 0.25); }

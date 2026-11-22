@@ -160,8 +160,20 @@ describe('tema Emilly (demonstração)', () => {
     expect(contraste(regra[1].toUpperCase(), emilly['--color-hero-from'])).toBeGreaterThanOrEqual(4.5);
   });
 
+  it('acentos em amarelo clarinho e lilás claro (tons pastel, claros)', () => {
+    expect(emilly['--color-accent-soft']).toMatch(/^#FFF/);
+    expect(emilly['--color-role-admin-bg']).toBe('#EEE6FB');
+    expect(emilly['--chart-c']).toBe('#BBA4E6');
+    expect(emilly['--section-accent']).toBe('#CDB8F0');
+    expect(emilly['--nav-active-accent']).toBe('#FFE98A');
+    // texto de ícone/alerta rosa-escuro continua legível sobre o amarelo clarinho
+    expect(contraste(emilly['--color-accent'], emilly['--color-accent-soft'])).toBeGreaterThanOrEqual(4.5);
+    // papel do usuário: verde-escuro sobre lilás claro
+    expect(contraste(emilly['--color-role-admin'], emilly['--color-role-admin-bg'])).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('a marca tem nome, logo, símbolo e paleta de avatares', () => {
-    expect(TEMAS.emilly.marca.nomeCompleto).toBe('Emilly Candy Designer');
+    expect(TEMAS.emilly.marca.nomeCompleto).toBe('Emilly Graziela');
     expect(TEMAS.emilly.marca.logo).toBeTruthy();
     expect(TEMAS.emilly.marca.simbolo).toBeTruthy();
     expect(TEMAS.emilly.marca.paleta.every(c => /^#[0-9A-F]{6}$/i.test(c))).toBe(true);

@@ -250,7 +250,7 @@ html[data-theme="valvazori"] {
 }
 
 /* Emilly Candy Designer — tema de DEMONSTRAÇÃO (confeitaria): verde-menta e rosa em tons pastel, menu lateral claro.
-   Paleta tirada da referência enviada pela cliente de teste; contrastes conferidos (texto ≥ 4,5:1; borda de campo ≥ 3:1). */
+   Verde-menta e rosa da referência enviada pela cliente de teste, mais amarelo clarinho e lilás claro nos acentos; contrastes conferidos (texto ≥ 4,5:1; borda de campo ≥ 3:1). */
 html[data-theme="emilly"] {
   /* Marca */
   --color-primary:        #1B7F6F;
@@ -263,9 +263,9 @@ html[data-theme="emilly"] {
   --color-secondary-ultra: #FDE4EE;
   --color-secondary-rgb:   194, 68, 122;
 
-  --color-accent:             #C2447A;
-  --color-accent-soft:        #FFEEF4;
-  --color-accent-soft-hover:  #FFDCE8;
+  --color-accent:             #B73A71;
+  --color-accent-soft:        #FFF6CC; /* amarelo clarinho */
+  --color-accent-soft-hover:  #FFEDA3;
 
   /* Rampa da marca */
   --brand-50:  #F2FBF9;
@@ -299,7 +299,7 @@ html[data-theme="emilly"] {
 
   /* Papéis */
   --color-role-admin:    #14655A;
-  --color-role-admin-bg: #DDF4EF;
+  --color-role-admin-bg: #EEE6FB; /* lilás claro */
 
   /* Dashboard: faixa de boas-vindas e gráficos */
   --color-hero-from:  #14655A;
@@ -307,7 +307,7 @@ html[data-theme="emilly"] {
   --color-hero-muted: #D5F1EB;
   --chart-a: #1B7F6F;
   --chart-b: #C2447A;
-  --chart-c: #9CCFC5;
+  --chart-c: #BBA4E6; /* lilás */
 
   /* Menu lateral claro em verde-menta pastel */
   --sidebar-bg: linear-gradient(180deg, #E8F8F4 0, #DFF5F0 160px, #D3EFE8 100%);
@@ -324,13 +324,13 @@ html[data-theme="emilly"] {
   --sidebar-active-shadow: 0 4px 14px rgba(194, 68, 122, 0.28);
   --brand-symbol-bg: #E8F8F4;
 
-  /* Pequenos acentos de marca: um toque de rosa nas seções */
-  --section-accent: #F6B6CC;
-  --nav-active-accent: #F6B6CC;
+  /* Pequenos acentos de marca: lilás nas seções e amarelo no item ativo do menu */
+  --section-accent: #CDB8F0; /* lilás claro */
+  --nav-active-accent: #FFE98A; /* amarelo clarinho */
 }
 
 /* Emilly: o texto de autoria da faixa do Dashboard usa o acento (rosa-escuro, bom sobre branco) e fica sem contraste sobre o verde-escuro. */
-html[data-theme="emilly"] .dashboard-hero-quote figcaption { color: #FBCBDA; }
+html[data-theme="emilly"] .dashboard-hero-quote figcaption { color: #FFF0A6; }
 
 /* Emilly: a tela de login do VERTUMNO tem cores próprias fixas no Login.css; aqui só para este tema. */
 html[data-theme="emilly"] .login-page-vertumno > .login-side {

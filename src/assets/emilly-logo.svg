@@ -1,12 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" role="img" aria-label="Emilly Candy Designer">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6B6CC"/><stop offset="1" stop-color="#C2447A"/></linearGradient></defs>
-  <g transform="translate(14 26)">
-    <path d="M0 34 L16 24 L16 44 Z" fill="#5FC4B2"/>
-    <path d="M72 34 L56 24 L56 44 Z" fill="#5FC4B2"/>
-    <circle cx="36" cy="34" r="22" fill="url(#g)"/>
-    <path d="M20 26 q16 -14 32 0" stroke="#FFF" stroke-width="4" fill="none" stroke-linecap="round" opacity=".85"/>
-    <path d="M20 40 q16 14 32 0" stroke="#FFF" stroke-width="4" fill="none" stroke-linecap="round" opacity=".55"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 110" role="img" aria-label="Emilly Graziela">
+  <defs>
+    <linearGradient id="massa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F29A86"/><stop offset="1" stop-color="#E0705F"/></linearGradient>
+    <linearGradient id="glace" x1="0.1" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#B9705F"/><stop offset="0.55" stop-color="#9C5546"/><stop offset="1" stop-color="#874638"/></linearGradient>
+  </defs>
+  <!-- faixas de destaque atrás da escrita: lilás claro e amarelo clarinho -->
+  <rect x="104" y="40" width="124" height="44" rx="14" fill="#E4D8F7"/>
+  <rect x="236" y="40" width="190" height="44" rx="14" fill="#FFF0A6"/>
+  <!-- escrita (negrito itálico com serifa), com larguras fixas para as faixas sempre casarem -->
+  <g font-family="Cambria,'Palatino Linotype',Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" font-size="40" fill="#3B2A57">
+    <text x="112" y="74" textLength="108" lengthAdjust="spacingAndGlyphs">Emilly</text>
+    <text x="244" y="74" textLength="174" lengthAdjust="spacingAndGlyphs">Graziela</text>
   </g>
-  <text x="104" y="62" font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive" font-size="46" fill="#C2447A">Emilly</text>
-  <text x="106" y="92" font-family="'Trebuchet MS','Helvetica Neue',Arial,sans-serif" font-size="17" letter-spacing="5" fill="#1B7F6F" font-weight="700">CANDY DESIGNER</text>
+  <!-- donut -->
+  <g transform="translate(6 12) scale(0.86)">
+    <path fill-rule="evenodd" fill="url(#massa)" d="M50 16c24 0 43 15 43 36S74 88 50 88 7 73 7 52 26 16 50 16zm0 25c-9 0-16 5-16 11s7 11 16 11 16-5 16-11-7-11-16-11z"/>
+    <path fill-rule="evenodd" fill="url(#glace)" d="M50 12c24 0 43 14 43 34S74 78 50 78 7 66 7 46 26 12 50 12zm0 23c-9 0-16 5-16 11s7 11 16 11 16-5 16-11-7-11-16-11z"/>
+    <path d="M18 34c6-10 17-16 30-17" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <ellipse cx="50" cy="46" rx="16" ry="11" fill="none" stroke="#F29A86" stroke-width="3"/>
+    <g stroke-linecap="round" stroke-width="5">
+      <path d="M33 22l5 3" stroke="#F06AE0"/><path d="M62 20l4 4" stroke="#2FA8F0"/><path d="M78 36l5-2" stroke="#F06AE0"/>
+      <path d="M18 46l5 2" stroke="#2FA8F0"/><path d="M26 62l5-3" stroke="#F06AE0"/><path d="M50 69l2-5" stroke="#2FA8F0"/>
+      <path d="M73 58l4 3" stroke="#F06AE0"/><path d="M66 70l-1-5" stroke="#2FA8F0"/><path d="M48 24l3 4" stroke="#F06AE0"/>
+    </g>
+  </g>
 </svg>

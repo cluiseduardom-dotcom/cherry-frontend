@@ -58,6 +58,7 @@ const ROTULO_TIPO = {
   alto_giro: 'Alto giro',
   insumo_pendente: 'Insumo faltou em venda',
   insumo_pendente_producao: 'Insumo pendente na produção',
+  ordem_producao_atrasada: 'Ordem de produção atrasada',
   transferencia_pendente: 'Transferência sem aceite',
   maleta_sem_conferencia: 'Maleta sem conferência',
   maleta_sem_venda: 'Maleta sem vender',
@@ -87,8 +88,8 @@ const TIPOS_SEM_DESTINO = ['cobranca_plataforma'];
 
 export function destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver = false, podeVerProducao = false) {
   if (TIPOS_SEM_DESTINO.includes(aviso.tipo)) return null;
-  // Insumo pendente na produção: a regularização é na ordem, em Produção (sem acesso à tela, não há para onde levar).
-  if (aviso.tipo === 'insumo_pendente_producao') return podeVerProducao ? '/producao' : null;
+  // Insumo pendente e ordem atrasada na produção: o que se resolve é na ordem, em Produção (sem acesso à tela, não há para onde levar).
+  if (aviso.tipo === 'insumo_pendente_producao' || aviso.tipo === 'ordem_producao_atrasada') return podeVerProducao ? '/producao' : null;
   // Loja online: pedido pago vai à fila de contato; pagamento sem venda vai à devolução (quem pode) ou à fila de pedidos.
   if (TIPOS_LOJA.includes(aviso.tipo)) {
     return aviso.tipo === 'loja_pagamento_sem_venda' && podeVerPixADevolver ? '/pix-a-devolver' : '/pedidos-loja';

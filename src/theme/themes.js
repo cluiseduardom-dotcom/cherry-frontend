@@ -82,23 +82,23 @@ export const TEMAS = {
       loginDescricao: 'Sistema completo de gestão. Vendas, estoque, clientes e relatórios em um só lugar.',
     },
   },
-  // Tema de DEMONSTRAÇÃO (confeitaria de teste): verde-menta e rosa pastel. O logo é o donut (refeito em vetor a partir da imagem enviada, pois o original tinha só 40 px) com a escrita "Emilly Graziela" em itálico negrito, sobre faixas lilás-claro e amarelo-clarinho.
+  // Tema de DEMONSTRAÇÃO (confeitaria de teste): verde-menta e rosa pastel. O logo é o donut (refeito em vetor a partir da imagem enviada, pois o original tinha só 40 px) com a escrita "Emilly Candy Designer" em itálico negrito, sem fundo colorido.
   emilly: {
     id: 'emilly',
     marca: {
       nome: 'Emilly',
-      nomeCompleto: 'Emilly Graziela',
+      nomeCompleto: 'Emilly Candy Designer',
       subtitulo: null,
       logo: emillyLogo,
       simbolo: emillySimbolo,
-      logoAlt: 'Emilly Graziela',
+      logoAlt: 'Emilly Candy Designer',
       tagline: null,
       slogan: 'Cada doce, um detalhe feito à mão.',
-      sloganAutor: 'Emilly Graziela',
+      sloganAutor: 'Emilly Candy Designer',
       ornamento: null,
       mostrarIcone: false,
       paleta: ['#1B7F6F', '#C2447A', '#14655A', '#7A5C9E', '#3F8A7E', '#A93868', '#2E6F66', '#8A6A8F', '#D05A8C'],
-      loginTitulo: 'Emilly Graziela',
+      loginTitulo: 'Emilly Candy Designer',
       loginDescricao: 'Sistema de gestão para a confeitaria: vendas, estoque, produção e receitas em um só lugar.',
     },
   },

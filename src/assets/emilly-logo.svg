@@ -1,18 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 110" role="img" aria-label="Emilly Graziela">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 110" role="img" aria-label="Emilly Candy Designer">
   <defs>
     <linearGradient id="massa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F29A86"/><stop offset="1" stop-color="#E0705F"/></linearGradient>
     <linearGradient id="glace" x1="0.1" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#B9705F"/><stop offset="0.55" stop-color="#9C5546"/><stop offset="1" stop-color="#874638"/></linearGradient>
   </defs>
-  <!-- faixas de destaque atrás da escrita: lilás claro e amarelo clarinho -->
-  <rect x="104" y="40" width="124" height="44" rx="14" fill="#E4D8F7"/>
-  <rect x="236" y="40" width="190" height="44" rx="14" fill="#FFF0A6"/>
-  <!-- escrita (negrito itálico com serifa), com larguras fixas para as faixas sempre casarem -->
-  <g font-family="Cambria,'Palatino Linotype',Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" font-size="40" fill="#3B2A57">
-    <text x="112" y="74" textLength="108" lengthAdjust="spacingAndGlyphs">Emilly</text>
-    <text x="244" y="74" textLength="174" lengthAdjust="spacingAndGlyphs">Graziela</text>
-  </g>
   <!-- donut -->
-  <g transform="translate(6 12) scale(0.86)">
+  <g transform="translate(4 6) scale(0.98)">
     <path fill-rule="evenodd" fill="url(#massa)" d="M50 16c24 0 43 15 43 36S74 88 50 88 7 73 7 52 26 16 50 16zm0 25c-9 0-16 5-16 11s7 11 16 11 16-5 16-11-7-11-16-11z"/>
     <path fill-rule="evenodd" fill="url(#glace)" d="M50 12c24 0 43 14 43 34S74 78 50 78 7 66 7 46 26 12 50 12zm0 23c-9 0-16 5-16 11s7 11 16 11 16-5 16-11-7-11-16-11z"/>
     <path d="M18 34c6-10 17-16 30-17" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="4" stroke-linecap="round" fill="none"/>
@@ -22,5 +14,10 @@
       <path d="M18 46l5 2" stroke="#2FA8F0"/><path d="M26 62l5-3" stroke="#F06AE0"/><path d="M50 69l2-5" stroke="#2FA8F0"/>
       <path d="M73 58l4 3" stroke="#F06AE0"/><path d="M66 70l-1-5" stroke="#2FA8F0"/><path d="M48 24l3 4" stroke="#F06AE0"/>
     </g>
+  </g>
+  <!-- escrita: negrito itálico com serifa, sem fundo; larguras fixas para não variar com a fonte do aparelho -->
+  <g font-family="Cambria,'Palatino Linotype',Georgia,'Times New Roman',serif" font-style="italic" font-weight="700" fill="#3B2A57">
+    <text x="112" y="58" font-size="50" textLength="150" lengthAdjust="spacingAndGlyphs">Emilly</text>
+    <text x="114" y="94" font-size="31" textLength="270" lengthAdjust="spacingAndGlyphs" fill="#14655A">Candy Designer</text>
   </g>
 </svg>

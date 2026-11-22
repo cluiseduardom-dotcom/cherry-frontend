@@ -173,7 +173,7 @@ describe('tema Emilly (demonstração)', () => {
   });
 
   it('a marca tem nome, logo, símbolo e paleta de avatares', () => {
-    expect(TEMAS.emilly.marca.nomeCompleto).toBe('Emilly Graziela');
+    expect(TEMAS.emilly.marca.nomeCompleto).toBe('Emilly Candy Designer');
     expect(TEMAS.emilly.marca.logo).toBeTruthy();
     expect(TEMAS.emilly.marca.simbolo).toBeTruthy();
     expect(TEMAS.emilly.marca.paleta.every(c => /^#[0-9A-F]{6}$/i.test(c))).toBe(true);

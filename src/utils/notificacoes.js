@@ -56,6 +56,8 @@ const ROTULO_TIPO = {
   perto_de_acabar: 'Perto de acabar',
   parado: 'Parado',
   alto_giro: 'Alto giro',
+  insumo_pendente: 'Insumo faltou em venda',
+  insumo_pendente_producao: 'Insumo pendente na produção',
   transferencia_pendente: 'Transferência sem aceite',
   maleta_sem_conferencia: 'Maleta sem conferência',
   maleta_sem_venda: 'Maleta sem vender',
@@ -83,8 +85,10 @@ const TIPOS_LOJA = ['loja_pedido_pago', 'loja_pagamento_sem_venda', 'loja_pagame
 // Aviso sem tela de destino (a pendência se resolve falando com a GiroNex): devolve null e a lista não mostra "Ver".
 const TIPOS_SEM_DESTINO = ['cobranca_plataforma'];
 
-export function destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver = false) {
+export function destinoDoAviso(aviso, podeVerEstoque, podeVerPixADevolver = false, podeVerProducao = false) {
   if (TIPOS_SEM_DESTINO.includes(aviso.tipo)) return null;
+  // Insumo pendente na produção: a regularização é na ordem, em Produção (sem acesso à tela, não há para onde levar).
+  if (aviso.tipo === 'insumo_pendente_producao') return podeVerProducao ? '/producao' : null;
   // Loja online: pedido pago vai à fila de contato; pagamento sem venda vai à devolução (quem pode) ou à fila de pedidos.
   if (TIPOS_LOJA.includes(aviso.tipo)) {
     return aviso.tipo === 'loja_pagamento_sem_venda' && podeVerPixADevolver ? '/pix-a-devolver' : '/pedidos-loja';

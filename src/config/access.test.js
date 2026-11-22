@@ -526,3 +526,16 @@ describe('rotas de Pedido de compra (compras avançado)', () => {
     expect(rotaForaDoPlano('/compras/recebimentos', { funcionalidades: [] })).toBe(false);
   });
 });
+
+describe('rotas de Cotações (compras avançado)', () => {
+  it('admin e estoquista acessam; vendedor não; dependem da funcionalidade compras_avancado', () => {
+    for (const rota of ['/compras/cotacoes', '/compras/cotacoes/:id']) {
+      expect(canAccessRoute(rota, 'admin')).toBe(true);
+      expect(canAccessRoute(rota, 'estoquista')).toBe(true);
+      expect(canAccessRoute(rota, 'vendedor')).toBe(false);
+      expect(FUNCIONALIDADE_POR_ROTA[rota]).toBe('compras_avancado');
+      expect(rotaForaDoPlano(rota, { funcionalidades: [] })).toBe(true);
+      expect(rotaForaDoPlano(rota, { funcionalidades: ['compras_avancado'] })).toBe(false);
+    }
+  });
+});

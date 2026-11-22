@@ -182,6 +182,75 @@ export const TUTORIAIS = [
     ],
   },
   {
+    id: 'primeiro-doce',
+    titulo: 'Seu primeiro doce: do ingrediente ao caixa',
+    resumo: 'O caminho completo da confeiteira: comprar os ingredientes, montar a receita, produzir, precificar e vender.',
+    minutos: 6,
+    rotaPrincipal: '/producao',
+    passos: [
+      {
+        titulo: '1. Cadastre os ingredientes (insumos)',
+        texto:
+          'Em Estoque > Produtos, use "Novo Insumo" para cada ingrediente (farinha, açúcar, leite condensado, ovos...). ' +
+          'O que é pesado ou medido fica em Grama (g) ou Mililitro (ml); o que se conta (ovos) fica em unidade. ' +
+          'Digite o custo por kg ou por litro: o sistema guarda por grama ou ml (R$ 19,00 o kg de leite condensado vira R$ 0,019 o grama).',
+        rota: '/produtos',
+        rotuloRota: 'Abrir produtos',
+      },
+      {
+        titulo: '2. Dê entrada nos ingredientes comprando',
+        texto:
+          'Em Compras, use "Nova compra" > compra direta: escolha o fornecedor, os ingredientes, a quantidade (em gramas ou ml) e quanto pagou. ' +
+          'O estoque dos ingredientes sobe e a conta a pagar é criada. Se comprou e ainda não lançou, não tem problema: veja o passo 5.',
+        rota: '/compras',
+        rotuloRota: 'Abrir compras',
+      },
+      {
+        titulo: '3. Cadastre o doce que você vende',
+        texto:
+          'Em Produtos, use "Novo Produto" para o doce (brigadeiro, bolo de pote, torta). Dê nome e um custo inicial (a receita vai ajustar isso depois). ' +
+          'Na categorização escolha o tipo e o tamanho: o código do produto (SKU) nasce sozinho, como DOC-UNI-001.',
+        rota: '/produtos',
+        rotuloRota: 'Abrir produtos',
+      },
+      {
+        titulo: '4. Monte a receita (ficha técnica)',
+        texto:
+          'Em Produção, em Fichas técnicas, escolha o doce e use "Abrir ficha técnica". Diga quantas unidades a receita rende (40 brigadeiros) ' +
+          'e quanto de cada ingrediente ela leva, em g/kg ou ml/L. A tela mostra o custo da receita e o custo por unidade: ' +
+          'é com esse número que você define o preço.',
+        rota: '/producao',
+        rotuloRota: 'Abrir produção',
+        dica: 'A quantidade é POR RECEITA (não por unidade): 790 g de leite condensado para 40 brigadeiros.',
+      },
+      {
+        titulo: '5. Produza',
+        texto:
+          'Em Produção, use "Nova ordem": escolha o doce e a quantidade. A tela mostra o que cada ingrediente precisa e o que falta. ' +
+          'Faltou ingrediente no sistema? Pode produzir mesmo assim (ele pode estar na bancada e a compra ainda não ter sido lançada): a baixa fica pendente e aparece em Avisos. ' +
+          'Abra a ordem, use "Iniciar" e, ao terminar, "Concluir…" com a quantidade boa e a perdida. O doce entra no estoque.',
+        rota: '/producao',
+        rotuloRota: 'Abrir produção',
+      },
+      {
+        titulo: '6. Defina o preço',
+        texto:
+          'Em Produtos, no doce, abra a "Precificação por canal": informe o preço de venda (ou o markup sobre o custo) do canal da loja. ' +
+          'A tela mostra a margem, e o sistema não deixa o preço ficar abaixo do custo.',
+        rota: '/produtos',
+        rotuloRota: 'Abrir produtos',
+      },
+      {
+        titulo: '7. Venda no caixa',
+        texto:
+          'Em Venda, toque no doce, escolha o pagamento e finalize. Para o que se vende por peso (granola, doces a quilo), cadastre o produto em gramas com "Vender por kg" e digite o peso no caixa.',
+        rota: '/venda',
+        rotuloRota: 'Abrir venda',
+        dica: 'Faltou ingrediente depois? Dê a entrada na compra e use "Regularizar insumos" na ordem em Produção: o aviso some.',
+      },
+    ],
+  },
+  {
     id: 'receita-insumos',
     titulo: 'Como cadastrar insumos e a receita (ficha técnica) de um produto',
     resumo: 'Insumos em gramas ou mililitros, receita com rendimento e custo calculado sozinho.',

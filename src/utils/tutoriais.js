@@ -6,6 +6,16 @@ export function buscarTutorial(id, catalogo = TUTORIAIS) {
   return catalogo.find(t => t.id === id) ?? null;
 }
 
+// Tutorial de módulo (PCP, grade, fiscal...) só aparece para quem pode abrir a tela principal dele: o papel e a funcionalidade do plano
+// valem. Sem `rotaPrincipal`, é geral e todos veem.
+export function tutorialVisivel(tutorial, user) {
+  return Boolean(tutorial) && (!tutorial.rotaPrincipal || canAccessRoute(tutorial.rotaPrincipal, user));
+}
+
+export function tutoriaisParaUsuario(user, catalogo = TUTORIAIS) {
+  return catalogo.filter(t => tutorialVisivel(t, user));
+}
+
 // Remove `rota` dos passos que o usuário não pode abrir (o botão só aparece quando há acesso).
 export function passosParaUsuario(tutorial, user) {
   if (!tutorial) return [];

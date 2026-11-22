@@ -11,6 +11,8 @@ import cherrySimbolo from '../assets/cherry-simbolo.png';
 import cherryOrnamento from '../assets/cherry-ornamento.png';
 import valvazoriLogo from '../assets/valvazori-logo.png';
 import valvazoriSimbolo from '../assets/valvazori-simbolo.png';
+import emillyLogo from '../assets/emilly-logo.svg';
+import emillySimbolo from '../assets/emilly-simbolo.svg';
 
 export const TEMA_PADRAO = 'vertumno';
 
@@ -80,6 +82,26 @@ export const TEMAS = {
       loginDescricao: 'Sistema completo de gestão. Vendas, estoque, clientes e relatórios em um só lugar.',
     },
   },
+  // Tema de DEMONSTRAÇÃO (confeitaria de teste): verde-menta e rosa pastel. Logo e símbolo são vetores simples feitos para o teste.
+  emilly: {
+    id: 'emilly',
+    marca: {
+      nome: 'Emilly',
+      nomeCompleto: 'Emilly Candy Designer',
+      subtitulo: 'CANDY DESIGNER',
+      logo: emillyLogo,
+      simbolo: emillySimbolo,
+      logoAlt: 'Emilly Candy Designer',
+      tagline: null,
+      slogan: 'Cada doce, um detalhe feito à mão.',
+      sloganAutor: 'Emilly Candy Designer',
+      ornamento: null,
+      mostrarIcone: false,
+      paleta: ['#1B7F6F', '#C2447A', '#14655A', '#7A5C9E', '#3F8A7E', '#A93868', '#2E6F66', '#8A6A8F', '#D05A8C'],
+      loginTitulo: 'Emilly Candy Designer',
+      loginDescricao: 'Sistema de gestão para a confeitaria: vendas, estoque, produção e receitas em um só lugar.',
+    },
+  },
 };
 
 export const CHAVE_TEMA_DEV = 'vertumno.dev.tema';
@@ -90,7 +112,7 @@ export function resolverTema(chave) {
 }
 
 // Pré-visualização explícita, só em desenvolvimento:
-//   ?tema=cherry | vertumno | valvazori   escolhe o tema (e guarda na sessão)
+//   ?tema=cherry | vertumno | valvazori | emilly   escolhe o tema (e guarda na sessão)
 //   ?tema=padrao                    limpa a escolha
 // Em produção (isDev falso) isto é ignorado por completo.
 export function lerTemaDev({ search = '', storage = null, isDev = false } = {}) {

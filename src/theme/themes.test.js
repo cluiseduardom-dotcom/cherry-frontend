@@ -29,6 +29,7 @@ function tokensDoBloco(seletor) {
 const padrao = tokensDoBloco(':root,\\s*html\\[data-theme="vertumno"\\]');
 const cherry = tokensDoBloco('html\\[data-theme="cherry"\\]');
 const valvazori = tokensDoBloco('html\\[data-theme="valvazori"\\]');
+const emilly = tokensDoBloco('html\\[data-theme="emilly"\\]');
 
 const HEX_CHERRY = ['#A70636', '#91052F', '#D33A63', '#F8DCE4', '#FCF2F4', '#5D031E', '#760426'];
 const HEX_NAVY = ['#0B2545', '#091D38', '#1F5FBF', '#E8F0FB', '#13315C', '#F4F6F9'];
@@ -119,6 +120,55 @@ describe('tokens dos temas', () => {
   });
 });
 
+describe('tema Emilly (demonstração)', () => {
+  const luminancia = (hex) => {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contraste = (a, b) => {
+    const [x, y] = [luminancia(a), luminancia(b)].sort((m, n) => n - m);
+    return (x + 0.05) / (y + 0.05);
+  };
+
+  it('define exatamente o mesmo conjunto de tokens dos demais', () => {
+    expect(Object.keys(emilly).sort()).toEqual(Object.keys(padrao).sort());
+  });
+
+  it('verde-menta e rosa pastel, menu claro, sem cores dos outros temas', () => {
+    expect(emilly['--color-primary']).toBe('#1B7F6F');
+    expect(emilly['--color-secondary']).toBe('#C2447A');
+    expect(emilly['--color-bg']).toBe('#F3FBF9');
+    const valores = Object.values(emilly).join(' ');
+    for (const hex of [...HEX_CHERRY, ...HEX_NAVY, '#102961']) expect(valores).not.toContain(hex);
+  });
+
+  it('acessibilidade: texto de botão e de corpo ≥ 4,5:1 e borda de campo ≥ 3:1', () => {
+    expect(contraste('#FFFFFF', emilly['--color-primary'])).toBeGreaterThanOrEqual(4.5);
+    expect(contraste('#FFFFFF', emilly['--color-secondary'])).toBeGreaterThanOrEqual(4.5);
+    expect(contraste(emilly['--color-text-primary'], emilly['--color-bg'])).toBeGreaterThanOrEqual(4.5);
+    expect(contraste(emilly['--color-text-muted'], '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
+    expect(contraste(emilly['--color-border-input'], '#FFFFFF')).toBeGreaterThanOrEqual(3);
+    expect(contraste(emilly['--sidebar-text'], '#DFF5F0')).toBeGreaterThanOrEqual(4.5);
+    expect(contraste(emilly['--sidebar-text-muted'], '#DFF5F0')).toBeGreaterThanOrEqual(4.5);
+    expect(contraste('#FFFFFF', '#A93868')).toBeGreaterThanOrEqual(4.5); // item ativo do menu
+  });
+
+  it('o texto de autoria da faixa do Dashboard fica legível sobre o verde-escuro', () => {
+    const regra = readFileSync(join(SRC, 'theme', 'themes.css'), 'utf8').match(/html\[data-theme="emilly"\] \.dashboard-hero-quote figcaption \{ color: (#[0-9A-F]{6}); \}/i);
+
+    expect(regra).not.toBeNull();
+    expect(contraste(regra[1].toUpperCase(), emilly['--color-hero-from'])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('a marca tem nome, logo, símbolo e paleta de avatares', () => {
+    expect(TEMAS.emilly.marca.nomeCompleto).toBe('Emilly Candy Designer');
+    expect(TEMAS.emilly.marca.logo).toBeTruthy();
+    expect(TEMAS.emilly.marca.simbolo).toBeTruthy();
+    expect(TEMAS.emilly.marca.paleta.every(c => /^#[0-9A-F]{6}$/i.test(c))).toBe(true);
+    expect(resolverTema('emilly')).toBe('emilly');
+  });
+});
+
 describe('seleção de tema', () => {
   it('o padrão é o tema VERTUMNO', () => {
     expect(TEMA_PADRAO).toBe('vertumno');
@@ -137,7 +187,7 @@ describe('seleção de tema', () => {
     expect(resolverTema('cherry')).toBe('cherry');
     expect(resolverTema('vertumno')).toBe('vertumno');
     expect(resolverTema('valvazori')).toBe('valvazori');
-    expect(Object.keys(TEMAS).sort()).toEqual(['cherry', 'valvazori', 'vertumno']);
+    expect(Object.keys(TEMAS).sort()).toEqual(['cherry', 'emilly', 'valvazori', 'vertumno']);
   });
 
   it('aplicarTema grava data-theme e usa o padrão quando não há tema', () => {

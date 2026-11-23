@@ -3,6 +3,7 @@ import {
   acoesDaOrdem,
   formatarPrazo,
   montarConclusao,
+  montarConclusaoPorPeso,
   montarFichaTecnica,
   produtosProduziveis,
   resumirNecessidade,
@@ -136,5 +137,25 @@ describe('formatadores e filtros', () => {
     ];
     expect(produtosProduziveis(lista).map(p => p.id)).toEqual([1]);
     expect(produtosProduziveis(null)).toEqual([]);
+  });
+});
+
+describe('montarConclusaoPorPeso (produto vendido por peso)', () => {
+  const base = { quantidade_perdida: '', escolha_produzida: 'base', escolha_perdida: 'base' };
+
+  it('converte g e kg para a unidade-base inteira', () => {
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '600' }, 'G').conclusao).toEqual({ quantidade_produzida: 600, quantidade_perdida: 0 });
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '1,2', escolha_produzida: 'grande' }, 'G').conclusao).toEqual({ quantidade_produzida: 1200, quantidade_perdida: 0 });
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '700', quantidade_perdida: '50' }, 'G').conclusao).toEqual({ quantidade_produzida: 700, quantidade_perdida: 50 });
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '2', escolha_produzida: 'grande' }, 'ML').conclusao.quantidade_produzida).toBe(2000);
+  });
+
+  it('aceita rendimento zero se algo se perdeu; recusa tudo zerado, vazio e inválido', () => {
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '0', quantidade_perdida: '300' }, 'G').conclusao).toEqual({ quantidade_produzida: 0, quantidade_perdida: 300 });
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '0' }, 'G').erro).toMatch(/ao menos 1 g/);
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '' }, 'G').erro).toMatch(/Informe quanto rendeu/);
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: 'abc' }, 'G').erro).not.toBe('');
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '1,2345', escolha_produzida: 'grande' }, 'G').erro).toMatch(/3 casas/);
+    expect(montarConclusaoPorPeso({ ...base, quantidade_produzida: '10', quantidade_perdida: 'x' }, 'G').erro).not.toBe('');
   });
 });

@@ -144,3 +144,12 @@ describe('resumoPlanejado (tela da ordem)', () => {
     expect(resumoPlanejado({ quantidade_planejada: 5, rendimento: 0, insumos })).toBe('5 un.');
   });
 });
+
+describe('resumoPlanejado com unidade de peso', () => {
+  it('produto em g mostra o total em g/kg no lugar de "un."', () => {
+    const insumos = [{ nome: 'Farinha', unidade: 'G', quantidade_receita: 570 }];
+    expect(resumoPlanejado({ quantidade_planejada: 570, rendimento: 570, insumos }, 'G')).toBe('1 receita · 570 g (570 g)');
+    expect(resumoPlanejado({ quantidade_planejada: 1140, rendimento: 570, insumos }, 'G')).toBe('2 receitas · 1,14 kg (1,14 kg)');
+    expect(resumoPlanejado({ quantidade_planejada: 8, rendimento: 8, insumos }, 'UN')).toContain('(8 un.)');
+  });
+});

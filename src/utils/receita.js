@@ -3,7 +3,7 @@
 // acabado; a tela é que converte "1 receita" / "0,5 receita" em unidades (receitas × rendimento) e o backend
 // consome o insumo proporcionalmente (docs/PCP_ORDEM_PRODUCAO.md).
 
-import { lerDecimal, paraUnidadeBase } from './unidades';
+import { ehUnidadeBase, formatarQuantidade, lerDecimal, paraUnidadeBase } from './unidades';
 
 const arredonda = (n, casas = 4) => Math.round(n * 10 ** casas) / 10 ** casas;
 
@@ -127,13 +127,15 @@ export function pesoDaReceitaDaOrdem(ordem) {
 }
 
 // "1 receita · 450 g (1 un.)": o que a ordem planejou, em receitas e peso, com as unidades entre parênteses.
-export function resumoPlanejado(ordem) {
+// `unidade` = unidade de estoque do produto: g/ml mostram "(570 g)" em vez de "(570 un.)".
+export function resumoPlanejado(ordem, unidade) {
   const unidades = Number(ordem?.quantidade_planejada);
+  const total = ehUnidadeBase(unidade) ? formatarQuantidade(unidades, unidade) : `${unidades} un.`;
   const receitas = unidadesParaReceitas(unidades, ordem?.rendimento ?? 1);
-  if (receitas === null) return `${unidades} un.`;
+  if (receitas === null) return total;
   const pesoG = pesoDaReceitaDaOrdem(ordem) * receitas;
   const partes = [textoReceitas(receitas)];
   const peso = formatarPeso(arredonda(pesoG, 2));
   if (peso) partes.push(peso);
-  return `${partes.join(' · ')} (${unidades} un.)`;
+  return `${partes.join(' · ')} (${total})`;
 }

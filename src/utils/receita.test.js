@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularReceita, formatarPeso, formatarVolume, receitasParaUnidades, resumoMassa, textoReceitas, unidadesParaReceitas } from './receita';
+import { calcularReceita, formatarPeso, formatarVolume, pesoDoInsumoG, receitasParaUnidades, resumoMassa, resumoPlanejado, textoReceitas, unidadesParaReceitas } from './receita';
 
 const insumos = [
   { id: 1, unidade: 'G', custo: 0.02 },
@@ -97,5 +97,50 @@ describe('unidadesParaReceitas / textoReceitas', () => {
     expect(textoReceitas(0.5)).toBe('0,5 receitas');
     expect(textoReceitas(1)).toBe('1 receita');
     expect(textoReceitas(null)).toBe('');
+  });
+});
+
+describe('peso do ovo (60 g cada)', () => {
+  it('ovo em unidade pesa 60 g; outros insumos em unidade não pesam', () => {
+    expect(pesoDoInsumoG({ unidade: 'UN', nome: 'Ovos' }, 2)).toBe(120);
+    expect(pesoDoInsumoG({ unidade: 'UN', nome: 'Ovo caipira' }, 1)).toBe(60);
+    expect(pesoDoInsumoG({ unidade: 'UN', nome: 'Ovos de codorna' }, 10)).toBe(600);
+    expect(pesoDoInsumoG({ unidade: 'UN', nome: 'Embalagem' }, 5)).toBe(0);
+    expect(pesoDoInsumoG({ unidade: 'UN', nome: 'Chocolate ovo de páscoa' }, 1)).toBe(0);
+    expect(pesoDoInsumoG({ unidade: 'G', nome: 'Farinha' }, 200)).toBe(200);
+    expect(pesoDoInsumoG({ unidade: 'ML', nome: 'Leite' }, 200)).toBe(0);
+  });
+
+  it('a receita do Pão de mel pesa 200 + 2 ovos (120) + 50 + 200 = 570 g', () => {
+    const lista = [
+      { id: 1, nome: 'Farinha de trigo', unidade: 'G', custo: 0.005 },
+      { id: 2, nome: 'Ovos', unidade: 'UN', custo: 0.9 },
+      { id: 3, nome: 'Chocolate em pó 50%', unidade: 'G', custo: 0.045 },
+      { id: 4, nome: 'Manteiga', unidade: 'G', custo: 0.045 },
+    ];
+    const linhas = [['1', '200'], ['2', '2'], ['3', '50'], ['4', '200']].map(([id, q]) => ({ insumo_produto_id: id, quantidade: q, escolha: 'base' }));
+    const r = calcularReceita(linhas, lista, '1');
+    expect(r.pesoG).toBe(570);
+    expect(r.pesoPorUnidadeG).toBe(570);
+  });
+});
+
+describe('resumoPlanejado (tela da ordem)', () => {
+  const insumos = [
+    { nome: 'Farinha de trigo', unidade: 'G', quantidade_receita: 200 },
+    { nome: 'Ovos', unidade: 'UN', quantidade_receita: 2 },
+    { nome: 'Manteiga', unidade: 'G', quantidade_receita: 250 },
+  ];
+
+  it('mostra receitas, peso e unidades', () => {
+    expect(resumoPlanejado({ quantidade_planejada: 1, rendimento: 1, insumos })).toBe('1 receita · 570 g (1 un.)');
+    expect(resumoPlanejado({ quantidade_planejada: 8, rendimento: 8, insumos })).toBe('1 receita · 570 g (8 un.)');
+    expect(resumoPlanejado({ quantidade_planejada: 4, rendimento: 8, insumos })).toBe('0,5 receitas · 285 g (4 un.)');
+    expect(resumoPlanejado({ quantidade_planejada: 16, rendimento: 8, insumos: [{ nome: 'Farinha', unidade: 'G', quantidade_receita: 1000 }] })).toBe('2 receitas · 2 kg (16 un.)');
+  });
+
+  it('sem insumos em peso, mostra só as receitas; sem rendimento válido, só unidades', () => {
+    expect(resumoPlanejado({ quantidade_planejada: 3, rendimento: 1, insumos: [{ nome: 'Leite', unidade: 'ML', quantidade_receita: 500 }] })).toBe('3 receitas (3 un.)');
+    expect(resumoPlanejado({ quantidade_planejada: 5, rendimento: 0, insumos })).toBe('5 un.');
   });
 });

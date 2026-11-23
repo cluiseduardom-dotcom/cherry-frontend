@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import {
   cancelarOrdem, concluirOrdem, iniciarOrdem, regularizarInsumos,
 } from '../services/producao';
+import { buscarProduto } from '../services/produtos';
 import {
   STATUS_ORDEM, acoesDaOrdem, formatarPrazo, montarConclusao, resumirPendencias, rotuloStatus,
-  temCustoNaOrdem, validarConclusao, validarMotivo,
+  montarConclusaoPorPeso, temCustoNaOrdem, validarConclusao, validarMotivo,
 } from '../utils/producao';
-import { formatarQuantidade } from '../utils/unidades';
+import { ehUnidadeBase, formatarQuantidade, opcoesDeEntrada } from '../utils/unidades';
 import { resumoPlanejado } from '../utils/receita';
 import './ProductModal.css';
 
@@ -16,7 +17,20 @@ const moeda = valor => Number(valor ?? 0).toLocaleString('pt-BR', { style: 'curr
 // Detalhe da ordem + as ações do estado atual. O backend valida de novo (409 se o estado mudou).
 export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
   const [painel, setPainel] = useState(null); // 'concluir' | 'cancelar' | null
-  const [conclusao, setConclusao] = useState({ quantidade_produzida: String(ordem?.quantidade_planejada ?? ''), quantidade_perdida: '' });
+  const [conclusao, setConclusao] = useState({
+    quantidade_produzida: String(ordem?.quantidade_planejada ?? ''), quantidade_perdida: '', escolha_produzida: 'base', escolha_perdida: 'base',
+  });
+  // Unidade de estoque do produto (a ordem não a traz): g/ml pedem o rendimento em peso, o resto em unidades.
+  const [unidade, setUnidade] = useState(null);
+  const produtoId = ordem?.produto_id;
+  useEffect(() => {
+    if (!produtoId) return undefined;
+    let cancelado = false;
+    buscarProduto(produtoId).then(p => { if (!cancelado) setUnidade(p?.unidade ?? null); }).catch(() => { /* sem a unidade, segue em unidades */ });
+    return () => { cancelado = true; };
+  }, [produtoId]);
+  const porPeso = ehUnidadeBase(unidade);
+  const opcoes = porPeso ? opcoesDeEntrada(unidade) : null;
   const [motivo, setMotivo] = useState('');
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -44,6 +58,12 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
 
   function enviarConclusao(evento) {
     evento.preventDefault();
+    if (porPeso) {
+      const { conclusao: valores, erro: erroPeso } = montarConclusaoPorPeso(conclusao, unidade);
+      if (erroPeso) { setError(erroPeso); return; }
+      executar(() => concluirOrdem(ordem.id, valores));
+      return;
+    }
     const erro = validarConclusao(conclusao);
     if (erro) { setError(erro); return; }
     executar(() => concluirOrdem(ordem.id, montarConclusao(conclusao)));
@@ -75,12 +95,12 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
           <dl className="producao-dados">
             <div>
               <dt>Planejado</dt>
-              <dd>{resumoPlanejado(ordem)}</dd>
+              <dd>{resumoPlanejado(ordem, unidade)}</dd>
             </div>
             {ordem.status === 'concluida' && (
               <>
-                <div><dt>Produzido</dt><dd>{ordem.quantidade_produzida}</dd></div>
-                <div><dt>Perdido</dt><dd>{ordem.quantidade_perdida}{ordem.perda_pct !== null && ordem.perda_pct !== undefined ? ` (${String(ordem.perda_pct).replace('.', ',')}%)` : ''}</dd></div>
+                <div><dt>Produzido</dt><dd>{porPeso ? formatarQuantidade(ordem.quantidade_produzida, unidade) : ordem.quantidade_produzida}</dd></div>
+                <div><dt>Perdido</dt><dd>{porPeso ? formatarQuantidade(ordem.quantidade_perdida, unidade) : ordem.quantidade_perdida}{ordem.perda_pct !== null && ordem.perda_pct !== undefined ? ` (${String(ordem.perda_pct).replace('.', ',')}%)` : ''}</dd></div>
               </>
             )}
             <div><dt>Prazo</dt><dd>{formatarPrazo(ordem.prazo)}</dd></div>
@@ -108,7 +128,7 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
           {ordem.insumos?.length > 0 && ordem.status !== 'concluida' && ordem.status !== 'cancelada' && (
             <>
               <h3 className="section-title">
-                Insumos para {resumoPlanejado(ordem)}
+                Insumos para {resumoPlanejado(ordem, unidade)}
               </h3>
               <ul className="producao-insumos">
                 {ordem.insumos.map(i => {
@@ -128,14 +148,40 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
 
           {painel === 'concluir' && (
             <form onSubmit={enviarConclusao} noValidate className="producao-form-inline">
-              <div className="input-wrapper">
-                <label className="input-label" htmlFor="oc-produzida">Quantidade produzida *</label>
-                <input id="oc-produzida" type="number" min="0" step="1" className="input-field" value={conclusao.quantidade_produzida} onChange={e => setConclusao(c => ({ ...c, quantidade_produzida: e.target.value }))} />
-              </div>
-              <div className="input-wrapper">
-                <label className="input-label" htmlFor="oc-perdida">Quantidade perdida</label>
-                <input id="oc-perdida" type="number" min="0" step="1" className="input-field" value={conclusao.quantidade_perdida} onChange={e => setConclusao(c => ({ ...c, quantidade_perdida: e.target.value }))} placeholder="0" />
-              </div>
+              {porPeso ? (
+                <>
+                  <div className="input-wrapper">
+                    <label className="input-label" htmlFor="oc-produzida">Quanto rendeu? *</label>
+                    <div className="ficha-linha">
+                      <input id="oc-produzida" type="text" inputMode="decimal" className="input-field ficha-qtd" value={conclusao.quantidade_produzida} onChange={e => setConclusao(c => ({ ...c, quantidade_produzida: e.target.value }))} />
+                      <select className="input-field ficha-unidade" aria-label="Unidade do que rendeu" value={conclusao.escolha_produzida} onChange={e => setConclusao(c => ({ ...c, escolha_produzida: e.target.value }))}>
+                        {opcoes.map(o => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
+                      </select>
+                    </div>
+                    <span className="modal-field-hint">Pese o que saiu e informe em {opcoes[0].rotulo} ou {opcoes[1].rotulo}: 600 g, 700 g, 1,2 kg.</span>
+                  </div>
+                  <div className="input-wrapper">
+                    <label className="input-label" htmlFor="oc-perdida">Quanto se perdeu (opcional)</label>
+                    <div className="ficha-linha">
+                      <input id="oc-perdida" type="text" inputMode="decimal" className="input-field ficha-qtd" value={conclusao.quantidade_perdida} onChange={e => setConclusao(c => ({ ...c, quantidade_perdida: e.target.value }))} placeholder="0" />
+                      <select className="input-field ficha-unidade" aria-label="Unidade do que se perdeu" value={conclusao.escolha_perdida} onChange={e => setConclusao(c => ({ ...c, escolha_perdida: e.target.value }))}>
+                        {opcoes.map(o => <option key={o.valor} value={o.valor}>{o.rotulo}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="input-wrapper">
+                    <label className="input-label" htmlFor="oc-produzida">Quantidade produzida *</label>
+                    <input id="oc-produzida" type="number" min="0" step="1" className="input-field" value={conclusao.quantidade_produzida} onChange={e => setConclusao(c => ({ ...c, quantidade_produzida: e.target.value }))} />
+                  </div>
+                  <div className="input-wrapper">
+                    <label className="input-label" htmlFor="oc-perdida">Quantidade perdida</label>
+                    <input id="oc-perdida" type="number" min="0" step="1" className="input-field" value={conclusao.quantidade_perdida} onChange={e => setConclusao(c => ({ ...c, quantidade_perdida: e.target.value }))} placeholder="0" />
+                  </div>
+                </>
+              )}
               <p className="text-sm text-secondary">Os insumos são baixados pelo total feito (produzido + perdido). Só o produzido entra no estoque do produto.</p>
               <div className="producao-form-botoes">
                 <button type="button" className="btn btn-secondary" onClick={() => setPainel(null)} disabled={working}>Voltar</button>

@@ -1,5 +1,7 @@
 // Regras puras da tela de Produção (PCP). Sem DOM, testável.
 
+import { lerDecimal, paraUnidadeBase } from './unidades';
+
 export const STATUS_ORDEM = {
   planejada: { rotulo: 'Planejada', badge: 'badge-info' },
   em_producao: { rotulo: 'Em produção', badge: 'badge-warning' },
@@ -85,6 +87,24 @@ export function validarFichaTecnica(itens) {
 
 export function montarFichaTecnica(itens) {
   return itens.map(i => ({ insumo_produto_id: Number(i.insumo_produto_id), quantidade_necessaria: Number(i.quantidade) }));
+}
+
+// Conclusão de produto vendido por peso (g/ml): a pessoa informa quanto rendeu em g ou kg (ex.: 600 g, 1,2 kg) e o sistema
+// converte para a unidade-base inteira. Perda é opcional (vazia = 0). Devolve { conclusao, erro }.
+export function montarConclusaoPorPeso({ quantidade_produzida, quantidade_perdida, escolha_produzida, escolha_perdida }, unidade) {
+  const ler = (texto, escolha, rotulo, obrigatorio) => {
+    const vazio = texto === undefined || texto === null || String(texto).trim() === '';
+    if (vazio) return obrigatorio ? { erro: `Informe quanto ${rotulo}.` } : { valor: 0 };
+    if (lerDecimal(texto) === 0) return { valor: 0 };
+    const { valor, erro } = paraUnidadeBase(texto, unidade, escolha);
+    return erro ? { erro } : { valor };
+  };
+  const produzida = ler(quantidade_produzida, escolha_produzida, 'rendeu', true);
+  if (produzida.erro) return { conclusao: null, erro: produzida.erro };
+  const perdida = ler(quantidade_perdida, escolha_perdida, 'se perdeu', false);
+  if (perdida.erro) return { conclusao: null, erro: perdida.erro };
+  if (produzida.valor + perdida.valor < 1) return { conclusao: null, erro: 'Informe quanto rendeu (ou quanto se perdeu): ao menos 1 g.' };
+  return { conclusao: { quantidade_produzida: produzida.valor, quantidade_perdida: perdida.valor }, erro: '' };
 }
 
 // Resumo da prévia de necessidade para a pessoa: faltar insumo NÃO impede produzir, só avisa.

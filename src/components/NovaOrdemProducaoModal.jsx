@@ -4,7 +4,7 @@ import { listarTodosProdutos } from '../services/produtos';
 import { criarOrdem, obterFichaTecnica, obterNecessidade } from '../services/producao';
 import { listarInsumos } from '../services/consumos';
 import { produtosProduziveis, resumirNecessidade, validarNovaOrdem } from '../utils/producao';
-import { formatarQuantidade } from '../utils/unidades';
+import { ehUnidadeBase, formatarQuantidade } from '../utils/unidades';
 import { calcularReceita, receitasParaUnidades, resumoMassa } from '../utils/receita';
 import './ProductModal.css';
 
@@ -72,6 +72,9 @@ export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbr
   const resumo = useMemo(() => resumirNecessidade(previaAtual?.dados), [previaAtual]);
   const produto = produtos.find(p => String(p.id) === String(form.produto_id));
 
+  // Produto vendido por peso (g/ml): rende "570 g", não "570 unidades".
+  const medida = (n) => (ehUnidadeBase(produto?.unidade) ? formatarQuantidade(n, produto.unidade) : `${n} ${n === 1 ? 'unidade' : 'unidades'}`);
+
   if (!open) return null;
 
   function mudar(campo, valor) {
@@ -134,9 +137,9 @@ export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbr
               <input id="op-qtd" type="text" inputMode="decimal" className="input-field ficha-qtd" value={form.receitas} onChange={e => mudar('receitas', e.target.value)} />
               {rendimentoAtual ? (
                 <span className="modal-field-hint">
-                  1 = uma receita inteira ({rendimentoAtual} {rendimentoAtual === 1 ? 'unidade' : 'unidades'}{massaAtual?.total ? `, ${massaAtual.total} de insumos` : ''}). Para meia receita, digite 0,5.
+                  1 = uma receita inteira (rende {medida(rendimentoAtual)}{massaAtual?.total ? `, ${massaAtual.total} de insumos` : ''}). Para meia receita, digite 0,5.
                   {conversao && !conversao.erro && (
-                    <> <strong>Vai produzir {conversao.unidades} {conversao.unidades === 1 ? 'unidade' : 'unidades'}.</strong></>
+                    <> <strong>Vai produzir {medida(conversao.unidades)}.</strong></>
                   )}
                 </span>
               ) : (

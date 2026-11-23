@@ -172,7 +172,7 @@ export default function FichaTecnicaModal({ open, produto, onClose, onSaved }) {
                       <p className="text-sm">
                         Peso da receita: <strong>{massa.total}</strong>
                         {massa.porUnidade && <> · cerca de <strong>{massa.porUnidade}</strong> por unidade</>}
-                        <span className="text-secondary"> (soma dos insumos em g/kg e ml/L)</span>
+                        <span className="text-secondary"> (soma dos insumos em g/kg; ovo conta 60 g cada)</span>
                       </p>
                     )}
                     {!receita.completa && receita.detalhes.some(d => !Number.isFinite(d.custoUnitario)) && (

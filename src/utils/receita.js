@@ -7,6 +7,21 @@ import { lerDecimal, paraUnidadeBase } from './unidades';
 
 const arredonda = (n, casas = 4) => Math.round(n * 10 ** casas) / 10 ** casas;
 
+// Peso de um insumo contado em unidade. Regra do PO: ovo pesa 60 g. Só ovo tem peso padrão por enquanto
+// (reconhecido pelo nome); os demais insumos em unidade não entram no peso.
+export const PESO_OVO_G = 60;
+const semAcento = texto => String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const ehOvo = nome => /^ovos?\b/.test(semAcento(nome));
+
+// Peso em gramas de `quantidadeBase` do insumo ({ unidade, nome }): gramas valem elas mesmas; ovo (UN) = 60 g cada; resto = 0.
+export function pesoDoInsumoG(insumo, quantidadeBase) {
+  const q = Number(quantidadeBase);
+  if (!insumo || !Number.isFinite(q)) return 0;
+  if (insumo.unidade === 'G') return q;
+  if (insumo.unidade === 'UN' && ehOvo(insumo.nome)) return q * PESO_OVO_G;
+  return 0;
+}
+
 // Linhas da ficha ({ insumo_produto_id, quantidade, escolha }), insumos ({ id, unidade, custo }) e rendimento (texto).
 // Devolve, por linha, a quantidade na unidade-base e o custo (quando o insumo tem custo e a quantidade é válida),
 // e os totais: custo da receita, custo por unidade, peso (g) e volume (ml) dos insumos.
@@ -25,7 +40,7 @@ export function calcularReceita(linhas, insumos, rendimento) {
       completa = false;
       return { quantidadeBase: NaN, custoUnitario, subtotal: NaN, unidade: insumo?.unidade };
     }
-    if (insumo.unidade === 'G') pesoG += valor;
+    pesoG += pesoDoInsumoG(insumo, valor);
     if (insumo.unidade === 'ML') volumeMl += valor;
     const subtotal = Number.isFinite(custoUnitario) ? arredonda(valor * custoUnitario) : NaN;
     if (Number.isFinite(subtotal)) custoReceita += subtotal;
@@ -103,4 +118,22 @@ export function textoReceitas(receitas) {
   if (receitas === null || receitas === undefined || !Number.isFinite(Number(receitas))) return '';
   const n = Number(receitas);
   return `${n.toLocaleString('pt-BR', { maximumFractionDigits: 4 })} ${n === 1 ? 'receita' : 'receitas'}`;
+}
+
+// Peso (g) de UMA receita inteira da ordem, a partir dos insumos da ficha congelada ({ unidade, nome, quantidade_receita }).
+// A ordem em R receitas pesa R × isto.
+export function pesoDaReceitaDaOrdem(ordem) {
+  return (ordem?.insumos ?? []).reduce((soma, i) => soma + pesoDoInsumoG(i, i.quantidade_receita), 0);
+}
+
+// "1 receita · 450 g (1 un.)": o que a ordem planejou, em receitas e peso, com as unidades entre parênteses.
+export function resumoPlanejado(ordem) {
+  const unidades = Number(ordem?.quantidade_planejada);
+  const receitas = unidadesParaReceitas(unidades, ordem?.rendimento ?? 1);
+  if (receitas === null) return `${unidades} un.`;
+  const pesoG = pesoDaReceitaDaOrdem(ordem) * receitas;
+  const partes = [textoReceitas(receitas)];
+  const peso = formatarPeso(arredonda(pesoG, 2));
+  if (peso) partes.push(peso);
+  return `${partes.join(' · ')} (${unidades} un.)`;
 }

@@ -216,9 +216,9 @@ export const TUTORIAIS = [
       {
         titulo: '4. Monte a receita (ficha técnica)',
         texto:
-          'Em Produção, em Fichas técnicas, escolha o doce e use "Abrir ficha técnica". Diga quantas unidades a receita rende (40 brigadeiros) ' +
-          'e quanto de cada ingrediente ela leva, em g/kg ou ml/L. A tela mostra o custo da receita e o custo por unidade: ' +
-          'é com esse número que você define o preço.',
+          'Em Produtos, no doce, use o botão da ficha técnica (frasco). Diga quantas unidades a receita rende (40 brigadeiros) ' +
+          'e quanto de cada ingrediente ela leva, em g/kg ou ml/L. A tela puxa o custo de cada ingrediente do cadastro e mostra o custo da receita, ' +
+          'o custo por unidade e o peso da receita: o custo do produto nasce daí, e é com esse número que você define o preço.',
         rota: '/producao',
         rotuloRota: 'Abrir produção',
         dica: 'A quantidade é POR RECEITA (não por unidade): 790 g de leite condensado para 40 brigadeiros.',
@@ -226,7 +226,7 @@ export const TUTORIAIS = [
       {
         titulo: '5. Produza',
         texto:
-          'Em Produção, use "Nova ordem": escolha o doce e a quantidade. A tela mostra o que cada ingrediente precisa e o que falta. ' +
+          'Em Produção, use "Nova ordem": escolha o doce e QUANTAS RECEITAS fazer (1 = uma receita inteira, 0,5 = meia). A tela mostra o que cada ingrediente precisa e o que falta. ' +
           'Faltou ingrediente no sistema? Pode produzir mesmo assim (ele pode estar na bancada e a compra ainda não ter sido lançada): a baixa fica pendente e aparece em Avisos. ' +
           'Abra a ordem, use "Iniciar" e, ao terminar, "Concluir…" com a quantidade boa e a perdida. O doce entra no estoque.',
         rota: '/producao',
@@ -275,7 +275,7 @@ export const TUTORIAIS = [
       {
         titulo: 'Abra a ficha técnica do produto',
         texto:
-          'Em Produção, na seção Fichas técnicas, escolha o produto (por exemplo, o bolo) e use "Abrir ficha técnica". ' +
+          'Em Produtos, no produto (por exemplo, o bolo), use o botão da ficha técnica (frasco). Também dá para abrir em Produção, em Fichas técnicas. ' +
           'A ficha é a receita: quais insumos entram e em que quantidade.',
         rota: '/producao',
         rotuloRota: 'Abrir produção',
@@ -284,7 +284,7 @@ export const TUTORIAIS = [
         titulo: 'Informe o rendimento e as quantidades',
         texto:
           'Preencha "rende quantas unidades": se a receita faz 12 brigadeiros, o rendimento é 12. Cada quantidade é POR RECEITA, em g/kg ou ml/L à sua escolha. ' +
-          'O sistema mostra o custo da receita e o custo sugerido por unidade, e a cada salvamento cria uma nova versão da ficha.',
+          'O sistema mostra o custo de cada insumo, o custo da receita, o custo por unidade e o peso da receita (o bolo de 8 fatias pesa quanto?), e a cada salvamento cria uma nova versão da ficha.',
         dica: 'Se o consumo por unidade não for exato, o sistema arredonda para cima (nunca baixa menos insumo do que o necessário).',
       },
     ],
@@ -299,7 +299,7 @@ export const TUTORIAIS = [
       {
         titulo: 'Crie uma ordem de produção',
         texto:
-          'Em Produção, use "Nova ordem", escolha o produto (ele precisa ter ficha técnica) e a quantidade a produzir. ' +
+          'Em Produção, use "Nova ordem", escolha o produto (ele precisa ter ficha técnica) e quantas receitas produzir: 1 é uma receita inteira, 0,5 é meia. Os insumos acompanham (meia receita gasta metade). ' +
           'A tela mostra o que cada insumo precisa, quanto há em estoque, o que falta e quantas unidades dá para produzir.',
         rota: '/producao',
         rotuloRota: 'Abrir produção',

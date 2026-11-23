@@ -1,19 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle2, X } from 'lucide-react';
 import { listarTodosProdutos } from '../services/produtos';
-import { criarOrdem, obterNecessidade } from '../services/producao';
+import { criarOrdem, obterFichaTecnica, obterNecessidade } from '../services/producao';
+import { listarInsumos } from '../services/consumos';
 import { produtosProduziveis, resumirNecessidade, validarNovaOrdem } from '../utils/producao';
 import { formatarQuantidade } from '../utils/unidades';
+import { calcularReceita, receitasParaUnidades, resumoMassa } from '../utils/receita';
 import './ProductModal.css';
 
-const FORM_VAZIO = { produto_id: '', quantidade_planejada: '1', prazo: '', observacao: '' };
+const FORM_VAZIO = { produto_id: '', receitas: '1', prazo: '', observacao: '' };
 
-// Nova ordem: escolhe o produto e a quantidade e vê, antes de criar, o que a produção consumiria.
+// Nova ordem: escolhe o produto e QUANTAS RECEITAS produzir (1 = uma receita inteira, 0,5 = meia receita). A ordem
+// vai ao backend em unidades (receitas × rendimento da ficha) e o consumo de insumo acompanha: meia receita gasta
+// meia receita de cada insumo. Antes de criar, mostra o que a produção consumiria.
 // Faltar insumo no sistema só AVISA: dá para produzir mesmo assim (a baixa fica pendente).
 export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbrirFicha }) {
   const [produtos, setProdutos] = useState([]);
   const [form, setForm] = useState(FORM_VAZIO);
   const [previa, setPrevia] = useState({ chave: '', dados: null, erro: '', semFicha: false });
+  // Rendimento e massa da receita do produto escolhido (vale só para o produto da chave).
+  const [receitaDoProduto, setReceitaDoProduto] = useState({ produtoId: '', rendimento: null, massa: null });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,7 +32,27 @@ export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbr
     return () => { cancelado = true; };
   }, [open]);
 
-  const quantidade = Number(form.quantidade_planejada);
+  // Ficha vigente do produto: dá o rendimento (unidades por receita) e a massa de uma receita.
+  useEffect(() => {
+    if (!open || !form.produto_id) return undefined;
+    let cancelado = false;
+    const produtoId = form.produto_id;
+    Promise.all([obterFichaTecnica(produtoId), listarInsumos().catch(() => [])])
+      .then(([ficha, insumos]) => {
+        if (cancelado) return;
+        const linhas = (ficha.itens ?? []).map(i => ({ insumo_produto_id: i.insumo_produto_id, quantidade: String(i.quantidade_necessaria), escolha: 'base' }));
+        const calculo = calcularReceita(linhas, Array.isArray(insumos) ? insumos : [], ficha.rendimento);
+        setReceitaDoProduto({ produtoId, rendimento: Number(ficha.rendimento ?? 1), massa: resumoMassa(calculo) });
+      })
+      .catch(() => { if (!cancelado) setReceitaDoProduto({ produtoId, rendimento: null, massa: null }); });
+    return () => { cancelado = true; };
+  }, [open, form.produto_id]);
+
+  const rendimentoAtual = receitaDoProduto.produtoId === String(form.produto_id) ? receitaDoProduto.rendimento : null;
+  const massaAtual = receitaDoProduto.produtoId === String(form.produto_id) ? receitaDoProduto.massa : null;
+  // Sem ficha (rendimento desconhecido) não há como converter: a prévia mostra o aviso de ficha pendente.
+  const conversao = rendimentoAtual ? receitasParaUnidades(form.receitas, rendimentoAtual) : null;
+  const quantidade = conversao && !conversao.erro ? conversao.unidades : NaN;
   const chavePrevia = form.produto_id && Number.isInteger(quantidade) && quantidade >= 1 ? `${form.produto_id}|${quantidade}` : '';
 
   // Previa do consumo (somente leitura). A resposta só vale se a chave ainda for a atual.
@@ -61,14 +87,17 @@ export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbr
 
   async function salvar(evento) {
     evento.preventDefault();
-    const erro = validarNovaOrdem(form);
+    if (!rendimentoAtual) { setError('Escolha um produto que já tenha ficha técnica (receita).'); return; }
+    const { unidades, erro: erroReceitas } = receitasParaUnidades(form.receitas, rendimentoAtual);
+    if (erroReceitas) { setError(erroReceitas); return; }
+    const erro = validarNovaOrdem({ produto_id: form.produto_id, quantidade_planejada: unidades, prazo: form.prazo });
     if (erro) { setError(erro); return; }
     setError('');
     setSaving(true);
     try {
       const ordem = await criarOrdem({
         produto_id: Number(form.produto_id),
-        quantidade_planejada: Number(form.quantidade_planejada),
+        quantidade_planejada: unidades,
         prazo: form.prazo,
         observacao: form.observacao.trim(),
       });
@@ -101,8 +130,19 @@ export default function NovaOrdemProducaoModal({ open, onClose, onCreated, onAbr
             </div>
 
             <div className="input-wrapper">
-              <label className="input-label" htmlFor="op-qtd">Quantidade a produzir *</label>
-              <input id="op-qtd" type="number" min="1" step="1" className="input-field" value={form.quantidade_planejada} onChange={e => mudar('quantidade_planejada', e.target.value)} />
+              <label className="input-label" htmlFor="op-qtd">Quantas receitas? *</label>
+              <input id="op-qtd" type="text" inputMode="decimal" className="input-field ficha-qtd" value={form.receitas} onChange={e => mudar('receitas', e.target.value)} />
+              {rendimentoAtual ? (
+                <span className="modal-field-hint">
+                  1 = uma receita inteira ({rendimentoAtual} {rendimentoAtual === 1 ? 'unidade' : 'unidades'}{massaAtual?.total ? `, ${massaAtual.total} de insumos` : ''}). Para meia receita, digite 0,5.
+                  {conversao && !conversao.erro && (
+                    <> <strong>Vai produzir {conversao.unidades} {conversao.unidades === 1 ? 'unidade' : 'unidades'}.</strong></>
+                  )}
+                </span>
+              ) : (
+                <span className="modal-field-hint">Escolha o produto para ver quanto uma receita rende.</span>
+              )}
+              {conversao?.erro && <span className="modal-field-hint producao-insumos--falta">{conversao.erro}</span>}
             </div>
 
             <div className="input-wrapper">

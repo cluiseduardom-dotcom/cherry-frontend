@@ -79,7 +79,7 @@ export default function Producao() {
 
       <div className="card card-padding producao-ficha-card">
         <h2 className="section-title"><FlaskConical size={16} aria-hidden="true" /> Fichas técnicas</h2>
-        <p className="text-sm text-secondary">A ficha técnica (receita) diz quanto de cada insumo é gasto e quantas unidades do produto ela rende. Sem ela, não há como criar a ordem.</p>
+        <p className="text-sm text-secondary">A ficha técnica (receita) diz quanto de cada insumo uma receita leva, quanto custa e quantas unidades ela rende. Na ordem você escolhe quantas receitas produzir (1, 0,5, 2…) e o consumo de insumos acompanha. Sem a ficha, não há como criar a ordem. Também dá para abri-la em Produtos.</p>
         <div className="rel-filtros">
           <div className="input-wrapper">
             <label className="input-label" htmlFor="pf-produto">Produto</label>
@@ -126,8 +126,8 @@ export default function Producao() {
               <span>
                 <span className="producao-item-titulo">#{o.id} · {o.produto_nome}</span>
                 <span className="producao-item-sub">
-                  {' '}Planejado: {o.quantidade_planejada}
-                  {o.status === 'concluida' ? ` · Produzido: ${o.quantidade_produzida}` : ''}
+                  {' '}Planejado: {o.quantidade_planejada} un.
+                  {o.status === 'concluida' ? ` · Produzido: ${o.quantidade_produzida} un.` : ''}
                   {o.prazo ? ` · Prazo: ${formatarPrazo(o.prazo)}` : ''}
                 </span>
               </span>

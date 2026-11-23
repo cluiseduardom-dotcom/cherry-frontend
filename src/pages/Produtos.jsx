@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Tag, DollarSign, Edit, Trash2, Layers, Boxes } from 'lucide-react';
+import { Search, Plus, Tag, DollarSign, Edit, Trash2, Layers, Boxes, FlaskConical } from 'lucide-react';
 import { listarTodosProdutos, excluirProduto } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
-import { ACTIONS, podeExecutarAcao } from '../config/access';
+import { ACTIONS, podeExecutarAcao, temFuncionalidade } from '../config/access';
 import ProductModal from '../components/ProductModal';
 import FichaVendaModal from '../components/FichaVendaModal';
+import FichaTecnicaModal from '../components/FichaTecnicaModal';
 import CategorizarProdutoModal from '../components/CategorizarProdutoModal';
 import AssistenteCadastroProduto from '../components/AssistenteCadastroProduto';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -39,6 +40,10 @@ export default function Produtos({ tipo = 'acabado' }) {
   const [modalMode, setModalMode] = useState('create');
   const [editingProduto, setEditingProduto] = useState(null);
   const [fichaProduto, setFichaProduto] = useState(null);
+  const [receitaProduto, setReceitaProduto] = useState(null);
+  const temReceita = temFuncionalidade(user, 'pcp');
+  const [versao, setVersao] = useState(0); // muda para recarregar a lista (ex.: o custo do produto veio da ficha)
+  const recarregar = () => setVersao(v => v + 1);
   const [categorizarModalOpen, setCategorizarModalOpen] = useState(false);
   const [categorizandoProduto, setCategorizandoProduto] = useState(null);
   // Produto recém-criado: abre o assistente com os passos que faltam (fotos, categoria, preço, estoque inicial).
@@ -65,7 +70,7 @@ export default function Produtos({ tipo = 'acabado' }) {
 
     load();
     return () => { cancelled = true; };
-  }, [tipo]);
+  }, [tipo, versao]);
 
   const filtered = produtos.filter(p => {
     const term = search.toLowerCase();
@@ -224,6 +229,19 @@ export default function Produtos({ tipo = 'acabado' }) {
                         <Layers size={14} />
                       </button>
                     )}
+                    {podeGerenciar && !ehInsumo && temReceita && (
+                      <button
+                        className="produto-action-btn"
+                        aria-label="Ficha técnica (receita)"
+                        title="Ficha técnica (receita): insumos, custo e rendimento"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReceitaProduto(p);
+                        }}
+                      >
+                        <FlaskConical size={14} />
+                      </button>
+                    )}
                     {podeGerenciar && !ehInsumo && (
                       <button
                         className="produto-action-btn"
@@ -278,6 +296,13 @@ export default function Produtos({ tipo = 'acabado' }) {
           )}
         </>
       )}
+
+      <FichaTecnicaModal
+        open={receitaProduto !== null}
+        produto={receitaProduto}
+        onClose={() => setReceitaProduto(null)}
+        onSaved={() => { setReceitaProduto(null); toast.success('Ficha técnica salva.'); recarregar(); }}
+      />
 
       <FichaVendaModal
         open={fichaProduto !== null}

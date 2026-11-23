@@ -8,6 +8,7 @@ import {
   temCustoNaOrdem, validarConclusao, validarMotivo,
 } from '../utils/producao';
 import { formatarQuantidade } from '../utils/unidades';
+import { textoReceitas, unidadesParaReceitas } from '../utils/receita';
 import './ProductModal.css';
 
 const moeda = valor => Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -72,7 +73,13 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
           </p>
 
           <dl className="producao-dados">
-            <div><dt>Planejado</dt><dd>{ordem.quantidade_planejada}</dd></div>
+            <div>
+              <dt>Planejado</dt>
+              <dd>
+                {ordem.quantidade_planejada} un.
+                {Number(ordem.rendimento) > 1 && ` (${textoReceitas(unidadesParaReceitas(ordem.quantidade_planejada, ordem.rendimento))})`}
+              </dd>
+            </div>
             {ordem.status === 'concluida' && (
               <>
                 <div><dt>Produzido</dt><dd>{ordem.quantidade_produzida}</dd></div>
@@ -103,7 +110,10 @@ export default function OrdemProducaoModal({ ordem, onClose, onChanged }) {
 
           {ordem.insumos?.length > 0 && ordem.status !== 'concluida' && ordem.status !== 'cancelada' && (
             <>
-              <h3 className="section-title">Insumos para {ordem.quantidade_planejada} un.</h3>
+              <h3 className="section-title">
+                Insumos para {ordem.quantidade_planejada} un.
+                {Number(ordem.rendimento) > 1 && ` (${textoReceitas(unidadesParaReceitas(ordem.quantidade_planejada, ordem.rendimento))})`}
+              </h3>
               <ul className="producao-insumos">
                 {ordem.insumos.map(i => {
                   const falta = i.disponivel < i.necessario_planejado;

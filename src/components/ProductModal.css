@@ -139,3 +139,8 @@
 .ficha-qtd { width: 90px; }
 
 .ficha-unidade { width: 72px; flex: 0 0 auto; }
+.modal-panel.ficha-modal { max-width: 700px; }
+.ficha-custo { width: 84px; flex: 0 0 auto; text-align: right; font-variant-numeric: tabular-nums; }
+.ficha-resumo { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-md, 8px); background: var(--brand-50); }
+.ficha-resumo p { margin: 2px 0; }
+.ficha-usar-custo { display: block; margin-top: 6px; }

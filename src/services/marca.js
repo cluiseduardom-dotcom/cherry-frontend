@@ -51,6 +51,13 @@ export function carregarMarcaLembrada(storage) {
   }
 }
 
+// Para onde ir ao sair: a tela de login da própria empresa (/c/<slug>, vem da sessão do usuário, não do
+// navegador) ou, sem endereço de loja, o login padrão VERTUMNO.
+export function rotaDeLogin(user) {
+  const slug = String(user?.empresa_slug ?? '').toLowerCase();
+  return slugValido(slug) ? `/c/${slug}` : '/login';
+}
+
 export function lembrarMarca({ tema, slug = null }, storage) {
   const s = storageLocal(storage);
   if (!s || !Object.prototype.hasOwnProperty.call(TEMAS, tema)) return;

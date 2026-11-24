@@ -50,6 +50,7 @@ import { rotuloDoUsuario } from '../config/papeis';
 import { EVENTO_ESTOQUE_ALTERADO, listarEstoqueBaixo } from '../services/estoque';
 import { montarMenu, grupoContemRota, lerGruposAbertos, salvarGruposAbertos } from '../utils/menuGrupos';
 import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
+import { rotaDeLogin } from '../services/marca';
 import Avatar from './Avatar';
 import './Sidebar.css';
 
@@ -177,8 +178,9 @@ export default function Sidebar() {
   const alertasEstoque = contarAlertasEstoque(estoqueAlertas);
 
   function handleLogout() {
+    const destino = rotaDeLogin(user);
     logout();
-    navigate('/login', { replace: true });
+    navigate(destino, { replace: true });
   }
 
   const menu = montarMenu(rotasDoMenu, path => canAccessRoute(path, user));

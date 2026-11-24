@@ -41,6 +41,7 @@ import { useAuth } from '../context/AuthContext';
 import { canAccessRoute } from '../config/access';
 import { rotuloDoUsuario } from '../config/papeis';
 import { vocabularioDoUsuario } from '../utils/vocabularioEstoque';
+import { rotaDeLogin } from '../services/marca';
 import './Mais.css';
 
 const ITEMS = [
@@ -90,8 +91,9 @@ export default function Mais() {
   });
 
   function handleLogout() {
+    const destino = rotaDeLogin(user);
     logout();
-    navigate('/login', { replace: true });
+    navigate(destino, { replace: true });
   }
 
   return (

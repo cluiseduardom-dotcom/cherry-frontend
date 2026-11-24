@@ -60,3 +60,21 @@ describe('marca ativa, paleta de produto e PDF', () => {
     expect(ler('components', 'Layout.jsx')).not.toMatch(/\?\?\s*'Cherry'/);
   });
 });
+
+describe('login: marca lembrada não pinta o /login', () => {
+  it('o tema inicial do ThemeProvider não lê a marca lembrada no navegador', () => {
+    const fonte = ler('theme', 'ThemeProvider.jsx');
+    const inicio = fonte.indexOf('function temaInicial');
+    const fim = fonte.indexOf('export function ThemeProvider');
+    expect(inicio).toBeGreaterThan(-1);
+    expect(fonte.slice(inicio, fim)).not.toMatch(/carregarMarcaLembrada/);
+  });
+
+  it('sair leva ao /c/<slug> da empresa, não ao /login fixo', () => {
+    for (const arquivo of [['components', 'Sidebar.jsx'], ['pages', 'Mais.jsx']]) {
+      const fonte = ler(...arquivo);
+      expect(fonte, arquivo.join('/')).toContain('rotaDeLogin(user)');
+      expect(fonte, arquivo.join('/')).not.toContain("navigate('/login'");
+    }
+  });
+});

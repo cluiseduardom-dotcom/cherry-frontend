@@ -11,7 +11,7 @@ vi.mock('./api', () => {
 });
 
 import { apiFetch, ApiError } from './api';
-import { buscarMarcaPublica, carregarMarcaLembrada, esquecerMarca, lembrarMarca, slugValido } from './marca';
+import { buscarMarcaPublica, carregarMarcaLembrada, esquecerMarca, lembrarMarca, rotaDeLogin, slugValido } from './marca';
 
 function storageFalso(inicial = {}) {
   const dados = { ...inicial };
@@ -111,5 +111,19 @@ describe('marca lembrada no navegador', () => {
     expect(carregarMarcaLembrada(quebrado)).toBeNull();
     expect(() => lembrarMarca({ tema: 'cherry' }, quebrado)).not.toThrow();
     expect(() => esquecerMarca(quebrado)).not.toThrow();
+  });
+});
+
+describe('rotaDeLogin (para onde ir ao sair)', () => {
+  it('usa o endereço da loja da sessão do usuário', () => {
+    expect(rotaDeLogin({ empresa_slug: 'valvazori' })).toBe('/c/valvazori');
+    expect(rotaDeLogin({ empresa_slug: 'Cherry' })).toBe('/c/cherry');
+  });
+
+  it('sem slug ou com slug inválido, volta ao login padrão VERTUMNO', () => {
+    expect(rotaDeLogin({ empresa_slug: null })).toBe('/login');
+    expect(rotaDeLogin({})).toBe('/login');
+    expect(rotaDeLogin(null)).toBe('/login');
+    expect(rotaDeLogin({ empresa_slug: '../x' })).toBe('/login');
   });
 });

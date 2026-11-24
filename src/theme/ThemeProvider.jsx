@@ -38,10 +38,10 @@ function temaInicial() {
     isDev: podePrevisualizar,
   });
 
-  // Sem prévia: a última marca usada neste navegador (ex.: equipe da Cherry abrindo /login direto);
-  // sem nada lembrado, o padrão VERTUMNO.
-  const lembrada = carregarMarcaLembrada();
-  return resolverTema(temaDev || lembrada?.tema || TEMA_INICIAL);
+  // Sem prévia: o padrão VERTUMNO. A marca lembrada no navegador NÃO pinta a tela de login: num aparelho
+  // compartilhado ela mostraria a marca de outra empresa. A marca do cliente vem do endereço /c/<slug>
+  // (antes do login) e da empresa do usuário (depois do login).
+  return resolverTema(temaDev || TEMA_INICIAL);
 }
 
 export function ThemeProvider({ children }) {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Eye, Plus, Scale } from 'lucide-react';
 import { listarCotacoes } from '../services/cotacoes';
-import { listarFornecedores } from '../services/fornecedores';
+import { listarTodosFornecedores } from '../services/fornecedores';
 import { listarTodosProdutos } from '../services/produtos';
 import CotacaoModal from '../components/compras/CotacaoModal';
 import { FILTROS_STATUS_COTACAO, rotuloStatusCotacao, badgeStatusCotacao } from '../utils/cotacao';
@@ -28,7 +28,7 @@ export default function Cotacoes() {
     try {
       const [lista, forn, prod] = await Promise.all([
         listarCotacoes({ status: statusFiltro || undefined, pageSize: 100 }),
-        listarFornecedores({ pageSize: 100 }),
+        listarTodosFornecedores(),
         listarTodosProdutos({ canal: 'loja_fisica' }),
       ]);
       setCotacoes(lista.items || []);

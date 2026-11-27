@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ClipboardList, Eye, Plus } from 'lucide-react';
 import { listarPedidosCompra } from '../services/pedidosCompra';
-import { listarFornecedores } from '../services/fornecedores';
+import { listarTodosFornecedores } from '../services/fornecedores';
 import { listarTodosProdutos } from '../services/produtos';
 import PedidoCompraModal from '../components/compras/PedidoCompraModal';
 import { FILTROS_STATUS, rotuloStatusPedido, badgeStatusPedido } from '../utils/pedidoCompra';
@@ -28,7 +28,7 @@ export default function PedidosCompra() {
     try {
       const [lista, forn, prod] = await Promise.all([
         listarPedidosCompra({ status: statusFiltro || undefined, pageSize: 100 }),
-        listarFornecedores({ pageSize: 100 }),
+        listarTodosFornecedores(),
         listarTodosProdutos({ canal: 'loja_fisica' }),
       ]);
       setPedidos(lista.items || []);

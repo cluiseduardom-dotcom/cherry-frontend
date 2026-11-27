@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, PackageSearch } from 'lucide-react';
 import { listarRecebimentos } from '../services/recebimentos';
-import { listarFornecedores } from '../services/fornecedores';
+import { listarTodosFornecedores } from '../services/fornecedores';
 import { badgeClassePorStatus } from './RecebimentoDetalhe';
 import { formatarData } from '../utils/formatarData';
 
@@ -22,7 +22,7 @@ export default function Recebimentos() {
     try {
       const [recebimentosData, fornecedoresData] = await Promise.all([
         listarRecebimentos({ status: statusFiltro || undefined, limit: 100 }),
-        listarFornecedores({ pageSize: 100 }),
+        listarTodosFornecedores(),
       ]);
       setRecebimentos(Array.isArray(recebimentosData) ? recebimentosData : []);
       setFornecedores(fornecedoresData.items || []);

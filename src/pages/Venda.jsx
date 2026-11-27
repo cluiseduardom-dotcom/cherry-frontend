@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { Link, useBlocker } from 'react-router-dom';
 import {
   Search, SlidersHorizontal, Barcode, ShoppingCart,
   Trash2, Plus, Minus, X, CheckCircle, Layers, ChevronDown, ChevronUp, ChevronRight
@@ -16,6 +16,7 @@ import { criarVenda } from '../services/vendas';
 import { listarClientes } from '../services/clientes';
 import { listarLocais, saldosDoLocal } from '../services/locaisEstoque';
 import { useAuth } from '../context/AuthContext';
+import { useCaixaPdv } from '../hooks/useCaixaPdv';
 import { ApiError } from '../services/api';
 import { formatarMoeda } from '../utils/mascaras';
 import {
@@ -174,6 +175,7 @@ function rowQtyCount(row) {
 
 export default function Venda() {
   const { user } = useAuth();
+  const caixaPdv = useCaixaPdv(user);
   const [produtos, setProdutos] = useState([]);
   // Local de saída: Central ou a própria Maleta. `saldos` = estoque do local escolhido
   // ({ produto_id: saldo }); null = sem local (usa o estoque do catálogo).
@@ -550,7 +552,7 @@ export default function Venda() {
 
   /* --- Finalize --- */
   async function finalizeSale() {
-    if (cart.length === 0 || saving) return;
+    if (cart.length === 0 || saving || caixaPdv.bloqueia) return;
 
     setSaving(true);
     setSaveError('');
@@ -660,6 +662,11 @@ export default function Venda() {
         <div>
           <h1 className="page-title">Nova Venda</h1>
           <p className="page-subtitle">Selecione os produtos e finalize o atendimento</p>
+          {caixaPdv.visivel && (
+            <p className={`text-sm venda-caixa${caixaPdv.bloqueia ? ' venda-caixa--fechado' : ''}`} role={caixaPdv.bloqueia ? 'alert' : 'status'}>
+              {caixaPdv.mensagem}{caixaPdv.bloqueia && <> <Link to="/caixa">Abrir o caixa</Link></>}
+            </p>
+          )}
         </div>
         {opcoesLocal.length > 1 && (
           <div className="venda-local">
@@ -1122,7 +1129,7 @@ export default function Venda() {
                 <button
                   className="btn btn-primary btn-full btn-lg cart-finalize-btn"
                   onClick={finalizeSale}
-                  disabled={cart.length === 0 || saving || !resumoPagamento.podeFinalizar}
+                  disabled={cart.length === 0 || saving || !resumoPagamento.podeFinalizar || caixaPdv.bloqueia}
                   id="btn-finalizar-venda"
                 >
                   <CheckCircle size={18} />

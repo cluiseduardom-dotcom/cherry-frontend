@@ -539,3 +539,19 @@ describe('rotas de Cotações (compras avançado)', () => {
     }
   });
 });
+
+describe('Caixa do PDV (/caixa)', () => {
+  it('depende da funcionalidade caixa: sem ela a rota some, nem o admin ultrapassa o plano', () => {
+    expect(FUNCIONALIDADE_POR_ROTA['/caixa']).toBe('caixa');
+    expect(canAccessRoute('/caixa', { role: 'admin', funcionalidades: ['fiado'] })).toBe(false);
+    expect(canAccessRoute('/caixa', { role: 'admin', funcionalidades: ['caixa'] })).toBe(true);
+  });
+
+  it('por capacidade: operar_caixa ou gerir_caixas entra; sem elas não', () => {
+    expect(REQUIRED_CAPABILITIES_BY_PATH['/caixa']).toEqual(['operar_caixa', 'gerir_caixas']);
+    expect(canAccessRoute('/caixa', { role: 'vendedor', capacidades: ['operar_caixa'], funcionalidades: ['caixa'] })).toBe(true);
+    expect(canAccessRoute('/caixa', { role: 'vendedor', capacidades: ['gerir_caixas'], funcionalidades: ['caixa'] })).toBe(true);
+    expect(canAccessRoute('/caixa', { role: 'vendedor', capacidades: [], funcionalidades: ['caixa'] })).toBe(false);
+    expect(canAccessRoute('/caixa', { role: 'estoquista', capacidades: [], funcionalidades: ['caixa'] })).toBe(false);
+  });
+});

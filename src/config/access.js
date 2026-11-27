@@ -52,6 +52,8 @@ export const ALLOWED_ROLES_BY_PATH = {
   '/colheita': ['admin', 'vendedor'],
   '/colheita/:id': ['admin', 'vendedor'],
   '/usuarios': ['admin'],
+  // Caixa do PDV: admin ou cargo com `operar_caixa`/`gerir_caixas` (REQUIRED_CAPABILITIES_BY_PATH), só com a funcionalidade `caixa`.
+  '/caixa': ['admin'],
   '/mais': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/conta/seguranca': ['admin', 'vendedor', 'estoquista', 'faturista'],
   '/conta/perfil': ['admin', 'vendedor', 'estoquista', 'faturista'],
@@ -97,6 +99,7 @@ export const FUNCIONALIDADE_POR_ROTA = {
   '/loja-banners': 'loja_online',
   '/colheita': 'fiado',
   '/colheita/:id': 'fiado',
+  '/caixa': 'caixa',
 };
 
 export const MENSAGEM_SEM_FUNCIONALIDADE = 'Funcionalidade não incluída no seu plano. Fale com a GiroNex.';
@@ -124,6 +127,7 @@ export const REQUIRED_CAPABILITIES_BY_PATH = {
   '/cancelamentos': ['ver_cancelamentos'],
   '/configuracoes/cargos': ['gerir_cargos', 'conceder_admin'],
   '/usuarios': ['gerir_usuarios'],
+  '/caixa': ['operar_caixa', 'gerir_caixas'],
 };
 
 export function podeComCapacidade(userOrCapacidades, capacidadeOuCapacidades) {

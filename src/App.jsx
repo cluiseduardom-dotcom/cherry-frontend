@@ -55,6 +55,7 @@ const IndicadoresInsumosPage = lazy(() => import('./pages/IndicadoresInsumosPage
 const DashboardCalculos = lazy(() => import('./pages/DashboardCalculos'));
 const ContasPagar = lazy(() => import('./pages/ContasPagar'));
 const ContasReceber = lazy(() => import('./pages/ContasReceber'));
+const Caixa = lazy(() => import('./pages/Caixa'));
 const Colheita = lazy(() => import('./pages/Colheita'));
 const ColheitaCliente = lazy(() => import('./pages/ColheitaCliente'));
 const PontoEquilibrio = lazy(() => import('./pages/PontoEquilibrio'));
@@ -94,6 +95,7 @@ const ROUTE_COMPONENTS = {
   '/compras/recebimentos/:id': RecebimentoDetalhe,
   '/historico': Historico,
   '/comissoes': Comissoes,
+  '/caixa': Caixa,
   '/colheita': Colheita,
   '/colheita/:id': ColheitaCliente,
   '/usuarios': Usuarios,

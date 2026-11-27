@@ -796,3 +796,6 @@
 .cart-qty-input { width: 64px; padding: 2px 6px; text-align: right; border: 1px solid var(--color-border); border-radius: var(--radius-sm, 6px); background: var(--color-surface, #fff); color: inherit; font: inherit; }
 .cart-qty-unidade { font-size: 12px; opacity: .7; }
 .cart-qty-erro { flex-basis: 100%; font-size: 11px; color: var(--color-danger, #b91c1c); }
+
+.venda-caixa { margin: var(--space-1) 0 0; color: var(--color-text-secondary); }
+.venda-caixa--fechado { color: var(--color-danger, #b91c1c); font-weight: 600; }

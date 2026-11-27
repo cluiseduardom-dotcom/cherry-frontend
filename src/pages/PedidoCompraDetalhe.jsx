@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Ban, PackageCheck, Pencil, Send, ThumbsUp } from 'lucide-react';
 import { buscarPedidoCompra, enviarPedidoCompra, confirmarPedidoCompra, cancelarPedidoCompra } from '../services/pedidosCompra';
-import { listarFornecedores } from '../services/fornecedores';
+import { listarTodosFornecedores } from '../services/fornecedores';
 import { listarTodosProdutos } from '../services/produtos';
 import PedidoCompraModal from '../components/compras/PedidoCompraModal';
 import ReceberPedidoModal from '../components/compras/ReceberPedidoModal';
@@ -47,7 +47,7 @@ export default function PedidoCompraDetalhe() {
   async function abrirEdicao() {
     try {
       if (!fornecedores.length) {
-        const [forn, prod] = await Promise.all([listarFornecedores({ pageSize: 100 }), listarTodosProdutos({ canal: 'loja_fisica' })]);
+        const [forn, prod] = await Promise.all([listarTodosFornecedores(), listarTodosProdutos({ canal: 'loja_fisica' })]);
         setFornecedores(forn.items || []);
         setProdutos(prod.items || []);
       }

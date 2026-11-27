@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Building2, Edit, Mail, Phone, Plus, Search, UserRound, X } from 'lucide-react';
-import { atualizarFornecedor, listarFornecedores, removerFornecedor } from '../services/fornecedores';
+import { atualizarFornecedor, listarTodosFornecedores, removerFornecedor } from '../services/fornecedores';
 import FornecedorModal from '../components/FornecedorModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
@@ -32,7 +32,7 @@ export default function Fornecedores() {
     setLoading(true);
     setError('');
     try {
-      const data = await listarFornecedores({ pageSize: 100 });
+      const data = await listarTodosFornecedores();
       setFornecedores(data.items ?? []);
     } catch (err) {
       setError(err.message);

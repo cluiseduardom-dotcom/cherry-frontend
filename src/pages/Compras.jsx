@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Eye, X, Trash2, ShoppingCart, PackageCheck, Ban, ClipboardList } from 'lucide-react';
 import { listarCompras, criarCompra, cancelarCompra } from '../services/compras';
-import { listarFornecedores } from '../services/fornecedores';
+import { listarTodosFornecedores } from '../services/fornecedores';
 import { listarTodosProdutos } from '../services/produtos';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS, temFuncionalidade } from '../config/access';
@@ -146,7 +146,7 @@ export default function Compras() {
           data_de: filtrosParaCarregar.data_de || undefined,
           data_ate: filtrosParaCarregar.data_ate || undefined,
         }),
-        listarFornecedores({ pageSize: 100 }),
+        listarTodosFornecedores(),
         listarTodosProdutos({ canal: 'loja_fisica' }),
       ]);
       setCompras(c.items || []);

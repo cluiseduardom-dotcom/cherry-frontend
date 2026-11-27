@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ScanLine, Tag, TriangleAlert } from 'lucide-react';
 import { buscarRecebimento, alterarStatusRecebimento, aprovarRecebimento } from '../services/recebimentos';
-import { listarFornecedores } from '../services/fornecedores';
+import { listarTodosFornecedores } from '../services/fornecedores';
 import { useAuth } from '../context/AuthContext';
 import { podeExecutarAcao, ACTIONS } from '../config/access';
 import BarcodeScannerModal from '../components/compras/BarcodeScannerModal';
@@ -67,7 +67,7 @@ export default function RecebimentoDetalhe() {
     try {
       const [recebimentoData, fornecedoresData] = await Promise.all([
         buscarRecebimento(id),
-        listarFornecedores({ pageSize: 100 }),
+        listarTodosFornecedores(),
       ]);
       setRecebimento(recebimentoData);
       setFornecedores(fornecedoresData.items || []);
